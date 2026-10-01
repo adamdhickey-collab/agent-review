@@ -1,0 +1,26 @@
+.test-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.test-status .icon {
+  color: var(--test-ink, var(--color-text-muted));
+}
+
+.test-status--success {
+  --test-ink: var(--color-success);
+}
+
+.test-status--warning {
+  --test-ink: var(--color-warning);
+}
+
+.test-status--danger {
+  --test-ink: var(--color-danger);
+  color: var(--color-danger);
+}

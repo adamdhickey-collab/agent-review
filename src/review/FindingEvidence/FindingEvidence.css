@@ -1,0 +1,135 @@
+.evidence {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.evidence__label {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+
+.evidence__pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-3);
+}
+
+.evidence__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.evidence__side:first-child {
+  background: var(--color-diff-remove);
+  border-color: transparent;
+}
+
+.evidence__side:last-child {
+  background: var(--color-diff-add);
+  border-color: transparent;
+}
+
+.evidence__code {
+  margin: 0;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--color-text);
+}
+
+.evidence__file {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.evidence__component {
+  font-size: var(--text-md);
+}
+
+.evidence__recommendation {
+  color: var(--color-text-secondary);
+}
+
+.evidence__facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-1) var(--space-4);
+}
+
+.evidence__facts > div {
+  display: contents;
+}
+
+.evidence__facts dt {
+  color: var(--color-text-muted);
+}
+
+.evidence__facts dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.evidence__token {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+}
+
+.evidence__token-value {
+  color: var(--color-text-muted);
+}
+
+.evidence__note {
+  flex-basis: 100%;
+  color: var(--color-text-secondary);
+}
+
+.evidence__fail {
+  color: var(--color-danger);
+}
+
+.evidence__message {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  overflow-wrap: anywhere;
+}
+
+.evidence__message .evidence__label {
+  font-family: var(--font-ui);
+}
+
+.evidence--interaction {
+  gap: var(--space-1);
+}
+
+.evidence__test {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.evidence__ms {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}

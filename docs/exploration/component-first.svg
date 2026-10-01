@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900" font-family="Inter, system-ui, -apple-system, 'Segoe UI', sans-serif">
+<title>Agent Review, change detail, direction C: component-first</title>
+<desc>The affected components are the left spine, the selected one expanded to its stories and states; the center is that component&#x27;s states grid; findings hang off the component; the decision bar is top right.</desc>
+<rect x="0" y="0" width="1440" height="900" fill="#ffffff"/>
+<rect x="0" y="0" width="1440" height="56" rx="0" fill="#ffffff" stroke="#e4e4e7" stroke-width="1"/>
+<line x1="0" y1="56" x2="1440" y2="56" stroke="#e4e4e7" stroke-width="1"/>
+<text x="24" y="34" font-size="13" fill="#71717a" font-weight="600" text-anchor="start">Agent Review</text>
+<line x1="132" y1="16" x2="132" y2="40" stroke="#e4e4e7" stroke-width="1"/>
+<text x="148" y="24" font-size="15" fill="#18181b" font-weight="600" text-anchor="start">Add bulk actions to the customer table</text>
+<text x="148" y="43" font-size="12" fill="#71717a" font-weight="400" text-anchor="start">agent/bulk-actions  ·  Claude Code  ·  14 files changed  ·  opened 2 h ago  ·  waiting for review</text>
+<rect x="1326" y="13" width="90" height="30" rx="4" fill="#3b5bdb" stroke="#3b5bdb" stroke-width="1"/>
+<text x="1371" y="32.68" font-size="13" fill="#ffffff" font-weight="500" text-anchor="middle">Accept</text>
+<rect x="1234" y="13" width="84" height="30" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="1276" y="32.68" font-size="13" fill="#18181b" font-weight="500" text-anchor="middle">Reject</text>
+<rect x="1086" y="13" width="140" height="30" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="1156" y="32.68" font-size="13" fill="#18181b" font-weight="500" text-anchor="middle">Return to agent</text>
+<rect x="24" y="72" width="336" height="788" rx="6" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="40" y="98" font-size="14" fill="#18181b" font-weight="600" text-anchor="start">Affected components (4)</text>
+<line x1="24" y1="112" x2="360" y2="112" stroke="#e4e4e7" stroke-width="1"/>
+<text x="40" y="138" font-size="13" fill="#18181b" font-weight="600" text-anchor="start">Button</text>
+<text x="40" y="153" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">reused  ·  0 findings</text>
+<text x="344" y="144" font-size="12" fill="#71717a" font-weight="400" text-anchor="end">▸</text>
+<text x="40" y="178" font-size="13" fill="#18181b" font-weight="600" text-anchor="start">Checkbox</text>
+<text x="40" y="193" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">1 new state  ·  1 finding</text>
+<text x="344" y="184" font-size="12" fill="#71717a" font-weight="400" text-anchor="end">▸</text>
+<text x="40" y="218" font-size="13" fill="#18181b" font-weight="600" text-anchor="start">CustomerTable</text>
+<text x="40" y="233" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">modified  ·  2 findings</text>
+<text x="344" y="224" font-size="12" fill="#71717a" font-weight="400" text-anchor="end">▸</text>
+<rect x="25" y="240" width="334" height="40" rx="0" fill="#f4f4f5" stroke="#f4f4f5" stroke-width="1"/>
+<rect x="25" y="240" width="3" height="40" rx="0" fill="#3b5bdb" stroke="#3b5bdb" stroke-width="1"/>
+<text x="40" y="258" font-size="13" fill="#18181b" font-weight="600" text-anchor="start">BulkActionBar  (new)</text>
+<text x="40" y="273" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">new  ·  3 findings</text>
+<text x="344" y="264" font-size="12" fill="#71717a" font-weight="400" text-anchor="end">▾</text>
+<line x1="24" y1="288" x2="360" y2="288" stroke="#e4e4e7" stroke-width="1"/>
+<text x="52" y="310" font-size="11" fill="#71717a" font-weight="600" text-anchor="start">Stories</text>
+<text x="52" y="335" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">Default</text>
+<rect x="25" y="344" width="334" height="26" rx="0" fill="#f4f4f5" stroke="#f4f4f5" stroke-width="1"/>
+<text x="52" y="361" font-size="12" fill="#18181b" font-weight="600" text-anchor="start">With 3 selected</text>
+<text x="344" y="361" font-size="11" fill="#71717a" font-weight="400" text-anchor="end">shown</text>
+<text x="52" y="387" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">All selected</text>
+<text x="52" y="413" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">Narrow, 768</text>
+<text x="52" y="452" font-size="11" fill="#71717a" font-weight="600" text-anchor="start">States</text>
+<text x="52" y="477" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">Default</text>
+<text x="52" y="503" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">Hover</text>
+<text x="52" y="529" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">Focus-visible</text>
+<text x="52" y="555" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">Disabled</text>
+<text x="52" y="581" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">Narrow, actions wrap</text>
+<text x="52" y="620" font-size="11" fill="#71717a" font-weight="600" text-anchor="start">Findings on this component (3)</text>
+<circle cx="56" cy="641" r="3" fill="#18181b"/>
+<text x="66" y="645" font-size="12" fill="#18181b" font-weight="600" text-anchor="start">Delete text 3.1:1, blocking</text>
+<circle cx="56" cy="667" r="3" fill="#18181b"/>
+<text x="66" y="671" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">Padding 14px, off scale</text>
+<circle cx="56" cy="693" r="3" fill="#18181b"/>
+<text x="66" y="697" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">No story in Storybook</text>
+<text x="52" y="736" font-size="11" fill="#71717a" font-weight="600" text-anchor="start">Files</text>
+<text x="52" y="761" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">src/components/BulkActionBar/</text>
+<text x="52" y="779" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">BulkActionBar.tsx  ·  .css  ·  no .stories.tsx</text>
+<text x="384" y="92" font-size="16" fill="#18181b" font-weight="600" text-anchor="start">BulkActionBar</text>
+<text x="518" y="92" font-size="12" fill="#71717a" font-weight="400" text-anchor="start">src/components/BulkActionBar  ·  new in this change  ·  2 findings pinned</text>
+<rect x="384" y="108" width="121" height="28" rx="4" fill="#18181b" stroke="#18181b" stroke-width="1"/>
+<text x="444.5" y="126.32" font-size="12" fill="#ffffff" font-weight="500" text-anchor="middle">Grid of states</text>
+<rect x="509" y="108" width="107" height="28" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="562.5" y="126.32" font-size="12" fill="#18181b" font-weight="500" text-anchor="middle">Single story</text>
+<text x="636" y="126" font-size="12" fill="#71717a" font-weight="600" text-anchor="start">Viewport</text>
+<rect x="692" y="108" width="51" height="28" rx="4" fill="#18181b" stroke="#18181b" stroke-width="1"/>
+<text x="717.5" y="126.32" font-size="12" fill="#ffffff" font-weight="500" text-anchor="middle">1280</text>
+<rect x="747" y="108" width="44" height="28" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="769" y="126.32" font-size="12" fill="#18181b" font-weight="500" text-anchor="middle">768</text>
+<text x="1056" y="126" font-size="12" fill="#18181b" font-weight="500" text-anchor="end">Open in Storybook</text>
+<rect x="384" y="148" width="672" height="712" rx="6" fill="#f4f4f5" stroke="#e4e4e7" stroke-width="1"/>
+<defs><pattern id="dots" width="12" height="12" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#d4d4d8"/></pattern></defs>
+<rect x="384" y="148" width="672" height="712" rx="6" fill="url(#dots)"/>
+<rect x="400" y="164" width="312" height="212" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="412" y="186" font-size="12" fill="#18181b" font-weight="600" text-anchor="start">Default  ·  0 selected</text>
+<text x="412" y="202" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">hidden until a row is checked</text>
+<rect x="412" y="220" width="288" height="40" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1" stroke-dasharray="4 4"/>
+<text x="556" y="244" font-size="11" fill="#a1a1aa" font-weight="400" text-anchor="middle">not rendered</text>
+<text x="412" y="294" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">Checking any row mounts the bar above the table.</text>
+<rect x="728" y="164" width="312" height="212" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="740" y="186" font-size="12" fill="#18181b" font-weight="600" text-anchor="start">With 3 selected</text>
+<text x="740" y="202" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">the state the change ships in</text>
+<rect x="740" y="220" width="288" height="40" rx="4" fill="#f4f4f5" stroke="#e4e4e7" stroke-width="1"/>
+<text x="750" y="244" font-size="10" fill="#18181b" font-weight="600" text-anchor="start">3 selected</text>
+<rect x="982" y="229" width="40" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="1002" y="243.24" font-size="9" fill="#a1a1aa" font-weight="500" text-anchor="middle">Delete</text>
+<rect x="934" y="229" width="44" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="956" y="243.24" font-size="9" fill="#18181b" font-weight="500" text-anchor="middle">Archive</text>
+<rect x="864" y="229" width="66" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="897" y="243.24" font-size="9" fill="#18181b" font-weight="500" text-anchor="middle">Assign owner</text>
+<rect x="820" y="229" width="40" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="840" y="243.24" font-size="9" fill="#18181b" font-weight="500" text-anchor="middle">Export</text>
+<rect x="979" y="226" width="46" height="28" rx="5" fill="none" stroke="#3b5bdb" stroke-width="2"/>
+<circle cx="1024" cy="226" r="10" fill="#3b5bdb" stroke="#ffffff" stroke-width="2"/>
+<text x="1024" y="230.5" font-size="12" fill="#ffffff" font-weight="600" text-anchor="middle">1</text>
+<circle cx="742" cy="222" r="10" fill="#18181b" stroke="#ffffff" stroke-width="2"/>
+<text x="742" y="226.5" font-size="12" fill="#ffffff" font-weight="600" text-anchor="middle">2</text>
+<text x="740" y="282" font-size="11" fill="#18181b" font-weight="400" text-anchor="start">1  Delete text 3.1:1 against the bar, floor 4.5:1.</text>
+<text x="740" y="299" font-size="11" fill="#18181b" font-weight="400" text-anchor="start">   Button / danger / compact already covers this.</text>
+<text x="740" y="316" font-size="11" fill="#18181b" font-weight="400" text-anchor="start">2  padding: 14px. Nearest tokens --space-3, --space-4.</text>
+<text x="740" y="350" font-size="10" fill="#71717a" font-weight="400" text-anchor="start" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">Props  selectedCount=3  actions=[4]  onClear</text>
+<rect x="400" y="392" width="312" height="212" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="412" y="414" font-size="12" fill="#18181b" font-weight="600" text-anchor="start">Hover  ·  Export</text>
+<text x="412" y="430" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">ground lifts one step</text>
+<rect x="412" y="448" width="288" height="40" rx="4" fill="#f4f4f5" stroke="#e4e4e7" stroke-width="1"/>
+<text x="422" y="472" font-size="10" fill="#18181b" font-weight="600" text-anchor="start">3 selected</text>
+<rect x="654" y="457" width="40" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="674" y="471.24" font-size="9" fill="#a1a1aa" font-weight="500" text-anchor="middle">Delete</text>
+<rect x="606" y="457" width="44" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="628" y="471.24" font-size="9" fill="#18181b" font-weight="500" text-anchor="middle">Archive</text>
+<rect x="536" y="457" width="66" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="569" y="471.24" font-size="9" fill="#18181b" font-weight="500" text-anchor="middle">Assign owner</text>
+<rect x="492" y="457" width="40" height="22" rx="4" fill="#e4e4e7" stroke="#a1a1aa" stroke-width="1"/>
+<text x="512" y="471" font-size="9" fill="#18181b" font-weight="500" text-anchor="middle">Export</text>
+<text x="412" y="510" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">From Button&#x27;s own story; nothing local.</text>
+<rect x="728" y="392" width="312" height="212" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="740" y="414" font-size="12" fill="#18181b" font-weight="600" text-anchor="start">Focus-visible  ·  Export</text>
+<text x="740" y="430" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">ring token, 2px offset</text>
+<rect x="740" y="448" width="288" height="40" rx="4" fill="#f4f4f5" stroke="#e4e4e7" stroke-width="1"/>
+<text x="750" y="472" font-size="10" fill="#18181b" font-weight="600" text-anchor="start">3 selected</text>
+<rect x="982" y="457" width="40" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="1002" y="471.24" font-size="9" fill="#a1a1aa" font-weight="500" text-anchor="middle">Delete</text>
+<rect x="934" y="457" width="44" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="956" y="471.24" font-size="9" fill="#18181b" font-weight="500" text-anchor="middle">Archive</text>
+<rect x="864" y="457" width="66" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="897" y="471.24" font-size="9" fill="#18181b" font-weight="500" text-anchor="middle">Assign owner</text>
+<rect x="820" y="457" width="40" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="840" y="471.24" font-size="9" fill="#18181b" font-weight="500" text-anchor="middle">Export</text>
+<rect x="817" y="454" width="46" height="28" rx="5" fill="none" stroke="#18181b" stroke-width="2"/>
+<text x="740" y="510" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">From Button&#x27;s own story; nothing local.</text>
+<rect x="400" y="620" width="312" height="212" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="412" y="642" font-size="12" fill="#18181b" font-weight="600" text-anchor="start">Disabled  ·  while an action runs</text>
+<text x="412" y="658" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">actions at 50%, bar stays</text>
+<rect x="412" y="676" width="288" height="40" rx="4" fill="#f4f4f5" stroke="#e4e4e7" stroke-width="1"/>
+<text x="422" y="700" font-size="10" fill="#18181b" font-weight="600" text-anchor="start">3 selected</text>
+<rect x="654" y="685" width="40" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="674" y="699.24" font-size="9" fill="#a1a1aa" font-weight="500" text-anchor="middle">Delete</text>
+<rect x="606" y="685" width="44" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="628" y="699.24" font-size="9" fill="#a1a1aa" font-weight="500" text-anchor="middle">Archive</text>
+<rect x="536" y="685" width="66" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="569" y="699.24" font-size="9" fill="#a1a1aa" font-weight="500" text-anchor="middle">Assign owner</text>
+<rect x="492" y="685" width="40" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="512" y="699.24" font-size="9" fill="#a1a1aa" font-weight="500" text-anchor="middle">Export</text>
+<text x="412" y="738" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">aria-busy on the bar; Clear stays enabled.</text>
+<rect x="728" y="620" width="312" height="212" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="740" y="642" font-size="12" fill="#18181b" font-weight="600" text-anchor="start">Narrow  ·  768</text>
+<text x="740" y="658" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">actions wrap to a second row</text>
+<rect x="740" y="676" width="288" height="72" rx="4" fill="#f4f4f5" stroke="#e4e4e7" stroke-width="1"/>
+<text x="750" y="698" font-size="10" fill="#18181b" font-weight="600" text-anchor="start">3 selected</text>
+<text x="808" y="698" font-size="10" fill="#71717a" font-weight="400" text-anchor="start">Clear</text>
+<rect x="750" y="714" width="40" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="770" y="728.24" font-size="9" fill="#18181b" font-weight="500" text-anchor="middle">Export</text>
+<rect x="794" y="714" width="66" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="827" y="728.24" font-size="9" fill="#18181b" font-weight="500" text-anchor="middle">Assign owner</text>
+<rect x="864" y="714" width="44" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="886" y="728.24" font-size="9" fill="#18181b" font-weight="500" text-anchor="middle">Archive</text>
+<rect x="912" y="714" width="40" height="22" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="932" y="728.24" font-size="9" fill="#a1a1aa" font-weight="500" text-anchor="middle">Delete</text>
+<text x="740" y="772" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">768 wide, 2 rows. Table columns unchanged.</text>
+<rect x="1080" y="72" width="336" height="788" rx="6" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="1096" y="98" font-size="14" fill="#18181b" font-weight="600" text-anchor="start">Findings on BulkActionBar (3)</text>
+<line x1="1080" y1="112" x2="1416" y2="112" stroke="#e4e4e7" stroke-width="1"/>
+<rect x="1081" y="120" width="334" height="80" rx="0" fill="#f4f4f5" stroke="#f4f4f5" stroke-width="1"/>
+<rect x="1081" y="120" width="3" height="80" rx="0" fill="#3b5bdb" stroke="#3b5bdb" stroke-width="1"/>
+<text x="1096" y="139" font-size="11" fill="#3b5bdb" font-weight="600" text-anchor="start">Accessibility  ·  blocking</text>
+<text x="1096" y="158" font-size="13" fill="#18181b" font-weight="500" text-anchor="start">Delete button text is 3.1:1</text>
+<text x="1096" y="175" font-size="13" fill="#18181b" font-weight="500" text-anchor="start">against the bar, floor 4.5:1</text>
+<text x="1096" y="192" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">Open in Storybook  ·  Show in preview</text>
+<rect x="1382" y="136" width="14" height="14" rx="3" fill="#18181b" stroke="#18181b" stroke-width="1"/>
+<path d="M1385.5 143.28 l2.52 2.8 l5.04 -5.88" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<line x1="1081" y1="200" x2="1415" y2="200" stroke="#e4e4e7" stroke-width="1"/>
+<text x="1096" y="219" font-size="11" fill="#71717a" font-weight="600" text-anchor="start">Tokens</text>
+<text x="1096" y="238" font-size="13" fill="#18181b" font-weight="500" text-anchor="start">Bar padding is 14px, not on</text>
+<text x="1096" y="255" font-size="13" fill="#18181b" font-weight="500" text-anchor="start">the 4px scale</text>
+<text x="1096" y="272" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">Nearest --space-3, --space-4</text>
+<rect x="1382" y="216" width="14" height="14" rx="3" fill="#18181b" stroke="#18181b" stroke-width="1"/>
+<path d="M1385.5 223.28 l2.52 2.8 l5.04 -5.88" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<line x1="1081" y1="280" x2="1415" y2="280" stroke="#e4e4e7" stroke-width="1"/>
+<text x="1096" y="299" font-size="11" fill="#71717a" font-weight="600" text-anchor="start">Components</text>
+<text x="1096" y="318" font-size="13" fill="#18181b" font-weight="500" text-anchor="start">New component, no story in</text>
+<text x="1096" y="335" font-size="13" fill="#18181b" font-weight="500" text-anchor="start">Storybook yet</text>
+<text x="1096" y="352" font-size="11" fill="#71717a" font-weight="400" text-anchor="start">Required by ui-quality rule 4</text>
+<rect x="1382" y="296" width="14" height="14" rx="3" fill="#ffffff" stroke="#a1a1aa" stroke-width="1"/>
+<line x1="1081" y1="360" x2="1415" y2="360" stroke="#e4e4e7" stroke-width="1"/>
+<text x="1096" y="386" font-size="11" fill="#71717a" font-weight="600" text-anchor="start">Elsewhere in this change</text>
+<text x="1096" y="408" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">Checkbox  ·  indeterminate is a new state</text>
+<text x="1096" y="426" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">CustomerTable  ·  rows tinted, moves 52px</text>
+<text x="1096" y="444" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">Button  ·  reused, nothing to review</text>
+<text x="1096" y="462" font-size="12" fill="#18181b" font-weight="400" text-anchor="start">Interaction  ·  12 tests passed</text>
+<line x1="1080" y1="484" x2="1416" y2="484" stroke="#e4e4e7" stroke-width="1"/>
+<text x="1096" y="508" font-size="11" fill="#71717a" font-weight="600" text-anchor="start">In the product  ·  After  ·  1280</text>
+<rect x="1096" y="518" width="304" height="200" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="1105" y="549" font-size="13" fill="#18181b" font-weight="600" text-anchor="start">Customers</text>
+<text x="1105" y="567" font-size="7" fill="#71717a" font-weight="400" text-anchor="start">1,284 accounts</text>
+<rect x="1187" y="537" width="96" height="26" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="1195" y="554" font-size="7" fill="#a1a1aa" font-weight="400" text-anchor="start">Search customers</text>
+<rect x="1291" y="537" width="100" height="26" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="1341" y="552.52" font-size="7" fill="#18181b" font-weight="500" text-anchor="middle">Add customer</text>
+<rect x="1105" y="579" width="286" height="27" rx="4" fill="#f4f4f5" stroke="#e4e4e7" stroke-width="1"/>
+<text x="1113" y="595.167" font-size="8" fill="#18181b" font-weight="600" text-anchor="start">3 selected</text>
+<text x="1161" y="595.167" font-size="7" fill="#71717a" font-weight="400" text-anchor="start">Clear</text>
+<rect x="1344.33" y="584.333" width="40" height="16" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="1364.33" y="594.853" font-size="7" fill="#a1a1aa" font-weight="500" text-anchor="middle">Delete</text>
+<rect x="1296.33" y="584.333" width="44" height="16" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="1318.33" y="594.853" font-size="7" fill="#18181b" font-weight="500" text-anchor="middle">Archive</text>
+<rect x="1228.33" y="584.333" width="64" height="16" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="1260.33" y="594.853" font-size="7" fill="#18181b" font-weight="500" text-anchor="middle">Assign owner</text>
+<rect x="1183.33" y="584.333" width="41" height="16" rx="4" fill="#ffffff" stroke="#d4d4d8" stroke-width="1"/>
+<text x="1203.83" y="594.853" font-size="7" fill="#18181b" font-weight="500" text-anchor="middle">Export</text>
+<rect x="1341.33" y="581.333" width="46" height="22" rx="5" fill="none" stroke="#3b5bdb" stroke-width="2"/>
+<rect x="1105" y="618" width="286" height="20" rx="0" fill="#f4f4f5" stroke="#e4e4e7" stroke-width="1"/>
+<rect x="1113" y="621" width="14" height="14" rx="3" fill="#18181b" stroke="#18181b" stroke-width="1"/>
+<line x1="1116.5" y1="628" x2="1123.5" y2="628" stroke="#ffffff" stroke-width="2"/>
+<text x="1131" y="632" font-size="7" fill="#71717a" font-weight="600" text-anchor="start">Name</text>
+<text x="1208" y="632" font-size="7" fill="#71717a" font-weight="600" text-anchor="start">Company</text>
+<text x="1285" y="632" font-size="7" fill="#71717a" font-weight="600" text-anchor="start">Plan</text>
+<text x="1327" y="632" font-size="7" fill="#71717a" font-weight="600" text-anchor="start">Status</text>
+<text x="1383" y="632" font-size="7" fill="#71717a" font-weight="600" text-anchor="end">MRR</text>
+<rect x="1105" y="638" width="286" height="20" rx="0" fill="#ececee" stroke="#e4e4e7" stroke-width="1"/>
+<rect x="1113" y="641" width="14" height="14" rx="3" fill="#18181b" stroke="#18181b" stroke-width="1"/>
+<path d="M1116.5 648.28 l2.52 2.8 l5.04 -5.88" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1131" y="652" font-size="8" fill="#18181b" font-weight="500" text-anchor="start">Ada Okafor</text>
+<text x="1208" y="652" font-size="8" fill="#71717a" font-weight="400" text-anchor="start">Northwind Freight</text>
+<text x="1285" y="652" font-size="8" fill="#71717a" font-weight="400" text-anchor="start">Team</text>
+<text x="1327" y="652" font-size="8" fill="#71717a" font-weight="400" text-anchor="start">Active</text>
+<text x="1383" y="652" font-size="8" fill="#71717a" font-weight="400" text-anchor="end">$1,240</text>
+<rect x="1105" y="658" width="286" height="20" rx="0" fill="#ececee" stroke="#e4e4e7" stroke-width="1"/>
+<rect x="1113" y="661" width="14" height="14" rx="3" fill="#18181b" stroke="#18181b" stroke-width="1"/>
+<path d="M1116.5 668.28 l2.52 2.8 l5.04 -5.88" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1131" y="672" font-size="8" fill="#18181b" font-weight="500" text-anchor="start">Jonas Lindqvist</text>
+<text x="1208" y="672" font-size="8" fill="#71717a" font-weight="400" text-anchor="start">Helio Energy</text>
+<text x="1285" y="672" font-size="8" fill="#71717a" font-weight="400" text-anchor="start">Enterprise</text>
+<text x="1327" y="672" font-size="8" fill="#71717a" font-weight="400" text-anchor="start">Active</text>
+<text x="1383" y="672" font-size="8" fill="#71717a" font-weight="400" text-anchor="end">$4,800</text>
+<rect x="1105" y="678" width="286" height="20" rx="0" fill="#ececee" stroke="#e4e4e7" stroke-width="1"/>
+<rect x="1113" y="681" width="14" height="14" rx="3" fill="#18181b" stroke="#18181b" stroke-width="1"/>
+<path d="M1116.5 688.28 l2.52 2.8 l5.04 -5.88" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1131" y="692" font-size="8" fill="#18181b" font-weight="500" text-anchor="start">Priya Raman</text>
+<text x="1208" y="692" font-size="8" fill="#71717a" font-weight="400" text-anchor="start">Tessera Labs</text>
+<text x="1285" y="692" font-size="8" fill="#71717a" font-weight="400" text-anchor="start">Team</text>
+<text x="1327" y="692" font-size="8" fill="#71717a" font-weight="400" text-anchor="start">Trial</text>
+<text x="1383" y="692" font-size="8" fill="#71717a" font-weight="400" text-anchor="end">$0</text>
+<text x="1105" y="716" font-size="7" fill="#71717a" font-weight="400" text-anchor="start">1 to 3 of 1,284</text>
+<text x="1391" y="716" font-size="7" fill="#71717a" font-weight="400" text-anchor="end">Previous   Next</text>
+<line x1="1080" y1="730" x2="1416" y2="730" stroke="#e4e4e7" stroke-width="1"/>
+<text x="1096" y="752" font-size="11" fill="#71717a" font-weight="600" text-anchor="start">Agent&#x27;s rationale</text>
+<text x="1096" y="772" font-size="11" fill="#18181b" font-weight="400" text-anchor="start">The table had no way to act on more than</text>
+<text x="1096" y="788" font-size="11" fill="#18181b" font-weight="400" text-anchor="start">one row. I added a BulkActionBar that shows</text>
+<text x="1096" y="804" font-size="11" fill="#18181b" font-weight="400" text-anchor="start">when any row is checked, reused Button and</text>
+<text x="1096" y="820" font-size="11" fill="#18181b" font-weight="400" text-anchor="start">Checkbox, and gave Checkbox an indeterminate</text>
+<text x="1096" y="836" font-size="11" fill="#18181b" font-weight="400" text-anchor="start">state for the header. Delete is muted so it</text>
+<text x="1096" y="852" font-size="11" fill="#18181b" font-weight="400" text-anchor="start">does not compete with the primary action.</text>
+</svg>

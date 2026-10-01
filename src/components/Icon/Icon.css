@@ -1,0 +1,15 @@
+.icon {
+  display: inline-block;
+  flex: none;
+  vertical-align: -0.1875em; /* sits on the x-height of the line it is in */
+}
+
+.icon--spin {
+  animation: icon-spin var(--motion-ambient) linear infinite;
+}
+
+@keyframes icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,25 @@
+.queue {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.queue__title {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.queue__count {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.queue__table {
+  min-width: 56rem;
+}

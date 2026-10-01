@@ -1,0 +1,41 @@
+.review-row__change {
+  white-space: normal;
+  min-width: 18rem;
+}
+
+.review-row__title {
+  display: block;
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+}
+
+.review-row__title:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.review-row__meta {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: 2px;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.review-row__lanes {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.review-row__blocking {
+  margin-left: var(--space-1);
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+
+.review-row[data-state='accepted'] .review-row__title,
+.review-row[data-state='rejected'] .review-row__title {
+  color: var(--color-text-secondary);
+}

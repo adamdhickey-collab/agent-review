@@ -1,0 +1,28 @@
+.stories {
+  display: flex;
+  flex-direction: column;
+}
+
+.stories__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.stories__name {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stories__title {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.stories__story {
+  font-weight: var(--weight-medium);
+}

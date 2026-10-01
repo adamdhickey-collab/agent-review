@@ -1,0 +1,114 @@
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { SegmentedControl, type SegmentedOption } from '../../components';
+import type { Reproduce, Screen, Side, Viewport } from '../../data/types';
+import { PreviewScreen } from '../preview/screens';
+import './ComponentPreview.css';
+
+/* The affected product UI, rendered, not pictured. The frame is the
+   chosen viewport wide and scales to fit the column, so 768 means the
+   layout a tablet gets and the overflow it gets. Before and after are
+   the two versions of the screen from code: the baseline and the agent's
+   branch. A finding puts the frame in the state that shows it, and the
+   element it is about is outlined.
+
+   The frame's content is real and operable: a reviewer can tab into it
+   and select rows. */
+
+export const VIEWPORTS: SegmentedOption<`${Viewport}`>[] = [
+  { value: '1280', label: 'Desktop, 1280', icon: 'monitor', iconOnly: true },
+  { value: '1024', label: 'Laptop, 1024', icon: 'tablet', iconOnly: true },
+  { value: '768', label: 'Tablet, 768', icon: 'smartphone', iconOnly: true },
+];
+
+const SIDES: SegmentedOption<Side>[] = [
+  { value: 'before', label: 'Before' },
+  { value: 'after', label: 'After' },
+];
+
+const SCREENS: SegmentedOption<Screen>[] = [
+  { value: 'customers', label: 'Customers' },
+  { value: 'invoices', label: 'Invoices' },
+];
+
+export interface ComponentPreviewProps {
+  /** The state a selected finding asks for; the controls follow it. */
+  reproduce?: Reproduce;
+  /** Which screens the change touched, for the screen switch. */
+  screens?: Screen[];
+  /** Something to show above the frame: a caption, a warning. */
+  note?: ReactNode;
+}
+
+export function ComponentPreview({ reproduce, screens = ['customers', 'invoices'], note }: ComponentPreviewProps) {
+  const [screen, setScreen] = useState<Screen>(reproduce?.screen ?? 'customers');
+  const [side, setSide] = useState<Side>(reproduce?.side ?? 'after');
+  const [viewport, setViewport] = useState<Viewport>(reproduce?.viewport ?? 1280);
+  const [selection, setSelection] = useState(reproduce?.withSelection ?? false);
+
+  /* When the finding changes, the controls follow it. Done during render
+     (the React pattern for state that depends on a prop) so there is no
+     frame showing the old state first. */
+  const [followed, setFollowed] = useState(reproduce);
+  if (reproduce !== followed) {
+    setFollowed(reproduce);
+    if (reproduce) {
+      setScreen(reproduce.screen);
+      setSide(reproduce.side);
+      setViewport(reproduce.viewport);
+      setSelection(reproduce.withSelection ?? false);
+    }
+  }
+
+  const column = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  useLayoutEffect(() => {
+    const el = column.current;
+    if (!el) return;
+    const fit = () => setScale(Math.min(1, el.clientWidth / viewport));
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [viewport]);
+
+  const [height, setHeight] = useState(400);
+  const frame = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = frame.current;
+    if (!el) return;
+    const measure = () => setHeight(el.scrollHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [screen, side, viewport, selection]);
+
+  return (
+    <div className="preview">
+      <div className="preview__bar">
+        {screens.length > 1 ? (
+          <SegmentedControl label="Screen" options={SCREENS.filter((s) => screens.includes(s.value))} value={screen} onChange={setScreen} size="compact" />
+        ) : null}
+        <SegmentedControl label="Version" options={SIDES} value={side} onChange={setSide} size="compact" />
+        <SegmentedControl label="Viewport width" options={VIEWPORTS} value={`${viewport}`} onChange={(v) => setViewport(Number(v) as Viewport)} size="compact" />
+        <span className="preview__dims">
+          <code>{viewport}px</code>
+          {scale < 1 ? <span className="preview__scale">at {Math.round(scale * 100)}%</span> : null}
+        </span>
+      </div>
+      {note ? <div className="preview__note">{note}</div> : null}
+      <div className="preview__column" ref={column} data-side={side}>
+        <div className="preview__viewport" style={{ height: `${height * scale}px` }}>
+          <div
+            ref={frame}
+            className="preview__frame"
+            style={{ width: `${viewport}px`, transform: `scale(${scale})` }}
+            data-target={reproduce?.target}
+          >
+            <PreviewScreen screen={screen} side={side} selection={selection} target={reproduce?.target} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

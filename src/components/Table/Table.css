@@ -1,0 +1,130 @@
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.table-scroll:focus-visible {
+  outline-offset: -2px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-md);
+  --table-pad-y: var(--space-2);
+  --table-pad-x: var(--space-3);
+}
+
+.table--compact {
+  --table-pad-y: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.table__caption {
+  text-align: left;
+  padding: var(--space-2) var(--table-pad-x);
+  font-weight: var(--weight-semibold);
+}
+
+.table__th,
+.table__td {
+  padding: var(--table-pad-y) var(--table-pad-x);
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: var(--border-width) solid var(--color-border);
+  white-space: nowrap;
+}
+
+.table__th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  line-height: var(--leading-tight);
+  height: 2rem;
+}
+
+.table__td {
+  color: var(--color-text);
+}
+
+th.table__td {
+  font-weight: var(--weight-medium);
+}
+
+.table__cell--numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.table__cell--control {
+  width: 1px; /* shrink to the control */
+  padding-right: 0;
+}
+
+.table__cell--muted {
+  color: var(--color-text-muted);
+}
+
+/* Sort buttons fill the header cell so the whole label is the target. */
+.table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: calc(var(--space-1) * -1);
+  padding: var(--space-1);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.table__sort:hover {
+  color: var(--color-text);
+}
+
+.table__sort-icon {
+  opacity: 0;
+  transition: opacity var(--motion-fast) var(--ease);
+}
+
+.table__sort:hover .table__sort-icon,
+.table__sort:focus-visible .table__sort-icon,
+.table__sort[data-sort='ascending'] .table__sort-icon,
+.table__sort[data-sort='descending'] .table__sort-icon {
+  opacity: 1;
+}
+
+.table__sort[data-sort='ascending'] .table__sort-icon {
+  transform: rotate(-90deg);
+}
+
+/* Rows */
+.table--interactive .table__tr {
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--ease);
+}
+
+.table--interactive .table__tr:hover {
+  background: var(--color-surface-hover);
+}
+
+.table__tr.is-selected {
+  background: var(--color-accent-subtle);
+}
+
+.table__tr.is-selected .table__td {
+  border-bottom-color: var(--color-border);
+}
+
+.table__tr:focus-visible {
+  outline-offset: -2px;
+}
