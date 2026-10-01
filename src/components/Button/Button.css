@@ -21,7 +21,7 @@
 
 .btn--compact {
   height: var(--control-height-compact);
-  padding: 0 var(--control-padding-x-compact);
+  padding: 0 10px;
   font-size: var(--text-sm);
 }
 

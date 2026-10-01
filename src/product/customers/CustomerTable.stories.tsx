@@ -63,3 +63,7 @@ export const Sorted: Story = {
     await expect(within(firstRow).getByRole('rowheader')).toHaveTextContent('Juniper Foods');
   },
 };
+
+export const Selected: Story = {
+  args: { initialSelection: ['c_01HZK3', 'c_01HZKF', 'c_01HZKZ'] },
+};
