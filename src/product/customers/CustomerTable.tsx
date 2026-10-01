@@ -1,14 +1,36 @@
-import { useMemo, useState } from 'react';
-import { Badge, Button, Cell, HeaderCell, IconButton, Row, Table, Toolbar, type BadgeTone, type SortDirection } from '../../components';
-import { customers as allCustomers, formatMrr, STATUS_LABEL, type Customer, type CustomerStatus } from './customers';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Badge,
+  Button,
+  Cell,
+  Checkbox,
+  EmptyState,
+  HeaderCell,
+  IconButton,
+  Row,
+  Table,
+  Toolbar,
+  type BadgeTone,
+  type SortDirection,
+} from '../../components';
+import { customers as allCustomers, customersToCsv, formatMrr, STATUS_LABEL, type Customer, type CustomerStatus } from './customers';
 import './CustomerTable.css';
 
-/* The customer table in Relay, as it stands before the agent's change.
-   This is the baseline Agent Review compares against: a sortable table of
-   customers with a toolbar, built from the system. It has no selection
-   and no bulk actions, which is the feature the agent was asked to add.
+/* The customer table in Relay, with selection and bulk actions.
 
-   The screen owns sorting; the Table owns the markup and the states. */
+   A control column of checkboxes selects rows (the Table's SelectedRows
+   pattern: the row says it with aria-selected and a tinted ground, the
+   select-all box is indeterminate while the selection is partial). A
+   selection brings up a second Toolbar, in the accent tone, with the count
+   and the three actions: Archive, Export, Clear selection. Archive is a
+   danger button and does nothing on first press; the same toolbar turns
+   into the question ("Archive 3 customers?") with Cancel beside the
+   confirming button, and Escape is Cancel. Export hands the selected
+   customers to the screen's `onExport`, or, without one, downloads them
+   as a CSV.
+
+   The screen owns sorting, the selection and the archive; the Table, the
+   Checkbox, the Toolbar and the Button own the markup and the states. */
 
 const STATUS_TONE: Record<CustomerStatus, BadgeTone> = {
   active: 'success',
@@ -22,21 +44,75 @@ type SortKey = 'company' | 'owner' | 'plan' | 'status' | 'seats' | 'mrr';
 export interface CustomerTableProps {
   customers?: Customer[];
   density?: 'default' | 'compact';
+  /** Ids selected on first render, for a story or a preview that opens the screen mid-selection. */
+  initialSelection?: string[];
+  /** Receives the selected customers when Export is pressed. Without it, the screen downloads a CSV. */
+  onExport?: (selected: Customer[]) => void;
+  /** Receives the customers once Archive is confirmed. The screen takes them out of the table either way. */
+  onArchive?: (archived: Customer[]) => void;
 }
 
-export function CustomerTable({ customers = allCustomers, density = 'default' }: CustomerTableProps) {
+function plural(n: number): string {
+  return n === 1 ? '1 customer' : `${n} customers`;
+}
+
+function downloadCsv(rows: Customer[]) {
+  const url = URL.createObjectURL(new Blob([customersToCsv(rows)], { type: 'text/csv' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'customers.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function CustomerTable({ customers = allCustomers, density = 'default', initialSelection = [], onExport, onArchive }: CustomerTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('company');
   const [direction, setDirection] = useState<Exclude<SortDirection, 'none'>>('ascending');
+  const [selected, setSelected] = useState<Set<string>>(() => new Set(initialSelection));
+  const [archived, setArchived] = useState<Set<string>>(() => new Set());
+  const [confirming, setConfirming] = useState(false);
+  const [status, setStatus] = useState('');
+
+  const archiveButton = useRef<HTMLButtonElement>(null);
+  const confirmButton = useRef<HTMLButtonElement>(null);
+  const selectAll = useRef<HTMLInputElement>(null);
+  const addButton = useRef<HTMLButtonElement>(null);
+  /* Where focus goes once the toolbar that held it has re-rendered or gone. */
+  const pendingFocus = useRef<'archive' | 'select-all' | 'add' | null>(null);
+
+  const visible = useMemo(() => customers.filter((c) => !archived.has(c.id)), [customers, archived]);
 
   const rows = useMemo(() => {
-    const sorted = [...customers].sort((a, b) => {
+    return [...visible].sort((a, b) => {
       const av = a[sortKey];
       const bv = b[sortKey];
       const cmp = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv));
       return direction === 'ascending' ? cmp : -cmp;
     });
-    return sorted;
-  }, [customers, sortKey, direction]);
+  }, [visible, sortKey, direction]);
+
+  const selectedRows = useMemo(() => visible.filter((c) => selected.has(c.id)), [visible, selected]);
+  const count = selectedRows.length;
+  const all = visible.length > 0 && count === visible.length;
+  const some = count > 0 && !all;
+
+  /* The question replaces the actions, so focus would fall off the toolbar
+     unless it is placed: on the confirming button, as the DecisionBar does.
+     On the way back (Cancel, or the archive itself) the control that had
+     focus is gone from the tree, so the hand-off waits for the render that
+     removes it: a cancel changes `confirming`, an archive changes the row
+     count, and either runs this. */
+  useEffect(() => {
+    if (confirming) {
+      confirmButton.current?.focus();
+      return;
+    }
+    const target = pendingFocus.current;
+    pendingFocus.current = null;
+    if (target === 'archive') archiveButton.current?.focus();
+    else if (target === 'select-all') selectAll.current?.focus();
+    else if (target === 'add') addButton.current?.focus();
+  }, [confirming, visible.length]);
 
   function sortFor(key: SortKey): SortDirection {
     return key === sortKey ? direction : 'none';
@@ -50,6 +126,50 @@ export function CustomerTable({ customers = allCustomers, density = 'default' }:
     }
   }
 
+  function toggleRow(id: string, on: boolean) {
+    const next = new Set(selected);
+    if (on) next.add(id);
+    else next.delete(id);
+    setSelected(next);
+    setConfirming(false);
+  }
+
+  function toggleAll(on: boolean) {
+    setSelected(on ? new Set(visible.map((c) => c.id)) : new Set());
+    setConfirming(false);
+  }
+
+  function clearSelection() {
+    setSelected(new Set());
+    setConfirming(false);
+    selectAll.current?.focus();
+  }
+
+  function cancelArchive() {
+    setConfirming(false);
+    pendingFocus.current = 'archive';
+  }
+
+  function archiveSelected() {
+    const going = selectedRows;
+    const next = new Set(archived);
+    for (const c of going) next.add(c.id);
+    setArchived(next);
+    setSelected(new Set());
+    setConfirming(false);
+    setStatus(`${plural(going.length)} archived.`);
+    onArchive?.(going);
+    /* The toolbar that held focus is gone; land on the table's own control,
+       or on the one action left when the table is empty. */
+    pendingFocus.current = visible.length - going.length > 0 ? 'select-all' : 'add';
+  }
+
+  function exportSelected() {
+    if (onExport) onExport(selectedRows);
+    else downloadCsv(selectedRows);
+    setStatus(`${plural(count)} exported as CSV.`);
+  }
+
   return (
     <section className="customers" aria-labelledby="customers-title">
       <Toolbar
@@ -60,19 +180,67 @@ export function CustomerTable({ customers = allCustomers, density = 'default' }:
             <h2 id="customers-title" className="customers__title">
               Customers
             </h2>
-            <span className="customers__count">{customers.length}</span>
+            <span className="customers__count">{visible.length}</span>
           </>
         }
       >
         <IconButton icon="filter" label="Filter customers" size="compact" />
         <IconButton icon="columns" label="Choose columns" size="compact" />
-        <Button size="compact" variant="secondary" leadingIcon="plus">
+        <Button ref={addButton} size="compact" variant="secondary" leadingIcon="plus">
           Add customer
         </Button>
       </Toolbar>
+      {count > 0 ? (
+        <Toolbar
+          label="Selected customers"
+          tone="accent"
+          data-finding="bulk-bar"
+          start={<span data-finding="bulk-count">{confirming ? `Archive ${plural(count)}?` : `${count} selected`}</span>}
+          onKeyDown={(e) => {
+            if (confirming && e.key === 'Escape') {
+              e.preventDefault();
+              cancelArchive();
+            }
+          }}
+        >
+          {confirming ? (
+            <>
+              <Button size="compact" variant="ghost" onClick={cancelArchive}>
+                Cancel
+              </Button>
+              <Button ref={confirmButton} size="compact" variant="danger" onClick={archiveSelected}>
+                Archive {plural(count)}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button ref={archiveButton} size="compact" variant="danger" onClick={() => setConfirming(true)} data-finding="bulk-archive">
+                Archive
+              </Button>
+              <Button size="compact" variant="secondary" leadingIcon="external" onClick={exportSelected}>
+                Export
+              </Button>
+              <Button size="compact" variant="ghost" onClick={clearSelection}>
+                Clear selection
+              </Button>
+            </>
+          )}
+        </Toolbar>
+      ) : null}
       <Table caption="Customers, with plan, status, seats and monthly revenue" density={density}>
         <thead>
           <tr>
+            <HeaderCell control>
+              <Checkbox
+                ref={selectAll}
+                label="Select all customers"
+                hideLabel
+                checked={all}
+                indeterminate={some}
+                disabled={visible.length === 0}
+                onChange={(e) => toggleAll(e.currentTarget.checked)}
+              />
+            </HeaderCell>
             <HeaderCell sort={sortFor('company')} onSort={() => toggleSort('company')}>
               Company
             </HeaderCell>
@@ -96,7 +264,10 @@ export function CustomerTable({ customers = allCustomers, density = 'default' }:
         </thead>
         <tbody>
           {rows.map((c) => (
-            <Row key={c.id}>
+            <Row key={c.id} selected={selected.has(c.id)}>
+              <Cell control>
+                <Checkbox label={`Select ${c.company}`} hideLabel checked={selected.has(c.id)} onChange={(e) => toggleRow(c.id, e.currentTarget.checked)} />
+              </Cell>
               <Cell rowHeader>{c.company}</Cell>
               <Cell muted>{c.owner}</Cell>
               <Cell>{c.plan}</Cell>
@@ -110,6 +281,17 @@ export function CustomerTable({ customers = allCustomers, density = 'default' }:
           ))}
         </tbody>
       </Table>
+      {visible.length === 0 ? (
+        customers.length === 0 ? (
+          <EmptyState title="No customers yet" description="Add a customer and it appears here." />
+        ) : (
+          <EmptyState title="All customers archived" description="Archived customers are not shown in this table." />
+        )
+      ) : null}
+      {/* Always in the tree, so the announcement has a region to arrive in. */}
+      <p className="visually-hidden" role="status">
+        {status}
+      </p>
     </section>
   );
 }

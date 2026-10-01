@@ -194,6 +194,54 @@ untouched and the check passed. It now measures every toolbar's own box.
 A test that cannot fail on the defect it is for is the kind of thing a
 seeded failure exists to find.
 
-## What the system learned
+## The review, and what the system learned
 
-(recorded after the review)
+The decisions, made in Agent Review the way a reviewer would make them,
+and what each one changed in the repository afterwards.
+
+**rv-2041, Run 1: accepted**, with both of its decisions in its favour.
+The Table.css change stays, because it corrects the Table's own
+SelectedRows story and the reason was written down with a measurement.
+The inline confirmation enters the system as the second shape for a
+destructive action. The branch is merged into main; the live customer
+table is Run 1's.
+
+**rv-2042, Run 2: returned**, with two corrections. Use the
+second-toolbar arrangement the accepted change established, and render
+the empty state the emptied table now needs. Neither is a defect the
+checks can see; both are judgment the rules carry.
+
+**rv-2043, the seeded drift: it would be returned** with all five
+corrections, and two of them are blocking. It is kept in the queue so
+that the product has a change a visitor can see refused.
+
+**What changed in the system because of this:**
+
+- *The skill.* Rule 1's common misses name the bar of actions over a
+  selection, and say that a Button that looks too tall for a bar is a
+  Button at `size="compact"`. Rule 6 records the inline confirmation as
+  the system's second shape, with the ArchiveConfirmation story as its
+  reference. Rule 7 names the per-toolbar check. Rule 9 says what a
+  reason for a shared change looks like, with Run 1 as the example, and
+  that "so the buttons line up" is not one.
+- *The component.* The Table's control column fits a checkbox without
+  growing the row (Run 1's twelve lines), and the SelectedRows story's
+  description carries the measurement.
+- *The product.* The customer table has bulk actions, seven stories
+  with play functions reach its new states, and an emptied table renders
+  the system's EmptyState.
+- *The test.* The 768 check measures every toolbar's own box, because
+  the seeded branch showed the frame's scroll width could not see a bar
+  its parent clips.
+- *The tooling.* The full typecheck runs again; the visual tests start
+  their own server; Playwright's output is not tracked; baselines are
+  per platform and CI's set is recorded by CI.
+
+**What a logged-in CLI would have added.** The Storybook MCP's
+`docs-show` would have told either agent the Button's props without
+reading its source, and `test-run` would have run a story's tests from
+inside the session. Neither run needed the first (both read the stories
+as files) and both ran the tests themselves. Where it would have
+mattered is the seeded drift, had an agent produced it: `test-run` on
+the Selected story returns the axe violation to the agent before a
+reviewer ever sees it.

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
-import { bulkActionsWithRules, queue } from '../../data/scenario';
+import { queue } from '../../data/scenario';
 import type { Finding } from '../../data/types';
 import { FindingEvidence } from './FindingEvidence';
 

@@ -165,10 +165,35 @@ tests/               Playwright: visual baselines and the viewport check
 
 ## Component inventory
 
-Filled in as components land. Each entry: name, what it is for, the states
-its stories cover.
+The system, `src/components/` (13):
 
-(see the end of this file; updated as the build proceeds)
+| Component | For | Stories |
+| --- | --- | --- |
+| Icon | The inline icon set, 1.75 stroke, decorative unless named | in IconButton's AllIcons |
+| Button | The one button: primary, secondary, danger, ghost; default and compact; loading; disabled | 10 |
+| IconButton | An icon-only button whose label is its name and its tooltip, on hover and on focus | 7 |
+| Badge | A small label with a tone, never the only place a state is said | 5 |
+| StatusIndicator | A dot and a word; live pulses | 4 |
+| TestStatus | A check's result: passed, changed, failed, running, skipped | 8 |
+| Checkbox | A native checkbox with a drawn box; indeterminate is real | 7 |
+| SegmentedControl | One choice among a few, all visible; a radiogroup with arrow keys | 4 |
+| Tabs | The WAI tabs pattern, with counts | 4 |
+| Disclosure | A native details/summary, styled | 4 |
+| Table | Table, HeaderCell (sortable), Cell (numeric, control, row header), Row (selected); two densities; a focusable scroll region | 9 |
+| Toolbar | A row of controls over a region that wraps rather than overflows; an accent tone for a selection | 4 |
+| States | EmptyState, LoadingState, ErrorState: the three region states | 6 |
+
+The product under review, `src/product/` (2 screens): CustomerTable (the
+live one is Run 1's, with bulk actions; the baseline and all three
+branch versions are frozen under `history/`), InvoiceList.
+
+Agent Review, `src/review/` (14): Shell, QueueScreen, ReviewRow,
+ChangeScreen, ValidationSummary, FindingList, FindingEvidence (eight
+evidence kinds), ComponentPreview (the frame, with loading and error),
+DiffViewer, AgentRationale, DecisionBar, ReturnPanel, StoryList,
+FileList. 69 stories.
+
+Every story runs through axe. 161 at the time of writing.
 
 ## Tokens
 
@@ -183,16 +208,38 @@ ring token. The full list with values is in the file; the names in
 
 ## Open questions
 
-- Whether the experiment agent can be given the Storybook MCP server.
-  The addon ships; whether a nested session here can reach it is to be
-  tested, not assumed. If not, the experiment runs without it and this
-  file says what would be required.
-- How much of the scenario's validation output can be collected by script
-  rather than transcribed.
+- A second scenario, and whether the queue's four invented changes
+  should become real runs too.
+- Whether the token lint should parse CSS properly. It reads
+  declarations with a regex and strips lengths inside `calc()`, so a
+  literal inside a `calc()` passes. It caught the seventeen that
+  mattered; a parser is the next step when one slips through.
 
 ## Discoveries
 
-(as they happen)
+- **The system did most of the work, not the rules.** Two real runs, one
+  with the twelve rules in context and one without, both came back
+  clean on every check: no raw element where a component existed, every
+  value a token, every new state with a story, no axe violation. The
+  components, the tokens and the stories as files were enough to keep
+  an agent inside the system. What the rules changed was judgment at
+  the edges (the empty state, how to treat a shared change, the shape of
+  the description) and where a reviewer finds things.
+- **A seeded failure finds the test that cannot fail.** The 768 overflow
+  check passed on a bar 58px too wide, because it measured a container
+  whose parent clips. Without a branch built to fail, that test would
+  have stayed green for as long as nothing overflowed.
+- **The checks found their own defects first.** The Table's scroll
+  region had no keyboard access; the diff marker sat under 4.5:1; the
+  evidence excerpt scrolled without focus. All three were found by the
+  story tests in this repository before any experiment ran, which is
+  the same mechanism the experiment is about.
+- **The headless session connected the Storybook MCP and then could not
+  authenticate.** The experiment record says exactly how the runs were
+  done instead, and what the MCP would have added.
+- **Baselines are per platform.** Chromium on macOS and on Linux render
+  text differently enough to fail a 0.2% threshold; CI records its own
+  set.
 
 ## Deferred on purpose
 
@@ -204,3 +251,6 @@ ring token. The full list with values is in the file; the names in
   produce, and the README says what it would take.
 - Dark mode. The product has a light canvas by decision; the tokens are
   semantic so a dark set is a second block, not a rewrite.
+- An Archived view and undo for the bulk archive. Both runs listed it;
+  the inline question is the guard until there is a view to restore from.
+- A proper CSS parser for the token lint (see Open questions).
