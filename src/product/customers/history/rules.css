@@ -1,0 +1,12 @@
+/* The with-rules branch's one change to a shared component
+   (src/components/Table/Table.css at e50a20e), scoped to the frame that
+   renders that version. The preview's job is to show the branch; main's
+   Table is unchanged until the reviewer accepts it. */
+[data-version='rules'] .table__cell--control {
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
+}
+
+[data-version='rules'] .table__cell--control .checkbox {
+  display: flex;
+}

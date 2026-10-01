@@ -1,7 +1,12 @@
+/* FROZEN. The customer table as it stood at 129fa90, the commit every
+   experiment branch was cut from, kept verbatim (imports repointed) so the
+   review preview's Before side is the baseline the agent saw and not
+   whatever main has become since. Do not edit; the live screen is
+   ../CustomerTable.tsx. */
 import { useMemo, useState } from 'react';
-import { Badge, Button, Cell, HeaderCell, IconButton, Row, Table, Toolbar, type BadgeTone, type SortDirection } from '../../components';
-import { customers as allCustomers, formatMrr, STATUS_LABEL, type Customer, type CustomerStatus } from './customers';
-import './CustomerTable.css';
+import { Badge, Button, Cell, HeaderCell, IconButton, Row, Table, Toolbar, type BadgeTone, type SortDirection } from '../../../components';
+import { customers as allCustomers, formatMrr, STATUS_LABEL, type Customer, type CustomerStatus } from '../customers';
+import '../CustomerTable.css';
 
 /* The customer table in Relay, as it stands before the agent's change.
    This is the baseline Agent Review compares against: a sortable table of

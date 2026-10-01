@@ -19,6 +19,7 @@ export function InvoiceList() {
     <section className="invoices" aria-labelledby="invoices-title">
       <Toolbar
         label="Invoices"
+        data-finding="invoice-actions"
         start={
           <h2 id="invoices-title" className="invoices__title">
             Invoices

@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { SegmentedControl, type SegmentedOption } from '../../components';
+import { ErrorState, LoadingState, SegmentedControl, type SegmentedOption } from '../../components';
 import type { Reproduce, Screen, Side, Viewport } from '../../data/types';
 import { PreviewScreen } from '../preview/screens';
 import './ComponentPreview.css';
@@ -31,15 +31,20 @@ const SCREENS: SegmentedOption<Screen>[] = [
 ];
 
 export interface ComponentPreviewProps {
+  /** Which change's versions to render: the registry in preview/screens.tsx. */
+  changeId?: string;
   /** The state a selected finding asks for; the controls follow it. */
   reproduce?: Reproduce;
   /** Which screens the change touched, for the screen switch. */
   screens?: Screen[];
   /** Something to show above the frame: a caption, a warning. */
   note?: ReactNode;
+  /** The branch is still building, or failed to: the frame gives way to the
+      region state and says so. */
+  status?: { kind: 'loading' } | { kind: 'error'; message: string; detail?: string; onRetry?: () => void };
 }
 
-export function ComponentPreview({ reproduce, screens = ['customers', 'invoices'], note }: ComponentPreviewProps) {
+export function ComponentPreview({ changeId, reproduce, screens = ['customers', 'invoices'], note, status }: ComponentPreviewProps) {
   const [screen, setScreen] = useState<Screen>(reproduce?.screen ?? 'customers');
   const [side, setSide] = useState<Side>(reproduce?.side ?? 'after');
   const [viewport, setViewport] = useState<Viewport>(reproduce?.viewport ?? 1280);
@@ -97,6 +102,20 @@ export function ComponentPreview({ reproduce, screens = ['customers', 'invoices'
         </span>
       </div>
       {note ? <div className="preview__note">{note}</div> : null}
+      {status?.kind === 'loading' ? (
+        <div className="preview__column">
+          <LoadingState title="Building the agent\u2019s branch" description="The preview renders from the branch once its build finishes." />
+        </div>
+      ) : status?.kind === 'error' ? (
+        <div className="preview__column">
+          <ErrorState
+            title="The agent\u2019s branch did not build"
+            description={status.message}
+            detail={status.detail}
+            action={status.onRetry ? { label: 'Try the build again', onClick: status.onRetry } : undefined}
+          />
+        </div>
+      ) : (
       <div className="preview__column" ref={column} data-side={side}>
         <div className="preview__viewport" style={{ height: `${height * scale}px` }}>
           <div
@@ -105,10 +124,11 @@ export function ComponentPreview({ reproduce, screens = ['customers', 'invoices'
             style={{ width: `${viewport}px`, transform: `scale(${scale})` }}
             data-target={reproduce?.target}
           >
-            <PreviewScreen screen={screen} side={side} selection={selection} target={reproduce?.target} />
+            <PreviewScreen changeId={changeId} screen={screen} side={side} selection={selection} target={reproduce?.target} />
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

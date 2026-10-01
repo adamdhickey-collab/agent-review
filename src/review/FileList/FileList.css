@@ -38,9 +38,7 @@
 .files__path {
   flex: 1 1 auto;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere; /* a long path wraps; the filename at its end is the useful part */
 }
 
 .files__counts {

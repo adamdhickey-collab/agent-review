@@ -7,7 +7,7 @@ import { relativeTime } from '../format';
 import { ValidationSummary, kindsForLane } from '../ValidationSummary/ValidationSummary';
 import { FindingList } from '../FindingList/FindingList';
 import { ComponentPreview } from '../ComponentPreview/ComponentPreview';
-import { hasAfter } from '../preview/screens';
+import { hasVersions } from '../preview/screens';
 import { DiffViewer } from '../DiffViewer/DiffViewer';
 import { AgentRationale } from '../AgentRationale/AgentRationale';
 import { DecisionBar } from '../DecisionBar/DecisionBar';
@@ -47,7 +47,7 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
   const visible: Finding[] = lane ? change.findings.filter((f) => kindsForLane(lane).includes(f.kind)) : change.findings;
   const screens: Screen[] = Array.from(new Set(change.findings.map((f) => f.reproduce?.screen).filter(Boolean))) as Screen[];
   const previewScreens = screens.length ? screens : ['customers' as Screen];
-  const afterMissing = !hasAfter(previewScreens[0]);
+  const afterMissing = !hasVersions(change.id);
 
   return (
     <div className="change">
@@ -153,6 +153,7 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
 
         <section className="change__evidence" aria-label="Preview and diff">
           <ComponentPreview
+            changeId={change.id}
             reproduce={selected?.reproduce}
             screens={previewScreens}
             note={afterMissing ? 'The agent’s branch has not been loaded into this build; the After side shows the baseline.' : undefined}
