@@ -61,7 +61,14 @@ function lineOf(text, index) {
   return text.slice(0, index).split('\n').length;
 }
 
-const files = walk(DIR);
+/* The frozen branch versions under src/product/<screen>/history/ are the
+   experiment's record, kept verbatim so the review renders each branch
+   as it was; the seeded drift's stylesheet carries its seventeen literals
+   on purpose. They are not the product's stylesheets and are skipped by
+   path, and the skip is printed so a reader knows what was not read. */
+const all = walk(DIR);
+const frozen = all.filter((f) => f.split(path.sep).includes('history'));
+const files = all.filter((f) => !frozen.includes(f));
 const findings = [];
 
 for (const file of files) {
@@ -107,9 +114,9 @@ for (const file of files) {
 }
 
 if (JSON_OUT) {
-  console.log(JSON.stringify({ files: files.length, findings }, null, 2));
+  console.log(JSON.stringify({ files: files.length, skipped: frozen.map((f) => path.relative(ROOT, f)), findings }, null, 2));
 } else {
-  console.log(`token-lint: ${files.length} stylesheets under ${path.relative(ROOT, DIR) || '.'}`);
+  console.log(`token-lint: ${files.length} stylesheets under ${path.relative(ROOT, DIR) || '.'}${frozen.length ? `, ${frozen.length} frozen under history/ skipped` : ''}`);
   for (const f of findings) {
     console.log(`  ${f.file}:${f.line}  ${f.property}: ${f.value}  ← ${f.literal} written where a ${f.hint} exists`);
   }
