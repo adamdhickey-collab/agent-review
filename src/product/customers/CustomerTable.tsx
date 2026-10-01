@@ -193,7 +193,7 @@ export function CustomerTable({ customers = allCustomers, density = 'default', i
       {count > 0 ? (
         <div className="bulk-bar" role="toolbar" aria-label="Selected customers" data-finding="bulk-bar">
           <span className="bulk-bar__count" data-finding="bulk-count">
-            {confirming ? `Archive ${plural(count)}?` : `${count} selected`}
+            {confirming ? `Archive ${plural(count)}?` : `${count} of ${visible.length} customers selected`}
           </span>
           <span className="bulk-bar__spacer" />
           {confirming ? (
@@ -208,10 +208,13 @@ export function CustomerTable({ customers = allCustomers, density = 'default', i
           ) : (
             <>
               <button type="button" className="bulk-bar__btn bulk-bar__btn--danger" ref={archiveButton} onClick={() => setConfirming(true)} data-finding="bulk-archive">
-                Archive
+                Archive selected
               </button>
               <button type="button" className="bulk-bar__btn" onClick={exportSelected}>
                 Export selected as CSV
+              </button>
+              <button type="button" className="bulk-bar__btn">
+                Change owner
               </button>
               <button type="button" className="bulk-bar__btn bulk-bar__btn--quiet" onClick={clearSelection}>
                 Clear selection
