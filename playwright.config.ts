@@ -18,15 +18,20 @@ export default defineConfig({
     toHaveScreenshot: { maxDiffPixelRatio: 0.002, animations: 'disabled' },
   },
   use: {
-    baseURL: 'http://localhost:5173/agent-review/',
+    baseURL: 'http://localhost:4173/agent-review/',
     trace: 'retain-on-failure',
     ...devices['Desktop Chrome'],
     deviceScaleFactor: 1,
   },
+  /* The tests always start their own server, on a port nothing else uses,
+     for the tree they are run in. `reuseExistingServer` was true on 5173
+     until the experiment's first visual run found a dev server from a
+     different checkout on that port and measured the wrong tree, passing.
+     A test that can pass against someone else's tree is not a test. */
   webServer: {
-    command: 'npm run dev -- --port 5173 --strictPort',
-    url: 'http://localhost:5173/agent-review/',
-    reuseExistingServer: true,
+    command: 'npm run dev -- --port 4173 --strictPort',
+    url: 'http://localhost:4173/agent-review/',
+    reuseExistingServer: false,
     timeout: 60_000,
   },
 });
