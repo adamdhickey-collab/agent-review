@@ -65,6 +65,18 @@ th.table__td {
 .table__cell--control {
   width: 1px; /* shrink to the control */
   padding-right: 0;
+  /* A 1rem control in a 2rem head: with --space-2 above and below it and
+     the hairline, 15px is left for 16px, and the head row grows. --space-1
+     fits it; the cell is vertical-align middle, so it sits centred. */
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
+}
+
+/* The checkbox is inline-flex, which puts its box on the baseline and a
+   descender's worth of line box under it; as a block flex it is 1rem tall
+   and nothing more, so a row is the same height with it as without. */
+.table__cell--control .checkbox {
+  display: flex;
 }
 
 .table__cell--muted {

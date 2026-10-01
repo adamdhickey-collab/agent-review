@@ -40,3 +40,28 @@ export const customers: Customer[] = [
 export function formatMrr(n: number): string {
   return n === 0 ? '—' : `$${n.toLocaleString('en-US')}`;
 }
+
+/* The columns an export carries, in the order the table shows them, with
+   the raw figures rather than the formatted ones so a spreadsheet can add
+   them. A field holding a comma, a quote or a line break is quoted, and a
+   quote inside it is doubled, which is all the CSV grammar there is. */
+const EXPORT_COLUMNS: { header: string; value: (c: Customer) => string | number }[] = [
+  { header: 'Company', value: (c) => c.company },
+  { header: 'Owner', value: (c) => c.owner },
+  { header: 'Plan', value: (c) => c.plan },
+  { header: 'Status', value: (c) => STATUS_LABEL[c.status] },
+  { header: 'Seats', value: (c) => c.seats },
+  { header: 'MRR', value: (c) => c.mrr },
+  { header: 'Last active', value: (c) => c.lastActive },
+];
+
+function csvField(v: string | number): string {
+  const s = String(v);
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+export function customersToCsv(rows: Customer[]): string {
+  const head = EXPORT_COLUMNS.map((col) => csvField(col.header)).join(',');
+  const body = rows.map((c) => EXPORT_COLUMNS.map((col) => csvField(col.value(c))).join(','));
+  return [head, ...body].join('\r\n') + '\r\n';
+}
