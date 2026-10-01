@@ -43,7 +43,7 @@ export interface ValidationSummary {
   tokens: ValidationLane;
 }
 
-export type FindingKind = 'component' | 'token' | 'visual' | 'accessibility' | 'state' | 'interaction';
+export type FindingKind = 'component' | 'token' | 'visual' | 'accessibility' | 'state' | 'interaction' | 'shared' | 'pattern';
 
 export const FINDING_KIND_LABEL: Record<FindingKind, string> = {
   component: 'Component',
@@ -52,6 +52,8 @@ export const FINDING_KIND_LABEL: Record<FindingKind, string> = {
   accessibility: 'Accessibility',
   state: 'State',
   interaction: 'Interaction',
+  shared: 'Shared component',
+  pattern: 'New pattern',
 };
 
 /** Blocking cannot be accepted as is; decision needs a person to choose;
@@ -115,6 +117,8 @@ export interface VisualEvidence {
   /** Pixels that differ from the baseline, and the fraction of the frame. */
   diffPixels: number;
   diffPercent: number;
+  /** When one finding covers several frames: each, with its own figures. */
+  frames?: { name: string; diffPixels: number; diffPercent: number; sizeChanged?: string }[];
   /** The change was asked for (the feature) rather than a side effect. */
   expected: boolean;
   /** Where the difference is, in words. */
@@ -143,10 +147,43 @@ export interface StateEvidence {
 
 export interface InteractionEvidence {
   kind: 'interaction';
-  tests: { name: string; state: TestState; ms: number }[];
+  tests: { name: string; state: TestState; ms?: number }[];
 }
 
-export type Evidence = ComponentEvidence | TokenEvidence | VisualEvidence | AccessibilityEvidence | StateEvidence | InteractionEvidence;
+/** A change under src/components: every screen sees it. */
+export interface SharedChangeEvidence {
+  kind: 'shared';
+  file: string;
+  lines: number;
+  /** The agent's reason, as it wrote it. */
+  reason: string;
+  /** What the agent measured, or what the validation measured, to show the effect. */
+  measured: string;
+  /** Which stories render the component, so the reviewer can see the breadth. */
+  consumers: StoryRef[];
+}
+
+/** A way of doing something the system did not have before. */
+export interface PatternEvidence {
+  kind: 'pattern';
+  /** What the pattern is, in a sentence. */
+  description: string;
+  /** What the system already had that it was built from. */
+  builtFrom: string[];
+  /** The alternative the agent considered, or the reviewer might. */
+  alternative: string;
+  story: StoryRef;
+}
+
+export type Evidence =
+  | ComponentEvidence
+  | TokenEvidence
+  | VisualEvidence
+  | AccessibilityEvidence
+  | StateEvidence
+  | InteractionEvidence
+  | SharedChangeEvidence
+  | PatternEvidence;
 
 export interface Finding {
   id: string;

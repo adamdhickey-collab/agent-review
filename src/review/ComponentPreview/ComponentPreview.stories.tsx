@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import { bulkActions } from '../../data/scenario';
+import { bulkActionsWithRules, queue } from '../../data/scenario';
 import type { Reproduce } from '../../data/types';
 import { ComponentPreview } from './ComponentPreview';
 
 function reproduce(findingId: string): Reproduce {
-  const f = bulkActions.findings.find((x) => x.id === findingId);
+  const f = queue.flatMap((c) => c.findings).find((x) => x.id === findingId);
   /* globalThis, because a story below is named Error and shadows the global in this module. */
-  if (!f?.reproduce) throw new globalThis.Error(`The bulk-actions change has no reproducible finding ${findingId}`);
+  if (!f?.reproduce) throw new globalThis.Error(`No change in the queue has a reproducible finding ${findingId}`);
   return f.reproduce;
 }
 
@@ -35,14 +35,14 @@ export const Default: Story = {
 };
 
 export const ReproducingOverflow: Story = {
-  args: { reproduce: reproduce('f-overflow') },
+  args: { changeId: 'rv-2043', reproduce: reproduce('f3-overflow') },
   parameters: {
     docs: { description: { story: 'The overflow finding: the customers screen on the after side at 768, with rows selected so the bulk-action bar shows, and the bar as the target. The width is what makes the finding visible.' } },
   },
 };
 
 export const ReproducingInvoices: Story = {
-  args: { reproduce: reproduce('f-shared-padding') },
+  args: { changeId: 'rv-2043', reproduce: reproduce('f3-shared-button') },
   parameters: {
     docs: { description: { story: 'The shared-padding finding, which is about a screen the agent did not touch: the preview switches to Invoices and outlines its actions.' } },
   },

@@ -37,7 +37,7 @@ export const Default: Story = {
 };
 
 export const WithFindingOpen: Story = {
-  args: { findingId: 'f-overflow' },
+  args: { findingId: 'f1-new-pattern' },
   parameters: {
     docs: { description: { story: 'The overflow finding selected: it is open in the list, the preview has moved to 768 with rows selected, the status line says what is showing, and the diff is as it was, since that finding points at no line.' } },
   },

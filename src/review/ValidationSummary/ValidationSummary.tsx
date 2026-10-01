@@ -10,8 +10,8 @@ import './ValidationSummary.css';
 const LANES: { key: keyof Summary; label: string; kinds: FindingKind[] }[] = [
   { key: 'visual', label: 'Visual', kinds: ['visual'] },
   { key: 'accessibility', label: 'Accessibility', kinds: ['accessibility'] },
-  { key: 'interaction', label: 'Interaction', kinds: ['interaction'] },
-  { key: 'components', label: 'Components', kinds: ['component', 'state'] },
+  { key: 'interaction', label: 'Interaction', kinds: ['interaction', 'pattern'] },
+  { key: 'components', label: 'Components', kinds: ['component', 'state', 'shared'] },
   { key: 'tokens', label: 'Tokens', kinds: ['token'] },
 ];
 

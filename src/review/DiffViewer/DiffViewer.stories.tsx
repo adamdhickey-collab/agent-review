@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
-import { bulkActions } from '../../data/scenario';
+import { bulkActionsWithRules } from '../../data/scenario';
 import type { DiffHunk } from '../../data/types';
 import { DiffViewer } from './DiffViewer';
 
@@ -19,7 +19,7 @@ const longLines: DiffHunk[] = [
       {
         kind: 'remove',
         text: '.bulk-bar__btn, .bulk-bar__btn:hover, .bulk-bar__btn:focus-visible, .bulk-bar__btn:active, .bulk-bar__btn[aria-pressed="true"] { padding: 10px 14px; }',
-        findingId: 'f-padding-literal',
+        findingId: 'f3-tokens',
       },
       {
         kind: 'add',
@@ -36,7 +36,7 @@ const longLines: DiffHunk[] = [
 const meta = {
   title: 'Review/DiffViewer',
   component: DiffViewer,
-  args: { hunks: bulkActions.diff, onSelectFinding: fn() },
+  args: { hunks: bulkActionsWithRules.diff, onSelectFinding: fn() },
   parameters: {
     a11y: { test: 'error' },
     docs: {
@@ -58,7 +58,7 @@ export const Default: Story = {
 };
 
 export const WithSelectedFinding: Story = {
-  args: { selectedFindingId: 'f-contrast' },
+  args: { selectedFindingId: 'f3-tokens' },
   parameters: {
     docs: { description: { story: 'The contrast finding selected: its one line, the muted ink, is emphasised and its marker is pressed. The other marked lines stay at their resting weight.' } },
   },

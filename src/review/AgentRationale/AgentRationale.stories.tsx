@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { bulkActions } from '../../data/scenario';
+import { bulkActionsWithRules } from '../../data/scenario';
 import type { Rationale } from '../../data/types';
 import { AgentRationale } from './AgentRationale';
 
@@ -13,7 +13,7 @@ const minimal: Rationale = {
 /* A request of about four hundred characters: the kind a person writes
    when they paste the ticket in. */
 const longRequest: Rationale = {
-  ...bulkActions.rationale,
+  ...bulkActionsWithRules.rationale,
   request:
     'Add bulk actions to the customer table using the existing component system. A person should be able to select several customers at once, see how many are selected, and archive or export them in one step without leaving the table. Keep the existing sorting and the toolbar as they are, use the Checkbox for the selection column with a select-all in the header, and make sure the new state has stories so it is covered by the visual run and by axe before it ships.',
 };
@@ -21,7 +21,7 @@ const longRequest: Rationale = {
 const meta = {
   title: 'Review/AgentRationale',
   component: AgentRationale,
-  args: { rationale: bulkActions.rationale, agentName: bulkActions.agent.name },
+  args: { rationale: bulkActionsWithRules.rationale, agentName: bulkActionsWithRules.agent.name },
   parameters: {
     a11y: { test: 'error' },
     docs: {

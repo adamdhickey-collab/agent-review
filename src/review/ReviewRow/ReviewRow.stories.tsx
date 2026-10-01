@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { HeaderCell, Table } from '../../components';
-import { bulkActions, findChange } from '../../data/scenario';
+import { bulkActionsWithRules, findChange, queue } from '../../data/scenario';
 import type { Change, Finding } from '../../data/types';
 import { ReviewRow } from './ReviewRow';
 
@@ -13,8 +13,8 @@ function change(id: string): Change {
 }
 
 function finding(id: string): Finding {
-  const f = bulkActions.findings.find((x) => x.id === id);
-  if (!f) throw new Error(`The bulk-actions change has no finding ${id}`);
+  const f = queue.flatMap((c) => c.findings).find((x) => x.id === id);
+  if (!f) throw new Error(`No change in the queue has a finding ${id}`);
   return f;
 }
 
@@ -58,7 +58,7 @@ const contrastRegression: Change = {
     components: noNewStates,
     tokens: passed,
   },
-  findings: [finding('f-contrast')],
+  findings: [finding('f3-contrast')],
 };
 
 const longTitle: Change = {
@@ -128,7 +128,7 @@ export const AccessibilityRegression: Story = {
 };
 
 export const MultipleFindings: Story = {
-  args: { change: bulkActions },
+  args: { change: bulkActionsWithRules },
   parameters: {
     docs: { description: { story: 'The bulk-actions change: three lanes changed, one failed, two blocking findings among seven. The row the product is built around.' } },
   },

@@ -10,7 +10,11 @@ import { defineConfig, devices } from '@playwright/test';
    for document.fonts.ready so a baseline is not taken in the fallback. */
 export default defineConfig({
   testDir: './tests',
-  snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}{ext}',
+  /* Baselines are per platform: Chromium on macOS and on Linux rasterise
+     text differently enough to fail a 0.2% threshold, so the Linux set
+     CI compares against is recorded by CI (.github/workflows/baselines.yml)
+     and committed beside the macOS set a person records locally. */
+  snapshotPathTemplate: '{testDir}/__screenshots__/{platform}/{testFilePath}/{arg}{ext}',
   fullyParallel: true,
   retries: 0,
   reporter: [['list'], ['html', { open: 'never' }]],

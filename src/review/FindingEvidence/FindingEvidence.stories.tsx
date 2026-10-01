@@ -1,19 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
-import { bulkActions } from '../../data/scenario';
+import { bulkActionsWithRules, queue } from '../../data/scenario';
 import type { Finding } from '../../data/types';
 import { FindingEvidence } from './FindingEvidence';
 
 function finding(id: string): Finding {
-  const f = bulkActions.findings.find((x) => x.id === id);
-  if (!f) throw new Error(`The bulk-actions change has no finding ${id}`);
+  const f = queue.flatMap((c) => c.findings).find((x) => x.id === id);
+  if (!f) throw new Error(`No change in the queue has a finding ${id}`);
   return f;
 }
 
 const meta = {
   title: 'Review/FindingEvidence',
   component: FindingEvidence,
-  args: { finding: finding('f-local-button'), onOpenStory: fn() },
+  args: { finding: finding('f3-local-button'), onOpenStory: fn() },
   parameters: {
     a11y: { test: 'error' },
     docs: {
@@ -35,35 +35,35 @@ export const Component: Story = {
 };
 
 export const Token: Story = {
-  args: { finding: finding('f-padding-literal') },
+  args: { finding: finding('f3-tokens') },
   parameters: {
     docs: { description: { story: 'The literal with its file and line, then the two tokens it falls between and the note that no token produces it.' } },
   },
 };
 
 export const Accessibility: Story = {
-  args: { finding: finding('f-contrast') },
+  args: { finding: finding('f3-contrast') },
   parameters: {
     docs: { description: { story: 'The measured ratio in red against the floor, the axe rule with its impact as a badge, the element, and the message verbatim.' } },
   },
 };
 
 export const Visual: Story = {
-  args: { finding: finding('f-overflow') },
+  args: { finding: finding('f1-visual') },
   parameters: {
     docs: { description: { story: 'The story that moved, the pixel count and the fraction of the frame, a badge saying the change was not asked for, and where the difference is in words.' } },
   },
 };
 
 export const State: Story = {
-  args: { finding: finding('f-new-states') },
+  args: { finding: finding('f1-states') },
   parameters: {
     docs: { description: { story: 'The component, its new state, how a person reaches it, and a TestStatus saying whether a story covers it.' } },
   },
 };
 
 export const Interaction: Story = {
-  args: { finding: finding('f-interaction') },
+  args: { finding: finding('f1-interaction') },
   parameters: {
     docs: { description: { story: 'The tests that ran, each with its state as an icon and its time. All three passed.' } },
   },

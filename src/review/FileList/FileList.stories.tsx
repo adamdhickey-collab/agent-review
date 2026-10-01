@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { bulkActions } from '../../data/scenario';
+import { bulkActionsWithRules } from '../../data/scenario';
 import type { FileChange } from '../../data/types';
 import { FileList } from './FileList';
 
@@ -32,7 +32,7 @@ const longPaths: FileChange[] = [
 const meta = {
   title: 'Review/FileList',
   component: FileList,
-  args: { files: bulkActions.files },
+  args: { files: bulkActionsWithRules.files },
   parameters: {
     a11y: { test: 'error' },
     docs: {

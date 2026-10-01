@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import { bulkActions, findChange } from '../../data/scenario';
+import { bulkActionsWithRules, findChange } from '../../data/scenario';
 import type { Change } from '../../data/types';
 import { DecisionBar } from './DecisionBar';
 
@@ -13,7 +13,7 @@ function change(id: string): Change {
 const meta = {
   title: 'Review/DecisionBar',
   component: DecisionBar,
-  args: { change: bulkActions, onAccept: fn(), onReject: fn(), onReturn: fn() },
+  args: { change: bulkActionsWithRules, onAccept: fn(), onReject: fn(), onReturn: fn() },
   parameters: {
     a11y: { test: 'error' },
     docs: {

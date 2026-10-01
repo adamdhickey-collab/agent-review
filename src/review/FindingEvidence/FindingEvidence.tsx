@@ -28,7 +28,9 @@ export function FindingEvidence({ finding, onOpenStory }: { finding: Finding; on
           <div className="evidence__pair">
             <div className="evidence__side">
               <span className="evidence__label">Agent wrote</span>
-              <pre className="evidence__code">
+              {/* The excerpt scrolls sideways when a line is long, so it is
+                  focusable and named (axe: scrollable-region-focusable). */}
+              <pre className="evidence__code" tabIndex={0} role="region" aria-label="What the agent wrote">
                 <code>{e.wrote.excerpt}</code>
               </pre>
               <span className="evidence__file">
@@ -139,6 +141,19 @@ export function FindingEvidence({ finding, onOpenStory }: { finding: Finding; on
               <dd>{e.where}</dd>
             </div>
           </dl>
+          {e.frames ? (
+            <ul className="evidence__frames">
+              {e.frames.map((f) => (
+                <li key={f.name} className="evidence__test">
+                  <TestStatus state="changed" iconOnly />
+                  <span>{f.name}</span>
+                  <span className="evidence__ms">
+                    {f.diffPixels.toLocaleString('en-US')} px, {f.diffPercent}%{f.sizeChanged ? `, ${f.sizeChanged}` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
           <StoryLink story={e.story} onOpen={onOpenStory} />
         </div>
       );
@@ -174,10 +189,67 @@ export function FindingEvidence({ finding, onOpenStory }: { finding: Finding; on
             <li key={t.name} className="evidence__test">
               <TestStatus state={t.state} iconOnly />
               <span>{t.name}</span>
-              <span className="evidence__ms">{t.ms} ms</span>
+              {t.ms !== undefined ? <span className="evidence__ms">{t.ms} ms</span> : null}
             </li>
           ))}
         </ul>
+      );
+    case 'shared':
+      return (
+        <div className="evidence evidence--shared">
+          <dl className="evidence__facts">
+            <div>
+              <dt>File</dt>
+              <dd>
+                <code>{e.file}</code>
+                <Badge tone="warning">Shared</Badge>
+                <span className="evidence__note">{e.lines} lines; every screen that renders the component sees it.</span>
+              </dd>
+            </div>
+            <div>
+              <dt>Measured</dt>
+              <dd>{e.measured}</dd>
+            </div>
+            <div>
+              <dt>Rendered by</dt>
+              <dd>
+                {e.consumers.map((c) => (
+                  <Button key={c.id} size="compact" variant="ghost" trailingIcon="arrow-up-right" onClick={() => onOpenStory?.(c.id)}>
+                    {c.title} / {c.name}
+                  </Button>
+                ))}
+              </dd>
+            </div>
+          </dl>
+          <p className="evidence__message">
+            <span className="evidence__label">The agent\u2019s reason</span>
+            {e.reason}
+          </p>
+        </div>
+      );
+    case 'pattern':
+      return (
+        <div className="evidence evidence--pattern">
+          <dl className="evidence__facts">
+            <div>
+              <dt>The pattern</dt>
+              <dd>{e.description}</dd>
+            </div>
+            <div>
+              <dt>Built from</dt>
+              <dd>
+                {e.builtFrom.map((b) => (
+                  <Badge key={b}>{b}</Badge>
+                ))}
+              </dd>
+            </div>
+            <div>
+              <dt>Alternative</dt>
+              <dd>{e.alternative}</dd>
+            </div>
+          </dl>
+          <StoryLink story={e.story} onOpen={onOpenStory} label="Open the story" />
+        </div>
       );
   }
 }

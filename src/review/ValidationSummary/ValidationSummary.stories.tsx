@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { expect, userEvent, within } from 'storybook/test';
-import { bulkActions } from '../../data/scenario';
+import { bulkActionsWithRules } from '../../data/scenario';
 import type { ValidationSummary as Summary } from '../../data/types';
 import { ValidationSummary } from './ValidationSummary';
 
@@ -24,7 +24,7 @@ const allRunning: Summary = {
 const meta = {
   title: 'Review/ValidationSummary',
   component: ValidationSummary,
-  args: { summary: bulkActions.validation },
+  args: { summary: bulkActionsWithRules.validation },
   parameters: {
     a11y: { test: 'error' },
     docs: {

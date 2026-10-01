@@ -1,14 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
-import { bulkActions } from '../../data/scenario';
+import { bulkActionsWithRules, queue } from '../../data/scenario';
 import type { Finding } from '../../data/types';
 import { FindingList } from './FindingList';
 
-const findings = bulkActions.findings;
+const findings = bulkActionsWithRules.findings;
+const all = queue.flatMap((c) => c.findings);
 
 function finding(id: string): Finding {
-  const f = findings.find((x) => x.id === id);
-  if (!f) throw new Error(`The bulk-actions change has no finding ${id}`);
+  const f = all.find((x) => x.id === id);
+  if (!f) throw new Error(`No change in the queue has a finding ${id}`);
   return f;
 }
 
@@ -48,42 +49,42 @@ export const Default: Story = {
 };
 
 export const OneOpen: Story = {
-  args: { selectedId: 'f-contrast' },
+  args: { selectedId: 'f1-shared-table' },
   parameters: {
     docs: { description: { story: 'The contrast finding open: its summary, the axe evidence and the correction it would send. The others stay closed.' } },
   },
 };
 
 export const ComponentFinding: Story = {
-  args: { findings: [finding('f-local-button')], selectedId: 'f-local-button' },
+  args: { findings: [finding('f3-local-button')], selectedId: 'f3-local-button' },
   parameters: {
     docs: { description: { story: 'A component finding: what the agent wrote beside what the system already has, with the story to open.' } },
   },
 };
 
 export const TokenFinding: Story = {
-  args: { findings: [finding('f-padding-literal')], selectedId: 'f-padding-literal' },
+  args: { findings: [finding('f3-tokens')], selectedId: 'f3-tokens' },
   parameters: {
     docs: { description: { story: 'A token finding: the literal the agent wrote against the two steps of the scale it falls between.' } },
   },
 };
 
 export const VisualFinding: Story = {
-  args: { findings: [finding('f-overflow')], selectedId: 'f-overflow' },
+  args: { findings: [finding('f3-overflow')], selectedId: 'f3-overflow' },
   parameters: {
     docs: { description: { story: 'A visual finding: the story, the pixels that moved, and whether the change was asked for.' } },
   },
 };
 
 export const StateFinding: Story = {
-  args: { findings: [finding('f-new-states')], selectedId: 'f-new-states' },
+  args: { findings: [finding('f1-states')], selectedId: 'f1-states' },
   parameters: {
     docs: { description: { story: 'A state finding, a note: two states exist and neither has a story, so neither is tested or compared.' } },
   },
 };
 
 export const InteractionFinding: Story = {
-  args: { findings: [finding('f-interaction')], selectedId: 'f-interaction' },
+  args: { findings: [finding('f1-interaction')], selectedId: 'f1-interaction' },
   parameters: {
     docs: { description: { story: 'The interaction tests passed. There is no checkbox, because the correction is empty and there is nothing to return; the item exists so the reviewer sees the tests ran.' } },
   },

@@ -3,6 +3,8 @@ import type { Screen, Side } from '../../data/types';
 import { CustomerTable } from '../../product/customers/CustomerTable';
 import { CustomerTable as CustomersBase } from '../../product/customers/history/CustomerTable.base';
 import { CustomerTable as CustomersRules } from '../../product/customers/history/CustomerTable.rules';
+import { CustomerTable as CustomersNoRules } from '../../product/customers/history/CustomerTable.norules';
+import { CustomerTable as CustomersDrift } from '../../product/customers/history/CustomerTable.drift';
 import { InvoiceList } from '../../product/invoices/InvoiceList';
 
 /* Which component renders for a change, a screen and a side. The versions
@@ -27,6 +29,16 @@ const VERSIONS: Record<string, Versions> = {
   'rv-2041': {
     /* The baseline takes no selection prop (it has no selection); the cast says so. */
     customers: { before: CustomersBase as ComponentType<CustomersProps>, after: CustomersRules, afterVersion: 'rules' },
+    invoices: { before: InvoiceList, after: InvoiceList },
+  },
+  /* Run 2: the same request with the rules removed from the agent's context. */
+  'rv-2042': {
+    customers: { before: CustomersBase as ComponentType<CustomersProps>, after: CustomersNoRules, afterVersion: 'norules' },
+    invoices: { before: InvoiceList, after: InvoiceList },
+  },
+  /* The seeded drift: the four drifts the workflow exists to catch, by hand. */
+  'rv-2043': {
+    customers: { before: CustomersBase as ComponentType<CustomersProps>, after: CustomersDrift, afterVersion: 'drift' },
     invoices: { before: InvoiceList, after: InvoiceList },
   },
 };

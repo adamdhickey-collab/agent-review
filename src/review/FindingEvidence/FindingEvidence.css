@@ -133,3 +133,9 @@
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
 }
+
+.evidence__frames {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}

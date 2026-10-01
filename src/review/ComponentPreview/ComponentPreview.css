@@ -65,7 +65,7 @@
 .preview__frame [data-finding].is-target::after {
   content: 'Finding';
   position: absolute;
-  top: calc(100% + var(--space-2));
+  bottom: calc(100% + var(--space-2)); /* above the element, so it never covers what follows it */
   left: calc(var(--space-1) * -1);
   padding: 2px var(--space-2);
   border-radius: var(--radius-sm);

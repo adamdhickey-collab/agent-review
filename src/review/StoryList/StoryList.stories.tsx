@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
-import { bulkActions, findChange } from '../../data/scenario';
+import { bulkActionsWithRules, findChange } from '../../data/scenario';
 import type { StoryRef } from '../../data/types';
 import { StoryList } from './StoryList';
 
 /* The bulk-actions change's four compared stories, plus the one new story
    from the invoices empty-state change, so one item carries the New badge. */
-const withNew: StoryRef[] = [...bulkActions.stories, ...(findChange('rv-2040')?.stories ?? [])];
+const withNew: StoryRef[] = [...bulkActionsWithRules.stories, ...(findChange('rv-2040')?.stories ?? [])];
 
 const meta = {
   title: 'Review/StoryList',
   component: StoryList,
-  args: { stories: bulkActions.stories, onOpen: fn() },
+  args: { stories: bulkActionsWithRules.stories, onOpen: fn() },
   parameters: {
     a11y: { test: 'error' },
     docs: {

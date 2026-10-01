@@ -31,7 +31,10 @@ element where a component exists is the finding.
 Common misses: a "small button" (that is `<Button size="compact">`), a
 "link that looks like a button" (that is still a Button), a pill with a
 status word (that is a Badge with a tone), a row of controls over a table
-(that is a Toolbar).
+(that is a Toolbar), and a bar of actions that appears when rows are
+selected (that is `<Toolbar tone="accent">` holding Buttons; the
+Toolbar's Accent story is that bar). A Button whose default height looks
+too tall for a bar is a Button at `size="compact"`, not a local one.
 
 ## 2. Never write a value where a token exists
 
@@ -95,6 +98,15 @@ recovery, is a defect.
 
 How to check: the story for the action shows the confirmation or the undo.
 
+Two shapes are in the system. A dialog, for an action taken from a
+detail (the ReturnPanel). And, since the bulk-actions review
+(docs/experiment/, Run 1), an inline question: the toolbar that offered
+the action becomes the question, with Cancel beside the confirming
+danger button, Escape as Cancel, and focus on the confirming button;
+the CustomerTable's ArchiveConfirmation story is the reference. Use the
+inline shape for a bulk action on a selection where there is no view to
+restore from; use undo where there is one.
+
 ## 7. Table actions keep the table's alignment and density
 
 Controls in a table row use the compact size (`size="compact"`), sit in a
@@ -103,8 +115,12 @@ Controls in a table row use the compact size (`size="compact"`), sit in a
 density (`density="compact"`) is the Table's, not the screen's.
 
 How to check: the component's `Narrow` story at 768px shows no horizontal
-overflow beyond the table's own scroll region. A toolbar that overflows
-the viewport at 768 is a finding.
+overflow beyond the table's own scroll region, and `npm run test:visual`
+holds every `role="toolbar"` on the customers screen to its own box at
+768 (`scrollWidth <= clientWidth`, each bar measured on its own, because
+a clipping parent hides an overflow from the frame). A toolbar that
+overflows at 768 is a finding, and a bar written as one flex line with
+`white-space: nowrap` is the usual cause.
 
 ## 8. Loading, empty and error use the established patterns
 
@@ -126,6 +142,15 @@ lines up in one toolbar changes the Button in every toolbar.
 How to check: `git diff --stat src/components/` is empty, or every file
 in it is one you meant to change and the change description says why. The
 visual baselines (`npm run test:visual`) will show the screens that moved.
+
+A shared change with a reason in writing is allowed, and the reason has
+a shape: what you measured, on which story, before and after. Run 1 of
+the bulk-actions experiment changed twelve lines of `Table.css` so a
+checkbox fits a table head without growing the row, measured the head
+at 32px before and after against the base commit, and showed the
+Table's own SelectedRows story had the defect. That was accepted. "So
+the buttons line up" is not a reason; that is a local need, and the
+local need is solved by using the component, not by changing it.
 
 ## 10. A new component needs a reason in writing
 

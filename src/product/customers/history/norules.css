@@ -1,0 +1,22 @@
+
+/* The selection count sits on the accent ground, where the full ink is
+   the one that clears 4.5:1; muted does not. */
+[data-version='norules'] .customers__selected {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The second half of the archive question, quieter than the question. */
+[data-version='norules'] .customers__hint {
+  color: var(--color-text-secondary);
+  font-weight: var(--weight-regular);
+}
+
+/* The status line: the live region is always in the tree and has no box
+   of its own; the text inside it carries the row. */
+[data-version='norules'] .customers__status-text {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+}

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import { bulkActions } from '../../data/scenario';
+import { bulkActionsWithRules } from '../../data/scenario';
 import { ReturnPanel } from './ReturnPanel';
 
-const findings = bulkActions.findings;
+const findings = bulkActionsWithRules.findings;
 
 /* What the screen includes by default: every finding that has a
    correction and is not a note. The notes can be added by hand. */

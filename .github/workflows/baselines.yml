@@ -1,0 +1,33 @@
+# Records the Linux visual baselines, on demand. Chromium rasterises text
+# differently on macOS and on Linux, so a baseline a person records locally
+# does not match what CI renders; the first push found that out. This
+# records the set CI will compare against, on the runner CI uses, and hands
+# it back as an artifact to commit under tests/__screenshots__/linux/.
+#
+#   gh workflow run baselines.yml --ref <branch>
+#   gh run download <run id> -n linux-baselines -D tests/__screenshots__
+#
+# Re-run it when a screen changes on purpose, and commit the result with
+# the change that moved it, so the baseline and the reason travel together.
+name: record baselines
+
+on:
+  workflow_dispatch:
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --update-snapshots
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-baselines
+          path: tests/__screenshots__/linux
+          retention-days: 7
