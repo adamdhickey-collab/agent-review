@@ -5,7 +5,22 @@
   min-height: 0;
 }
 
+/* A focused control scrolls to below the sticky header, not under it
+   (WCAG 2.4.11). The scroll container is the page, so this is on the root. */
+@media not all and (max-width: 64rem) {
+  :root:has(.change) {
+    scroll-padding-top: 8rem;
+  }
+}
+
+/* The decision stays in reach however far down the evidence the reviewer has
+   read: the header, with Accept, Reject and Return in it, is sticky. Below
+   64rem it would cover too much of a screen, so the decision bar leaves the
+   header and sits at the bottom instead (see the end of this file). */
 .change__header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -24,6 +39,7 @@
 
 .change__back {
   display: inline-flex;
+  align-self: flex-start; /* the link is as wide as "Queue", not as wide as the column */
   align-items: center;
   gap: var(--space-1);
   color: var(--color-text-muted);
@@ -150,11 +166,54 @@
 
 @media (max-width: 64rem) {
   .change__body {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr); /* not 1fr, whose minimum is its widest content: that stretched the column past a 320px screen */
   }
 
   .change__spine {
     border-right: 0;
     border-bottom: var(--border-width) solid var(--color-border);
+  }
+}
+
+/* A narrow screen: the decision is a bar at the bottom of the screen, in
+   reach of a thumb, with room left under the content for it. Fixed, so it
+   leaves the header, which is not sticky here. */
+@media (max-width: 64rem) {
+  .change {
+    padding-bottom: calc(var(--control-height-touch) * 2 + var(--space-6));
+  }
+
+  .change__header {
+    position: static;
+  }
+
+  .change__header .decision {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 10;
+    padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+    border-top: var(--border-width) solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .change__header .decision--made {
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 40rem) {
+  .change__header .decision > .btn {
+    flex: 1 1 auto;
+  }
+
+  .change__header .decision__reason-text {
+    flex: 1 0 100%;
+    margin-right: 0;
+  }
+}
+
+@media (pointer: coarse) {
+  .change__back {
+    min-height: var(--control-height-touch);
   }
 }

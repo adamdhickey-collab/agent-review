@@ -121,3 +121,9 @@
   margin-right: auto;
   font-weight: var(--weight-medium);
 }
+
+@media (pointer: coarse) {
+  .return__findings .checkbox {
+    min-height: var(--control-height-touch);
+  }
+}

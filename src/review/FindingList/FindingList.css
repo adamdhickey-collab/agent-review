@@ -157,3 +157,20 @@
   padding: 0 var(--space-1);
   border-radius: var(--radius-sm);
 }
+
+/* The box is 16px; where the pointer is coarse its label is the target, and
+   the label is made the height of the row and wide enough to hit, with the
+   negative margin giving back the room it takes. */
+@media (pointer: coarse) {
+  .finding__include {
+    align-self: stretch;
+    align-items: flex-start;
+    margin: 0 calc(var(--space-2) * -1) 0 calc(var(--space-3) * -1);
+    padding: var(--space-3) var(--space-2) 0 var(--space-3);
+  }
+
+  .finding__include--none {
+    margin: 0;
+    padding: 0;
+  }
+}

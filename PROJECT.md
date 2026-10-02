@@ -187,13 +187,17 @@ The product under review, `src/product/` (2 screens): CustomerTable (the
 live one is Run 1's, with bulk actions; the baseline and all three
 branch versions are frozen under `history/`), InvoiceList.
 
-Agent Review, `src/review/` (14): Shell, QueueScreen, ReviewRow,
-ChangeScreen, ValidationSummary, FindingList, FindingEvidence (eight
-evidence kinds), ComponentPreview (the frame, with loading and error),
-DiffViewer, AgentRationale, DecisionBar, ReturnPanel, StoryList,
-FileList. 69 stories.
+Agent Review, `src/review/` (15): Shell, QueueScreen, ReviewRow,
+ReviewCard (the queue's row on a phone), ChangeScreen, ValidationSummary,
+FindingList, FindingEvidence (eight evidence kinds), ComponentPreview (the
+frame, with loading and error), DiffViewer, AgentRationale, DecisionBar,
+ReturnPanel, StoryList, FileList. 81 stories.
 
-Every story runs through axe. 161 at the time of writing.
+Every story runs through axe, with WCAG 2.2's target size on. 173 as of
+2026-10-02: 78 for the system, 14 for the product, 81 for the review. (The
+case study on adamhickey.com said 161 when it was written; the number moves
+whenever a story is added, so it is read from `npm run test:stories` or from
+the Storybook's `index.json`, not carried by hand.)
 
 ## Tokens
 

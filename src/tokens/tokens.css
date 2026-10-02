@@ -43,6 +43,7 @@
      for a control that sits inside a row or a toolbar beside text. */
   --control-height: 1.75rem;         /* 28 */
   --control-height-compact: 1.5rem;  /* 24 */
+  --control-height-touch: 2.75rem;   /* 44, a fingertip: what the app's own chrome uses where the pointer is coarse */
   --control-padding-x: var(--space-3);
   --control-padding-x-compact: var(--space-2);
 

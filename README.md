@@ -28,7 +28,7 @@ src/review/        Agent Review: the queue, the change, the findings, the previe
 src/data/          the review scenario, filled from the experiment
 skills/ui-quality/ the twelve rules an agent works inside, each with its check
 scripts/           the token lint
-tests/             Playwright: visual baselines and the viewport check
+tests/             Playwright: visual baselines, the 768 overflow check and the phone check
 docs/exploration/  three information architectures, drawn before the build
 docs/experiment/   the controlled experiment, as it happened
 ```
@@ -51,8 +51,10 @@ npm run test:visual  # Playwright screenshots against the committed baselines
 `npm run lint:tokens` reads every stylesheet under `src/` and reports a
 literal written where a token exists. `npm run test:stories` renders every
 story in headless Chromium and fails on an axe violation. `npm run
-test:visual` compares the review and product screens, at two widths,
-against `tests/__screenshots__/`. CI runs all of them on every push and
+test:visual` compares the review and product screens, at two widths and
+on a phone, against `tests/__screenshots__/`, and `tests/phone.spec.ts`
+measures that nothing overflows a 320 to 414px screen and that the chrome's
+controls are a fingertip tall. CI runs all of them on every push and
 deploys `main` to GitHub Pages.
 
 ## The agent's context
