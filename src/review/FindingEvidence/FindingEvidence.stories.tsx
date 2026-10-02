@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
+import { expect, fn, within } from 'storybook/test';
 import { queue } from '../../data/scenario';
 import type { Finding } from '../../data/types';
 import { FindingEvidence } from './FindingEvidence';
@@ -19,7 +19,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The evidence for one finding, in the shape that kind of finding needs. A reviewer deciding about a local button wants to see what was written beside what the system already has; one deciding about a literal wants the value against the scale it fell between; one reading a contrast failure wants the measurement against the floor and what axe actually said. So this is one component with six shapes, by the evidence’s kind: component, token, accessibility, visual, state and interaction. Each shape puts the fact first and the words second, and where a story exists, offers it as a button that opens it in the Storybook. The six stories are the six shapes, each on the scenario’s own finding of that kind.',
+          'The evidence for one finding, in the shape that kind of finding needs. A reviewer deciding about a local button wants to see what was written beside what the system already has; one deciding about a literal wants the value against the scale it fell between; one reading a contrast failure wants the measurement against the floor and what axe actually said. So this is one component with eight shapes, by the evidence’s kind: component, token, accessibility, visual, state, interaction, shared and pattern. Each shape puts the fact first and the words second, and where a story exists, offers it as a button that opens it in the Storybook. The eight stories are the eight shapes, each on the scenario’s own finding of that kind.',
       },
     },
   },
@@ -66,5 +66,25 @@ export const Interaction: Story = {
   args: { finding: finding('f1-interaction') },
   parameters: {
     docs: { description: { story: 'The tests that ran, each with its state as an icon and its time. All three passed.' } },
+  },
+};
+
+export const Shared: Story = {
+  args: { finding: finding('f1-shared-table') },
+  parameters: {
+    docs: { description: { story: 'A change to a shared component: the file with how many lines and that it is shared, what was measured before and after, the stories that render it, and the agent’s own reason for making the change.' } },
+  },
+  /* The label is JSX text, where a unicode escape is printed as written and
+     not decoded: the product said "The agent\u2019s reason" until a person
+     read it, because this shape had no story to render it. */
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByText('The agent\u2019s reason')).toBeInTheDocument();
+  },
+};
+
+export const Pattern: Story = {
+  args: { finding: finding('f1-new-pattern') },
+  parameters: {
+    docs: { description: { story: 'A new interaction pattern: what it is, which components it is built from, and the alternative the agent considered and did not take. The reviewer decides whether the pattern enters the system, so the alternative is on the page.' } },
   },
 };

@@ -20,6 +20,11 @@ const preview: Preview = {
     },
     a11y: {
       test: 'error',
+      /* axe runs WCAG 2.0 and 2.1 A and AA by default; target size is the
+         WCAG 2.2 AA rule (2.5.8) and is off unless asked for. Switching on
+         the one rule keeps every default, and a target under 24px that has
+         another target inside its 24px circle now fails a story. */
+      options: { rules: { 'target-size': { enabled: true } } },
     },
     options: {
       storySort: {

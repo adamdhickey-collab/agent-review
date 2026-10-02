@@ -102,6 +102,7 @@
 
 .return__footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
@@ -112,4 +113,11 @@
   margin-right: auto;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
+}
+
+/* The question that replaces the footer once the message has been edited:
+   the words take the room, and the two answers sit at the end. */
+.return__ask {
+  margin-right: auto;
+  font-weight: var(--weight-medium);
 }

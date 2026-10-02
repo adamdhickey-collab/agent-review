@@ -32,7 +32,9 @@ export function QueueScreen({ changes: given }: { changes?: Change[] }) {
         className="queue__toolbar"
         start={
           <>
-            <h1 className="queue__title">Review queue</h1>
+            <h1 className="queue__title" tabIndex={-1}>
+              Review queue
+            </h1>
             <span className="queue__count">{rows.length}</span>
           </>
         }

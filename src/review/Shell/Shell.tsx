@@ -5,12 +5,24 @@ import './Shell.css';
 
 /* The chrome: one bar. The product's name, where you are, and who you
    are. Everything else is the screen. The bar is a landmark (header) and
-   the content is main, so a screen reader can skip to it. */
+   the content is main, so a screen reader can skip to it.
+
+   The route is the URL's hash, so a link to "#main" would be read as a
+   route and replace the screen with "nothing at this address". The skip
+   link keeps its href, for a browser that runs no script, and moves focus
+   itself. */
 
 export function Shell({ route, children }: { route: Route; children: ReactNode }) {
   return (
     <div className="shell">
-      <a className="shell__skip" href="#main">
+      <a
+        className="shell__skip"
+        href="#main"
+        onClick={(e) => {
+          e.preventDefault();
+          document.getElementById('main')?.focus();
+        }}
+      >
         Skip to content
       </a>
       <header className="shell__bar">
@@ -38,10 +50,11 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
             <Icon name="git-branch" size={14} />
             <code>relay/web</code>
           </span>
-          <span className="shell__user" aria-label="Signed in as Dana Whitfield">
+          <span className="shell__user">
             <span className="shell__avatar" aria-hidden="true">
               DW
             </span>
+            <span className="visually-hidden">Signed in as </span>
             <span className="shell__user-name">Dana Whitfield</span>
           </span>
         </div>
