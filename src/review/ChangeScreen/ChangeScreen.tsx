@@ -41,7 +41,14 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
   const openStory = useCallback((storyId: string) => window.open(`${STORYBOOK}?path=/story/${storyId}`, '_blank', 'noopener'), []);
 
   if (!change) {
-    return <EmptyState icon="search" title="No change with that id" description={<code>{id}</code>} action={{ label: 'Back to the queue', onClick: () => navigate({ name: 'queue' }) }} />;
+    return (
+      <>
+        <h1 className="visually-hidden" tabIndex={-1}>
+          No change with that id
+        </h1>
+        <EmptyState icon="search" title="No change with that id" description={<code>{id}</code>} action={{ label: 'Back to the queue', onClick: () => navigate({ name: 'queue' }) }} />
+      </>
+    );
   }
 
   const visible: Finding[] = lane ? change.findings.filter((f) => kindsForLane(lane).includes(f.kind)) : change.findings;
@@ -57,7 +64,9 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
             <Icon name="arrow-left" size={14} />
             Queue
           </a>
-          <h1 className="change__title">{change.title}</h1>
+          <h1 className="change__title" tabIndex={-1}>
+            {change.title}
+          </h1>
           <p className="change__meta">
             <code>{change.repo}</code>
             <span className="change__sep" aria-hidden="true">
@@ -156,6 +165,7 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
             changeId={change.id}
             reproduce={selected?.reproduce}
             screens={previewScreens}
+            skipTo="diff"
             note={afterMissing ? 'The agent’s branch has not been loaded into this build; the After side shows the baseline.' : undefined}
           />
           {selected ? (
@@ -171,7 +181,9 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
             </p>
           ) : null}
           <div className="change__diff">
-            <h2 className="change__section-title">Diff</h2>
+            <h2 id="diff" className="change__section-title" tabIndex={-1}>
+              Diff
+            </h2>
             <DiffViewer hunks={change.diff} selectedFindingId={findingId} onSelectFinding={(fid) => select(fid)} />
           </div>
         </section>

@@ -15,7 +15,15 @@ const meta = {
   title: 'Review/ComponentPreview',
   component: ComponentPreview,
   parameters: {
-    a11y: { test: 'error' },
+    a11y: {
+      test: 'error',
+      /* The preview frame renders the product at a width and scales it to fit
+         the column, so Relay's 24px controls are measured here at 18px or
+         less. They are checked at their real size in their own stories; the
+         rest of this screen is checked at its real size in its components'
+         stories (DiffViewer, DecisionBar, FindingList). */
+      options: { rules: { 'target-size': { enabled: false } } },
+    },
     docs: {
       description: {
         component:

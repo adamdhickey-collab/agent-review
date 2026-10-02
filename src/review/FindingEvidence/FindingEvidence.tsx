@@ -222,7 +222,7 @@ export function FindingEvidence({ finding, onOpenStory }: { finding: Finding; on
             </div>
           </dl>
           <p className="evidence__message">
-            <span className="evidence__label">The agent\u2019s reason</span>
+            <span className="evidence__label">The agent’s reason</span>
             {e.reason}
           </p>
         </div>

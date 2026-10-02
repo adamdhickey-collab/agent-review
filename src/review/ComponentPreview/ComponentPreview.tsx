@@ -13,7 +13,10 @@ import './ComponentPreview.css';
    element it is about is outlined.
 
    The frame's content is real and operable: a reviewer can tab into it
-   and select rows. */
+   and select rows. That is a lot of tab stops between the findings and
+   the diff, so a screen that has somewhere to go next can name it
+   (skipTo, an element id) and the frame gets a skip link, which shows
+   when it has focus. */
 
 export const VIEWPORTS: SegmentedOption<`${Viewport}`>[] = [
   { value: '1280', label: 'Desktop, 1280', icon: 'monitor', iconOnly: true },
@@ -38,6 +41,9 @@ export interface ComponentPreviewProps {
   reproduce?: Reproduce;
   /** Which screens the change touched, for the screen switch. */
   screens?: Screen[];
+  /** The id of the element after the frame. When given, a skip link past the
+      frame appears on focus. */
+  skipTo?: string;
   /** Something to show above the frame: a caption, a warning. */
   note?: ReactNode;
   /** The branch is still building, or failed to: the frame gives way to the
@@ -45,7 +51,7 @@ export interface ComponentPreviewProps {
   status?: { kind: 'loading' } | { kind: 'error'; message: string; detail?: string; onRetry?: () => void };
 }
 
-export function ComponentPreview({ changeId, reproduce, screens = ['customers', 'invoices'], note, status }: ComponentPreviewProps) {
+export function ComponentPreview({ changeId, reproduce, screens = ['customers', 'invoices'], skipTo, note, status }: ComponentPreviewProps) {
   const [screen, setScreen] = useState<Screen>(reproduce?.screen ?? 'customers');
   const [side, setSide] = useState<Side>(reproduce?.side ?? 'after');
   const [viewport, setViewport] = useState<Viewport>(reproduce?.viewport ?? 1280);
@@ -133,16 +139,28 @@ export function ComponentPreview({ changeId, reproduce, screens = ['customers', 
           <code>{viewport}px</code>
           {scale < 1 ? <span className="preview__scale">at {Math.round(scale * 100)}%</span> : null}
         </span>
+        {skipTo && !status ? (
+          <a
+            className="preview__skip"
+            href={`#${skipTo}`}
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById(skipTo)?.focus();
+            }}
+          >
+            Skip the preview
+          </a>
+        ) : null}
       </div>
       {note ? <div className="preview__note">{note}</div> : null}
       {status?.kind === 'loading' ? (
         <div className="preview__column">
-          <LoadingState title="Building the agent\u2019s branch" description="The preview renders from the branch once its build finishes." />
+          <LoadingState title="Building the agent’s branch" description="The preview renders from the branch once its build finishes." />
         </div>
       ) : status?.kind === 'error' ? (
         <div className="preview__column">
           <ErrorState
-            title="The agent\u2019s branch did not build"
+            title="The agent’s branch did not build"
             description={status.message}
             detail={status.detail}
             action={status.onRetry ? { label: 'Try the build again', onClick: status.onRetry } : undefined}

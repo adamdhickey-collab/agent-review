@@ -168,6 +168,16 @@ a name, a table without headers, a state said only by color, a focus ring
 removed: any of these blocks the change. There is no "minor" accessibility
 finding in this repository.
 
+Target size is part of that. The stories run axe's WCAG 2.2 target-size
+rule (2.5.8): a control is at least 24 by 24px, or has room around it for a
+24px circle. A control that is a small pill (a marker, a tag you can press)
+is a compact Button, which is 24px tall, around a Badge if it should look
+like one; it is not a button restyled down to 18px. One screen is measured
+differently: the review's preview frame scales the product to fit its
+column, so Relay's controls are smaller there than they are, and the stories
+that render the frame turn the rule off, with the reason beside it. Those
+controls are checked at their real size in their own stories.
+
 How to check: `npm run test:stories` is green.
 
 ## 12. A new interaction pattern needs a person to look at it

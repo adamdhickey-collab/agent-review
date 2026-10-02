@@ -1,10 +1,17 @@
+import { Badge, Button } from '../../components';
 import type { DiffHunk } from '../../data/types';
 import './DiffViewer.css';
 
 /* A unified diff, small. Lines added and removed on the diff grounds; a
    line a finding points at is marked, and the selected finding's lines
    are emphasised. Rendered as a table so a row is a row to a screen
-   reader and the line numbers are headers. */
+   reader and the line numbers are headers.
+
+   A long line scrolls the table sideways, so the table is a tab stop (a
+   keyboard can scroll it) and the marker column is sticky at the right
+   edge: a line's marker is in view wherever the line has been scrolled to.
+   The marker is a compact ghost Button around a warning Badge, which is
+   24px tall, the least a target may be (WCAG 2.5.8). */
 
 export interface DiffViewerProps {
   hunks: DiffHunk[];
@@ -24,7 +31,7 @@ export function DiffViewer({ hunks, selectedFindingId, onSelectFinding }: DiffVi
             <code>{h.file}</code>
             <code className="diff__hunk">{h.header}</code>
           </header>
-          <table className="diff__table">
+          <table className="diff__table" tabIndex={0}>
             <caption className="visually-hidden">Changed lines in {h.file}</caption>
             <tbody>
               {h.lines.map((l, i) => {
@@ -44,9 +51,9 @@ export function DiffViewer({ hunks, selectedFindingId, onSelectFinding }: DiffVi
                     </td>
                     <td className="diff__mark">
                       {marked ? (
-                        <button type="button" className="diff__finding" onClick={() => onSelectFinding?.(l.findingId!)} aria-pressed={selected}>
-                          finding
-                        </button>
+                        <Button variant="ghost" size="compact" className="diff__finding" onClick={() => onSelectFinding?.(l.findingId!)} aria-pressed={selected}>
+                          <Badge tone="warning">finding</Badge>
+                        </Button>
                       ) : null}
                     </td>
                   </tr>
