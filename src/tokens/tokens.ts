@@ -15,7 +15,7 @@ export const TOKEN_GROUPS = {
     '--tracking-caps',
   ],
   space: ['--space-1', '--space-2', '--space-3', '--space-4', '--space-5', '--space-6', '--space-8'],
-  control: ['--control-height', '--control-height-compact', '--control-padding-x', '--control-padding-x-compact'],
+  control: ['--control-height', '--control-height-compact', '--control-height-touch', '--control-padding-x', '--control-padding-x-compact'],
   shape: ['--radius-sm', '--radius-md', '--border-width'],
   ground: ['--color-canvas', '--color-surface', '--color-surface-sunken', '--color-surface-hover'],
   line: ['--color-border', '--color-border-control'],

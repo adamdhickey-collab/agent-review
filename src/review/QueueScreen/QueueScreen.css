@@ -23,3 +23,19 @@
 .queue__table {
   min-width: 56rem;
 }
+
+.queue__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.queue__list li:last-child .review-card {
+  border-bottom: 0;
+}
+
+@media (max-width: 48rem) {
+  .queue {
+    margin: var(--space-2);
+  }
+}

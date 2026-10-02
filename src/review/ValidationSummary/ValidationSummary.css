@@ -41,3 +41,10 @@ button.validation__lane[aria-pressed='true'] {
 .validation__result {
   font-size: var(--text-md);
 }
+
+@media (max-width: 40rem) {
+  .validation__lane {
+    flex: 1 1 calc(50% - var(--space-1));
+    min-width: 0;
+  }
+}

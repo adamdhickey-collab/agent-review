@@ -53,12 +53,18 @@
 .preview__column {
   padding: var(--space-4);
   background: var(--color-surface-sunken);
-  overflow: hidden;
+  overflow-x: auto; /* pans when the frame is wider than the room at its smallest scale */
+  overflow-y: hidden;
 }
 
+.preview__column:focus-visible {
+  outline-offset: -2px;
+}
+
+/* No height transition: the frame's size changes with the width chosen, and
+   animating a layout property moved the diff under it for 200ms each time. */
 .preview__viewport {
   position: relative;
-  transition: height var(--motion-base) var(--ease);
 }
 
 .preview__frame {

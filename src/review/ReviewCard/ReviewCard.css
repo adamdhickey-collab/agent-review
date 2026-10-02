@@ -1,0 +1,63 @@
+.review-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+  transition: background-color var(--motion-fast) var(--ease);
+}
+
+.review-card:hover {
+  background: var(--color-surface-hover);
+}
+
+.review-card__title {
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+}
+
+.review-card__title:hover {
+  text-decoration: none;
+}
+
+/* The link is the whole card: its box is stretched over the card, so a press
+   anywhere on it opens the change. */
+.review-card__title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.review-card__meta,
+.review-card__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* Two groups, who and when, so a line breaks between them and never inside
+   one, and no separator is left at the end of a line. */
+.review-card__group {
+  white-space: nowrap;
+}
+
+.review-card__meta code {
+  overflow-wrap: anywhere;
+}
+
+.review-card__verdict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.review-card[data-state='accepted'] .review-card__title,
+.review-card[data-state='rejected'] .review-card__title {
+  color: var(--color-text-secondary);
+}

@@ -79,12 +79,12 @@ const meta = {
         <thead>
           <tr>
             <HeaderCell>Change</HeaderCell>
+            <HeaderCell>Status</HeaderCell>
+            <HeaderCell>Validation</HeaderCell>
             <HeaderCell>Agent</HeaderCell>
             <HeaderCell>Requested by</HeaderCell>
             <HeaderCell>Opened</HeaderCell>
             <HeaderCell numeric>Components</HeaderCell>
-            <HeaderCell>Validation</HeaderCell>
-            <HeaderCell>Status</HeaderCell>
           </tr>
         </thead>
         <tbody>
@@ -98,7 +98,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'One change in the review queue, as a table row. The title is a real link, so the keyboard gets one stop per row and a screen reader names the row by it; the whole row opens the change for a pointer. The five validation lanes are icons with names in a fixed order, so a column of rows reads as a grid, and a count of blocking findings sits beside them because that is the one number that decides whether the change can be accepted at all. The state at the end is a StatusIndicator whose tone says what kind of attention the row needs: amber for needs review, green for ready or accepted, red for rejected, accent for returned, and a live dot while validation is still running. Each story is one of those situations.',
+          'One change in the review queue, as a table row. The title is a real link, so the keyboard gets one stop per row and a screen reader names the row by it; the whole row opens the change for a pointer. The columns run in the order a reviewer decides in: the change, its state, what validation said, then who and when, so the two that decide stay on screen when the table scrolls at 768. The five validation lanes are icons with names in a fixed order, so a column of rows reads as a grid, and a count of blocking findings sits beside them because that is the one number that decides whether the change can be accepted at all. The state is a StatusIndicator whose tone says what kind of attention the row needs: amber for needs review, green for ready or accepted, red for rejected, accent for returned, and a live dot while validation is still running. Each story is one of those situations.',
       },
     },
   },

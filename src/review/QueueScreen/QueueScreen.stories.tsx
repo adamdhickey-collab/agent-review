@@ -6,6 +6,9 @@ import { QueueScreen } from './QueueScreen';
 const meta = {
   title: 'Review/QueueScreen',
   component: QueueScreen,
+  /* The table, whatever width the story browser happens to be: below 48rem
+     the screen renders the list, and AsList is that story. */
+  args: { list: false },
   decorators: [
     (Story) => (
       <StoreProvider>
@@ -18,7 +21,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The review queue: every change an agent has opened, newest first, with the five validation lanes in one column and the state at the end. It is dense on purpose, because a reviewer scans it for the row that needs them rather than reading it. The filter is a segmented control over the state, and it opens on Open, which is the question a reviewer arrives with. When a filter leaves nothing, the screen renders EmptyState rather than an empty table: on Open it says what will appear and when, and on any other filter it offers the way back. The screen owns the store and the filter; each row is a ReviewRow.',
+          'The review queue: every change an agent has opened, newest first, with its state and the five validation lanes beside the title, then who and when. It is dense on purpose, because a reviewer scans it for the row that needs them rather than reading it. Below 48rem it is a list of cards instead of a table, because seven columns do not fit a phone and scrolling them sideways hides the two a reviewer decides on. The filter is a segmented control over the state, and it opens on Open, which is the question a reviewer arrives with. When a filter leaves nothing, the screen renders EmptyState rather than an empty table: on Open it says what will appear and when, and on any other filter it offers the way back. The screen owns the store and the filter; each row is a ReviewRow, or below 48rem each item is a ReviewCard.',
       },
     },
   },
@@ -65,5 +68,20 @@ export const KeyboardRow: Story = {
       await userEvent.tab();
     }
     await expect(link).toHaveFocus();
+  },
+};
+
+export const AsList: Story = {
+  args: { list: true },
+  parameters: {
+    docs: { description: { story: 'What a phone gets: a list of cards, not a table. The same five changes, the same filter, the same order of things in each. The list is named, each item is one link, and the filter still works.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('table')).not.toBeInTheDocument();
+    await expect(canvas.getByRole('list', { name: /Changes awaiting review/ })).toBeInTheDocument();
+    await expect(canvas.getAllByRole('link')).toHaveLength(5);
+    await userEvent.click(canvas.getByRole('radio', { name: 'Done' }));
+    await expect(canvas.getAllByRole('link')).toHaveLength(2);
   },
 };

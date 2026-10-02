@@ -94,6 +94,26 @@ samp {
   border: 0;
 }
 
+/* A fingertip is about 44px. Where the pointer is coarse, the review's own
+   chrome gives every control that height: the bar, the queue, the change's
+   header and summary and findings, the preview's controls, and the dialog.
+   Components already read --control-height, so this is a token set where
+   it is wanted and no component is restyled. The preview FRAME is left out
+   on purpose: it shows the product as the checks measured it, so Relay's
+   controls stay the size they are. */
+@media (pointer: coarse) {
+  .shell__bar,
+  .queue,
+  .change__header,
+  .change__summary,
+  .change__spine,
+  .preview__bar,
+  .return {
+    --control-height: var(--control-height-touch);
+    --control-height-compact: var(--control-height-touch);
+  }
+}
+
 /* Reduced motion. Nothing here animates for its own sake, so there is no
    content to lose; the transitions just stop. */
 @media (prefers-reduced-motion: reduce) {

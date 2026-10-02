@@ -18,7 +18,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  height: 2.25rem;
+  height: max(2.25rem, var(--control-height)); /* 36 as it was; a touch control height where one is set */
   padding: 0 var(--space-2);
   margin-bottom: calc(var(--border-width) * -1);
   border: 0;

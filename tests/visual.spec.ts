@@ -1,6 +1,6 @@
-import { expect, test, type Page } from '@playwright/test';
+import { devices, expect, test, type Page } from '@playwright/test';
 
-/* The screens, at two widths, against their baselines. Each screenshot is
+/* The screens, at two widths and on a phone, against their baselines. Each screenshot is
    the full page so a change below the fold counts. The product screens
    are rendered on their own through the preview route so the baseline is
    the screen, not the review around it. */
@@ -29,6 +29,41 @@ for (const width of WIDTHS) {
     });
   });
 }
+
+/* A phone: the queue as cards, the change with its decision bar at the
+   bottom of the screen, and the return dialog over it. A touch device, so
+   the coarse-pointer styles are on, started from a blank page because a
+   touch context applies its emulation to the next navigation. The change and
+   the dialog are the first screen, not the whole page: a fixed bar belongs
+   at the bottom of what is seen, and in a full-page capture it is not. */
+test.describe('on a phone, 375', () => {
+  const { defaultBrowserType: _ignored, ...phone } = devices['iPhone 13'];
+  test.use({ ...phone, viewport: { width: 375, height: 812 }, deviceScaleFactor: 1 });
+
+  async function open(page: Page, hash: string) {
+    await page.goto('about:blank');
+    await page.goto(hash);
+    await settle(page);
+  }
+
+  test('the review queue', async ({ page }) => {
+    await open(page, '#/');
+    await expect(page).toHaveScreenshot('queue-375.png', { fullPage: true });
+  });
+
+  test('the change, with the first finding open', async ({ page }) => {
+    await open(page, '#/changes/rv-2041/findings/f1-shared-table');
+    await expect(page).toHaveScreenshot('change-375.png');
+  });
+
+  test('the return dialog', async ({ page }) => {
+    await open(page, '#/changes/rv-2043');
+    await page.getByRole('button', { name: 'Return to agent' }).click();
+    await page.getByRole('dialog').waitFor();
+    await page.waitForTimeout(300);
+    await expect(page).toHaveScreenshot('dialog-375.png');
+  });
+});
 
 test.describe('the product screens', () => {
   for (const width of WIDTHS) {

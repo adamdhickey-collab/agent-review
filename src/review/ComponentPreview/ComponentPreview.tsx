@@ -18,6 +18,11 @@ import './ComponentPreview.css';
    (skipTo, an element id) and the frame gets a skip link, which shows
    when it has focus. */
 
+/* How small the frame is allowed to get. A 1280px screen fitted to a 343px
+   phone column would be a quarter of its size, and its text a few pixels
+   high; below this it stops shrinking and the column pans instead. */
+const MIN_SCALE = 0.5;
+
 export const VIEWPORTS: SegmentedOption<`${Viewport}`>[] = [
   { value: '1280', label: 'Desktop, 1280', icon: 'monitor', iconOnly: true },
   { value: '1024', label: 'Laptop, 1024', icon: 'tablet', iconOnly: true },
@@ -71,17 +76,30 @@ export function ComponentPreview({ changeId, reproduce, screens = ['customers', 
     }
   }
 
+  /* The scale is the column's CONTENT width over the viewport's. Its
+     clientWidth includes its own padding, and fitting to that made the
+     frame 16px wider than the room it had, so the product's right edge was
+     cut off at every width. Where even the smallest scale is wider than the
+     room, the column pans, and is a tab stop so a keyboard can pan it. */
   const column = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const [pans, setPans] = useState(false);
+  const ready = status?.kind;
   useLayoutEffect(() => {
     const el = column.current;
     if (!el) return;
-    const fit = () => setScale(Math.min(1, el.clientWidth / viewport));
+    const fit = () => {
+      const pad = getComputedStyle(el);
+      const room = el.clientWidth - parseFloat(pad.paddingLeft) - parseFloat(pad.paddingRight);
+      const next = Math.min(1, Math.max(MIN_SCALE, room / viewport));
+      setScale(next);
+      setPans(viewport * next > room + 0.5);
+    };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [viewport]);
+  }, [viewport, ready]);
 
   const [height, setHeight] = useState(400);
   const frame = useRef<HTMLDivElement>(null);
@@ -167,8 +185,13 @@ export function ComponentPreview({ changeId, reproduce, screens = ['customers', 
           />
         </div>
       ) : (
-      <div className="preview__column" ref={column} data-side={side}>
-        <div className="preview__viewport" style={{ height: `${height * scale}px` }}>
+      <div
+        className="preview__column"
+        ref={column}
+        data-side={side}
+        {...(pans ? { tabIndex: 0, role: 'region', 'aria-label': `The product at ${viewport}px, scrolls sideways` } : {})}
+      >
+        <div className="preview__viewport" style={{ width: `${viewport * scale}px`, height: `${height * scale}px` }}>
           <div
             ref={frame}
             className="preview__frame"
