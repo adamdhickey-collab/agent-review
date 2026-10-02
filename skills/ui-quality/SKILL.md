@@ -114,6 +114,13 @@ Controls in a table row use the compact size (`size="compact"`), sit in a
 `Toolbar`, which wraps at narrow widths rather than overflowing; the row
 density (`density="compact"`) is the Table's, not the screen's.
 
+On a phone the same holds a size down: nothing makes the page wider than the
+screen at 320, 360, 375 and 414, and a table that cannot fit becomes a list
+rather than a sideways scroll that hides its columns (the review's queue
+does this below 48rem). `tests/phone.spec.ts` measures it on a touch device,
+and measures that the chrome's controls are 44px; the preview frame is the
+one place that is not, for the reason in rule 11.
+
 How to check: the component's `Narrow` story at 768px shows no horizontal
 overflow beyond the table's own scroll region, and `npm run test:visual`
 holds every `role="toolbar"` on the customers screen to its own box at

@@ -19,7 +19,7 @@ src/data/          the review scenario
 src/app/           the shell, the router, the base stylesheet
 skills/            the rules an agent reads
 docs/              exploration, the experiment, decisions (PROJECT.md at the root)
-tests/             Playwright visual baselines and the viewport check
+tests/             Playwright visual baselines, the 768 overflow check and the phone check
 ```
 
 ## Commands
