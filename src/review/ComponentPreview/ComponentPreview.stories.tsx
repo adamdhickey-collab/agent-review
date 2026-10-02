@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { queue } from '../../data/scenario';
 import type { Reproduce } from '../../data/types';
 import { ComponentPreview } from './ComponentPreview';
@@ -37,14 +37,22 @@ export const Default: Story = {
 export const ReproducingOverflow: Story = {
   args: { changeId: 'rv-2043', reproduce: reproduce('f3-overflow') },
   parameters: {
-    docs: { description: { story: 'The overflow finding: the customers screen on the after side at 768, with rows selected so the bulk-action bar shows, and the bar as the target. The width is what makes the finding visible.' } },
+    docs: { description: { story: 'The overflow finding: the customers screen on the after side at 768, with rows selected so the bulk-action bar shows, and the bar as the target. The width is what makes the finding visible. The bar sits flush under the table’s heading, so its tag goes on the bar’s top edge rather than above it, where it would cover the heading.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const bar = canvasElement.querySelector('[data-finding="bulk-bar"]');
+    await waitFor(() => expect(bar).toHaveAttribute('data-tag', 'edge'));
   },
 };
 
 export const ReproducingInvoices: Story = {
   args: { changeId: 'rv-2043', reproduce: reproduce('f3-shared-button') },
   parameters: {
-    docs: { description: { story: 'The shared-padding finding, which is about a screen the agent did not touch: the preview switches to Invoices and outlines its actions.' } },
+    docs: { description: { story: 'The shared-padding finding, which is about a screen the agent did not touch: the preview switches to Invoices and outlines its actions. There is room above them, so the tag sits there, its default place.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const actions = canvasElement.querySelector('[data-finding="invoice-actions"]');
+    await waitFor(() => expect(actions).toHaveAttribute('data-tag', 'above'));
   },
 };
 

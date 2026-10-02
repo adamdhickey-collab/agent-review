@@ -53,8 +53,10 @@
 }
 
 /* The outlined element: the finding's target. The outline sits outside
-   the element with a label naming the finding, drawn from a data
-   attribute the preview screen sets. */
+   the element with a tag naming the finding, drawn from a data attribute
+   the preview screen sets. The screen also chooses where the tag goes
+   (data-tag, in preview/screens.tsx): above by default, on the element's
+   top edge when above would cover something. */
 .preview__frame [data-finding].is-target {
   position: relative;
   outline: 2px solid var(--color-danger);
@@ -79,4 +81,13 @@
   text-transform: uppercase;
   pointer-events: none;
   z-index: 3;
+}
+
+/* On the edge: centered on the element's top edge, half in the gap above
+   it and half in its own padding, for a band too close under its heading
+   for the tag to sit above. */
+.preview__frame [data-finding].is-target[data-tag='edge']::after {
+  top: 0;
+  bottom: auto;
+  transform: translateY(-50%);
 }
