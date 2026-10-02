@@ -52,19 +52,21 @@
   box-shadow: 0 0 0 var(--border-width) var(--color-border);
 }
 
-/* The outlined element: the finding's target. The outline sits outside
-   the element with a tag naming the finding, drawn from a data attribute
-   the preview screen sets. The screen also chooses where the tag goes
-   (data-tag, in preview/screens.tsx): above by default, on the element's
-   top edge when above would cover something. */
-.preview__frame [data-finding].is-target {
-  position: relative;
+/* The finding's mark: a box over the visible part of the element the
+   finding is about, drawn in the frame above the screen (mark.ts), with
+   a tag naming it. The tag goes above by default, or on the mark's top
+   edge when above would cover something; mark.ts measures and sets
+   data-tag. */
+.preview__mark {
+  position: absolute;
   outline: 2px solid var(--color-danger);
   outline-offset: var(--space-1);
   border-radius: var(--radius-sm);
+  pointer-events: none;
+  z-index: 3;
 }
 
-.preview__frame [data-finding].is-target::after {
+.preview__mark::after {
   content: 'Finding';
   position: absolute;
   bottom: calc(100% + var(--space-2)); /* above the element, so it never covers what follows it */
@@ -79,14 +81,13 @@
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  pointer-events: none;
-  z-index: 3;
+  white-space: nowrap;
 }
 
-/* On the edge: centered on the element's top edge, half in the gap above
-   it and half in its own padding, for a band too close under its heading
-   for the tag to sit above. */
-.preview__frame [data-finding].is-target[data-tag='edge']::after {
+/* On the edge: centered on the mark's top edge, half in the gap above the
+   element and half in its own padding, for a band too close under its
+   heading for the tag to sit above. */
+.preview__mark[data-tag='edge']::after {
   top: 0;
   bottom: auto;
   transform: translateY(-50%);

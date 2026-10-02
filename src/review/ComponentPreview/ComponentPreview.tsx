@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { ErrorState, LoadingState, SegmentedControl, type SegmentedOption } from '../../components';
 import type { Reproduce, Screen, Side, Viewport } from '../../data/types';
 import { PreviewScreen } from '../preview/screens';
+import { drawMark } from './mark';
 import './ComponentPreview.css';
 
 /* The affected product UI, rendered, not pictured. The frame is the
@@ -88,6 +89,38 @@ export function ComponentPreview({ changeId, reproduce, screens = ['customers', 
     return () => ro.disconnect();
   }, [screen, side, viewport, selection]);
 
+  /* The finding's element is marked from outside the screen (mark.ts),
+     before paint, and again whenever the screen under it moves: a width,
+     fonts arriving, or the reviewer selecting rows in the frame. */
+  const mark = useRef<HTMLDivElement>(null);
+  const target = reproduce?.target;
+  useLayoutEffect(() => {
+    const el = frame.current;
+    const m = mark.current;
+    if (!el || !m) return;
+    let live = true;
+    let queued = 0;
+    const draw = () => {
+      queued = 0;
+      if (live) drawMark(el, m, target);
+    };
+    const later = () => {
+      if (live && !queued) queued = requestAnimationFrame(draw);
+    };
+    draw();
+    const ro = new ResizeObserver(later);
+    ro.observe(el);
+    const mo = new MutationObserver(later);
+    mo.observe(el, { childList: true, subtree: true, characterData: true });
+    document.fonts.ready.then(later);
+    return () => {
+      live = false;
+      cancelAnimationFrame(queued);
+      ro.disconnect();
+      mo.disconnect();
+    };
+  }, [target, changeId, screen, side, viewport, selection]);
+
   return (
     <div className="preview">
       <div className="preview__bar">
@@ -124,7 +157,8 @@ export function ComponentPreview({ changeId, reproduce, screens = ['customers', 
             style={{ width: `${viewport}px`, transform: `scale(${scale})` }}
             data-target={reproduce?.target}
           >
-            <PreviewScreen changeId={changeId} screen={screen} side={side} selection={selection} target={reproduce?.target} />
+            <PreviewScreen changeId={changeId} screen={screen} side={side} selection={selection} />
+            <div ref={mark} className="preview__mark" aria-hidden="true" hidden />
           </div>
         </div>
       </div>

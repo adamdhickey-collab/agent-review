@@ -165,6 +165,7 @@ export function CustomerTable({ customers = allCustomers, density = 'default', i
       <Toolbar
         label={selecting ? 'Selected customers' : 'Customers'}
         tone={selecting ? 'accent' : 'plain'}
+        data-finding={selecting ? 'bulk-bar' : undefined}
         start={
           <>
             <h2 id="customers-title" className={selecting ? 'visually-hidden' : 'customers__title'}>

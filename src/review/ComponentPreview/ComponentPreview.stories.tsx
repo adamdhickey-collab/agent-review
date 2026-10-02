@@ -40,8 +40,8 @@ export const ReproducingOverflow: Story = {
     docs: { description: { story: 'The overflow finding: the customers screen on the after side at 768, with rows selected so the bulk-action bar shows, and the bar as the target. The width is what makes the finding visible. The bar sits flush under the table’s heading, so its tag goes on the bar’s top edge rather than above it, where it would cover the heading.' } },
   },
   play: async ({ canvasElement }) => {
-    const bar = canvasElement.querySelector('[data-finding="bulk-bar"]');
-    await waitFor(() => expect(bar).toHaveAttribute('data-tag', 'edge'));
+    const mark = canvasElement.querySelector('.preview__mark');
+    await waitFor(() => expect(mark).toHaveAttribute('data-tag', 'edge'));
   },
 };
 
@@ -51,8 +51,20 @@ export const ReproducingInvoices: Story = {
     docs: { description: { story: 'The shared-padding finding, which is about a screen the agent did not touch: the preview switches to Invoices and outlines its actions. There is room above them, so the tag sits there, its default place.' } },
   },
   play: async ({ canvasElement }) => {
-    const actions = canvasElement.querySelector('[data-finding="invoice-actions"]');
-    await waitFor(() => expect(actions).toHaveAttribute('data-tag', 'above'));
+    const mark = canvasElement.querySelector('.preview__mark');
+    await waitFor(() => expect(mark).toHaveAttribute('data-tag', 'above'));
+  },
+};
+
+export const ReproducingReplacedToolbar: Story = {
+  args: { changeId: 'rv-2042', reproduce: reproduce('f2-toolbar-replaced') },
+  parameters: {
+    docs: { description: { story: 'The control run’s finding about its selection toolbar, which takes the title toolbar’s slot at the top of the customers section. The section clips its overflow, so a mark drawn on the toolbar itself would lose three sides of its outline and the whole tag; the mark is drawn in the frame over the toolbar instead, and its tag sits above the section.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const mark = canvasElement.querySelector<HTMLElement>('.preview__mark');
+    await waitFor(() => expect(mark).toHaveAttribute('data-tag', 'above'));
+    await expect(mark).toBeVisible();
   },
 };
 
