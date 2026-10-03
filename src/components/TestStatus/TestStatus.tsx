@@ -8,21 +8,31 @@ import './TestStatus.css';
    fifth, skipped, is for a check that did not run and says so rather
    than passing.
 
-   Changed is the caution triangle, which is what a reader already takes
-   to mean "look at this", and it is a different shape from the circles
-   that say passed and failed, so the three differ by silhouette as well
-   as by colour. It was a ring with a dot in it; at 14px the dot was a
-   speck, and a reader who saw a green tick and a red cross beside an
-   amber ring could not say what the ring was telling them. */
+   Each state has its own shape, so the five differ by silhouette as well
+   as by colour: a disc passed, a triangle wants a look, an octagon stops,
+   an open arc is still running, an empty dashed ring did not run. The
+   three that are answers are solid, drawn on a 16 grid for the 16px they
+   are shown at (Icon.tsx has the drawing and the reason); the two that
+   are not answers are rings.
+
+   They were the line set's circle-check, alert and circle-x at 14px, and
+   a queue row is five of these with no word beside them. There the stroke
+   was 1px, the tick 3.5px across, and passed and failed were the same thin
+   ring in two colours. Changed had already left that family for the
+   caution triangle, which is what a reader takes to mean "look at this";
+   this finishes the move for the other four.
+
+   Running takes the accent rather than the grey it had: it is the one
+   state that is happening now, and grey is what skipped already is. */
 
 export type TestState = 'passed' | 'changed' | 'failed' | 'running' | 'skipped';
 
 const PRESENTATION: Record<TestState, { icon: IconName; word: string; tone: string }> = {
-  passed: { icon: 'circle-check', word: 'Passed', tone: 'success' },
-  changed: { icon: 'alert', word: 'Changed', tone: 'warning' },
-  failed: { icon: 'circle-x', word: 'Failed', tone: 'danger' },
-  running: { icon: 'loader', word: 'Running', tone: 'neutral' },
-  skipped: { icon: 'circle', word: 'Skipped', tone: 'neutral' },
+  passed: { icon: 'status-passed', word: 'Passed', tone: 'success' },
+  changed: { icon: 'status-changed', word: 'Changed', tone: 'warning' },
+  failed: { icon: 'status-failed', word: 'Failed', tone: 'danger' },
+  running: { icon: 'status-running', word: 'Running', tone: 'accent' },
+  skipped: { icon: 'status-skipped', word: 'Skipped', tone: 'neutral' },
 };
 
 export interface TestStatusProps extends HTMLAttributes<HTMLSpanElement> {
@@ -42,7 +52,7 @@ export function TestStatus({ state, label, iconOnly, className, ...rest }: TestS
       data-state={state}
       {...rest}
     >
-      <Icon name={p.icon} size={14} label={iconOnly ? text : undefined} />
+      <Icon name={p.icon} size={16} label={iconOnly ? text : undefined} />
       {iconOnly ? null : <span>{text}</span>}
     </span>
   );

@@ -52,7 +52,7 @@ export const Outline: Story = {
 export const WithIcon: Story = {
   render: () => (
     <div style={row}>
-      <Badge tone="success" icon="circle-check">Passed</Badge>
+      <Badge tone="success" icon="status-passed">Passed</Badge>
       <Badge tone="warning" icon="alert">3 changes</Badge>
       <Badge tone="danger" icon="alert">1 regression</Badge>
       <Badge tone="neutral" icon="git-branch">feature/bulk-actions</Badge>

@@ -64,7 +64,7 @@ export function FindingList({ findings, selectedId, onSelect, included, onInclud
                   onClick={() => onSelect(open ? undefined : f.id)}
                 >
                   <span className="finding__marker" aria-hidden="true">
-                    <Icon name={f.severity === 'blocking' ? 'circle-x' : f.severity === 'decision' ? 'alert' : 'info'} size={14} />
+                    <Icon name={f.severity === 'blocking' ? 'status-failed' : f.severity === 'decision' ? 'status-changed' : 'status-note'} size={16} />
                   </span>
                   <span className="finding__text">
                     <span className="finding__title">{f.title}</span>

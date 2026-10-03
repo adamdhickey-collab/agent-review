@@ -54,9 +54,14 @@
   outline-offset: 0;
 }
 
+/* The marker is centred on the title's first line, and takes that from the
+   line itself: a box one title line tall, the icon in its middle. It was a
+   1px nudge that suited the 14px icon it was written for and sat the 16px
+   one a pixel low; a height derived from the type holds at any icon size. */
 .finding__marker {
   display: inline-flex;
-  margin-top: 1px;
+  align-items: center;
+  height: calc(var(--text-md) * var(--leading-tight));
   color: var(--color-text-muted);
 }
 

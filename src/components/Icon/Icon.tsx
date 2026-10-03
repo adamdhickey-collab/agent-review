@@ -3,7 +3,11 @@ import type { SVGProps } from 'react';
 /* The icon set, drawn inline so an icon is one element with no request
    behind it. 16 on a 24 grid, 1.75 stroke, currentColor. Every icon is
    decorative by default (aria-hidden); a component that needs the icon to
-   carry meaning gives it a `label`, which renders a <title>. */
+   carry meaning gives it a `label`, which renders a <title>.
+
+   Two drawings live here. PATHS is the line set, for everything that is
+   an action or an object. STATUS, below it, is the handful of marks that
+   say how something went, and those are drawn solid, on their own grid. */
 
 const PATHS = {
   check: 'M20 6 9 17l-5-5',
@@ -47,9 +51,53 @@ const PATHS = {
   undo: 'M3 7v6h6M3 13a9 9 0 1 0 3-6.7L3 9',
 } as const;
 
-export type IconName = keyof typeof PATHS;
+/* The status marks: what a check answered, and how much a finding matters.
+   They are read at 14 and 16px, often with no word beside them (a queue
+   row is five of them in a line), and the line set is the wrong drawing
+   for that. A 24-grid outline at 14px puts a 1.75 stroke down as 1.02px
+   and the tick inside its ring as 3.5px across; passed and failed are then
+   the same thin ring, told apart by a speck and a colour.
 
-export const ICON_NAMES = Object.keys(PATHS) as IconName[];
+   So these are drawn for the size they are used at: a 16 grid, a solid
+   shape in the state's ink, and the mark cut out of it, 1.7 wide. The cut
+   is a real hole (one path, even-odd), not a white mark, so it takes the
+   colour of whatever the icon sits on: a selected row, a tinted badge.
+
+   One shape per state, so the state survives without its colour: a disc
+   passed, a triangle wants a look, an octagon stops, an open arc is still
+   running, an empty dashed ring did not run. A note is a disc with an i.
+   The outline circle-check, circle-x, alert and info stay in the line set
+   for the places that draw them large (an empty state, a region's error). */
+const DISC = 'M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Z';
+const TRIANGLE = 'M9.04 2.3l5.9 10.1a1.2 1.2 0 0 1-1.04 1.8H2.1a1.2 1.2 0 0 1-1.04-1.8l5.9-10.1a1.2 1.2 0 0 1 2.08 0Z';
+const OCTAGON =
+  'M5.5 1.1h5a.6.6 0 0 1 .42.18l3.8 3.8a.6.6 0 0 1 .18.42v5a.6.6 0 0 1-.18.42l-3.8 3.8a.6.6 0 0 1-.42.18h-5a.6.6 0 0 1-.42-.18l-3.8-3.8a.6.6 0 0 1-.18-.42v-5a.6.6 0 0 1 .18-.42l3.8-3.8a.6.6 0 0 1 .42-.18Z';
+const CUT_CHECK = 'M4.15 8.95 6.35 11.15a.85.85 0 0 0 1.22-.02l4.3-4.6a.85.85 0 0 0-1.24-1.16L6.93 9.33 5.35 7.75a.85.85 0 0 0-1.2 1.2Z';
+const CUT_BANG = 'M7.15 6.1a.85.85 0 0 1 1.7 0v3.3a.85.85 0 0 1-1.7 0ZM8 10.8a.95.95 0 1 1 0 1.9a.95.95 0 1 1 0-1.9Z';
+const CUT_CROSS =
+  'M8 6.8 6.35 5.15a.85.85 0 0 0-1.2 1.2L6.8 8 5.15 9.65a.85.85 0 0 0 1.2 1.2L8 9.2l1.65 1.65a.85.85 0 0 0 1.2-1.2L9.2 8l1.65-1.65a.85.85 0 0 0-1.2-1.2Z';
+const CUT_INFO = 'M8 3.95a.95.95 0 1 1 0 1.9a.95.95 0 1 1 0-1.9ZM7.15 7.6a.85.85 0 0 1 1.7 0v3.5a.85.85 0 0 1-1.7 0Z';
+
+const STATUS_SOLID = {
+  'status-passed': DISC + CUT_CHECK,
+  'status-changed': TRIANGLE + CUT_BANG,
+  'status-failed': OCTAGON + CUT_CROSS,
+  'status-note': DISC + CUT_INFO,
+} as const;
+
+/* The two states that are not an answer are not solid: they are rings,
+   which is the difference a reader should see first. */
+const STATUS_RING = ['status-running', 'status-skipped'] as const;
+
+type SolidName = keyof typeof STATUS_SOLID;
+type RingName = (typeof STATUS_RING)[number];
+
+export type IconName = keyof typeof PATHS | SolidName | RingName;
+
+export const ICON_NAMES = [...Object.keys(PATHS), ...Object.keys(STATUS_SOLID), ...STATUS_RING] as IconName[];
+
+const isSolid = (name: IconName): name is SolidName => name in STATUS_SOLID;
+const isRing = (name: IconName): name is RingName => (STATUS_RING as readonly string[]).includes(name);
 
 export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'name'> {
   name: IconName;
@@ -59,24 +107,55 @@ export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'name'> {
 }
 
 export function Icon({ name, label, size = 16, className, ...rest }: IconProps) {
+  const spins = name === 'loader' || name === 'status-running';
+  const shared = {
+    width: size,
+    height: size,
+    'aria-hidden': label ? undefined : true,
+    role: label ? 'img' : undefined,
+    focusable: 'false' as const,
+    className: ['icon', spins ? 'icon--spin' : '', className].filter(Boolean).join(' '),
+    'data-icon': name,
+    ...rest,
+  };
+  const title = label ? <title>{label}</title> : null;
+
+  if (isSolid(name)) {
+    return (
+      <svg viewBox="0 0 16 16" fill="currentColor" {...shared}>
+        {title}
+        <path fillRule="evenodd" d={STATUS_SOLID[name]} />
+      </svg>
+    );
+  }
+
+  if (isRing(name)) {
+    return (
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeLinecap="round" {...shared}>
+        {title}
+        {name === 'status-running' ? (
+          <>
+            <circle cx={8} cy={8} r={6} strokeWidth={2} opacity={0.25} />
+            <path d="M8 2a6 6 0 0 1 6 6" strokeWidth={2} />
+          </>
+        ) : (
+          <circle cx={8} cy={8} r={6} strokeWidth={1.7} strokeDasharray="2.55 2.16" />
+        )}
+      </svg>
+    );
+  }
+
   return (
     <svg
       viewBox="0 0 24 24"
-      width={size}
-      height={size}
       fill="none"
       stroke="currentColor"
       strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden={label ? undefined : true}
-      role={label ? 'img' : undefined}
-      focusable="false"
-      className={['icon', name === 'loader' ? 'icon--spin' : '', className].filter(Boolean).join(' ')}
-      data-icon={name}
-      {...rest}
+      {...shared}
     >
-      {label ? <title>{label}</title> : null}
+      {title}
       <path d={PATHS[name]} />
     </svg>
   );

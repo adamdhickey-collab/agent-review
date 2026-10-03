@@ -12,6 +12,10 @@
   color: var(--test-ink, var(--color-text-muted));
 }
 
+.test-status--accent {
+  --test-ink: var(--color-accent);
+}
+
 .test-status--success {
   --test-ink: var(--color-success);
 }

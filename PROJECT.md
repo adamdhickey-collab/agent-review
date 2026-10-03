@@ -169,12 +169,12 @@ The system, `src/components/` (13):
 
 | Component | For | Stories |
 | --- | --- | --- |
-| Icon | The inline icon set, 1.75 stroke, decorative unless named | in IconButton's AllIcons |
+| Icon | The inline icon set, decorative unless named: a line set at a 1.75 stroke, and six status marks drawn solid on a 16 grid | in IconButton's AllIcons |
 | Button | The one button: primary, secondary, danger, ghost; default and compact; loading; disabled | 10 |
 | IconButton | An icon-only button whose label is its name and its tooltip, on hover and on focus | 7 |
 | Badge | A small label with a tone, never the only place a state is said | 5 |
 | StatusIndicator | A dot and a word; live pulses | 4 |
-| TestStatus | A check's result: passed, changed, failed, running, skipped | 8 |
+| TestStatus | A check's result: passed, changed, failed, running, skipped, each its own shape | 8 |
 | Checkbox | A native checkbox with a drawn box; indeterminate is real | 7 |
 | SegmentedControl | One choice among a few, all visible; a radiogroup with arrow keys | 4 |
 | Tabs | The WAI tabs pattern, with counts | 4 |
