@@ -33,7 +33,7 @@ export function DecisionBar({ change, onAccept, onReject, onReturn, onUndo, canU
     const d = change.decision;
     return (
       <div className="decision decision--made" data-action={d.action} role="status">
-        <Icon name={d.action === 'accept' ? 'circle-check' : d.action === 'reject' ? 'circle-x' : 'corner-up-left'} size={16} />
+        <Icon name={d.action === 'accept' ? 'status-passed' : d.action === 'reject' ? 'status-failed' : 'corner-up-left'} size={16} />
         <span className="decision__record">
           <strong>{REVIEW_STATE_LABEL[change.state]}</strong> by {d.by.name}
           {d.message ? <span className="decision__message">“{d.message.split('\n')[0]}”</span> : null}
@@ -100,7 +100,7 @@ export function DecisionBar({ change, onAccept, onReject, onReturn, onUndo, canU
         <>
           {blocking ? (
             <span className="decision__reason-text">
-              <Icon name="circle-x" size={14} />
+              <Icon name="status-failed" size={14} />
               {blocking} blocking finding{blocking === 1 ? '' : 's'}: cannot accept as is
             </span>
           ) : null}
