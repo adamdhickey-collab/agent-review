@@ -447,7 +447,8 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
 
       const next = { ...s, ...tick, rules, work: s.work.map((x) => (x.id === w.id ? done : x)) };
       const { state, settled, asked } = settle(next, at);
-      const lead = option.leaves ? 'Left as written.' : q.kind === 'scope' ? 'Allowed once, made and merged.' : `Answered${ruleNote ? ', and made a rule' : ''}.`;
+      const ruled = ruleNote === ' You made it a rule.' ? ', and made a rule' : ruleNote ? ', and added the case to your rule' : '';
+      const lead = option.leaves ? 'Left as written.' : q.kind === 'scope' ? 'Allowed once, made and merged.' : `Answered${ruled}.`;
       const quiet = state.work.some((x) => x.status === 'asking') ? '' : 'Nothing else needs you.';
       return { ...state, notice: [lead, tell(settled, asked), quiet].filter(Boolean).join(' ') };
     }
