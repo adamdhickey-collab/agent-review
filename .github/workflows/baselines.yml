@@ -9,6 +9,10 @@
 #
 # Re-run it when a screen changes on purpose, and commit the result with
 # the change that moved it, so the baseline and the reason travel together.
+#
+# It records ALL of them (--update-snapshots=all), not only the ones that fail:
+# a change small against a whole page, like an icon, passes within the tolerance
+# and a recorder that skips what passes leaves the baseline showing the old one.
 name: record baselines
 
 on:
@@ -25,7 +29,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npx playwright test --update-snapshots
+      - run: npx playwright test --update-snapshots=all
       - uses: actions/upload-artifact@v4
         with:
           name: linux-baselines
