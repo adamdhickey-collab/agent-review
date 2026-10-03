@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 import type { CSSProperties } from 'react';
 import { TestStatus } from './TestStatus';
 
@@ -23,7 +24,16 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Passed: Story = { args: { state: 'passed' } };
-export const Changed: Story = { args: { state: 'changed' } };
+export const Changed: Story = {
+  args: { state: 'changed' },
+  parameters: {
+    docs: { description: { story: 'The check found something a person has to look at. The caution triangle, in the warning ink, with the word beside it. It is not the ring with a dot it used to be: a reader could not tell what that was saying, and it is the one state that is neither good nor bad news.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const icon = canvasElement.querySelector('.test-status svg');
+    await expect(icon).toHaveAttribute('data-icon', 'alert');
+  },
+};
 export const Failed: Story = { args: { state: 'failed' } };
 export const Running: Story = { args: { state: 'running' } };
 export const Skipped: Story = { args: { state: 'skipped' } };

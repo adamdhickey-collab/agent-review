@@ -6,13 +6,20 @@ import './TestStatus.css';
    that mean four different things to a reviewer: passed needs nothing,
    changed needs a look, failed blocks, running is not yet an answer. A
    fifth, skipped, is for a check that did not run and says so rather
-   than passing. */
+   than passing.
+
+   Changed is the caution triangle, which is what a reader already takes
+   to mean "look at this", and it is a different shape from the circles
+   that say passed and failed, so the three differ by silhouette as well
+   as by colour. It was a ring with a dot in it; at 14px the dot was a
+   speck, and a reader who saw a green tick and a red cross beside an
+   amber ring could not say what the ring was telling them. */
 
 export type TestState = 'passed' | 'changed' | 'failed' | 'running' | 'skipped';
 
 const PRESENTATION: Record<TestState, { icon: IconName; word: string; tone: string }> = {
   passed: { icon: 'circle-check', word: 'Passed', tone: 'success' },
-  changed: { icon: 'circle-dot', word: 'Changed', tone: 'warning' },
+  changed: { icon: 'alert', word: 'Changed', tone: 'warning' },
   failed: { icon: 'circle-x', word: 'Failed', tone: 'danger' },
   running: { icon: 'loader', word: 'Running', tone: 'neutral' },
   skipped: { icon: 'circle', word: 'Skipped', tone: 'neutral' },
