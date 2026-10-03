@@ -20,7 +20,13 @@ const NAME = 'Agent Review';
 export function useRouteEffects(route: Route) {
   const store = useStore();
   const screen =
-    route.name === 'queue' ? 'Review queue' : route.name === 'change' ? (store.find(route.id)?.title ?? 'No change with that id') : 'Not found';
+    route.name === 'delegation'
+      ? 'Delegated work'
+      : route.name === 'queue'
+        ? 'Review queue'
+        : route.name === 'change'
+          ? (store.find(route.id)?.title ?? 'No change with that id')
+          : 'Not found';
 
   useEffect(() => {
     document.title = `${screen} · ${NAME}`;

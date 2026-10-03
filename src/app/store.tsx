@@ -1,6 +1,8 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useReducer, useState, type ReactNode } from 'react';
 import { queue as initialQueue } from '../data/scenario';
 import type { Change, Decision } from '../data/types';
+import { initialDelegation } from '../data/billing';
+import { reduce, type Action, type DelegationState } from '../data/delegation';
 
 /* The review's state: the queue, and the decisions made in this session.
    In memory, on purpose. A real Agent Review would write a decision to
@@ -8,7 +10,12 @@ import type { Change, Decision } from '../data/types';
    shape of what it keeps is what the write would carry.
 
    Every decision is undoable for a moment (the Undo in the banner), which
-   is rule 6 in skills/ui-quality/SKILL.md applied to the product itself. */
+   is rule 6 in skills/ui-quality/SKILL.md applied to the product itself.
+
+   The delegated work is a second piece of state, moved only by `reduce`
+   in data/delegation.ts, so the screen and the stories drive the same
+   machine. It starts from the billing run each time the page loads, and
+   Reset puts it back there without a reload. */
 
 interface Store {
   changes: Change[];
@@ -17,13 +24,19 @@ interface Store {
   undo(id: string): void;
   /** The last decision made, for the banner. */
   last?: { id: string; previous: Change; decision: Decision };
+  delegation: DelegationState;
+  delegate(action: Action): void;
+  /** Back to the start of the run. */
+  resetDelegation(): void;
 }
 
 const StoreContext = createContext<Store | null>(null);
 
-export function StoreProvider({ children }: { children: ReactNode }) {
+export function StoreProvider({ children, delegation: start }: { children: ReactNode; /** Where the delegated work starts, for a story; the billing run by default. */ delegation?: DelegationState }) {
   const [changes, setChanges] = useState<Change[]>(initialQueue);
   const [last, setLast] = useState<Store['last']>();
+  const [delegation, delegate] = useReducer(reduce, start ?? initialDelegation());
+  const resetDelegation = useCallback(() => delegate({ type: 'reset', to: start ?? initialDelegation() }), [start]);
 
   const decide = useCallback((id: string, decision: Decision) => {
     setChanges((cs) => {
@@ -44,8 +57,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<Store>(
-    () => ({ changes, find: (id) => changes.find((c) => c.id === id), decide, undo, last }),
-    [changes, decide, undo, last],
+    () => ({ changes, find: (id) => changes.find((c) => c.id === id), decide, undo, last, delegation, delegate, resetDelegation }),
+    [changes, decide, undo, last, delegation, resetDelegation],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

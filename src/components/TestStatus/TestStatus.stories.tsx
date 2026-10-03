@@ -14,7 +14,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The result of a check, as an icon with a name and a word. The five states are five different things a reviewer has to do: passed needs nothing, changed needs a look, failed blocks, running is not an answer yet, and skipped is a check that did not run and says so rather than passing quietly. Each has its own shape as well as its own colour (a disc, a triangle, an octagon, an open arc, a dashed ring), and the three that are answers are drawn solid at 16px, because a queue row is five of these with no word beside them. The label can be replaced with what the check found ("3 changes") when the count is the news; the icon keeps the state. Icon-only keeps the word as the icon\'s accessible name.',
+          'The result of a check, as an icon with a name and a word. The six states are six different things a reviewer has to do: passed needs nothing, changed needs a look, failed blocks, running is not an answer yet, skipped is a check that did not run and says so rather than passing quietly, and inconclusive is a check that ran and could not answer. Each has its own shape as well as its own colour (a disc, a triangle, an octagon, an open arc, a dashed ring, a whole ring with a question mark), and the three that are answers are drawn solid at 16px, because a queue row is five of these with no word beside them. The label can be replaced with what the check found ("3 changes") when the count is the news; the icon keeps the state. Icon-only keeps the word as the icon\'s accessible name.',
       },
     },
   },
@@ -48,6 +48,18 @@ export const Skipped: Story = {
   },
 };
 
+export const Inconclusive: Story = {
+  args: { state: 'inconclusive' },
+  parameters: {
+    docs: { description: { story: 'The check ran and could not answer, as when axe cannot tell what is behind a label and so cannot measure its contrast. A whole ring with a question mark, in the muted ink: a ring because it is not an answer, and whole, unlike skipped, because the check did run. It is never shown as a pass.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const icon = canvasElement.querySelector('.test-status svg');
+    await expect(icon).toHaveAttribute('data-icon', 'status-inconclusive');
+    await expect(canvasElement).toHaveTextContent('Inconclusive');
+  },
+};
+
 export const WithLabels: Story = {
   render: () => (
     <div style={row}>
@@ -55,6 +67,7 @@ export const WithLabels: Story = {
       <TestStatus state="failed" label="1 regression" />
       <TestStatus state="passed" label="12 passed" />
       <TestStatus state="skipped" label="Not run" />
+      <TestStatus state="inconclusive" label="Inconclusive on 1 of 3" />
     </div>
   ),
 };
@@ -68,6 +81,7 @@ export const IconOnly: Story = {
         <TestStatus state="failed" iconOnly />
         <TestStatus state="running" iconOnly />
         <TestStatus state="skipped" iconOnly />
+        <TestStatus state="inconclusive" iconOnly />
       </div>
       <div
         style={{ ...row, gap: 'var(--space-2)', padding: 'var(--space-2) var(--space-3)', background: 'var(--color-accent-subtle)' }}
@@ -85,7 +99,7 @@ export const IconOnly: Story = {
     docs: {
       description: {
         story:
-          'The word is gone from the screen and lives in the SVG\'s title, so the icon is an image with a name rather than a decoration. This is where the shapes do the work: with no word beside them the five have to differ by outline, and the three answers by a solid one. The second row is a queue row\'s five checks on the selected tint: the mark inside each solid shape is a hole, not a white mark, so it takes the row\'s colour and the icon reads as one piece on any ground.',
+          'The word is gone from the screen and lives in the SVG\'s title, so the icon is an image with a name rather than a decoration. This is where the shapes do the work: with no word beside them the six have to differ by outline, and the three answers by a solid one. The second row is a queue row\'s five checks on the selected tint: the mark inside each solid shape is a hole, not a white mark, so it takes the row\'s colour and the icon reads as one piece on any ground.',
       },
     },
   },
@@ -93,10 +107,10 @@ export const IconOnly: Story = {
     const icons = [...canvasElement.querySelectorAll('[data-ground="plain"] .test-status svg')];
     /* One drawing per state, and each one names itself. */
     const names = icons.map((i) => i.getAttribute('data-icon'));
-    await expect(new Set(names).size).toBe(5);
-    await expect(icons.map((i) => i.querySelector('title')?.textContent)).toEqual(['Passed', 'Changed', 'Failed', 'Running', 'Skipped']);
-    /* The three answers are filled shapes; the two that are not are rings. */
-    await expect(icons.map((i) => i.getAttribute('fill'))).toEqual(['currentColor', 'currentColor', 'currentColor', 'none', 'none']);
+    await expect(new Set(names).size).toBe(6);
+    await expect(icons.map((i) => i.querySelector('title')?.textContent)).toEqual(['Passed', 'Changed', 'Failed', 'Running', 'Skipped', 'Inconclusive']);
+    /* The three answers are filled shapes; the three that are not are rings. */
+    await expect(icons.map((i) => i.getAttribute('fill'))).toEqual(['currentColor', 'currentColor', 'currentColor', 'none', 'none', 'none']);
     for (const icon of icons) await expect(icon).toHaveAttribute('width', '16');
     /* The cut is a hole: one even-odd path and nothing painted over it. */
     const onTint = canvasElement.querySelectorAll('[data-ground="selected"] svg[fill="currentColor"]');

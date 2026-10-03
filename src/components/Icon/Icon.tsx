@@ -85,9 +85,11 @@ const STATUS_SOLID = {
   'status-note': DISC + CUT_INFO,
 } as const;
 
-/* The two states that are not an answer are not solid: they are rings,
-   which is the difference a reader should see first. */
-const STATUS_RING = ['status-running', 'status-skipped'] as const;
+/* The three states that are not an answer are not solid: they are rings,
+   which is the difference a reader should see first. Inconclusive is the
+   one that ran: a whole ring, with a question mark where an answer would
+   be, against skipped's dashed and empty one. */
+const STATUS_RING = ['status-running', 'status-skipped', 'status-inconclusive'] as const;
 
 type SolidName = keyof typeof STATUS_SOLID;
 type RingName = (typeof STATUS_RING)[number];
@@ -137,6 +139,11 @@ export function Icon({ name, label, size = 16, className, ...rest }: IconProps) 
           <>
             <circle cx={8} cy={8} r={6} strokeWidth={2} opacity={0.25} />
             <path d="M8 2a6 6 0 0 1 6 6" strokeWidth={2} />
+          </>
+        ) : name === 'status-inconclusive' ? (
+          <>
+            <circle cx={8} cy={8} r={6} strokeWidth={1.7} />
+            <path d="M6.3 6.4a1.75 1.75 0 1 1 2.5 1.55c-.5.25-.8.55-.8 1.1v.2M8 11.15h.01" strokeWidth={1.5} strokeLinejoin="round" />
           </>
         ) : (
           <circle cx={8} cy={8} r={6} strokeWidth={1.7} strokeDasharray="2.55 2.16" />

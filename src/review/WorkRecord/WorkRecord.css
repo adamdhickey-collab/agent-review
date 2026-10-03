@@ -1,0 +1,193 @@
+/* A record is a row in the completed work: the Disclosure's hairline above
+   it, the summary as the row. */
+.record > .disclosure__summary {
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.record > .disclosure__summary .disclosure__chevron {
+  margin-top: calc((var(--text-md) * var(--leading-tight) - 14px) / 2); /* centred on the title's first line */
+}
+
+.record > .disclosure__summary .disclosure__title {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.record__summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.record__title {
+  line-height: var(--leading-tight);
+}
+
+.record__where {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+}
+
+.record__meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.record__marks {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+.record[data-status='reverted'] .record__title,
+.record[data-status='left'] .record__title {
+  color: var(--color-text-secondary);
+}
+
+.record > .disclosure__body {
+  padding: 0 var(--space-4) var(--space-4) calc(var(--space-4) + 14px + var(--space-2));
+}
+
+/* A record's lines are short, so the diff's rows run the width of the
+   file's frame rather than stopping where the text does. The table stays a
+   block, so a long line still scrolls. */
+.record .diff__table > tbody {
+  display: table;
+  min-width: 100%;
+}
+
+.record__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.record__part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.record__label {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.record__bounds {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.record__bounds li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.record__n {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: calc(var(--text-md) * var(--leading-body));
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.record__checks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.record__checks li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.record__earlier .test-status {
+  white-space: normal;
+}
+
+.record__unchecked {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  line-height: var(--leading-body);
+}
+
+.record__unchecked strong {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.record__history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.record__history li {
+  display: grid;
+  grid-template-columns: 3rem 6.5rem minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.record__history time {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.record__who {
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+}
+
+.record__undo {
+  align-items: flex-start;
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+@media (pointer: coarse) {
+  .record > .disclosure__summary {
+    min-height: var(--control-height-touch);
+  }
+}
+
+@media (max-width: 40rem) {
+  .record > .disclosure__summary {
+    padding: var(--space-3);
+  }
+
+  /* The marks drop under the title, and line up with it, not with the chevron. */
+  .record > .disclosure__summary .disclosure__meta {
+    flex-basis: 100%;
+    padding-left: calc(14px + var(--space-2));
+  }
+
+  .record > .disclosure__body {
+    padding: 0 var(--space-3) var(--space-3);
+  }
+
+  .record__history li {
+    grid-template-columns: 3rem minmax(0, 1fr);
+  }
+
+  .record__what {
+    grid-column: 2;
+  }
+}

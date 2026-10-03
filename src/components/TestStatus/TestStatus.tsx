@@ -23,9 +23,18 @@ import './TestStatus.css';
    this finishes the move for the other four.
 
    Running takes the accent rather than the grey it had: it is the one
-   state that is happening now, and grey is what skipped already is. */
+   state that is happening now, and grey is what skipped already is.
 
-export type TestState = 'passed' | 'changed' | 'failed' | 'running' | 'skipped';
+   Inconclusive is a check that ran and could not answer: axe reporting a
+   contrast it cannot measure because it cannot see what is behind the text.
+   It is not a pass, and the delegated work (src/review/DelegationScreen)
+   must not be able to say "checked" about it as if it were; it is not
+   skipped either, because the check did run. A whole ring with a question
+   mark in it, in the muted ink: a ring because it is not an answer, whole
+   because something was measured. Added with that screen, as a new value of
+   the prop with its own story; the five states before it are unchanged. */
+
+export type TestState = 'passed' | 'changed' | 'failed' | 'running' | 'skipped' | 'inconclusive';
 
 const PRESENTATION: Record<TestState, { icon: IconName; word: string; tone: string }> = {
   passed: { icon: 'status-passed', word: 'Passed', tone: 'success' },
@@ -33,6 +42,7 @@ const PRESENTATION: Record<TestState, { icon: IconName; word: string; tone: stri
   failed: { icon: 'status-failed', word: 'Failed', tone: 'danger' },
   running: { icon: 'status-running', word: 'Running', tone: 'accent' },
   skipped: { icon: 'status-skipped', word: 'Skipped', tone: 'neutral' },
+  inconclusive: { icon: 'status-inconclusive', word: 'Inconclusive', tone: 'neutral' },
 };
 
 export interface TestStatusProps extends HTMLAttributes<HTMLSpanElement> {

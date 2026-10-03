@@ -1,6 +1,6 @@
 # Agent Review
 
-Review UI written by coding agents before it ships.
+Delegate UI work to a coding agent, and know what came back.
 
 A coding agent can change a product's interface in minutes. The harder
 question is whether the result inherits the decisions the team already
@@ -11,6 +11,13 @@ touching it, a controlled experiment where Claude Code was asked to add a
 feature inside that system, the validation that caught where it drifted,
 and Agent Review, the tool a person uses to inspect the consequences and
 send a precise correction back.
+
+Its second iteration asks what happens as agents need less supervision.
+The product now opens on delegated work: an account of what an agent did
+inside written boundaries, the few decisions that still need a person and
+why, a way to turn an answer into a scoped rule that can be edited or
+revoked, and completed work that can be inspected and reverted. That run
+is simulated, and says so; the experiment's review queue is at `#/queue`.
 
 - The product: https://adamdhickey-collab.github.io/agent-review/
 - The Storybook: https://adamdhickey-collab.github.io/agent-review/storybook/
@@ -24,8 +31,8 @@ src/tokens/        tokens.css, the single token layer; tokens.ts, its names, typ
 src/components/    the system: Button, IconButton, Badge, StatusIndicator, TestStatus,
                    Checkbox, SegmentedControl, Tabs, Disclosure, Table, Toolbar, States
 src/product/       Relay, the product under review: the customer table, the invoice list
-src/review/        Agent Review: the queue, the change, the findings, the preview, the decision
-src/data/          the review scenario, filled from the experiment
+src/review/        Agent Review: the delegated work, the queue, the change, the findings, the preview, the decision
+src/data/          the review scenario, filled from the experiment; the delegated run, simulated
 skills/ui-quality/ the twelve rules an agent works inside, each with its check
 scripts/           the token lint
 tests/             Playwright: visual baselines, the 768 overflow check and the phone check
@@ -67,8 +74,10 @@ and run them. The experiment record says which of this the agent used.
 
 ## What it is not
 
-A static scenario, not an integration. Agent Review reads one change from
-`src/data/scenario.ts`; a real deployment would build that object from a
+A static scenario, not an integration. The delegated run in
+`src/data/billing.ts` is written, not recorded: no model runs behind it and
+no rule is learned, only made by the person and applied as written. The
+review reads one change from `src/data/scenario.ts`; a real deployment would build that object from a
 pull request, its CI run and the Storybook test output, and the shape in
 `src/data/types.ts` is what that integration would produce. It is also
 not a product of, or affiliated with, any visual-testing service; the

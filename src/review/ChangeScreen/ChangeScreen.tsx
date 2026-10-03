@@ -60,9 +60,9 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
     <div className="change">
       <header className="change__header">
         <div className="change__heading">
-          <a href="#/" className="change__back">
+          <a href="#/queue" className="change__back">
             <Icon name="arrow-left" size={14} />
-            Queue
+            Reviews
           </a>
           <h1 className="change__title" tabIndex={-1}>
             {change.title}
