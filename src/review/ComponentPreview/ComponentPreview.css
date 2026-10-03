@@ -81,10 +81,15 @@
    finding is about, drawn in the frame above the screen (mark.ts), with
    a tag naming it. The tag goes above by default, or on the mark's top
    edge when above would cover something; mark.ts measures and sets
-   data-tag. */
+   data-tag. It is drawn in the ink, not in danger: the elements a finding
+   is about are often the destructive action itself, a red button, and a
+   red mark on a red button reads as the button being broken rather than
+   flagged. Red is kept for destructive actions. The ink is 17.2:1 on a
+   table's white surface and 14.9:1 on the accent-subtle selection bar,
+   over the 3:1 a non-text mark needs; the tag's white on it is 17.2:1. */
 .preview__mark {
   position: absolute;
-  outline: 2px solid var(--color-danger);
+  outline: 2px solid var(--color-text);
   outline-offset: var(--space-1);
   border-radius: var(--radius-sm);
   pointer-events: none;
@@ -98,14 +103,12 @@
   left: calc(var(--space-1) * -1);
   padding: 2px var(--space-2);
   border-radius: var(--radius-sm);
-  background: var(--color-danger);
+  background: var(--color-text);
   color: var(--color-text-on-accent);
   font-family: var(--font-ui);
   font-size: var(--text-xs);
   font-weight: var(--weight-medium);
   line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
   white-space: nowrap;
 }
 

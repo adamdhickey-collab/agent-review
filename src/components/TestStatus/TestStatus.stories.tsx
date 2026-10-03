@@ -121,7 +121,7 @@ export const Summary: Story = {
     <ul style={{ ...row, gap: 'var(--space-6)' }}>
       {SUMMARY.map((s) => (
         <li key={s.check} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
-          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--tracking-caps)' }}>{s.check}</span>
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>{s.check}</span>
           <TestStatus state={s.state} label={s.label} />
         </li>
       ))}

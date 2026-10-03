@@ -16,7 +16,7 @@ function useTokenValues(names: readonly TokenName[]): Record<string, string> {
 
 const name: CSSProperties = { fontSize: 'var(--text-sm)' };
 const value: CSSProperties = { fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' };
-const heading: CSSProperties = { fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-medium)', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 'var(--tracking-caps)', marginBottom: 'var(--space-2)' };
+const heading: CSSProperties = { fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-medium)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-2)' };
 const section: CSSProperties = { display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' };
 
 const COLOR_GROUPS: TokenGroup[] = ['ground', 'line', 'ink', 'accent', 'meaning', 'diff'];
