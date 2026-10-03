@@ -12,7 +12,6 @@ export const TOKEN_GROUPS = {
     '--text-xs', '--text-sm', '--text-md', '--text-lg', '--text-xl',
     '--leading-tight', '--leading-ui', '--leading-body',
     '--weight-regular', '--weight-medium', '--weight-semibold',
-    '--tracking-caps',
   ],
   space: ['--space-1', '--space-2', '--space-3', '--space-4', '--space-5', '--space-6', '--space-8'],
   control: ['--control-height', '--control-height-compact', '--control-height-touch', '--control-padding-x', '--control-padding-x-compact'],
