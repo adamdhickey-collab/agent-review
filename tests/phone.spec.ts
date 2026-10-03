@@ -12,7 +12,8 @@ import { devices, expect, test, type Page } from '@playwright/test';
       a phone innerWidth GROWS with the overflow, so a page 353px wide on a
       320px screen reports 353 against 353 and passes. (This test did exactly
       that until a seeded overflow found it.)
-   2. The chrome's controls are a fingertip tall. The preview frame is left
+   2. The chrome's controls are a fingertip tall, on the delegated work as
+      on the review. The preview frame is left
       out: it shows the product as the checks measured it. Three things are
       allowed under 44px, and each is written here rather than skipped: a
       segmented control's options, which are 38px inside a 44px track; the
@@ -43,7 +44,8 @@ for (const width of WIDTHS) {
     test.use({ ...phone, viewport: { width, height: 800 }, deviceScaleFactor: 1 });
 
     const SCREENS: [string, string][] = [
-      ['the queue', '#/'],
+      ['the delegated work', '#/'],
+      ['the queue', '#/queue'],
       ['a change', '#/changes/rv-2041'],
       ['a finding open, with the preview at its width', '#/changes/rv-2043/findings/f3-overflow'],
     ];
@@ -60,7 +62,10 @@ for (const width of WIDTHS) {
           ({ floor, allowed }) => {
             const out: string[] = [];
             for (const el of document.querySelectorAll<HTMLElement>('a[href], button, [role="radio"], [role="tab"], input[type="checkbox"], [tabindex]:not([tabindex="-1"])')) {
-              if (el.closest('.preview__frame, .visually-hidden, .diff__finding') || el.matches(allowed)) continue;
+              /* Inside a closed disclosure is not on the screen: Chrome hides it with
+                 content-visibility rather than display: none, so it still has a box,
+                 but it cannot be reached or pressed until the disclosure opens. */
+              if (el.closest('.preview__frame, .visually-hidden, .diff__finding, details:not([open]) > :not(summary)') || el.matches(allowed)) continue;
               /* a checkbox input is a transparent box over its label, and the label is the target */
               const target = el.matches('input[type="checkbox"]') ? (el.closest('label') ?? el) : el;
               const r = target.getBoundingClientRect();
@@ -100,6 +105,27 @@ for (const width of WIDTHS) {
     });
   });
 }
+
+/* The delegated work with an answer chosen and the rule box checked: the
+   confirmation, the rule as it will read, and Apply. The one state on that
+   screen that adds controls, so the one measured beyond the first load. */
+test.describe('the delegated work on a phone, answering', () => {
+  test.use({ ...phone, viewport: { width: 320, height: 800 }, deviceScaleFactor: 1 });
+
+  test('the confirmation and the rule fit, and their controls are a fingertip', async ({ page }) => {
+    await open(page, '#/');
+    await page.getByRole('button', { name: 'Use the diff pair' }).click();
+    await page.getByText('Also use this answer for similar cases').click();
+    await expect(page.getByText('The rule, as it will read')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    for (const name of ['Cancel', 'Apply']) {
+      const box = await page.getByRole('button', { name, exact: true }).boundingBox();
+      expect(box!.height, name).toBeGreaterThanOrEqual(FLOOR);
+    }
+    const label = await page.locator('.ask .checkbox').boundingBox();
+    expect(label!.height, 'the rule box').toBeGreaterThanOrEqual(FLOOR);
+  });
+});
 
 test.describe('the return dialog on a phone', () => {
   test.use({ ...phone, viewport: { width: 360, height: 700 }, deviceScaleFactor: 1 });

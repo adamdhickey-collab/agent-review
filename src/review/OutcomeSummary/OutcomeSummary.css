@@ -1,0 +1,66 @@
+.outcome {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.outcome__lead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.outcome__lead:focus-visible {
+  outline: none; /* focus is sent here after the last decision, as it is to a screen's heading; a ring would frame a sentence */
+}
+
+.outcome__mark {
+  flex: none;
+  color: var(--color-success);
+}
+
+.outcome__sub {
+  margin-top: calc(var(--space-2) * -1);
+  color: var(--color-text-secondary);
+}
+
+/* Four rows, the label in a narrow column beside its sentence. On a phone
+   the label sits over the sentence instead. */
+.outcome__facts {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: var(--space-2) var(--space-3);
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.outcome__facts > div {
+  display: contents;
+}
+
+.outcome__facts dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: calc(var(--text-md) * var(--leading-body)); /* the sentence's first line, so the label sits on it */
+}
+
+.outcome__facts dd {
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+@media (max-width: 40rem) {
+  .outcome__facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .outcome__facts dd + dt,
+  .outcome__facts > div + div dt {
+    margin-top: var(--space-2);
+  }
+}

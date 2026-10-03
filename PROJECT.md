@@ -19,6 +19,11 @@ system, the tokens, the Storybook and the agent-readable rules in this
 repository answer the first half, and the experiment in `docs/experiment/`
 is the two halves meeting.
 
+Since 2026-10-03 there is a second question, and it is the one the product
+now opens on (see "The second iteration" below): how does someone hand an
+agent more of the work, and still know what it did, where its authority
+ends, and which decisions are still theirs?
+
 ## Where it lives, and why not inside the site
 
 adamhickey.com is thirty pages of hand-written HTML with no framework and no
@@ -121,6 +126,83 @@ should open well in it, and Claude Code stays the agent).
   output is what the scenario data reports. Where a number in the product
   is invented, this file says so.
 
+## The second iteration: delegation (2026-10-03)
+
+The first version is built around what agents could not do in that
+experiment: tell an intentional choice from a mistake, so a person reviews
+every change. That is a limit of the moment, not a fact about the work. As
+agents get better more of those calls should be automatic, and a queue that
+asks for a review of each one turns that progress into busywork. So the
+design question changed: how can someone delegate more, and still
+understand the results, the boundaries, and the decisions that still need
+them? Human attention is the cost being spent, and fewer required reviews
+is the goal, provided nothing important is hidden to get there.
+
+The front door (`#/`) is now **delegated work**: one run, Claude Code moving
+Relay's billing screens onto the token layer. The review queue the
+experiment was built around is unchanged at `#/queue`.
+
+**The run is simulated, and labelled so on the screen.** Unlike rv-2041 and
+rv-2042, nothing in it was run: the billing screens, the times, the commits
+and the checks' figures are written to agree with each other
+(`src/data/billing.ts`) and played back through one pure reducer
+(`src/data/delegation.ts`), so the same presses always end in the same
+place. Nothing learns. The tokens are real, and so are the two facts the
+scenario turns on: `--color-danger` and `--color-diff-remove-ink` are both
+`#b42318`, and `--color-success` and `--color-diff-add-ink` are both
+`#1f7a3f`, so either name passes every check.
+
+Decisions:
+
+- **Results first.** The screen opens on an account, not a queue: what was
+  done, how it was checked, what is unresolved, what needs the person, and
+  whether the work stayed inside its boundaries. Four sentences with the
+  figures inside them, each counted from the records; the stories assert
+  that the records account for all 36 literals the lint reported.
+- **Three reasons to stop, not three tabs.** A problem the agent can solve
+  with the evidence and permission it has (it named a token that does not
+  exist; the lint and the visual check failed; it corrected the name) is
+  fixed and recorded, and asks nobody. Missing or conflicting intent (which
+  of two same-valued tokens a red means) is a narrow question with the
+  evidence for each reading and a recommendation. A step past the
+  delegation (a new token, which every screen and every later agent will
+  reach for) asks for that one step. The first is a record in the completed
+  work; the other two are the "Needs you" cards, told apart by a badge.
+- **Confidence is not permission.** No card shows a confidence figure. What
+  lets the agent act is a boundary, written in words, numbered, and cited
+  wherever it stopped or acted.
+- **Boundaries are sentences.** Seven, in three groups (does on its own,
+  asks you first, outside this delegation), beside the work. Not a slider,
+  not presets, not a policy editor.
+- **An answer becomes a rule only when the person says so.** The box is
+  unchecked by default. Checked, it shows the rule in words, what it does
+  not cover, and what it would settle at once. A one-time answer stays one
+  time: the four changes held behind the first question each ask again if
+  it was answered once, and say why. A rule can be edited (what it covers)
+  or revoked, each a second step; revoking stops it and leaves what it made,
+  and says so. A scope decision offers no rule: allowing one step past a
+  boundary is not moving the boundary.
+- **A check's word is a fact about the code.** Every completed change says
+  what each check established, and separately what no check could: a swap
+  to the wrong one of two same-valued tokens passes everything. A check
+  that ran and could not answer is `inconclusive`, a new state of
+  TestStatus, and is never shown as passed.
+- **Recovery is real in the model.** Every merged change can be reverted (a
+  revert commit puts the literal back; the agent will not redo it) and
+  restored, and its history keeps both. A line left as written offers
+  nothing to revert, because nothing changed.
+- **The quiet state is the result.** With nothing to decide, the "Needs
+  you" section is not there and the account says "Nothing needs your
+  attention." Nothing is invented to fill the space.
+
+What would tell whether this works, none of it tested yet:
+
+- Can a person explain what they have delegated?
+- Do they understand why the agent paused?
+- Can they spot an automatic action that was wrong?
+- Can they correct or revoke a standing rule?
+- Does it cut interruptions without hiding a failure?
+
 ## Exploration: three information architectures
 
 Pencil is not available here (no MCP server, no application), so the
@@ -154,7 +236,8 @@ src/
   components/        the reusable system, one directory per component, with stories
   product/           the customer table under review: the baseline and the agent's version
   review/            Agent Review's own screens and composed components
-  data/              the scenario: the change, the findings, the validation report
+  data/              the scenario: the change, the findings, the validation report;
+                     the delegated run (billing.ts) and the reducer it moves by (delegation.ts)
   app/               the shell and the hash router
 skills/ui-quality/   the rules an agent reads before touching UI
 docs/exploration/    the three directions
@@ -174,7 +257,7 @@ The system, `src/components/` (13):
 | IconButton | An icon-only button whose label is its name and its tooltip, on hover and on focus | 7 |
 | Badge | A small label with a tone, never the only place a state is said | 5 |
 | StatusIndicator | A dot and a word; live pulses | 4 |
-| TestStatus | A check's result: passed, changed, failed, running, skipped, each its own shape | 8 |
+| TestStatus | A check's result: passed, changed, failed, running, skipped, inconclusive, each its own shape | 9 |
 | Checkbox | A native checkbox with a drawn box; indeterminate is real | 7 |
 | SegmentedControl | One choice among a few, all visible; a radiogroup with arrow keys | 4 |
 | Tabs | The WAI tabs pattern, with counts | 4 |
@@ -187,14 +270,16 @@ The product under review, `src/product/` (2 screens): CustomerTable (the
 live one is Run 1's, with bulk actions; the baseline and all three
 branch versions are frozen under `history/`), InvoiceList.
 
-Agent Review, `src/review/` (15): Shell, QueueScreen, ReviewRow,
+Agent Review, `src/review/` (20): Shell, DelegationScreen, OutcomeSummary,
+DecisionRequest, WorkRecord, Boundaries, QueueScreen, ReviewRow,
 ReviewCard (the queue's row on a phone), ChangeScreen, ValidationSummary,
 FindingList, FindingEvidence (eight evidence kinds), ComponentPreview (the
 frame, with loading and error), DiffViewer, AgentRationale, DecisionBar,
-ReturnPanel, StoryList, FileList. 81 stories.
+ReturnPanel, StoryList, FileList. 110 stories.
 
-Every story runs through axe, with WCAG 2.2's target size on. 173 as of
-2026-10-02: 78 for the system, 14 for the product, 81 for the review. (The
+Every story runs through axe, with WCAG 2.2's target size on. 203 as of
+2026-10-03: 79 for the system, 14 for the product, 110 for the review; it
+was 173 (78, 14, 81) before the delegated work added thirty. (The
 case study on adamhickey.com said 161 when it was written; the number moves
 whenever a story is added, so it is read from `npm run test:stories` or from
 the Storybook's `index.json`, not carried by hand.)

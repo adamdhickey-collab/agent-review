@@ -72,6 +72,12 @@ samp {
   font-size: inherit; /* one size per line: a token in running text is the text's size */
 }
 
+/* A name a machine wrote, inside running text: a token, a file, a value.
+   It wraps between words and never inside itself. */
+.inline-name {
+  white-space: nowrap;
+}
+
 /* Focus. One ring for everything a keyboard can reach; outline so it
    follows the element's own shape, offset so it never collides with a
    border. :focus-visible, so a pointer press does not draw it. */
@@ -96,7 +102,8 @@ samp {
 
 /* A fingertip is about 44px. Where the pointer is coarse, the review's own
    chrome gives every control that height: the bar, the queue, the change's
-   header and summary and findings, the preview's controls, and the dialog.
+   header and summary and findings, the preview's controls, the dialog, and
+   the delegated work.
    Components already read --control-height, so this is a token set where
    it is wanted and no component is restyled. The preview FRAME is left out
    on purpose: it shows the product as the checks measured it, so Relay's
@@ -108,7 +115,8 @@ samp {
   .change__summary,
   .change__spine,
   .preview__bar,
-  .return {
+  .return,
+  .delegation {
     --control-height: var(--control-height-touch);
     --control-height-compact: var(--control-height-touch);
   }

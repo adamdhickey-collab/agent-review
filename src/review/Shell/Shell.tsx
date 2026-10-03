@@ -4,7 +4,9 @@ import type { Route } from '../../app/router';
 import './Shell.css';
 
 /* The chrome: one bar. The product's name, where you are, and who you
-   are. Everything else is the screen. The bar is a landmark (header) and
+   are. Everything else is the screen. Two places: the delegated work, which
+   is the front door, and the reviews, the queue of single changes the
+   experiment was built around. The bar is a landmark (header) and
    the content is main, so a screen reader can skip to it.
 
    The route is the URL's hash, so a link to "#main" would be read as a
@@ -26,15 +28,21 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
         Skip to content
       </a>
       <header className="shell__bar">
-        <a className="shell__brand" href="#/" aria-label="Agent Review, the review queue">
+        <a className="shell__brand" href="#/" aria-label="Agent Review, the delegated work">
           <span className="shell__mark" aria-hidden="true">
             <Icon name="check" size={14} />
           </span>
           <span>Agent Review</span>
         </a>
         <nav className="shell__nav" aria-label="Primary">
-          <a href="#/" aria-current={route.name === 'queue' ? 'page' : undefined}>
-            Queue
+          <a href="#/" aria-current={route.name === 'delegation' ? 'page' : undefined}>
+            <span className="shell__long">Delegated work</span>
+            <span className="shell__short" aria-hidden="true">
+              Work
+            </span>
+          </a>
+          <a href="#/queue" aria-current={route.name === 'queue' ? 'page' : undefined}>
+            Reviews
           </a>
           <a href="storybook/" target="_blank" rel="noopener">
             Storybook

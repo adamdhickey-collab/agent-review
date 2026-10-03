@@ -16,8 +16,14 @@ for (const width of WIDTHS) {
   test.describe(`at ${width}`, () => {
     test.use({ viewport: { width, height: 900 } });
 
-    test('the review queue', async ({ page }) => {
+    test('the delegated work', async ({ page }) => {
       await page.goto('#/');
+      await settle(page);
+      await expect(page).toHaveScreenshot(`delegation-${width}.png`, { fullPage: true });
+    });
+
+    test('the review queue', async ({ page }) => {
+      await page.goto('#/queue');
       await settle(page);
       await expect(page).toHaveScreenshot(`queue-${width}.png`, { fullPage: true });
     });
@@ -30,7 +36,7 @@ for (const width of WIDTHS) {
   });
 }
 
-/* A phone: the queue as cards, the change with its decision bar at the
+/* A phone: the delegated work in one column, the queue as cards, the change with its decision bar at the
    bottom of the screen, and the return dialog over it. A touch device, so
    the coarse-pointer styles are on, started from a blank page because a
    touch context applies its emulation to the next navigation. The change and
@@ -46,8 +52,13 @@ test.describe('on a phone, 375', () => {
     await settle(page);
   }
 
-  test('the review queue', async ({ page }) => {
+  test('the delegated work', async ({ page }) => {
     await open(page, '#/');
+    await expect(page).toHaveScreenshot('delegation-375.png', { fullPage: true });
+  });
+
+  test('the review queue', async ({ page }) => {
+    await open(page, '#/queue');
     await expect(page).toHaveScreenshot('queue-375.png', { fullPage: true });
   });
 

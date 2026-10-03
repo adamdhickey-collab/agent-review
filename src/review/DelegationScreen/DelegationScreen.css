@@ -1,0 +1,156 @@
+.delegation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+/* Said first and in words: this is a simulation. A strip, not a banner to
+   dismiss, because it stays true for as long as the page is open. */
+.delegation__sim {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.delegation__sim p {
+  flex: 1 1 20rem;
+}
+
+.delegation__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  align-items: start;
+  gap: var(--space-6);
+}
+
+.delegation__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.delegation__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.delegation__by {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.delegation__by .icon {
+  flex: none;
+  margin-top: calc((var(--text-sm) * var(--leading-ui) - 14px) / 2); /* centred on the line */
+}
+
+.delegation__title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.delegation__title:focus-visible,
+.delegation__h2:focus-visible {
+  outline: none; /* destinations focus is sent to, as a screen's heading is */
+}
+
+.delegation__request {
+  max-width: 44rem;
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+.delegation__request-label {
+  margin-right: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+/* What just happened, in a sentence. Empty until something does; a live
+   region, so it is in the tree from the start. */
+.delegation__notice {
+  margin-top: calc(var(--space-3) * -1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-subtle);
+  color: var(--color-text);
+  line-height: var(--leading-body);
+}
+
+.delegation__notice:empty {
+  display: none;
+}
+
+.delegation__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.delegation__h2 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.delegation__count {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-regular);
+}
+
+.delegation__hint {
+  margin-top: calc(var(--space-2) * -1);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+/* The completed work is one panel of rows, as the queue is. */
+.delegation__records {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.delegation__records > li:first-child > .record {
+  border-top: 0;
+}
+
+.delegation__aside {
+  min-width: 0;
+}
+
+/* One column: the boundaries follow the work. Every paused change names
+   its own boundary in place, so the panel is a reference rather than
+   something a decision depends on reaching. */
+@media (max-width: 64rem) {
+  .delegation__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 40rem) {
+  .delegation {
+    padding: var(--space-2);
+  }
+}

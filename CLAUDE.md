@@ -1,7 +1,8 @@
 # Working in this repository
 
 This is a React component system, the product (Relay) built from it, and
-Agent Review, the tool a person uses to review UI that an agent changed.
+Agent Review, the tool a person uses to delegate UI work to an agent and
+review what it changed.
 
 **Before changing anything under `src/` that renders, read
 `skills/ui-quality/SKILL.md` and work inside it.** It is twelve rules,
@@ -15,7 +16,7 @@ src/tokens/        the token layer (tokens.css) and its typed names (tokens.ts)
 src/components/    the system; import from src/components/index.ts
 src/product/       Relay's screens: the customer table, the invoice list
 src/review/        Agent Review's own screens
-src/data/          the review scenario
+src/data/          the review scenario, and the delegated run and its reducer
 src/app/           the shell, the router, the base stylesheet
 skills/            the rules an agent reads
 docs/              exploration, the experiment, decisions (PROJECT.md at the root)
