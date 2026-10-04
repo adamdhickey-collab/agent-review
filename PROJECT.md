@@ -156,9 +156,20 @@ Decisions:
 
 - **Results first.** The screen opens on an account, not a queue: what was
   done, how it was checked, what is unresolved, what needs the person, and
-  whether the work stayed inside its boundaries. Four sentences with the
-  figures inside them, each counted from the records; the stories assert
-  that the records account for all 36 literals the lint reported.
+  whether the work stayed inside its boundaries. Every figure is counted
+  from the records, and the stories assert that the records account for
+  all 36 literals the lint reported.
+- **Read at a glance (2026-10-04).** The account was four sentences and
+  read like a paragraph; it is a bar now, the 36 literals by where they
+  are (merged, asking, waiting), the three checks as badges with their
+  counts, and a line each for what is unresolved and for scope. Each
+  decision leads with its answers, as cards, and for a value whose meaning
+  is in question each card shows the element as it would render if
+  `--color-danger` were made louder later: one stays, one follows. What was
+  found, the code and the evidence fold under the card. The completed work
+  names its check columns once, marks only work not done on its own, and
+  folds the routine swaps into one row. The line icons take a stroke for
+  the size they are shown at, because one stroke scaled to 1px at 14px.
 - **Three reasons to stop, not three tabs.** A problem the agent can solve
   with the evidence and permission it has (it named a token that does not
   exist; the lint and the visual check failed; it corrected the name) is
@@ -172,8 +183,9 @@ Decisions:
   lets the agent act is a boundary, written in words, numbered, and cited
   wherever it stopped or acted.
 - **Boundaries are sentences.** Seven, in three groups (does on its own,
-  asks you first, outside this delegation), beside the work. Not a slider,
-  not presets, not a policy editor.
+  asks you first, outside this delegation), beside the work, each group a
+  line with its mark and its count that opens to the sentences. Not a
+  slider, not presets, not a policy editor.
 - **An answer becomes a rule only when the person says so.** The box is
   unchecked by default. Checked, it shows the rule in words, what it does
   not cover, and what it would settle at once. A one-time answer stays one
@@ -252,10 +264,10 @@ The system, `src/components/` (13):
 
 | Component | For | Stories |
 | --- | --- | --- |
-| Icon | The inline icon set, decorative unless named: a line set at a 1.75 stroke, and six status marks drawn solid on a 16 grid | in IconButton's AllIcons |
+| Icon | The inline icon set, decorative unless named: a line set with a stroke for each size it is shown at, and six status marks drawn solid on a 16 grid | 2, and IconButton's AllIcons |
 | Button | The one button: primary, secondary, danger, ghost; default and compact; loading; disabled | 10 |
 | IconButton | An icon-only button whose label is its name and its tooltip, on hover and on focus | 7 |
-| Badge | A small label with a tone, never the only place a state is said | 5 |
+| Badge | A small label with a tone, never the only place a state is said; a large size for a badge read as content | 6 |
 | StatusIndicator | A dot and a word; live pulses | 4 |
 | TestStatus | A check's result: passed, changed, failed, running, skipped, inconclusive, each its own shape | 9 |
 | Checkbox | A native checkbox with a drawn box; indeterminate is real | 7 |
@@ -275,11 +287,12 @@ DecisionRequest, WorkRecord, Boundaries, QueueScreen, ReviewRow,
 ReviewCard (the queue's row on a phone), ChangeScreen, ValidationSummary,
 FindingList, FindingEvidence (eight evidence kinds), ComponentPreview (the
 frame, with loading and error), DiffViewer, AgentRationale, DecisionBar,
-ReturnPanel, StoryList, FileList. 110 stories.
+ReturnPanel, StoryList, FileList. 111 stories.
 
-Every story runs through axe, with WCAG 2.2's target size on. 203 as of
-2026-10-03: 79 for the system, 14 for the product, 110 for the review; it
-was 173 (78, 14, 81) before the delegated work added thirty. (The
+Every story runs through axe, with WCAG 2.2's target size on. 207 as of
+2026-10-04: 82 for the system, 14 for the product, 111 for the review; it
+was 203 (79, 14, 110) before the glanceable pass added four, and 173 (78,
+14, 81) before the delegated work added thirty. (The
 case study on adamhickey.com said 161 when it was written; the number moves
 whenever a story is added, so it is read from `npm run test:stories` or from
 the Storybook's `index.json`, not carried by hand.)

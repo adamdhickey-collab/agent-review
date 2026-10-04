@@ -35,7 +35,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A change the agent stopped on, asking for one decision, and saying which kind. What a value means: the agent can make the change and cannot tell which is meant, so the card says what no check can settle, folds the evidence for each reading, and recommends one. Outside the delegation: the agent knows what to do and may not, so the card says what it would do and why that is past its authority. Both cite the boundary that stopped them in its own words. Answering is the system’s inline confirmation: the answers become "apply this?", Escape cancels, focus goes to Apply. That second step is where an intent answer can become a rule, never by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
+          'A change the agent stopped on, asking for one decision, and saying which kind. The answers are the body of the card, each a card with its button. What a value means: the agent can make the change and cannot tell which is meant, so the card says what no check can settle and each answer shows the element as it would render if --color-danger changed later, which is the whole difference between them. Outside the delegation: the agent knows what to do and may not, so the card shows the line it would change and what each answer does. Both cite the boundary that stopped them on one line, and fold what was found, the code, the evidence and the reason for the recommendation. Answering is the system’s inline confirmation: the answers become "apply this?", Escape cancels, focus goes to Apply. That second step is where an intent answer can become a rule, never by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
       },
     },
   },
@@ -46,7 +46,19 @@ type Story = StoryObj<typeof meta>;
 
 export const WhatAValueMeans: Story = {
   parameters: {
-    docs: { description: { story: 'The first question of the billing run: the same red is two tokens, and the evidence points both ways. Four changes are held behind it, and the card lists them.' } },
+    docs: { description: { story: 'The first question of the billing run: the same red is two tokens, and the evidence points both ways. The answers are two cards, and each shows the plan change as it would render if --color-danger were made louder later: the diff pair stays as it is, danger and success follows it. The recommended card carries the badge. The four changes held behind it are counted in the head and listed under the evidence.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('4 changes wait on this')).toBeInTheDocument();
+    const answers = canvas.getByRole('group', { name: /is made louder later/ });
+    const cards = within(answers).getAllByRole('listitem');
+    await expect(cards).toHaveLength(2);
+    await expect(cards[0]).toHaveTextContent('Stays as it is');
+    await expect(cards[0]).toHaveTextContent('Recommended');
+    await expect(cards[1]).toHaveTextContent('Follows it');
+    await expect(cards[1].querySelector('.ask__sample--loud')).not.toBeNull();
+    await expect(canvas.getByText(/4 changes are held until you answer/)).not.toBeVisible();
   },
 };
 

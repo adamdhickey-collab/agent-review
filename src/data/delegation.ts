@@ -1,4 +1,4 @@
-import type { TestState } from '../components';
+import type { IconName, TestState } from '../components';
 import type { AgentIdentity, Person } from './types';
 
 /* Delegated work: the shape of a run an agent was handed, and the rules for
@@ -20,6 +20,13 @@ export const BOUNDARY_GROUP_LABEL: Record<BoundaryGroup, string> = {
   own: 'Does on its own',
   asks: 'Asks you first',
   outside: 'Outside this delegation',
+};
+
+/** Each group's mark, the same in the boundaries panel and on a paused change. */
+export const BOUNDARY_GROUP_ICON: Record<BoundaryGroup, IconName> = {
+  own: 'circle-check',
+  asks: 'message-question',
+  outside: 'lock',
 };
 
 export interface Boundary {

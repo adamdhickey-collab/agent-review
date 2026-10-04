@@ -26,6 +26,21 @@
   line-height: var(--leading-tight);
 }
 
+.ask__holds {
+  margin-left: auto;
+}
+
+.ask__why {
+  color: var(--color-text);
+  line-height: var(--leading-body);
+}
+
+.ask__gap {
+  max-width: 44rem;
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
 /* The element as a reader of the billing screen sees it. */
 .ask__sample {
   display: flex;
@@ -51,9 +66,17 @@
   color: var(--color-diff-add-ink);
 }
 
-.ask__found {
-  color: var(--color-text-secondary);
-  line-height: var(--leading-body);
+/* As it would look if danger's red were made louder and this followed it:
+   the red as a ground under the text, at the weight an error takes, which
+   is what a louder danger looks like wherever the system already shouts
+   (a danger Button). An illustration of the consequence, said in words
+   above it. */
+.ask__sample--loud .ask__sample-old {
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger);
+  color: var(--color-text-on-accent);
+  font-weight: var(--weight-semibold);
 }
 
 .ask__code {
@@ -66,8 +89,87 @@
   line-height: var(--leading-ui);
 }
 
-/* The facts: the label over its text, in the order a person reads them
-   before deciding. */
+/* The answers, each a card with its button in it. Side by side where two
+   fit, one over the other on a phone. */
+.ask__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ask__if {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.ask__choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-3);
+}
+
+.ask__choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+/* The recommended answer's edge is the accent, twice the hairline, drawn
+   inside so the two cards keep one size. */
+.ask__choice[data-recommended] {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 var(--border-width) var(--color-accent);
+}
+
+.ask__choice .btn {
+  margin-top: auto;
+}
+
+/* What choosing it does, and the badge on the recommended one, on one row
+   at the top of each card, kept even when it is empty, so what is under it
+   lines up from card to card. */
+.ask__choice-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  align-self: stretch;
+  min-height: var(--space-6);
+}
+
+.ask__effect-line {
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+.ask__outcome {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-body);
+}
+
+.ask__outcome .icon {
+  flex: none;
+  margin-top: calc((var(--text-md) * var(--leading-body) - var(--space-4)) / 2);
+}
+
+.ask__outcome [data-icon='check'] {
+  color: var(--color-success);
+}
+
+.ask__outcome [data-icon='alert'] {
+  color: var(--color-warning);
+}
+
+/* The facts inside the Disclosure: the label over its text. */
 .ask__facts {
   display: flex;
   flex-direction: column;
@@ -91,16 +193,6 @@
   font-weight: var(--weight-semibold);
 }
 
-/* The evidence is folded: the recommendation says which reading, and the
-   person who wants the reasons opens them. */
-.ask__evidence {
-  border-bottom: var(--border-width) solid var(--color-border);
-}
-
-.ask__evidence .ask__list {
-  margin-top: 0;
-}
-
 .ask__list {
   display: flex;
   flex-direction: column;
@@ -110,32 +202,43 @@
   list-style: disc;
 }
 
-.ask__why {
-  margin-bottom: var(--space-2);
-  color: var(--color-text);
-}
-
+/* The boundary that stopped it, a line each: the group's mark, the
+   boundary's number as the panel shows it, and its words. */
 .ask__bounds {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
 }
 
 .ask__bounds li {
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
+  line-height: var(--leading-body);
 }
 
-/* The boundary's number, as it is in the boundaries panel, so the two can be
-   matched at a glance. Centred on the first line of its text. */
+.ask__bounds .icon {
+  flex: none;
+  margin-top: calc((var(--text-sm) * var(--leading-body) - var(--space-4)) / 2);
+}
+
+.ask__bounds [data-group='asks'] .icon {
+  color: var(--color-accent);
+}
+
+.ask__bounds [data-group='outside'] .icon {
+  color: var(--color-warning);
+}
+
 .ask__n {
   display: inline-flex;
   flex: none;
   align-items: center;
   justify-content: center;
   width: 1.25rem;
-  height: calc(var(--text-md) * var(--leading-body));
+  height: calc(var(--text-sm) * var(--leading-body));
   border-radius: var(--radius-sm);
   background: var(--color-surface-sunken);
   color: var(--color-text);
@@ -144,7 +247,16 @@
   font-variant-numeric: tabular-nums;
 }
 
-.ask__options,
+.ask__more {
+  margin-top: calc(var(--space-1) * -1);
+}
+
+.ask__more-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .ask__actions {
   display: flex;
   flex-wrap: wrap;
@@ -220,7 +332,14 @@
     padding: var(--space-3);
   }
 
-  .ask__options .btn,
+  .ask__holds {
+    margin-left: 0;
+  }
+
+  .ask__choice .btn {
+    align-self: stretch;
+  }
+
   .ask__actions .btn {
     flex: 1 1 auto;
   }

@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
-import { Badge, Button, Checkbox } from '../../components';
+import { Badge, Button, Checkbox, Disclosure, Icon } from '../../components';
 import {
+  BOUNDARY_GROUP_ICON,
   BOUNDARY_GROUP_LABEL,
   PATTERN_LABEL,
   RULE_EXCLUDES,
@@ -27,7 +28,15 @@ import { Inline } from '../Inline';
    what it covers as two boxes, with Save and Cancel; Revoke asks first,
    saying what revoking does and does not do (the changes it made stay; a
    matching case asks again). Escape is Cancel in both. A revoked rule stays
-   in the list as a record, because the changes it made are still there. */
+   in the list as a record, because the changes it made are still there.
+
+   Since 2026-10-04 the three groups are closed to a line each: the group's
+   mark, its name and how many boundaries it holds, open to the sentences.
+   Seven sentences beside the work were the panel's whole height and were
+   read once, and every paused change already quotes its own boundary in
+   place, so the panel is a reference rather than something a decision
+   depends on reaching. Your rules stay open, because they are the one thing
+   here a person changes. */
 
 export interface BoundariesProps {
   boundaries: Boundary[];
@@ -50,33 +59,51 @@ export const Boundaries = forwardRef<HTMLElement, BoundariesProps>(function Boun
       <h2 id="bounds-title" className="bounds__title">
         What Claude Code may do here
       </h2>
-      <p className="bounds__lead">Set by {by.name} for this delegation. A change that pauses names the boundary that stopped it.</p>
-      {GROUPS.map((g) => (
-        <div key={g} className="bounds__group" data-group={g}>
-          <h3 className="bounds__head">{BOUNDARY_GROUP_LABEL[g]}</h3>
-          <ul className="bounds__list">
-            {boundaries
-              .filter((b) => b.group === g)
-              .map((b) => (
-                <li key={b.n}>
-                  <span className="bounds__n" aria-hidden="true">
-                    {b.n}
-                  </span>
-                  <span>
-                    <span className="visually-hidden">Boundary {b.n}: </span>
-                    {b.text}
-                  </span>
-                </li>
-              ))}
-          </ul>
-        </div>
-      ))}
-      <div className="bounds__group bounds__group--rules">
+      <p className="bounds__lead">Set by {by.name} for this delegation.</p>
+      <div className="bounds__groups">
+        {GROUPS.map((g) => {
+          const items = boundaries.filter((b) => b.group === g);
+          return (
+            <Disclosure
+              key={g}
+              className="bounds__group"
+              data-group={g}
+              summary={
+                <span className="bounds__head">
+                  <Icon name={BOUNDARY_GROUP_ICON[g]} size={16} />
+                  {BOUNDARY_GROUP_LABEL[g]}
+                </span>
+              }
+              meta={
+                <>
+                  {items.length}
+                  <span className="visually-hidden"> {items.length === 1 ? 'boundary' : 'boundaries'}</span>
+                </>
+              }
+            >
+              <ul className="bounds__list">
+                {items.map((b) => (
+                  <li key={b.n}>
+                    <span className="bounds__n" aria-hidden="true">
+                      {b.n}
+                    </span>
+                    <span>
+                      <span className="visually-hidden">Boundary {b.n}: </span>
+                      {b.text}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </Disclosure>
+          );
+        })}
+      </div>
+      <div className="bounds__rules">
         <h3 className="bounds__head">
           Your rules <span className="bounds__count">{active}</span>
         </h3>
         {rules.length === 0 ? (
-          <p className="bounds__empty">None. When you answer a question about what a value means, you can make the answer a rule for similar cases. One is never made for you.</p>
+          <p className="bounds__empty">None yet. An answer about what a value means can become a rule for similar cases, never by default.</p>
         ) : (
           rules.map((r) => <RuleCard key={r.id} rule={r} work={work} onEdit={(covers) => onEditRule(r.id, covers)} onRevoke={() => onRevokeRule(r.id)} initialMode={initialMode} />)
         )}

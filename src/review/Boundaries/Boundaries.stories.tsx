@@ -24,7 +24,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'What the agent may do here, in seven sentences in three groups (does on its own, asks you first, outside this delegation), numbered so a paused change can cite one. Under them, the rules the person has made from answers, each as a sentence with what it does not cover, what it has done, and its history. A rule is edited or revoked here, each a second step with Cancel and Escape. Revoking stops it applying and leaves what it made; a revoked rule stays as a record.',
+          'What the agent may do here: seven sentences in three groups (does on its own, asks you first, outside this delegation), each group closed to a line with its mark and its count, and the sentences numbered so a paused change can cite one. Under them, the rules the person has made from answers, each as a sentence with what it does not cover, what it has done, and its history. A rule is edited or revoked here, each a second step with Cancel and Escape. Revoking stops it applying and leaves what it made; a revoked rule stays as a record.',
       },
     },
   },
@@ -34,6 +34,21 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const NoRules: Story = {};
+
+export const AGroupOpen: Story = {
+  parameters: {
+    docs: { description: { story: 'The three groups are closed to a line each: the mark, the name and the count. Opening one shows its boundaries, numbered as the paused changes cite them.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const asks = canvas.getByText('Asks you first').closest('details')!;
+    await expect(asks.open).toBe(false);
+    await expect(asks).toHaveTextContent('Asks you first2 boundaries');
+    await userEvent.click(canvas.getByText('Asks you first'));
+    await expect(asks.open).toBe(true);
+    await expect(canvas.getByText('When no token has the value, so a swap would move pixels.')).toBeVisible();
+  },
+};
 
 export const WithARule: Story = {
   args: { rules: withRule.rules, work: withRule.work },

@@ -1,9 +1,10 @@
 import type { SVGProps } from 'react';
 
 /* The icon set, drawn inline so an icon is one element with no request
-   behind it. 16 on a 24 grid, 1.75 stroke, currentColor. Every icon is
-   decorative by default (aria-hidden); a component that needs the icon to
-   carry meaning gives it a `label`, which renders a <title>.
+   behind it. Drawn on a 24 grid, currentColor, with a stroke set for the
+   size it is shown at (STROKE, below). Every icon is decorative by default
+   (aria-hidden); a component that needs the icon to carry meaning gives it
+   a `label`, which renders a <title>.
 
    Two drawings live here. PATHS is the line set, for everything that is
    an action or an object. STATUS, below it, is the handful of marks that
@@ -49,7 +50,23 @@ const PATHS = {
   inbox: 'M22 12h-6l-2 3h-4l-2-3H2M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1Z',
   send: 'm22 2-7 20-4-9-9-4 20-7Zm0 0L11 13',
   undo: 'M3 7v6h6M3 13a9 9 0 1 0 3-6.7L3 9',
+  lock: 'M7 11V7a5 5 0 0 1 10 0v4M5 11h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Z',
+  'message-question': 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2ZM9.6 8.4a2.4 2.4 0 1 1 3.3 2.2c-.6.3-.9.7-.9 1.3M12 14.2h.01',
 } as const;
+
+/* The line set's stroke, by the size it is shown at. It was one stroke,
+   1.75 on the 24 grid, at every size, which scales with the icon: 1.17px
+   at 16, 1.02px at 14 and 0.88px at 12. Most of the line set is shown at
+   14 and 12 (a compact Button's icon, a Badge's, the shell's), so most of
+   it was a hairline in a muted ink, and the delegated work's "Reset the
+   demo" was the one a reader named: a ring of 1px in grey on a grey strip.
+   The status marks met the same problem first and were redrawn for their
+   size (STATUS, below); these keep their drawings and take a stroke that
+   lands near 1.5px wherever they are shown: 1.5px at 16, 1.46px at 14,
+   1.67px at 20, and 1.25px at 12, where 1.5px would close up a glyph that
+   small. Measured by rendering every name at every size in the Icon's
+   AllIcons story before and after; no drawing changed. */
+const STROKE: Record<NonNullable<IconProps['size']>, number> = { 12: 2.5, 14: 2.5, 16: 2.25, 20: 2 };
 
 /* The status marks: what a check answered, and how much a finding matters.
    They are read at 14 and 16px, often with no word beside them (a queue
@@ -157,7 +174,7 @@ export function Icon({ name, label, size = 16, className, ...rest }: IconProps) 
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.75}
+      strokeWidth={STROKE[size]}
       strokeLinecap="round"
       strokeLinejoin="round"
       {...shared}

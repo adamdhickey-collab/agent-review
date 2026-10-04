@@ -30,7 +30,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The account a delegated run opens on: whether anything needs the person, then four sentences, done, checked, unresolved and scope. Every figure is counted from the work, never carried, and sits in a sentence that says what it means. When nothing needs the person, the lead says so first: the quiet state is the result the screen is for.',
+          'The account a delegated run opens on, built to be read at a glance: whether anything needs the person, then a bar of where the literals the lint reported are now (merged, asking, waiting, taken back), each check as a large Badge with its count, and a line each for what is unresolved and for scope. Every figure is counted from the work, never carried. When nothing needs the person, the lead says so first: the quiet state is the result the screen is for.',
       },
     },
   },
@@ -43,7 +43,10 @@ export const NeedsYou: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
-    await expect(canvas.getByText(/26 of the 36 literals/)).toBeInTheDocument();
+    await expect(canvas.getByText('26 of 36')).toBeInTheDocument();
+    await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('26 merged3 asking you7 waiting on an answer');
+    await expect(canvas.getByText('Axe: 6 of 7 passed, 1 inconclusive')).toBeInTheDocument();
+    await expect(canvas.getByText(/A first try in the plan card failed two checks and was fixed\./)).toBeInTheDocument();
   },
 };
 
@@ -51,6 +54,7 @@ export const Quiet: Story = {
   args: { state: quiet },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByText('Nothing needs your attention.')).toBeInTheDocument();
+    await expect(within(canvasElement).getByText('13 changes made and checked. Completed work is below.')).toBeInTheDocument();
   },
 };
 

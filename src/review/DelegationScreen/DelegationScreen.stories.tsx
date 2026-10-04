@@ -49,7 +49,7 @@ type Story = StoryObj<typeof meta>;
 export const Initial: Story = {
   decorators: [inStore(start)],
   parameters: {
-    docs: { description: { story: 'The run as the person finds it: seven changes made and checked, two decisions, four changes held behind the first. The totals are counted from the work, and the work accounts for every literal the lint reported.' } },
+    docs: { description: { story: 'The run as the person finds it: seven changes made and checked, two decisions, four changes held behind the first. The totals are counted from the work, and the work accounts for every literal the lint reported. Of the seven, the three with something to look at (an inconclusive check, a fix after a failed first try, a red chosen by meaning) are rows of their own; the four routine swaps are folded into one row.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -62,6 +62,8 @@ export const Initial: Story = {
     await expect(canvas.getByRole('heading', { name: /Completed work/ })).toHaveTextContent('7');
     await expect(canvas.getByText(/4 changes are held until you answer/)).toBeInTheDocument();
     await expect(canvas.getByText('Simulated')).toBeInTheDocument();
+    await expect(canvas.getByText('4 routine swaps')).toBeInTheDocument();
+    await expect(canvas.queryByText('On its own')).toBeNull();
   },
 };
 
@@ -88,7 +90,7 @@ export const AnsweredOnce: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('8 changes made and checked. 5 decisions need you.')).toBeInTheDocument();
     await expect(canvas.getAllByText(/A one-time answer doesn’t carry over to another change/)).toHaveLength(4);
-    await expect(canvas.getByText(/None\. When you answer a question/)).toBeInTheDocument();
+    await expect(canvas.getByText(/None yet\./)).toBeInTheDocument();
   },
 };
 
@@ -102,7 +104,7 @@ export const Quiet: Story = {
     await expect(canvas.getByText('Nothing needs your attention.')).toBeInTheDocument();
     await expect(canvas.queryByRole('heading', { name: /Needs you/ })).toBeNull();
     await expect(canvas.getByRole('heading', { name: /Completed work/ })).toHaveTextContent('13');
-    await expect(canvas.getByText(/All 36 literals the lint reported are tokens now/)).toBeInTheDocument();
+    await expect(canvas.getByText('All 36')).toBeInTheDocument();
   },
 };
 
@@ -160,7 +162,7 @@ export const TheWholeLoop: Story = {
       await expect(within(seats).getByRole('button', { name: 'Restore it' })).toHaveFocus();
       await expect(within(seats).getByText(/puts the literals back/)).toBeInTheDocument();
       await expect(canvas.getByText(/1 change reverted by you\./)).toBeInTheDocument();
-      await expect(canvas.getByText(/The lint reports 2 literals you reverted or left as written\./)).toBeInTheDocument();
+      await expect(canvas.getByText(/The lint reports its 2 literals again\./)).toBeInTheDocument();
     });
 
     await step('Revoke the rule; what it made stays', async () => {

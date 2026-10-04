@@ -60,6 +60,19 @@ export const WithIcon: Story = {
   ),
 };
 
+export const Large: Story = {
+  render: () => (
+    <div style={row}>
+      <Badge size="large" tone="success" icon="status-passed">Token lint: 7 of 7 passed</Badge>
+      <Badge size="large" tone="neutral" icon="status-inconclusive">Axe: 6 of 7 passed, 1 inconclusive</Badge>
+      <Badge size="large" tone="danger" icon="status-failed">Visual baselines: 1 failed</Badge>
+    </div>
+  ),
+  parameters: {
+    docs: { description: { story: 'The large size, for a badge that is the content: the compact control’s height, the small type and a 14px icon. The delegated work’s account shows each check as one of these, with its count.' } },
+  },
+};
+
 export const Mono: Story = {
   render: () => (
     <div style={row}>

@@ -1,7 +1,7 @@
 .outcome {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
 .outcome__lead {
@@ -27,12 +27,94 @@
   color: var(--color-text-secondary);
 }
 
-/* Four rows, the label in a narrow column beside its sentence. On a phone
-   the label sits over the sentence instead. */
+/* The job's progress: one bar in the request's own unit, a segment per
+   place a literal can be, and a legend that says each in words, so the
+   bar repeats the legend rather than standing in for it. */
+.outcome__progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.outcome__share {
+  color: var(--color-text-secondary);
+}
+
+.outcome__share strong,
+.outcome__legend strong {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.outcome__bar {
+  display: flex;
+  gap: calc(var(--border-width) * 2);
+  height: var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+}
+
+.outcome__segment {
+  flex-basis: 0;
+  min-width: var(--space-1);
+}
+
+/* A segment's ground and its swatch's are the same, set once per kind. */
+.outcome [data-kind='made'] {
+  --kind-ground: var(--color-success);
+  --kind-edge: var(--color-success);
+}
+
+.outcome [data-kind='asking'] {
+  --kind-ground: var(--color-warning);
+  --kind-edge: var(--color-warning);
+}
+
+.outcome [data-kind='waiting'] {
+  --kind-ground: var(--color-warning-subtle);
+  --kind-edge: var(--color-warning);
+}
+
+.outcome [data-kind='back'] {
+  --kind-ground: var(--color-border-control);
+  --kind-edge: var(--color-border-control);
+}
+
+.outcome__segment,
+.outcome__swatch {
+  background: var(--kind-ground);
+  box-shadow: inset 0 0 0 var(--border-width) var(--kind-edge);
+}
+
+.outcome__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.outcome__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.outcome__swatch {
+  flex: none;
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+/* Three rows, each a line or two, the label in a narrow column beside it.
+   On a phone the label sits over its row instead. */
 .outcome__facts {
   display: grid;
   grid-template-columns: 6rem minmax(0, 1fr);
-  gap: var(--space-2) var(--space-3);
+  gap: var(--space-3);
   padding-top: var(--space-3);
   border-top: var(--border-width) solid var(--color-border);
 }
@@ -45,12 +127,53 @@
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
-  line-height: calc(var(--text-md) * var(--leading-body)); /* the sentence's first line, so the label sits on it */
+  line-height: var(--space-6); /* the large badges' height, so the label sits on their row */
 }
 
 .outcome__facts dd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
   color: var(--color-text-secondary);
+  line-height: var(--space-6);
+}
+
+.outcome__checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.outcome__note {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-ui);
+}
+
+.outcome__lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.outcome__lines li,
+.outcome__line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
   line-height: var(--leading-body);
+}
+
+/* Each mark centred on the first line of the text beside it. */
+.outcome__lines .icon,
+.outcome__line .icon {
+  flex: none;
+  margin-top: calc((var(--text-md) * var(--leading-body) - var(--space-4)) / 2);
+  color: var(--color-text-muted);
+}
+
+.outcome__line .outcome__scope-mark {
+  color: var(--color-success);
 }
 
 @media (max-width: 40rem) {
@@ -59,8 +182,7 @@
     gap: 0;
   }
 
-  .outcome__facts dd + dt,
   .outcome__facts > div + div dt {
-    margin-top: var(--space-2);
+    margin-top: var(--space-3);
   }
 }

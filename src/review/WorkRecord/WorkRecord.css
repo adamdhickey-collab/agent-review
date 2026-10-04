@@ -39,9 +39,18 @@
   gap: var(--space-2);
 }
 
+/* The three checks as marks, each in a column as wide as its heading over
+   the list ("Lint", "Pixels", "Axe"), so a mark is read against a name
+   rather than counted from the left. The column width is shared with that
+   heading through --record-mark-width. */
 .record__marks {
   display: inline-flex;
   gap: var(--space-1);
+}
+
+.record__marks .test-status {
+  justify-content: center;
+  width: var(--record-mark-width, auto);
 }
 
 .record[data-status='reverted'] .record__title,

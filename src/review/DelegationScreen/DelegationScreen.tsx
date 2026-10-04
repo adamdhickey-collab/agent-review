@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { Badge, Button, Icon } from '../../components';
+import { Badge, Button, Disclosure, Icon } from '../../components';
 import { useStore } from '../../app/store';
 import { account, activeRule, ruleText, waitingOn, whyAsking, wouldSettle, type Pattern, type Work } from '../../data/delegation';
-import { relativeTime } from '../format';
+import { plural, relativeTime } from '../format';
 import { OutcomeSummary } from '../OutcomeSummary/OutcomeSummary';
 import { DecisionRequest, type RulePreview } from '../DecisionRequest/DecisionRequest';
 import { WorkRecord } from '../WorkRecord/WorkRecord';
@@ -29,7 +29,33 @@ import { Inline } from '../Inline';
    state is an action on the store's reducer (data/delegation.ts). After an
    answer the card that asked is gone, so focus goes to what comes next: the
    next question's section, or the account once none is left. What happened
-   is said in a visible line that is also a live region. */
+   is said in a visible line that is also a live region.
+
+   READ AT A GLANCE, SINCE 2026-10-04. The screen said everything in
+   sentences, and a person arriving at it read a paragraph before they knew
+   how the run had gone. Now: the simulation is a labelled strip with a
+   real button to reset it; the header is who and when on one line and the
+   title, with the request one press away; the account is a bar and badges
+   (OutcomeSummary); each decision is its answers (DecisionRequest); the
+   completed work labels its check columns once, marks only the work that
+   was not done on its own, and folds the routine swaps, where every check
+   passed and nothing needed judgment, into one row; and the boundaries are
+   three counted rows (Boundaries). Nothing was removed that the person can
+   act on, and nothing simulated is said as if it were real. */
+
+/* Work with nothing to look at: made on its own, every check passed on the
+   first run, nothing chosen by meaning. Folded into one row. */
+function routine(w: Work): boolean {
+  return (
+    w.status === 'made' &&
+    w.basis?.kind === 'boundary' &&
+    !w.unchecked &&
+    (w.checks ?? []).every((c) => c.state === 'passed' && !c.earlier)
+  );
+}
+
+/* The check columns over the completed work, in the order the marks are. */
+const COLUMNS = ['Lint', 'Pixels', 'Axe'];
 
 function latest(w: Work): string {
   return w.history[w.history.length - 1]?.at ?? '';
@@ -65,18 +91,30 @@ export function DelegationScreen() {
   );
 
   const done = [...a.made, ...a.reverted, ...a.left].sort((x, y) => latest(y).localeCompare(latest(x)));
+  const notable = done.filter((w) => !routine(w));
+  const easy = done.filter(routine);
   const asking = a.asking;
+
+  const record = (w: Work) => (
+    <WorkRecord
+      work={w}
+      boundaries={s.boundaries}
+      rule={w.basis?.kind === 'rule' ? s.rules.find((r) => w.basis?.kind === 'rule' && r.id === w.basis.ruleId) : undefined}
+      onRevert={() => delegate({ type: 'revert', id: w.id })}
+      onRestore={() => delegate({ type: 'restore', id: w.id })}
+    />
+  );
 
   return (
     <div className="delegation">
       <div className="delegation__sim" role="note" aria-label="About this screen">
-        <Badge tone="neutral" icon="info">
+        <Badge tone="accent" icon="play">
           Simulated
         </Badge>
-        <p>A sample run, played back the same way every time. No model is running, and nothing here touches a real repository.</p>
+        <p>A sample run, played back the same way every time. No model runs, and no real repository is touched.</p>
         <Button
           size="compact"
-          variant="ghost"
+          variant="secondary"
           leadingIcon="undo"
           onClick={() => {
             resetDelegation();
@@ -91,18 +129,19 @@ export function DelegationScreen() {
         <div className="delegation__main">
           <header className="delegation__header">
             <p className="delegation__by">
-              <Icon name="bot" size={14} />
+              <Icon name="bot" size={16} />
               <span>
-                Delegated to {s.brief.agent.name} by {s.brief.by.name} <span aria-hidden="true">·</span> {relativeTime(s.brief.delegatedAt)}{' '}
-                <span aria-hidden="true">·</span> last active {s.brief.lastActive} <span aria-hidden="true">·</span> <code>{s.brief.repo}</code>
+                Delegated to {s.brief.agent.name} by {s.brief.by.name} <span aria-hidden="true">·</span> {relativeTime(s.brief.delegatedAt)}
               </span>
             </p>
             <h1 ref={top} className="delegation__title" tabIndex={-1}>
               {s.brief.title}
             </h1>
-            <p className="delegation__request">
-              <span className="delegation__request-label">The request</span> {s.brief.request}
-            </p>
+            <Disclosure className="delegation__request" summary={`${s.brief.by.name.split(' ')[0]}’s request`}>
+              <p>
+                {s.brief.request} <span className="delegation__request-meta">Last active {s.brief.lastActive}, in <code>{s.brief.repo}</code>.</span>
+              </p>
+            </Disclosure>
           </header>
 
           <OutcomeSummary ref={lead} state={s} />
@@ -133,23 +172,42 @@ export function DelegationScreen() {
             </section>
           ) : null}
 
-          <section className="delegation__section" aria-labelledby="done-title">
-            <h2 id="done-title" className="delegation__h2">
-              Completed work <span className="delegation__count">{done.length}</span>
-            </h2>
-            <p className="delegation__hint">Each was merged under a boundary or a decision of yours. Open one to see what changed, why, and what the checks did and didn’t establish.</p>
+          <section className="delegation__section delegation__done" aria-labelledby="done-title">
+            <div className="delegation__done-head">
+              <h2 id="done-title" className="delegation__h2">
+                Completed work <span className="delegation__count">{done.length}</span>
+              </h2>
+              <p className="delegation__columns" aria-hidden="true">
+                {COLUMNS.map((c) => (
+                  <span key={c}>{c}</span>
+                ))}
+              </p>
+            </div>
+            <p className="delegation__hint">Done on its own unless marked. Open one for what changed, why, and what the checks established.</p>
             <ul className="delegation__records">
-              {done.map((w) => (
-                <li key={w.id}>
-                  <WorkRecord
-                    work={w}
-                    boundaries={s.boundaries}
-                    rule={w.basis?.kind === 'rule' ? s.rules.find((r) => w.basis?.kind === 'rule' && r.id === w.basis.ruleId) : undefined}
-                    onRevert={() => delegate({ type: 'revert', id: w.id })}
-                    onRestore={() => delegate({ type: 'restore', id: w.id })}
-                  />
-                </li>
+              {notable.map((w) => (
+                <li key={w.id}>{record(w)}</li>
               ))}
+              {easy.length ? (
+                <li>
+                  <Disclosure
+                    className="delegation__routine"
+                    summary={`${plural(easy.length, 'routine swap')}`}
+                    meta={
+                      <span className="delegation__routine-meta">
+                        <Icon name="status-passed" size={16} />
+                        Every check passed
+                      </span>
+                    }
+                  >
+                    <ul>
+                      {easy.map((w) => (
+                        <li key={w.id}>{record(w)}</li>
+                      ))}
+                    </ul>
+                  </Disclosure>
+                </li>
+              ) : null}
             </ul>
           </section>
         </div>

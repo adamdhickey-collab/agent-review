@@ -9,7 +9,10 @@
 }
 
 /* Said first and in words: this is a simulation. A strip, not a banner to
-   dismiss, because it stays true for as long as the page is open. */
+   dismiss, because it stays true for as long as the page is open. Its reset
+   is a secondary Button, outlined, rather than the ghost it was: a ghost's
+   grey icon and words on this grey strip were the hardest thing on the
+   screen to find. */
 .delegation__sim {
   display: flex;
   flex-wrap: wrap;
@@ -56,7 +59,8 @@
 
 .delegation__by .icon {
   flex: none;
-  margin-top: calc((var(--text-sm) * var(--leading-ui) - 14px) / 2); /* centred on the line */
+  margin-top: calc((var(--text-sm) * var(--leading-ui) - var(--space-4)) / 2); /* a 16px icon, centred on the line */
+  color: var(--color-text);
 }
 
 .delegation__title {
@@ -70,17 +74,27 @@
   outline: none; /* destinations focus is sent to, as a screen's heading is */
 }
 
+/* The request as it was written, one press away: the title says what the
+   job is, and the account below says how far it got. */
 .delegation__request {
   max-width: 44rem;
-  color: var(--color-text-secondary);
-  line-height: var(--leading-body);
+  border-top: 0;
 }
 
-.delegation__request-label {
-  margin-right: var(--space-1);
-  color: var(--color-text-muted);
+.delegation__request > .disclosure__summary {
+  align-self: flex-start;
+  padding: 0;
+  color: var(--color-text-secondary);
   font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+}
+
+.delegation__request > .disclosure__body {
+  padding-top: var(--space-1);
+  padding-bottom: 0;
+}
+
+.delegation__request-meta {
+  color: var(--color-text-muted);
 }
 
 /* What just happened, in a sentence. Empty until something does; a live
@@ -124,7 +138,37 @@
   line-height: var(--leading-body);
 }
 
-/* The completed work is one panel of rows, as the queue is. */
+/* The completed work is one panel of rows, as the queue is. Its check
+   columns are named once, over the marks, at the width each mark's column
+   takes in a row (WorkRecord reads --record-mark-width); the heading row
+   ends where a row's summary does, inside the panel's edge. On a phone a
+   row's marks wrap under its title, so the names would not sit over them,
+   and each mark's own label says which check it is. */
+.delegation__done {
+  --record-mark-width: calc(var(--space-8) + var(--space-2));
+}
+
+.delegation__done-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.delegation__columns {
+  display: flex;
+  gap: var(--space-1);
+  padding-right: calc(var(--space-4) + var(--border-width));
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+
+.delegation__columns span {
+  width: var(--record-mark-width);
+  text-align: center;
+}
+
 .delegation__records {
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
@@ -132,8 +176,33 @@
   overflow: hidden;
 }
 
-.delegation__records > li:first-child > .record {
+.delegation__records > li:first-child > .disclosure {
   border-top: 0;
+}
+
+/* The routine swaps, folded to one row in the panel's own row style; open,
+   their rows run under it as the others do. */
+.delegation__routine > .disclosure__summary {
+  padding: var(--space-3) var(--space-4);
+}
+
+.delegation__routine > .disclosure__body {
+  padding: 0;
+}
+
+.delegation__routine .record {
+  background: var(--color-canvas); /* a step down from the panel, so the folded rows read as one group when open */
+}
+
+.delegation__routine-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+}
+
+.delegation__routine-meta .icon {
+  color: var(--color-success);
 }
 
 .delegation__aside {
@@ -152,5 +221,16 @@
 @media (max-width: 40rem) {
   .delegation {
     padding: var(--space-2);
+  }
+
+  .delegation__columns {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .delegation__request > .disclosure__summary,
+  .delegation__routine > .disclosure__summary {
+    min-height: var(--control-height-touch);
   }
 }
