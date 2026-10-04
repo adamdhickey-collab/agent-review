@@ -95,6 +95,11 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
           </>
         )}
       </p>
+      {quiet ? (
+        <p className="outcome__sub">
+          {plural(a.made.length, 'change')} made and checked. Completed work is below.
+        </p>
+      ) : null}
 
       <div className="outcome__progress">
         <p className="outcome__share">

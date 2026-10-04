@@ -54,6 +54,7 @@ export const Quiet: Story = {
   args: { state: quiet },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByText('Nothing needs your attention.')).toBeInTheDocument();
+    await expect(within(canvasElement).getByText('13 changes made and checked. Completed work is below.')).toBeInTheDocument();
   },
 };
 
