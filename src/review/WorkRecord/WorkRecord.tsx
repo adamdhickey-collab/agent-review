@@ -35,8 +35,12 @@ export interface WorkRecordProps {
   open?: boolean;
 }
 
-const BASIS: Record<NonNullable<Work['basis']>['kind'], { label: string; tone: BadgeTone }> = {
-  boundary: { label: 'On its own', tone: 'neutral' },
+/* What a closed row says about its authority. Work done on its own is the
+   ordinary case and carries no badge (the section says "on its own unless
+   marked"): seven grey "On its own" pills in a column said nothing a reader
+   needed, and made the three that did say something harder to see. */
+const BASIS: Record<NonNullable<Work['basis']>['kind'], { label: string; tone: BadgeTone } | undefined> = {
+  boundary: undefined,
   rule: { label: 'Your rule', tone: 'accent' },
   answer: { label: 'Your answer', tone: 'accent' },
   'allowed-once': { label: 'Allowed once', tone: 'warning' },

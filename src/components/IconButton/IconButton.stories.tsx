@@ -69,7 +69,7 @@ export const AllIcons: Story = {
     </ul>
   ),
   parameters: {
-    docs: { description: { story: 'Every icon in the set, each as an IconButton labelled with its own name. The line set is inline SVG on a 24 grid at a 1.75 stroke. The six status-* marks at the end are the other drawing: solid, on a 16 grid, for the sizes a status is read at (TestStatus has them in use). A new icon goes into Icon.tsx and appears here.' } },
+    docs: { description: { story: 'Every icon in the set, each as an IconButton labelled with its own name. The line set is inline SVG on a 24 grid, with a stroke set for the size it is shown at (the Icon’s AtEverySize story). The six status-* marks at the end are the other drawing: solid, on a 16 grid, for the sizes a status is read at (TestStatus has them in use). A new icon goes into Icon.tsx and appears here.' } },
   },
 };
 

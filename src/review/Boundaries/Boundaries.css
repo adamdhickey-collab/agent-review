@@ -24,18 +24,51 @@
   line-height: var(--leading-body);
 }
 
-.bounds__group {
+/* The three groups, a line each, open to their sentences. */
+.bounds__groups {
+  margin-top: calc(var(--space-2) * -1);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.bounds__group > .disclosure__summary {
+  padding: var(--space-2) 0;
+}
+
+.bounds__group > .disclosure__body {
+  padding-bottom: var(--space-3);
+}
+
+.bounds__group .disclosure__meta {
+  font-variant-numeric: tabular-nums;
+}
+
+.bounds__head {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.bounds__group[data-group='own'] .bounds__head .icon {
+  color: var(--color-success);
+}
+
+.bounds__group[data-group='asks'] .bounds__head .icon {
+  color: var(--color-accent);
+}
+
+.bounds__group[data-group='outside'] .bounds__head .icon {
+  color: var(--color-warning);
+}
+
+.bounds__rules {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-.bounds__head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
+.bounds__rules > .bounds__head {
+  color: var(--color-text);
+  font-size: var(--text-md);
   font-weight: var(--weight-medium);
 }
 
@@ -84,11 +117,6 @@
 .bounds__group[data-group='outside'] .bounds__n {
   background: var(--color-warning-subtle);
   color: var(--color-warning);
-}
-
-.bounds__group--rules {
-  padding-top: var(--space-4);
-  border-top: var(--border-width) solid var(--color-border);
 }
 
 .bounds__empty {
@@ -199,6 +227,7 @@
 }
 
 @media (pointer: coarse) {
+  .bounds__group > .disclosure__summary,
   .rule .checkbox {
     min-height: var(--control-height-touch);
   }
