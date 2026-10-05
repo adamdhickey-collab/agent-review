@@ -146,17 +146,14 @@
   font-size: var(--text-sm);
 }
 
-/* The bar carries no accent. The theme toggle, pressed, is a neutral step
-   up from the bar, and who you are is a neutral disc: blue in the chrome
-   is for the one thing a screen asks you to do, and the bar asks nothing. */
+/* The bar carries no accent: who you are is a neutral disc, and its two
+   buttons are plain icon buttons. Blue in the chrome is for the one thing a
+   screen asks you to do, and the bar asks nothing. */
 .shell__context .icon-btn + .icon-btn {
   margin-left: calc(var(--space-3) * -1); /* the two buttons are a pair, closer than the bar's gap */
 }
 
-.shell__context .icon-btn[aria-pressed='true'] {
-  background: var(--color-surface-sunken);
-  color: var(--color-text);
-}
+
 
 .shell__repo {
   display: inline-flex;

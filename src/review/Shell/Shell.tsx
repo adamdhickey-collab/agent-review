@@ -23,7 +23,10 @@ import './Shell.css';
    weight on a screen is the screen's own heading. Two places, and two
    links out of the product (the Storybook and the source), which are not
    places in it and so are a second, quieter nav on the right, before the
-   theme toggle (a pressed button, app/useTheme.ts: pressed is dark).
+   theme toggle. The toggle shows where a press takes you: a sun while the
+   review is dark, a moon while it is light, and its name says the same
+   ("Switch to light theme"). The review is dark until a person chooses
+   otherwise (app/useTheme.ts).
 
    The keyboard button opens the list of shortcuts, and so does a question
    mark pressed anywhere a person is not typing (app/shortcuts.ts has the
@@ -98,7 +101,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
             aria-haspopup="dialog"
             onClick={() => setSheet(true)}
           />
-          <IconButton icon="moon" label="Dark theme" pressed={theme === 'dark'} onClick={toggle} />
+          <IconButton icon={theme === 'dark' ? 'sun' : 'moon'} label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} onClick={toggle} />
           <span className="shell__repo">
             <Icon name="git-branch" size={14} />
             <code>relay/web</code>

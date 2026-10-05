@@ -17,21 +17,15 @@ html {
   -webkit-font-smoothing: antialiased;
   text-size-adjust: 100%;
   font-optical-sizing: none; /* the product's type: Inter's text cut at every size, as it always was */
-  color-scheme: light;
+  color-scheme: dark; /* the review's default; see the theme, below */
 }
 
 /* The theme. Every color token is light-dark(light, dark) (tokens.css), so
-   a theme is nothing but a color-scheme: the reader's system setting
-   unless they chose one (data-theme on the root, set by the bar's toggle
-   and remembered), and a chosen one wins in either direction. data-theme
-   works on any element, which is how a story renders one screen in the
-   dark without the rest of the Storybook following it. */
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme='light']) {
-    color-scheme: dark;
-  }
-}
-
+   a theme is nothing but a color-scheme. The review is dark unless a person
+   chose light (data-theme on the root, set by the bar's toggle and
+   remembered); it does not follow the system setting. data-theme works on
+   any element, which is how a story renders one screen in the other theme
+   without the rest of the Storybook following it. */
 [data-theme='dark'] {
   color-scheme: dark;
 }
