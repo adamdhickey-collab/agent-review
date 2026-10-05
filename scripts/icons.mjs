@@ -63,6 +63,7 @@ const MAP = {
   smartphone: ['device-mobile', 'bold'],
   tablet: ['device-tablet', 'bold'],
   monitor: ['monitor', 'bold'],
+  keyboard: ['keyboard', 'bold'],
   /* Meaning and state: solid. */
   alert: ['warning', 'fill'],
   info: ['info', 'fill'],
@@ -78,6 +79,7 @@ const MAP = {
   send: ['paper-plane-tilt', 'fill'],
   lock: ['lock', 'fill'],
   moon: ['moon', 'fill'],
+  sun: ['sun', 'fill'],
   'message-question': ['chat-circle-dots', 'fill'],
   /* How something went: a shape per state, so the state survives without its colour. */
   'status-passed': ['check-circle', 'fill'],

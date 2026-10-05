@@ -1,7 +1,9 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Icon, IconButton } from '../../components';
 import type { Route } from '../../app/router';
 import { useTheme } from '../../app/useTheme';
+import { opensSheet, useSingleKeys } from '../../app/shortcuts';
+import { ShortcutSheet } from '../ShortcutSheet/ShortcutSheet';
 import './Shell.css';
 
 /* The chrome: one bar. The product's name, where you are, and who you
@@ -21,10 +23,32 @@ import './Shell.css';
    weight on a screen is the screen's own heading. Two places, and two
    links out of the product (the Storybook and the source), which are not
    places in it and so are a second, quieter nav on the right, before the
-   theme toggle (a pressed button, app/useTheme.ts: pressed is dark). */
+   theme toggle. The toggle shows where a press takes you: a sun while the
+   review is dark, a moon while it is light, and its name says the same
+   ("Switch to light theme"). The review is dark until a person chooses
+   otherwise (app/useTheme.ts).
+
+   The keyboard button opens the list of shortcuts, and so does a question
+   mark pressed anywhere a person is not typing (app/shortcuts.ts has the
+   rules). The button is the way in that is always there: the key can be
+   switched off, and a pointer has no question mark. It is not on a phone's
+   bar, where there is no keyboard to have shortcuts for. */
 
 export function Shell({ route, children }: { route: Route; children: ReactNode }) {
   const { theme, toggle } = useTheme();
+  const singleKeys = useSingleKeys();
+  const [sheet, setSheet] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!opensSheet(e)) return;
+      e.preventDefault();
+      setSheet(true);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   return (
     <div className="shell" data-surface="review">
       <a
@@ -68,7 +92,16 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
           </nav>
         </div>
         <div className="shell__context">
-          <IconButton icon="moon" label="Dark theme" pressed={theme === 'dark'} onClick={toggle} />
+          <IconButton
+            className="shell__shortcuts"
+            icon="keyboard"
+            label="Keyboard shortcuts"
+            shortcut={singleKeys ? '?' : undefined}
+            aria-keyshortcuts={singleKeys ? 'Shift+/' : undefined}
+            aria-haspopup="dialog"
+            onClick={() => setSheet(true)}
+          />
+          <IconButton icon={theme === 'dark' ? 'sun' : 'moon'} label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} onClick={toggle} />
           <span className="shell__repo">
             <Icon name="git-branch" size={14} />
             <code>relay/web</code>
@@ -85,6 +118,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
       <main id="main" className="shell__main" tabIndex={-1}>
         {children}
       </main>
+      <ShortcutSheet open={sheet} onClose={() => setSheet(false)} />
     </div>
   );
 }

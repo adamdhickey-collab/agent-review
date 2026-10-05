@@ -1,4 +1,5 @@
 import { Checkbox, EmptyState, Icon } from '../../components';
+import { listKeys } from '../../app/shortcuts';
 import { FINDING_KIND_LABEL, SEVERITY_LABEL, type Finding, type Severity } from '../../data/types';
 import { FindingEvidence } from '../FindingEvidence/FindingEvidence';
 import './FindingList.css';
@@ -24,6 +25,10 @@ export interface FindingListProps {
   onOpenStory?: (storyId: string) => void;
 }
 
+/* J and K, and the arrows, move between the findings while one has focus,
+   each by the button that opens it. */
+const onListKey = listKeys('.finding', '.finding__button');
+
 export function FindingList({ findings, selectedId, onSelect, included, onInclude, onOpenStory }: FindingListProps) {
   const sorted = [...findings].sort((a, b) => ORDER.indexOf(a.severity) - ORDER.indexOf(b.severity));
   if (sorted.length === 0) {
@@ -38,7 +43,7 @@ export function FindingList({ findings, selectedId, onSelect, included, onInclud
           Checked findings go into the message if you return this change: {chosen} of {sendable.length}.
         </p>
       ) : null}
-      <ol className="findings">
+      <ol className="findings" onKeyDown={onListKey}>
         {sorted.map((f) => {
           const open = f.id === selectedId;
           const returnable = f.correction.length > 0;

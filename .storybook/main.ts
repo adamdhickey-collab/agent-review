@@ -1,4 +1,6 @@
 import type { StorybookConfig } from '@storybook/react-vite';
+import { mergeConfig } from 'vite';
+import { CSS_TARGET } from '../build-targets';
 
 /* The Storybook is three things at once: the place the system's states are
    inspected, the test runner for those states (addon-vitest renders every
@@ -18,5 +20,10 @@ const config: StorybookConfig = {
   features: {
     componentsManifest: true,
   },
+  /* The Storybook's Vite builder drops the project's `build` options, so the
+     CSS target that keeps light-dark() native (build-targets.ts) is handed
+     over here. Without it the built Storybook rewrites every token on the
+     root and a product story in a dark review shows Relay dark. */
+  viteFinal: (viteConfig) => mergeConfig(viteConfig, { build: { cssTarget: CSS_TARGET } }),
 };
 export default config;

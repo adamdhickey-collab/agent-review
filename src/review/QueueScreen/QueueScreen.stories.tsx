@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { StoreProvider } from '../../app/store';
+import { setSingleKeys } from '../../app/shortcuts';
 import { QueueScreen } from './QueueScreen';
 
 const meta = {
@@ -109,5 +110,37 @@ export const Dark: Story = {
   globals: { theme: 'dark' },
   parameters: {
     docs: { description: { story: 'The queue in the dark theme: the status marks, the lanes and the sample badges on dark grounds, with axe on all of it.' } },
+  },
+};
+
+export const ListKeys: Story = {
+  parameters: {
+    docs: { description: { story: 'With a row’s title focused, J and the down arrow move to the next row and K and the up arrow to the one before, across the state groups. At the last row J does nothing. With single-key shortcuts switched off the letters do nothing and the arrows still work. Nothing here opens, accepts or changes anything: the keys only move focus.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const links = within(canvasElement).getAllByRole('link');
+    links[0].focus();
+    await userEvent.keyboard('j');
+    await expect(links[1]).toHaveFocus();
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(links[2]).toHaveFocus();
+    await userEvent.keyboard('k');
+    await expect(links[1]).toHaveFocus();
+    await userEvent.keyboard('{ArrowUp}');
+    await expect(links[0]).toHaveFocus();
+    links[links.length - 1].focus();
+    await userEvent.keyboard('j');
+    await expect(links[links.length - 1]).toHaveFocus();
+
+    setSingleKeys(false);
+    try {
+      links[0].focus();
+      await userEvent.keyboard('j');
+      await expect(links[0]).toHaveFocus();
+      await userEvent.keyboard('{ArrowDown}');
+      await expect(links[1]).toHaveFocus();
+    } finally {
+      setSingleKeys(true);
+    }
   },
 };

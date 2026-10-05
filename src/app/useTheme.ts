@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react';
-import { useMediaQuery } from './useMediaQuery';
 
-/* The review's theme. Light or dark is the reader's system setting until
-   they choose one in the bar; a choice is remembered and wins in either
-   direction. The choice is one attribute on the root, data-theme, which the
-   base stylesheet turns into a color-scheme; every color is
-   light-dark(light, dark) in tokens.css, so nothing else has to know.
+/* The review's theme. Dark, unless a person chose light in the bar; a choice
+   is remembered. Dark is the default by decision (2026-10-05), and the
+   review does not follow the system setting: every first visit sees the
+   same thing, which is also what the review's pictures show. The choice is one
+   attribute on the root, data-theme, which the base stylesheet turns into a
+   color-scheme; every color is light-dark(light, dark) in tokens.css, so
+   nothing else has to know.
 
    The product in the preview frame does not follow it. Its surface is
    always light (app/global.css), because the frame shows Relay as the
    checks measured it.
 
    index.html applies a remembered choice before the first paint, so a
-   reader who chose dark does not see a light page first; this hook keeps
+   person who chose light does not see a dark page first; this hook keeps
    the attribute and the storage in step after that. Storage can throw (a
    private window, a blocked site), and then the choice lasts for the visit. */
 
@@ -30,14 +31,12 @@ function remembered(): Theme | null {
 }
 
 export function useTheme(): { theme: Theme; toggle: () => void } {
-  const system: Theme = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
   const [choice, setChoice] = useState<Theme | null>(remembered);
-  const theme = choice ?? system;
+  const theme: Theme = choice ?? 'dark';
 
   useEffect(() => {
-    if (choice) document.documentElement.dataset.theme = choice;
-    else delete document.documentElement.dataset.theme;
-  }, [choice]);
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   const toggle = () => {
     const next: Theme = theme === 'dark' ? 'light' : 'dark';

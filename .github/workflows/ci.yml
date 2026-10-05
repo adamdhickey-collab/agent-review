@@ -24,6 +24,8 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run lint:tokens
+      - run: npm run lint:icons
+      - run: npm run lint:build
       - run: npm run test:stories
 
   visual:

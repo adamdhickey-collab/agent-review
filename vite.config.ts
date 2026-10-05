@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { playwright } from '@vitest/browser-playwright';
+import { CSS_TARGET } from './build-targets';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -16,6 +17,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   base: '/agent-review/',
   plugins: [react()],
+  build: { cssTarget: CSS_TARGET }, /* why: build-targets.ts */
   test: {
     projects: [
       {

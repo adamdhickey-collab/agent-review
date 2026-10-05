@@ -7,6 +7,11 @@ import { devices, expect, test, type Page } from '@playwright/test';
 
 const WIDTHS = [1280, 768] as const;
 
+/* The review is dark until a person chooses light (app/useTheme.ts). The
+   baselines that are not named -dark are of the light theme, so those tests
+   make that choice first, the way the bar's toggle does: by remembering it. */
+const chooseLight = () => localStorage.setItem('agent-review:theme', 'light');
+
 async function settle(page: Page) {
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(100);
@@ -15,6 +20,9 @@ async function settle(page: Page) {
 for (const width of WIDTHS) {
   test.describe(`at ${width}`, () => {
     test.use({ viewport: { width, height: 900 } });
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript(chooseLight);
+    });
 
     test('the delegated work', async ({ page }) => {
       await page.goto('#/');
@@ -45,6 +53,9 @@ for (const width of WIDTHS) {
 test.describe('on a phone, 375', () => {
   const { defaultBrowserType: _ignored, ...phone } = devices['iPhone 13'];
   test.use({ ...phone, viewport: { width: 375, height: 812 }, deviceScaleFactor: 1 });
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(chooseLight);
+  });
 
   async function open(page: Page, hash: string) {
     await page.goto('about:blank');
@@ -76,12 +87,12 @@ test.describe('on a phone, 375', () => {
   });
 });
 
-/* The dark theme, at one width: the three screens under a reader's system
-   setting, with no choice made. The change is the one to look at: the
-   review is dark and the product in its frame is not, because the frame is
-   the product's surface and that surface is always light. */
-test.describe('in the dark theme, at 1280', () => {
-  test.use({ viewport: { width: 1280, height: 900 }, colorScheme: 'dark' });
+/* The dark theme, at one width: what a first visit sees, with no choice
+   made. The change is the one to look at: the review is dark and the product
+   in its frame is not, because the frame is the product's surface and that
+   surface is always light. */
+test.describe('in the dark theme, the default, at 1280', () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
 
   test('the delegated work', async ({ page }) => {
     await page.goto('#/');
@@ -103,6 +114,13 @@ test.describe('in the dark theme, at 1280', () => {
 });
 
 test.describe('the product screens', () => {
+  /* The product is light whatever the review is, so the theme makes no
+     difference to it; the choice is made so the page behind the frame is
+     light too, because the frame is a fraction of a pixel taller than a
+     whole number and the capture's last row shows what is behind it. */
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(chooseLight);
+  });
   for (const width of WIDTHS) {
     test(`customers, before, at ${width}`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });

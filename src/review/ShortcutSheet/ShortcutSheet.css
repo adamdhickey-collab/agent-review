@@ -1,0 +1,128 @@
+/* The browser's dialog, restyled to the review's surface. Its padding is the
+   panel's, so a press on the dialog's own box is a press outside the panel. */
+.shortcuts {
+  width: min(34rem, calc(100% - var(--space-8)));
+  max-height: calc(100% - var(--space-8));
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--color-text);
+  overflow: visible;
+}
+
+.shortcuts::backdrop {
+  background: var(--color-scrim);
+}
+
+.shortcuts__panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - var(--space-8));
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-menu);
+  overflow: auto;
+}
+
+.shortcuts__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+.shortcuts__title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.shortcuts__title:focus-visible {
+  outline: none; /* focus is sent here when the sheet opens, as it is to a screen's heading; a ring would frame a title */
+}
+
+.shortcuts__list {
+  padding: 0 var(--space-4);
+}
+
+.shortcuts__row {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+.shortcuts__row:last-child {
+  border-bottom: 0;
+}
+
+/* A keycap: the key as it is printed, in a box the height of a line. */
+.shortcuts__key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 var(--space-2);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+}
+
+.shortcuts__or {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.shortcuts__row dd {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.shortcuts__does {
+  font-weight: var(--weight-medium);
+}
+
+.shortcuts__where {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-ui);
+}
+
+.shortcuts__foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border-top: var(--border-width) solid var(--color-divider);
+  background: var(--color-canvas);
+}
+
+.shortcuts__note {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.shortcuts__note strong {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+@media (max-width: 40rem) {
+  .shortcuts__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+}
