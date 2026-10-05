@@ -21,7 +21,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The review queue: every change an agent has opened, newest first, with its state and the five validation lanes beside the title, then who and when. It is dense on purpose, because a reviewer scans it for the row that needs them rather than reading it. Below 48rem it is a list of cards instead of a table, because seven columns do not fit a phone and scrolling them sideways hides the two a reviewer decides on. The filter is a segmented control over the state, and it opens on Open, which is the question a reviewer arrives with. When a filter leaves nothing, the screen renders EmptyState rather than an empty table: on Open it says what will appear and when, and on any other filter it offers the way back. The screen owns the store and the filter; each row is a ReviewRow, or below 48rem each item is a ReviewCard.',
+          'The review queue: every change an agent has opened, grouped by the state it is in, with the five validation lanes beside the title, then who and when. A row is one line, 40px, and the state is said once above its group, with how many, not once on every line. It is dense on purpose, because a reviewer scans it for the row that needs them rather than reading it. Below 48rem it is a list of cards instead of a table, because seven columns do not fit a phone and scrolling them sideways hides the two a reviewer decides on. The filter is a segmented control over the state, and it opens on Open, which is the question a reviewer arrives with. When a filter leaves nothing, the screen renders EmptyState rather than an empty table: on Open it says what will appear and when, and on any other filter it offers the way back. The screen owns the store and the filter; each row is a ReviewRow, or below 48rem each item is a ReviewCard.',
       },
     },
   },
@@ -32,7 +32,25 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   parameters: {
-    docs: { description: { story: 'The whole scenario queue under the Open filter: three rows, one of them still validating.' } },
+    docs: { description: { story: 'The whole scenario queue under the Open filter: five rows in three groups, in the order a reviewer meets them (needs review, ready to accept, validating), each group headed by its state and how many.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const groups = Array.from(canvasElement.querySelectorAll('.queue__group'));
+    await expect(groups.map((g) => g.textContent)).toEqual(['Needs review3', 'Ready to accept1', 'Validating1']);
+    await expect(canvasElement.querySelectorAll('tbody .review-row').length).toBe(5);
+  },
+};
+
+export const OneLineRows: Story = {
+  parameters: {
+    docs: { description: { story: 'Every row is one line tall: the title, the branch and hash after it, then the lanes, with no wrapped line. The cells carry no border of their own; the row carries one. A row measures 40px.' } },
+  },
+  play: async ({ canvasElement }) => {
+    for (const row of Array.from(canvasElement.querySelectorAll('.review-row'))) {
+      await expect(Math.round(row.getBoundingClientRect().height)).toBeLessThanOrEqual(41);
+    }
+    const headers = Array.from(canvasElement.querySelectorAll('thead th')).map((th) => th.textContent);
+    await expect(headers).not.toContain('Status');
   },
 };
 
@@ -51,9 +69,10 @@ export const Filtered: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('radio', { name: 'Done' }));
     await expect(canvas.getByRole('radio', { name: 'Done' })).toHaveAttribute('aria-checked', 'true');
-    await expect(canvas.getAllByRole('rowheader')).toHaveLength(2);
-    await expect(canvas.getByRole('rowheader', { name: /Close account/ })).toBeInTheDocument();
-    await expect(canvas.getByRole('rowheader', { name: /density toggle/ })).toBeInTheDocument();
+    await expect(canvas.getAllByRole('link')).toHaveLength(2);
+    await expect(canvas.getByRole('link', { name: /Close account/ })).toBeInTheDocument();
+    await expect(canvas.getByRole('link', { name: /density toggle/ })).toBeInTheDocument();
+    await expect(Array.from(canvasElement.querySelectorAll('.queue__group')).map((g) => g.textContent)).toEqual(['Accepted1', 'Rejected1']);
   },
 };
 

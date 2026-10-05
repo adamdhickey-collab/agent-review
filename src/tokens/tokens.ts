@@ -16,7 +16,7 @@ export const TOKEN_GROUPS = {
   space: ['--space-1', '--space-2', '--space-3', '--space-4', '--space-5', '--space-6', '--space-8'],
   control: ['--control-height', '--control-height-compact', '--control-height-touch', '--control-padding-x', '--control-padding-x-compact'],
   shape: ['--radius-sm', '--radius-md', '--radius-lg', '--radius-sm-product', '--radius-md-product', '--radius-sm-review', '--radius-md-review', '--border-width'],
-  ground: ['--color-canvas', '--color-surface', '--color-surface-sunken', '--color-surface-hover'],
+  ground: ['--color-canvas', '--color-surface', '--color-surface-sunken', '--color-surface-hover', '--color-surface-hover-strong'],
   line: ['--color-border', '--color-border-control'],
   ink: ['--color-text', '--color-text-secondary', '--color-text-muted', '--color-text-on-accent'],
   accent: ['--color-accent', '--color-accent-hover', '--color-accent-subtle', '--color-accent-border'],

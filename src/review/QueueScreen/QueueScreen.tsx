@@ -1,19 +1,28 @@
 import { useState } from 'react';
-import { EmptyState, HeaderCell, SegmentedControl, Table, Toolbar } from '../../components';
+import { EmptyState, HeaderCell, SegmentedControl, StatusIndicator, Table, Toolbar } from '../../components';
 import { useStore } from '../../app/store';
 import { useMediaQuery } from '../../app/useMediaQuery';
-import type { Change, ReviewState } from '../../data/types';
+import { REVIEW_STATE_LABEL, type Change, type ReviewState } from '../../data/types';
 import { ReviewCard } from '../ReviewCard/ReviewCard';
 import { ReviewRow } from '../ReviewRow/ReviewRow';
+import { STATE_TONE } from '../ReviewRow/ReviewParts';
 import './QueueScreen.css';
 
-/* The queue: every change an agent has opened, newest first, with its state
-   and the validation summary in five lanes beside the title. Dense on
-   purpose; a reviewer scans this for the row that needs them. Below 48rem it
-   is a list of cards, because the table's seven columns do not fit a phone
-   and scrolling them sideways hides the two a reviewer decides on. */
+/* The queue: every change an agent has opened, newest first within the state
+   it is in, with the validation summary in five lanes beside the title. Dense
+   on purpose; a reviewer scans this for the row that needs them. The rows
+   are grouped by state, so the state is said once, above them, with how
+   many, and not once on every line: a row is one line, 40px, and the group
+   a change is in is what a Status column used to repeat. Below 48rem it is a
+   list of cards, because the table's columns do not fit a phone and
+   scrolling them sideways hides the two a reviewer decides on; a card says
+   its own state, since a list of cards has no room for a header between
+   them. */
 
 type Filter = 'open' | 'returned' | 'done' | 'all';
+
+/** The table's columns: the change, validation, agent, requested by, opened, components. */
+const COLUMNS = 6;
 
 const FILTERS: { value: Filter; label: string; states: ReviewState[] }[] = [
   { value: 'open', label: 'Open', states: ['needs-review', 'ready', 'validating'] },
@@ -30,6 +39,8 @@ export function QueueScreen({ changes: given, list }: { changes?: Change[]; /** 
   const [filter, setFilter] = useState<Filter>('open');
   const states = FILTERS.find((f) => f.value === filter)!.states;
   const rows = changes.filter((c) => states.includes(c.state));
+  /* The groups, in the order a reviewer meets them, and only the ones with a change in them. */
+  const groups = states.map((state) => ({ state, rows: rows.filter((c) => c.state === state) })).filter((g) => g.rows.length > 0);
 
   return (
     <div className="queue">
@@ -66,7 +77,6 @@ export function QueueScreen({ changes: given, list }: { changes?: Change[]; /** 
           <thead>
             <tr>
               <HeaderCell>Change</HeaderCell>
-              <HeaderCell>Status</HeaderCell>
               <HeaderCell>Validation</HeaderCell>
               <HeaderCell>Agent</HeaderCell>
               <HeaderCell>Requested by</HeaderCell>
@@ -74,11 +84,19 @@ export function QueueScreen({ changes: given, list }: { changes?: Change[]; /** 
               <HeaderCell numeric>Components</HeaderCell>
             </tr>
           </thead>
-          <tbody>
-            {rows.map((c) => (
-              <ReviewRow key={c.id} change={c} />
-            ))}
-          </tbody>
+          {groups.map((g) => (
+            <tbody key={g.state}>
+              <tr className="queue__group">
+                <th scope="rowgroup" colSpan={COLUMNS}>
+                  <StatusIndicator tone={STATE_TONE[g.state]} label={REVIEW_STATE_LABEL[g.state]} live={g.state === 'validating'} />
+                  <span className="queue__group-count">{g.rows.length}</span>
+                </th>
+              </tr>
+              {g.rows.map((c) => (
+                <ReviewRow key={c.id} change={c} />
+              ))}
+            </tbody>
+          ))}
         </Table>
       )}
       {rows.some((c) => c.sample) ? (
