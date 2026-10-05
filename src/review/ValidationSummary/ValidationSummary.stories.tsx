@@ -76,3 +76,14 @@ export const Selectable: Story = {
     await expect(canvas.getByRole('button', { name: /^Visual/ })).toHaveAttribute('aria-pressed', 'false');
   },
 };
+
+export const OneLine: Story = {
+  parameters: {
+    docs: { description: { story: 'Each lane is its name and its answer on one line, "Visual  4 changes", at the control height. They were stacked, a name over its answer in a 7.5rem box, which made the strip 73px tall for five short facts. On a phone, where half a row cannot hold both, they stack again.' } },
+  },
+  play: async ({ canvasElement }) => {
+    for (const lane of Array.from(canvasElement.querySelectorAll('.validation__lane'))) {
+      await expect(Math.round(lane.getBoundingClientRect().height)).toBeLessThanOrEqual(32);
+    }
+  },
+};

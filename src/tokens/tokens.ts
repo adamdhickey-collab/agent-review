@@ -17,7 +17,7 @@ export const TOKEN_GROUPS = {
   control: ['--control-height', '--control-height-compact', '--control-height-touch', '--control-padding-x', '--control-padding-x-compact'],
   shape: ['--radius-sm', '--radius-md', '--radius-lg', '--radius-sm-product', '--radius-md-product', '--radius-sm-review', '--radius-md-review', '--border-width'],
   ground: ['--color-canvas', '--color-surface', '--color-surface-sunken', '--color-surface-hover', '--color-surface-hover-strong'],
-  line: ['--color-border', '--color-border-control'],
+  line: ['--color-border', '--color-divider', '--color-border-control'],
   ink: ['--color-text', '--color-text-secondary', '--color-text-muted', '--color-text-on-accent'],
   accent: ['--color-accent', '--color-accent-hover', '--color-accent-subtle', '--color-accent-border'],
   meaning: [

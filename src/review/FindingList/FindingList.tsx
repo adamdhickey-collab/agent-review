@@ -1,4 +1,4 @@
-import { Badge, Checkbox, EmptyState, Icon } from '../../components';
+import { Checkbox, EmptyState, Icon } from '../../components';
 import { FINDING_KIND_LABEL, SEVERITY_LABEL, type Finding, type Severity } from '../../data/types';
 import { FindingEvidence } from '../FindingEvidence/FindingEvidence';
 import './FindingList.css';
@@ -69,7 +69,7 @@ export function FindingList({ findings, selectedId, onSelect, included, onInclud
                   <span className="finding__text">
                     <span className="finding__title">{f.title}</span>
                     <span className="finding__meta">
-                      <Badge tone={f.severity === 'blocking' ? 'danger' : f.severity === 'decision' ? 'warning' : 'neutral'}>{SEVERITY_LABEL[f.severity]}</Badge>
+                      <span className="finding__severity">{SEVERITY_LABEL[f.severity]}</span>
                       <span className="finding__kind">{FINDING_KIND_LABEL[f.kind]}</span>
                       {f.rules.length ? (
                         <span className="finding__rules">

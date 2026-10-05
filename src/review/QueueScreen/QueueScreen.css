@@ -39,7 +39,7 @@
 }
 
 .queue__table .table__tr {
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-divider);
 }
 
 /* What the pointer is on is the row you can see. */
@@ -53,7 +53,7 @@
 .queue__group th {
   height: 2rem; /* the table head's height, a whole number of pixels */
   padding: 0 var(--table-pad-x);
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-divider);
   background: var(--color-canvas);
   text-align: left;
   font-size: var(--text-sm);
@@ -88,7 +88,7 @@
 /* What "Sample" on a row means, said once, under the rows. */
 .queue__note {
   padding: var(--space-3) var(--space-4);
-  border-top: var(--border-width) solid var(--color-border);
+  border-top: var(--border-width) solid var(--color-divider);
   color: var(--color-text-muted);
   font-size: var(--text-sm);
 }

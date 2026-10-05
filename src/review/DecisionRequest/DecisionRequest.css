@@ -250,7 +250,7 @@
   background: var(--color-surface-sunken);
   color: var(--color-text);
   font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
   font-variant-numeric: tabular-nums;
 }
 

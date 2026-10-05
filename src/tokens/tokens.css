@@ -118,6 +118,12 @@
      reader has to find (3.1:1 on white, for WCAG 1.4.11; 4.3:1 on the dark
      surface). */
   --color-border: light-dark(#e4e4e8, oklch(0.31 0.008 285));
+  /* A line inside a panel: between the rows of a list, between a panel's
+     parts. The border above is for a panel's edge and a region's band; a
+     divider is the same line one step fainter (1.15:1 on white where the
+     border is 1.30), so a list of rows is read as rows and not as a stack of
+     rules. Decorative, like the border: nothing depends on seeing it. */
+  --color-divider: light-dark(oklch(0.945 0.004 286), oklch(0.27 0.006 285));
   --color-border-control: light-dark(#8c8c96, oklch(0.56 0.014 285));
 
   /* Ink. Three steps. Muted is the quietest text allowed, and it clears

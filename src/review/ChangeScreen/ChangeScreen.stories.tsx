@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 import { StoreProvider } from '../../app/store';
 import { ChangeScreen } from './ChangeScreen';
 
@@ -78,5 +79,19 @@ export const Dark: Story = {
   parameters: {
     ...WithFindingOpen.parameters,
     docs: { description: { story: 'A change in the dark theme. The review around the preview is dark; the product inside the frame is not, because the frame is the product’s surface and that surface is always light: the reviewer sees Relay as the checks measured it, whatever the review is wearing.' } },
+  },
+};
+
+export const ComponentsTouchedAsWords: Story = {
+  parameters: {
+    docs: { description: { story: 'The components a change touched are plain words, not a row of pills; the one that is shared, so every screen that uses it moves, is the name in the warning ink with a triangle, and says "a shared component" to a screen reader, so it does not rest on colour.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const touched = canvasElement.querySelector('.change__touched') as HTMLElement;
+    await expect(touched.querySelectorAll('.badge').length).toBe(0);
+    const shared = touched.querySelectorAll('.change__component--shared');
+    await expect(shared.length).toBe(1);
+    await expect(shared[0].textContent).toContain('a shared component');
+    await expect(shared[0].querySelector('svg')).not.toBeNull();
   },
 };
