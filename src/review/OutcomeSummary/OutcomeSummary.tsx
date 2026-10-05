@@ -21,7 +21,18 @@ import './OutcomeSummary.css';
 
    The lead says whether anything needs the person. When nothing does, it
    says so first: the quiet state is the result the screen is for, so it
-   reads as finished rather than as an empty queue. */
+   reads as finished rather than as an empty queue.
+
+   What the person holds up is one segment, counted in literals and named
+   in the lead's own unit: "10 waiting on your 2 decisions". It was two,
+   "3 asking you" and "7 waiting on an answer", and neither reconciled with
+   the lead: the lead counts decisions, the legend counted literals without
+   saying so, and a reader who had just read "2 decisions need you" met a
+   3 and a 7. Every literal not yet merged or taken back hinges on those
+   decisions, the ones held behind a question as much as the question's
+   own, so the bar reads as progress: what is done, and what remains on
+   the person. It takes the waiting style rather than the warning fill,
+   because what it shows is remaining, not wrong. */
 
 const join = (parts: string[], word = 'and') =>
   parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} ${word} ${parts[parts.length - 1]}`;
@@ -32,7 +43,7 @@ const CHECKS: { name: CheckName; short: string }[] = [
   { name: 'Stories with axe', short: 'Axe' },
 ];
 
-type Segment = { kind: 'made' | 'asking' | 'waiting' | 'back'; n: number; label: string };
+type Segment = { kind: 'made' | 'waiting' | 'back'; n: number; label: string };
 
 export interface OutcomeSummaryProps {
   state: DelegationState;
@@ -42,11 +53,14 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
   const a = account(state);
   const quiet = a.asking.length === 0;
   const back = [...a.reverted, ...a.left];
+  /* A change held behind a question with nothing asking is a state the
+     reducer never reaches (answering a question settles or asks everything
+     held behind it), so it gets no wording of its own beyond "waiting". */
+  const decisions = a.asking.length === 1 ? 'decision' : plural(a.asking.length, 'decision');
 
   const segments: Segment[] = [
     { kind: 'made' as const, n: a.valuesMade, label: 'merged' },
-    { kind: 'asking' as const, n: valuesIn(a.asking), label: 'asking you' },
-    { kind: 'waiting' as const, n: valuesIn(a.waiting), label: 'waiting on an answer' },
+    { kind: 'waiting' as const, n: valuesIn(a.asking) + valuesIn(a.waiting), label: a.asking.length ? `waiting on your ${decisions}` : 'waiting' },
     { kind: 'back' as const, n: valuesIn(back), label: 'reverted or left by you' },
   ].filter((s) => s.n > 0);
 

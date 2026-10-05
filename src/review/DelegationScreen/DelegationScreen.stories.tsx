@@ -58,6 +58,7 @@ export const Initial: Story = {
     await expect(a.made.length).toBe(7);
     await expect(a.valuesMade + a.literalsLeft).toBe(start.brief.literals);
     await expect(canvas.getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
+    await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('26 merged10 waiting on your 2 decisions');
     await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveTextContent('2');
     await expect(canvas.getByRole('heading', { name: /Completed work/ })).toHaveTextContent('7');
     await expect(canvas.getByText(/4 changes are held until you answer/)).toBeInTheDocument();
@@ -75,6 +76,7 @@ export const AfterARule: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('11 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
+    await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('34 merged2 waiting on your 2 decisions');
     await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
     await expect(canvas.getAllByText('Your rule')).toHaveLength(3);
     await expect(canvas.getByText('Active')).toBeInTheDocument();
@@ -89,6 +91,7 @@ export const AnsweredOnce: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('8 changes made and checked. 5 decisions need you.')).toBeInTheDocument();
+    await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('28 merged8 waiting on your 5 decisions');
     await expect(canvas.getAllByText(/A one-time answer doesn’t carry over to another change/)).toHaveLength(4);
     await expect(canvas.getByText(/None yet\./)).toBeInTheDocument();
   },
@@ -105,6 +108,7 @@ export const Quiet: Story = {
     await expect(canvas.queryByRole('heading', { name: /Needs you/ })).toBeNull();
     await expect(canvas.getByRole('heading', { name: /Completed work/ })).toHaveTextContent('13');
     await expect(canvas.getByText('All 36')).toBeInTheDocument();
+    await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('36 merged');
   },
 };
 
@@ -152,6 +156,7 @@ export const TheWholeLoop: Story = {
       await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
       await expect(canvas.getByText(/Rule saved\. Your rule settled 1 waiting change\./)).toBeInTheDocument();
       await expect(canvas.getByText('12 changes made and checked. 1 decision needs you.')).toBeInTheDocument();
+      await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('35 merged1 waiting on your decision');
     });
 
     await step('Revert one change the rule made, and the history keeps both', async () => {
@@ -163,6 +168,7 @@ export const TheWholeLoop: Story = {
       await expect(within(seats).getByText(/puts the literals back/)).toBeInTheDocument();
       await expect(canvas.getByText(/1 change reverted by you\./)).toBeInTheDocument();
       await expect(canvas.getByText(/The lint reports its 2 literals again\./)).toBeInTheDocument();
+      await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('33 merged1 waiting on your decision2 reverted or left by you');
     });
 
     await step('Revoke the rule; what it made stays', async () => {

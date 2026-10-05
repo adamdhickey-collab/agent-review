@@ -67,11 +67,6 @@
   --kind-edge: var(--color-success);
 }
 
-.outcome [data-kind='asking'] {
-  --kind-ground: var(--color-warning);
-  --kind-edge: var(--color-warning);
-}
-
 .outcome [data-kind='waiting'] {
   --kind-ground: var(--color-warning-subtle);
   --kind-edge: var(--color-warning);
