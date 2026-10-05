@@ -1,5 +1,6 @@
 import type { Preview } from '@storybook/react-vite';
 import '../src/app/global.css';
+import { IconSetContext } from '../src/components';
 
 /* The preview is the product's own canvas: the same tokens, the same base
    stylesheet, the same fonts. A story that looks right here looks right in
@@ -65,7 +66,9 @@ const preview: Preview = {
         <>
           <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Inter:opsz,wght@14..32,400..600&display=swap" />
           <div style={{ display: 'contents' }} data-surface={context.title.startsWith('Review/') ? 'review' : product ? 'product' : undefined}>
-            <Story />
+            <IconSetContext.Provider value={product ? 'product' : 'review'}>
+              <Story />
+            </IconSetContext.Provider>
           </div>
         </>
       );

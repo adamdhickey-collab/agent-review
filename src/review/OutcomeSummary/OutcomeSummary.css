@@ -184,7 +184,7 @@
 .outcome__lines .icon,
 .outcome__line .icon {
   flex: none;
-  margin-top: calc((var(--text-md) * var(--leading-body) - var(--space-4)) / 2);
+  margin-top: calc((var(--text-md) * var(--leading-body) - var(--icon-size)) / 2);
   color: var(--color-text-muted);
 }
 

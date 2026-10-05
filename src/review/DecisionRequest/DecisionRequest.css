@@ -165,7 +165,7 @@
 
 .ask__outcome .icon {
   flex: none;
-  margin-top: calc((var(--text-md) * var(--leading-body) - var(--space-4)) / 2);
+  margin-top: calc((var(--text-md) * var(--leading-body) - var(--icon-size)) / 2);
 }
 
 .ask__outcome [data-icon='check'] {
@@ -228,7 +228,7 @@
 
 .ask__bounds .icon {
   flex: none;
-  margin-top: calc((var(--text-sm) * var(--leading-body) - var(--space-4)) / 2);
+  margin-top: calc((var(--text-sm) * var(--leading-body) - var(--icon-size)) / 2);
 }
 
 .ask__bounds [data-group='asks'] .icon {

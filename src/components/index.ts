@@ -2,7 +2,7 @@
    `import { Button } from '../components'` and nothing about where it is. */
 import './Icon/Icon.css';
 
-export { Icon, ICON_NAMES, type IconName, type IconProps } from './Icon/Icon';
+export { Icon, ICON_NAMES, IconSetContext, REVIEW_PX, type IconName, type IconProps, type IconSet, type IconSize } from './Icon/Icon';
 export { Button, type ButtonProps, type ButtonVariant, type ButtonSize } from './Button/Button';
 export { IconButton, type IconButtonProps } from './IconButton/IconButton';
 export { Badge, type BadgeProps, type BadgeTone } from './Badge/Badge';

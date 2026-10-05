@@ -116,7 +116,20 @@ test.describe('the product screens', () => {
          buttons, and moved whenever the review's chrome did. It is hidden
          for this capture, so the baseline is the product and nothing else. */
       await page.addStyleTag({ content: '.change__header .decision { visibility: hidden !important; }' });
+      /* And the frame is lifted out of the review for the capture. Its page
+         offset is wherever the review's chrome above it puts it, a fraction
+         of a pixel when an icon or a line of type above it changes size, and
+         the scaled product rasterises differently at a different offset: the
+         baseline moved with the review while every element in the frame was
+         where it had been (811 compared, none different). Alone at 0,0 it
+         is drawn the same whatever is above it, so a Relay baseline moves
+         when Relay does. */
       const frame = page.locator('.preview__frame');
+      await frame.evaluate((el) => {
+        const lifted = el.cloneNode(true) as HTMLElement;
+        document.body.replaceChildren(lifted);
+        document.body.style.margin = '0';
+      });
       await expect(frame).toHaveScreenshot(`customers-before-${width}.png`);
     });
   }
