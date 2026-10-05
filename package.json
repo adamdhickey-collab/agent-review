@@ -17,7 +17,8 @@
     "test:visual": "playwright test",
     "lint:tokens": "node scripts/token-lint.mjs",
     "lint:icons": "node scripts/icons.mjs --check",
-    "check": "npm run typecheck && npm run lint && npm run lint:tokens && npm run lint:icons && npm run test:stories"
+    "lint:build": "node scripts/build-check.mjs",
+    "check": "npm run typecheck && npm run lint && npm run lint:tokens && npm run lint:icons && npm run lint:build && npm run test:stories"
   },
   "dependencies": {
     "react": "^19.2.8",
