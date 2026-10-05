@@ -18,8 +18,10 @@ import './Shell.css';
    The bar is quiet on purpose: it sits on the page's own ground, not on a
    white band, and the place you are in is said by ink and by the line
    under it, the same line a selected tab carries, so the first thing with
-   weight on a screen is the screen's own heading. The theme toggle is a
-   pressed button (app/useTheme.ts): pressed is dark. */
+   weight on a screen is the screen's own heading. Two places, and two
+   links out of the product (the Storybook and the source), which are not
+   places in it and so are a second, quieter nav on the right, before the
+   theme toggle (a pressed button, app/useTheme.ts: pressed is dark). */
 
 export function Shell({ route, children }: { route: Route; children: ReactNode }) {
   const { theme, toggle } = useTheme();
@@ -42,25 +44,29 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
           </span>
           <span>Agent Review</span>
         </a>
-        <nav className="shell__nav" aria-label="Primary">
-          <a href="#/" aria-current={route.name === 'delegation' ? 'page' : undefined}>
-            <span className="shell__long">Delegated work</span>
-            <span className="shell__short" aria-hidden="true">
-              Work
-            </span>
-          </a>
-          <a href="#/queue" aria-current={route.name === 'queue' ? 'page' : undefined}>
-            Reviews
-          </a>
-          <a href="storybook/" target="_blank" rel="noopener">
-            Storybook
-            <Icon name="arrow-up-right" size={12} />
-          </a>
-          <a href="https://github.com/adamdhickey-collab/agent-review" target="_blank" rel="noopener">
-            Source
-            <Icon name="arrow-up-right" size={12} />
-          </a>
-        </nav>
+        <div className="shell__where">
+          <nav className="shell__nav" aria-label="Primary">
+            <a href="#/" aria-current={route.name === 'delegation' ? 'page' : undefined}>
+              <span className="shell__long">Delegated work</span>
+              <span className="shell__short" aria-hidden="true">
+                Work
+              </span>
+            </a>
+            <a href="#/queue" aria-current={route.name === 'queue' ? 'page' : undefined}>
+              Reviews
+            </a>
+          </nav>
+          <nav className="shell__links" aria-label="Project links">
+            <a href="storybook/" target="_blank" rel="noopener">
+              Storybook
+              <Icon name="arrow-up-right" size={12} />
+            </a>
+            <a href="https://github.com/adamdhickey-collab/agent-review" target="_blank" rel="noopener">
+              Source
+              <Icon name="arrow-up-right" size={12} />
+            </a>
+          </nav>
+        </div>
         <div className="shell__context">
           <IconButton icon="moon" label="Dark theme" pressed={theme === 'dark'} onClick={toggle} />
           <span className="shell__repo">

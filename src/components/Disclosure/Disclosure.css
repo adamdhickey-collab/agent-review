@@ -22,6 +22,16 @@
   color: var(--color-accent);
 }
 
+/* On the review's surface a row that opens does not turn blue under the
+   pointer: its chevron takes the ink, which is enough to say it answers. */
+[data-surface='review'] .disclosure__summary:hover {
+  color: var(--color-text);
+}
+
+[data-surface='review'] .disclosure__summary:hover .disclosure__chevron {
+  color: var(--color-text);
+}
+
 .disclosure__chevron {
   color: var(--color-text-muted);
   transition: transform var(--motion-fast) var(--ease);

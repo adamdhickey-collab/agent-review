@@ -99,3 +99,29 @@ export const KeyboardArrows: Story = {
     await expect(canvas.getByRole('tabpanel')).toHaveTextContent('Four stories rendered');
   },
 };
+
+/* The review's surface, on a wrapper: the Storybook marks a story's surface
+   by where it lives (System stories have none), so a story about a surface
+   says so itself. */
+export const OnTheReviewSurface: Story = {
+  args: {
+    tabs: [
+      { value: 'findings', label: 'Findings', count: 5 },
+      { value: 'stories', label: 'Stories', count: 4 },
+      { value: 'rationale', label: 'Rationale' },
+    ],
+  },
+  decorators: [(Story) => <div data-surface="review"><Story /></div>],
+  parameters: {
+    docs: { description: { story: 'On the review’s surface the current tab is ink, with an ink line and a neutral count, as the bar’s current place is. Where you are is not something you are being asked to do, and the accent is kept for that. The product’s tabs keep the accent (Default, above).' } },
+  },
+  play: async ({ canvasElement }) => {
+    const probe = canvasElement.ownerDocument.createElement('i');
+    probe.style.color = 'var(--color-text)';
+    canvasElement.appendChild(probe);
+    const ink = getComputedStyle(probe).color;
+    probe.remove();
+    const selected = within(canvasElement).getByRole('tab', { selected: true });
+    await expect(getComputedStyle(selected).borderBottomColor).toBe(ink);
+  },
+};

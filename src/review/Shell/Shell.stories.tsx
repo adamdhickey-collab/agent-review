@@ -55,3 +55,30 @@ export const ThemeToggle: Story = {
     localStorage.removeItem('agent-review:theme');
   },
 };
+
+export const LinksOutAreQuieter: Story = {
+  parameters: {
+    docs: { description: { story: 'The Storybook and the source are not places in the product, so they are their own nav, on the right, in regular weight and muted ink with no line. The places are the two on the left. Neither the toggle, pressed, nor the avatar carries the accent: the bar asks nothing.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const places = canvas.getByRole('navigation', { name: 'Primary' });
+    const links = canvas.getByRole('navigation', { name: 'Project links' });
+    await expect(within(places).getAllByRole('link').length).toBe(2);
+    await expect(within(places).getByRole('link', { name: 'Delegated work' })).toBeInTheDocument();
+    await expect(within(places).getByRole('link', { name: 'Reviews' })).toBeInTheDocument();
+    await expect(within(links).getAllByRole('link').map((a) => a.textContent)).toEqual(['Storybook', 'Source']);
+    for (const a of within(links).getAllByRole('link')) await expect(a).toHaveAttribute('target', '_blank');
+    const resolve = (token: string) => {
+      const probe = canvasElement.ownerDocument.createElement('i');
+      probe.style.color = `var(${token})`;
+      canvasElement.appendChild(probe);
+      const c = getComputedStyle(probe).color;
+      probe.remove();
+      return c;
+    };
+    const avatar = canvasElement.querySelector('.shell__avatar') as HTMLElement;
+    await expect(getComputedStyle(avatar).color).not.toBe(resolve('--color-accent'));
+    await expect(getComputedStyle(avatar).color).toBe(resolve('--color-text-secondary'));
+  },
+};
