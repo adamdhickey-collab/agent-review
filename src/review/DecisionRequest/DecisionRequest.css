@@ -232,7 +232,7 @@
 }
 
 .ask__bounds [data-group='asks'] .icon {
-  color: var(--color-accent);
+  color: var(--color-text-secondary); /* the answer's own edge and button are the accent here; a label is not */
 }
 
 .ask__bounds [data-group='outside'] .icon {

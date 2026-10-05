@@ -45,29 +45,7 @@ const CHECKS: { name: CheckName; short: string }[] = [
 
 type Segment = { kind: 'made' | 'waiting' | 'back'; n: number; label: string };
 
-export interface OutcomeSummaryProps {
-  state: DelegationState;
-}
-
-export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryProps>(function OutcomeSummary({ state }, ref) {
-  const a = account(state);
-  const quiet = a.asking.length === 0;
-  const back = [...a.reverted, ...a.left];
-  /* A change held behind a question with nothing asking is a state the
-     reducer never reaches (answering a question settles or asks everything
-     held behind it), so it gets no wording of its own beyond "waiting". */
-  const decisions = a.asking.length === 1 ? 'decision' : plural(a.asking.length, 'decision');
-
-  /* Every kind keeps its segment in the bar, at zero when it is empty, so
-     an answer that merges what was waiting moves the boundary between them
-     rather than redrawing the bar; the legend names only what is there. */
-  const kinds: Segment[] = [
-    { kind: 'made' as const, n: a.valuesMade, label: 'merged' },
-    { kind: 'waiting' as const, n: valuesIn(a.asking) + valuesIn(a.waiting), label: a.asking.length ? `waiting on your ${decisions}` : 'waiting' },
-    { kind: 'back' as const, n: valuesIn(back), label: 'reverted or left by you' },
-  ];
-  const segments = kinds.filter((s) => s.n > 0);
-
+function factsOf(a: ReturnType<typeof account>) {
   const checked = [...a.made, ...a.reverted].filter((w) => w.checks);
   const checks = CHECKS.map(({ name, short }) => {
     const results = checked.map((w) => w.checks!.find((c) => c.name === name)).filter(Boolean);
@@ -102,6 +80,31 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
   const scope = [`Every change was made under ${join(bases, 'or')}.`];
   if (a.allowedOnce.length) scope.push(`${a.allowedOnce.length === 1 ? 'One' : a.allowedOnce.length} went past them because you allowed it, once.`);
   if (a.scopeAsks.length) scope.push('One stopped at the edge: it needs a new token.');
+  return { checks, unresolved, scope };
+}
+
+export interface OutcomeSummaryProps {
+  state: DelegationState;
+}
+
+export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryProps>(function OutcomeSummary({ state }, ref) {
+  const a = account(state);
+  const quiet = a.asking.length === 0;
+  const back = [...a.reverted, ...a.left];
+  /* A change held behind a question with nothing asking is a state the
+     reducer never reaches (answering a question settles or asks everything
+     held behind it), so it gets no wording of its own beyond "waiting". */
+  const decisions = a.asking.length === 1 ? 'decision' : plural(a.asking.length, 'decision');
+
+  /* Every kind keeps its segment in the bar, at zero when it is empty, so
+     an answer that merges what was waiting moves the boundary between them
+     rather than redrawing the bar; the legend names only what is there. */
+  const kinds: Segment[] = [
+    { kind: 'made' as const, n: a.valuesMade, label: 'merged' },
+    { kind: 'waiting' as const, n: valuesIn(a.asking) + valuesIn(a.waiting), label: a.asking.length ? `waiting on your ${decisions}` : 'waiting' },
+    { kind: 'back' as const, n: valuesIn(back), label: 'reverted or left by you' },
+  ];
+  const segments = kinds.filter((s) => s.n > 0);
 
   return (
     <section className="outcome" aria-label="What happened">
@@ -143,7 +146,21 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
           ))}
         </ul>
       </div>
+    </section>
+  );
+});
 
+/* What the checks established, and what they could not: the three rows under
+   the account. It is its own section because the delegated work puts it after
+   the decisions, not between the title and them: a person who has decisions to
+   make is told how the run went in one sentence and a bar, asked first, and
+   then shown the evidence for the sentence. Nothing here was shortened or
+   hidden by being moved; the unresolved check is as visible as it was. */
+export function OutcomeFacts({ state }: { state: DelegationState }) {
+  const a = account(state);
+  const { checks, unresolved, scope } = factsOf(a);
+  return (
+    <section className="outcome" aria-label="What the checks established">
       <dl className="outcome__facts">
         <div>
           <dt>Checks</dt>
@@ -196,4 +213,4 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
       </dl>
     </section>
   );
-});
+}

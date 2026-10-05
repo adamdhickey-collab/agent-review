@@ -29,6 +29,15 @@
   flex: 1 1 20rem;
 }
 
+/* The label is the strip's one word of ink: said plainly, in the text colour
+   and semibold, and not in the accent. The accent is for what a screen asks a
+   person to do, and this strip asks nothing; what it says is that none of
+   the below is real, which does not need a colour to be unmissable. */
+.delegation__sim .delegation__sim-label {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
 .delegation__layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 20rem;
@@ -103,7 +112,7 @@
   margin-top: calc(var(--space-3) * -1);
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-sm);
-  background: var(--color-accent-subtle);
+  background: var(--color-surface-sunken);
   color: var(--color-text);
   line-height: var(--leading-body);
 }
@@ -138,12 +147,14 @@
   line-height: var(--leading-body);
 }
 
-/* The completed work is one panel of rows, as the queue is. Its check
-   columns are named once, over the marks, at the width each mark's column
-   takes in a row (WorkRecord reads --record-mark-width); the heading row
-   ends where a row's summary does, inside the panel's edge. On a phone a
-   row's marks wrap under its title, so the names would not sit over them,
-   and each mark's own label says which check it is. */
+/* The completed work is a list of rows on the page's own ground, divided by
+   hairlines, with no card around it: the decisions above it are the only
+   cards on this screen, so the one thing that asks for the person is the one
+   thing with an edge. Its check columns are named once, over the marks, at
+   the width each mark's column takes in a row (WorkRecord reads
+   --record-mark-width). On a phone a row's marks wrap under its title, so
+   the names would not sit over them, and each mark's own label says which
+   check it is. */
 .delegation__done {
   --record-mark-width: calc(var(--space-8) + var(--space-2));
 }
@@ -170,10 +181,7 @@
 }
 
 .delegation__records {
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  overflow: hidden;
+  border-bottom: var(--border-width) solid var(--color-divider);
 }
 
 .delegation__records > li:first-child > .disclosure {
@@ -191,7 +199,7 @@
 }
 
 .delegation__routine .record {
-  background: var(--color-canvas); /* a step down from the panel, so the folded rows read as one group when open */
+  background: var(--color-surface-sunken); /* a step down from the page, so the folded rows read as one group when open */
 }
 
 .delegation__routine-meta {

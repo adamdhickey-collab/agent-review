@@ -132,7 +132,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
         {/* The kind is a label, not a state, so it is quiet; its mark is the
             boundary group's own (the panel's lock or question), in that
             group's color, so the card and the panel name it the same way. */}
-        <Badge tone={q.kind === 'scope' ? 'warning' : 'accent'} variant="quiet" icon={BOUNDARY_GROUP_ICON[q.kind === 'scope' ? 'outside' : 'asks']}>
+        <Badge tone={q.kind === 'scope' ? 'warning' : 'neutral'} variant="quiet" icon={BOUNDARY_GROUP_ICON[q.kind === 'scope' ? 'outside' : 'asks']}>
           {q.kind === 'scope' ? 'Outside the delegation' : 'What a value means'}
         </Badge>
         <span className="ask__where">

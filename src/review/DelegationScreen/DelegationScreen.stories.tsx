@@ -210,3 +210,34 @@ export const Dark: Story = {
     await expect(within(canvasElement).getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
   },
 };
+
+export const DecisionFirst: Story = {
+  decorators: [inStore(start)],
+  parameters: {
+    docs: { description: { story: 'The order a person who has something to decide wants: the account in one sentence and a bar, then the decisions, and only then the evidence for the sentence (the checks, what is unresolved, the scope), then the completed work. The decisions are the only cards on the screen, and the accent is theirs: the strip’s “Simulated” and the boundaries rail are in the ink, not blue.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const before = (a: Element, b: Element) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    const lead = canvas.getByText('7 changes made and checked. 2 decisions need you.');
+    const needs = canvas.getByRole('heading', { name: /Needs you/ });
+    const checks = canvas.getByRole('list', { name: 'Checks run on every change' });
+    const done = canvas.getByRole('heading', { name: /Completed work/ });
+    await expect(before(lead, needs)).toBe(true);
+    await expect(before(needs, checks)).toBe(true);
+    await expect(before(checks, done)).toBe(true);
+    /* Unresolved is below the decisions, not gone. */
+    await expect(canvas.getByText(/Axe couldn’t measure/)).toBeInTheDocument();
+    /* The only bordered cards are the decisions. */
+    await expect(canvasElement.querySelectorAll('.ask').length).toBe(2);
+    await expect(getComputedStyle(canvasElement.querySelector('.delegation__records') as Element).borderTopWidth).toBe('0px');
+    await expect(getComputedStyle(canvasElement.querySelector('.bounds') as Element).borderTopWidth).toBe('0px');
+    /* Simulated is ink, not the accent. */
+    const probe = canvasElement.ownerDocument.createElement('i');
+    canvasElement.appendChild(probe);
+    probe.style.color = 'var(--color-accent)';
+    const accent = getComputedStyle(probe).color;
+    probe.remove();
+    await expect(getComputedStyle(canvas.getByText('Simulated')).color).not.toBe(accent);
+  },
+};
