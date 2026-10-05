@@ -51,3 +51,10 @@ export const Stacked: Story = {
     docs: { description: { story: 'Three in a column. Each draws its own top rule, so a stack divides itself; the frame adds the bottom one.' } },
   },
 };
+
+export const OnTheReviewSurface: Story = {
+  decorators: [(Story) => <div data-surface="review"><Story /></div>],
+  parameters: {
+    docs: { description: { story: 'On the review’s surface a row that opens does not turn blue under the pointer: its chevron takes the ink, which is enough to say it answers. The product’s keeps the accent (Closed, above).' } },
+  },
+};

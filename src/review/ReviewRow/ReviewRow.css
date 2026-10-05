@@ -10,8 +10,7 @@
 }
 
 .review-row__title:hover {
-  color: var(--color-accent);
-  text-decoration: none;
+  text-decoration: none; /* the row's own ground says it is under the pointer */
 }
 
 .review-row__meta {

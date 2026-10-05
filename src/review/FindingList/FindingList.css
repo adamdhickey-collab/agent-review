@@ -46,8 +46,9 @@
   border-radius: var(--radius-sm);
 }
 
-.finding__button:hover .finding__title {
-  color: var(--color-accent);
+/* A finding under the pointer is a row with a ground, not a blue title. */
+.finding__row:hover {
+  background: var(--color-surface-hover);
 }
 
 .finding__button:focus-visible {

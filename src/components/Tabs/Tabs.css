@@ -46,6 +46,14 @@
   border-radius: var(--radius-sm);
 }
 
+/* On the review's surface the current tab is ink, as the bar's current place
+   is: where you are is not something you are being asked to do, and the
+   accent is kept for that. The product's tabs keep the accent; the surface is
+   app/global.css, and Relay is drawn on the other one. */
+[data-surface='review'] .tabs__tab[aria-selected='true'] {
+  border-bottom-color: var(--color-text);
+}
+
 .tabs__count {
   display: inline-flex;
   align-items: center;
@@ -63,6 +71,11 @@
 .tabs__tab[aria-selected='true'] .tabs__count {
   background: var(--color-accent-subtle);
   color: var(--color-accent);
+}
+
+[data-surface='review'] .tabs__tab[aria-selected='true'] .tabs__count {
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
 }
 
 .tabs__panel {
