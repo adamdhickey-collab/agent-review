@@ -3,7 +3,7 @@ import { Badge, Button, Disclosure, Icon } from '../../components';
 import { useStore } from '../../app/store';
 import { account, activeRule, ruleText, waitingOn, whyAsking, wouldSettle, type Pattern, type Work } from '../../data/delegation';
 import { plural, relativeTime } from '../format';
-import { OutcomeSummary } from '../OutcomeSummary/OutcomeSummary';
+import { OutcomeFacts, OutcomeSummary } from '../OutcomeSummary/OutcomeSummary';
 import { DecisionRequest, type RulePreview } from '../DecisionRequest/DecisionRequest';
 import { WorkRecord } from '../WorkRecord/WorkRecord';
 import { Boundaries } from '../Boundaries/Boundaries';
@@ -108,7 +108,7 @@ export function DelegationScreen() {
   return (
     <div className="delegation">
       <div className="delegation__sim" role="note" aria-label="About this screen">
-        <Badge tone="accent" icon="play">
+        <Badge variant="quiet" icon="play" className="delegation__sim-label">
           Simulated
         </Badge>
         <p>A sample run, played back the same way every time. No model runs, and no real repository is touched.</p>
@@ -171,6 +171,8 @@ export function DelegationScreen() {
               ))}
             </section>
           ) : null}
+
+          <OutcomeFacts state={s} />
 
           <section className="delegation__section delegation__done" aria-labelledby="done-title">
             <div className="delegation__done-head">
