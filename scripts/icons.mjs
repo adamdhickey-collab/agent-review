@@ -1,0 +1,147 @@
+#!/usr/bin/env node
+/* Builds src/components/Icon/family.ts from Phosphor Icons.
+
+   Agent Review's icons are one family, Phosphor (MIT, @phosphor-icons/core,
+   pinned in package.json), in two of its weights. SOLID ("fill") is for what
+   carries meaning or state: a check that passed, a lock, a clock, the agent.
+   BOLD is for chrome and direction, where a solid shape does not exist or
+   would not read: a chevron, an arrow, a plus, a funnel. Both weights are
+   drawn on one grid with one corner radius and one visual size, which is
+   what made the two sets that came before (a hand-drawn line set and a
+   hand-drawn status set) look like two products.
+
+   Every icon is one filled path on Phosphor's 256 grid, so the stroke does
+   not scale with the size it is drawn at: bold is 24 units of 256, 1.5px at
+   16 and 1.9px at 20. The names are the ones the app already uses; this file
+   is the only place a name meets a Phosphor drawing.
+
+   Failed is the one drawing Phosphor does not have, an octagon with a cross
+   cut out of it: the octagon is Phosphor's, and the cross is Phosphor's bold
+   x, scaled and cut through it as a real hole (one path, even-odd), so it
+   takes the colour of whatever the icon sits on.
+
+     node scripts/icons.mjs            write the file
+     node scripts/icons.mjs --check    fail if the file is not what this would write
+*/
+import fs from 'node:fs';
+import path from 'node:path';
+import svgpath from 'svgpath';
+
+/* The package does not export its own package.json, so it is found where npm
+   puts it. */
+const core = path.resolve('node_modules/@phosphor-icons/core');
+const version = JSON.parse(fs.readFileSync(path.join(core, 'package.json'), 'utf8')).version;
+const OUT = path.resolve('src/components/Icon/family.ts');
+
+/* The name the app uses -> [Phosphor name, weight]. */
+const MAP = {
+  /* Chrome and direction: bold. */
+  check: ['check', 'bold'],
+  x: ['x', 'bold'],
+  minus: ['minus', 'bold'],
+  plus: ['plus', 'bold'],
+  'chevron-down': ['caret-down', 'bold'],
+  'chevron-right': ['caret-right', 'bold'],
+  'chevron-left': ['caret-left', 'bold'],
+  'arrow-left': ['arrow-left', 'bold'],
+  'arrow-right': ['arrow-right', 'bold'],
+  'arrow-up-right': ['arrow-up-right', 'bold'],
+  'corner-up-left': ['arrow-bend-up-left', 'bold'],
+  external: ['arrow-square-out', 'bold'],
+  undo: ['arrow-counter-clockwise', 'bold'],
+  search: ['magnifying-glass', 'bold'],
+  filter: ['funnel', 'bold'],
+  dots: ['dots-three', 'bold'],
+  loader: ['spinner', 'bold'],
+  circle: ['circle', 'bold'],
+  code: ['code', 'bold'],
+  layers: ['stack', 'bold'],
+  columns: ['columns', 'bold'],
+  ruler: ['ruler', 'bold'],
+  'git-branch': ['git-branch', 'bold'],
+  inbox: ['tray', 'bold'],
+  smartphone: ['device-mobile', 'bold'],
+  tablet: ['device-tablet', 'bold'],
+  monitor: ['monitor', 'bold'],
+  /* Meaning and state: solid. */
+  alert: ['warning', 'fill'],
+  info: ['info', 'fill'],
+  'circle-check': ['check-circle', 'fill'],
+  'circle-x': ['x-circle', 'fill'],
+  eye: ['eye', 'fill'],
+  play: ['play', 'fill'],
+  book: ['book-open', 'fill'],
+  contrast: ['circle-half', 'fill'],
+  bot: ['robot', 'fill'],
+  user: ['user', 'fill'],
+  clock: ['clock', 'fill'],
+  send: ['paper-plane-tilt', 'fill'],
+  lock: ['lock', 'fill'],
+  moon: ['moon', 'fill'],
+  'message-question': ['chat-circle-dots', 'fill'],
+  /* How something went: a shape per state, so the state survives without its colour. */
+  'status-passed': ['check-circle', 'fill'],
+  'status-changed': ['warning', 'fill'],
+  'status-note': ['info', 'fill'],
+  'status-inconclusive': ['question', 'bold'],
+  'status-skipped': ['circle-dashed', 'bold'],
+  'status-running': ['circle-notch', 'bold'],
+};
+
+const file = (name, weight) => path.join(core, 'assets', weight, `${name}${weight === 'regular' ? '' : `-${weight}`}.svg`);
+function read(name, weight) {
+  const svg = fs.readFileSync(file(name, weight), 'utf8');
+  const paths = [...svg.matchAll(/<path d="([^"]+)"/g)].map((m) => m[1]);
+  if (paths.length !== 1 || /<(circle|rect|g|ellipse|polygon|line)\b/.test(svg)) throw new Error(`${name}-${weight}: expected one path`);
+  return paths[0];
+}
+
+/* Octagon, cross cut through it. The cross is the bold x scaled about the
+   grid's centre to 46% (about 64 of 256), which is the share the other solid
+   marks give their glyph. */
+function failed() {
+  const cross = svgpath(read('x', 'bold')).translate(-128, -128).scale(0.46).translate(128, 128).abs().round(2).toString();
+  return read('octagon', 'fill') + cross;
+}
+
+const entries = Object.entries(MAP).map(([name, [from, weight]]) => [name, { w: weight, d: read(from, weight) }]);
+entries.push(['status-failed', { w: 'fill', d: failed(), eo: true }]);
+entries.sort((a, b) => a[0].localeCompare(b[0]));
+
+const body = entries
+  .map(([name, v]) => `  '${name}': { w: '${v.w}', d: '${v.d}'${v.eo ? ', eo: true' : ''} },`)
+  .join('\n');
+
+const text = `/* GENERATED by scripts/icons.mjs from Phosphor Icons (@phosphor-icons/core
+   ${version}, MIT, https://phosphoricons.com). Do not edit: change the map in
+   the script and run it. Each icon is one filled path on a 256 grid, in the
+   solid ("fill") or bold weight; see the script's header for which and why.
+
+   Phosphor Icons: Copyright (c) 2020-present Phosphor Icons. MIT License:
+   permission is granted, free of charge, to use, copy, modify, merge,
+   publish, distribute and sell copies, subject to this notice being kept. */
+
+export type Weight = 'fill' | 'bold';
+export interface FamilyIcon {
+  w: Weight;
+  d: string;
+  /** Composed with a hole: fill with the even-odd rule. */
+  eo?: true;
+}
+
+export const FAMILY = {
+${body}
+} as const satisfies Record<string, FamilyIcon>;
+`;
+
+if (process.argv.includes('--check')) {
+  const have = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : '';
+  if (have !== text) {
+    console.error('src/components/Icon/family.ts is not what scripts/icons.mjs writes. Run: node scripts/icons.mjs');
+    process.exit(1);
+  }
+  console.log(`✓ family.ts matches Phosphor ${version} (${entries.length} icons)`);
+} else {
+  fs.writeFileSync(OUT, text);
+  console.log(`wrote ${path.relative(process.cwd(), OUT)}: ${entries.length} icons from Phosphor ${version}, ${(text.length / 1024).toFixed(1)} KB`);
+}

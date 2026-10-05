@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect } from 'storybook/test';
 import type { CSSProperties } from 'react';
+import { REVIEW_PX } from '../Icon/Icon';
 import { TestStatus } from './TestStatus';
 
 const row: CSSProperties = { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 'var(--space-4)' };
@@ -109,16 +110,15 @@ export const IconOnly: Story = {
     const names = icons.map((i) => i.getAttribute('data-icon'));
     await expect(new Set(names).size).toBe(6);
     await expect(icons.map((i) => i.querySelector('title')?.textContent)).toEqual(['Passed', 'Changed', 'Failed', 'Running', 'Skipped', 'Inconclusive']);
-    /* The three answers are filled shapes; the three that are not are rings. */
-    await expect(icons.map((i) => i.getAttribute('fill'))).toEqual(['currentColor', 'currentColor', 'currentColor', 'none', 'none', 'none']);
-    for (const icon of icons) await expect(icon).toHaveAttribute('width', '16');
-    /* The cut is a hole: one even-odd path and nothing painted over it. */
-    const onTint = canvasElement.querySelectorAll('[data-ground="selected"] svg[fill="currentColor"]');
+    /* The three answers are solid shapes; the three that are not are rings, which is
+       the bold line weight of the same family. */
+    await expect(icons.map((i) => i.getAttribute('data-weight'))).toEqual(['fill', 'fill', 'fill', 'bold', 'bold', 'bold']);
+    /* Drawn at the review's step for 16. */
+    for (const icon of icons) await expect(icon).toHaveAttribute('width', String(REVIEW_PX[16]));
+    /* The mark is a hole, not paint over a shape: one path and nothing on top of it. */
+    const onTint = canvasElement.querySelectorAll('[data-ground="selected"] svg[data-weight="fill"]');
     await expect(onTint.length).toBe(4);
-    for (const icon of onTint) {
-      await expect(icon.children.length).toBe(2);
-      await expect(icon.querySelector('path')).toHaveAttribute('fill-rule', 'evenodd');
-    }
+    for (const icon of onTint) await expect(icon.querySelectorAll('path').length).toBe(1);
   },
 };
 

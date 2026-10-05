@@ -28,7 +28,11 @@ How to check: `grep -rn "<button\|<input\|<table\|<details" src/` outside
 `src/components/` should return nothing new after your change. A raw
 element where a component exists is the finding.
 
-Common misses: a "small button" (that is `<Button size="compact">`), a
+Common misses: an icon drawn inline or a path copied from somewhere (that is
+`<Icon name="...">`; the review's icons are one family, Phosphor, written to
+`src/components/Icon/family.ts` by `scripts/icons.mjs`, and a name that is not
+in it is a finding about the family: add it to the script's map, never an
+`<svg>` beside it), a "small button" (that is `<Button size="compact">`), a
 "link that looks like a button" (that is still a Button), a pill with a
 status word (that is a Badge with a tone), a row of controls over a table
 (that is a Toolbar), and a bar of actions that appears when rows are

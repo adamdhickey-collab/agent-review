@@ -16,13 +16,15 @@
     "test:stories": "vitest run --project=storybook",
     "test:visual": "playwright test",
     "lint:tokens": "node scripts/token-lint.mjs",
-    "check": "npm run typecheck && npm run lint && npm run lint:tokens && npm run test:stories"
+    "lint:icons": "node scripts/icons.mjs --check",
+    "check": "npm run typecheck && npm run lint && npm run lint:tokens && npm run lint:icons && npm run test:stories"
   },
   "dependencies": {
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@phosphor-icons/core": "2.1.1",
     "@playwright/test": "latest",
     "@storybook/addon-a11y": "^10.6.1",
     "@storybook/addon-docs": "^10.6.1",
@@ -37,6 +39,7 @@
     "oxlint": "^1.81.0",
     "playwright": "latest",
     "storybook": "^10.6.1",
+    "svgpath": "2.6.0",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
     "vitest": "latest"

@@ -1,14 +1,30 @@
-import type { SVGProps } from 'react';
+import { createContext, useContext, type CSSProperties, type SVGProps } from 'react';
+import { FAMILY, type FamilyIcon } from './family';
 
 /* The icon set, drawn inline so an icon is one element with no request
-   behind it. Drawn on a 24 grid, currentColor, with a stroke set for the
-   size it is shown at (STROKE, below). Every icon is decorative by default
-   (aria-hidden); a component that needs the icon to carry meaning gives it
-   a `label`, which renders a <title>.
+   behind it. Decorative by default (aria-hidden); a component that needs
+   the icon to carry meaning gives it a `label`, which renders a <title>.
 
-   Two drawings live here. PATHS is the line set, for everything that is
-   an action or an object. STATUS, below it, is the handful of marks that
-   say how something went, and those are drawn solid, on their own grid. */
+   TWO SETS, ONE PER SURFACE (the same split as the type and the radii:
+   tokens.css, app/global.css). The REVIEW's icons are one family, Phosphor,
+   in two weights: solid for what carries meaning or state, bold for chrome
+   and direction (family.ts, written by scripts/icons.mjs from the package,
+   which says which and why). It replaced a hand-drawn line set and a
+   hand-drawn status set that read as two products side by side, at sizes
+   that were a step too small. The PRODUCT's icons, Relay's, are the line
+   set and the status marks below, untouched: the preview frame shows the
+   product as the checks measured it, and an icon is part of what they
+   measured. Which set an icon draws is IconSetContext: the frame provides
+   'product', and nothing else has to.
+
+   `size` names a step in the scale, 12, 14, 16 or 20, and the review draws
+   each one step larger (REVIEW_PX): its icons are solid shapes with air
+   inside the grid, so the glyph a reader sees is about a sixth smaller than
+   the box, and the old sizes read as small. Every icon sets --icon-size to
+   the pixels it is actually drawn at, so a rule that centres an icon on a
+   line of text reads the real size and not the step. */
+
+/* THE PRODUCT'S SET, from here to the end of STATUS_RING. Unchanged. */
 
 const PATHS = {
   check: 'M20 6 9 17l-5-5',
@@ -119,26 +135,51 @@ export const ICON_NAMES = [...Object.keys(PATHS), ...Object.keys(STATUS_SOLID), 
 const isSolid = (name: IconName): name is SolidName => name in STATUS_SOLID;
 const isRing = (name: IconName): name is RingName => (STATUS_RING as readonly string[]).includes(name);
 
+/* Every name has a drawing in the family: a name added above and not to the
+   map fails here, at the type, rather than drawing nothing. */
+const family: Record<IconName, FamilyIcon> = FAMILY;
+
+export type IconSet = 'review' | 'product';
+export const IconSetContext = createContext<IconSet>('review');
+
+export type IconSize = 12 | 14 | 16 | 20;
+
+/** The pixels the review draws each step at. */
+export const REVIEW_PX: Record<IconSize, number> = { 12: 14, 14: 16, 16: 20, 20: 24 };
+
 export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'name'> {
   name: IconName;
   /** Accessible name. Without one the icon is decorative and hidden. */
   label?: string;
-  size?: 12 | 14 | 16 | 20;
+  size?: IconSize;
 }
 
-export function Icon({ name, label, size = 16, className, ...rest }: IconProps) {
+export function Icon({ name, label, size = 16, className, style, ...rest }: IconProps) {
+  const set = useContext(IconSetContext);
+  const px = set === 'review' ? REVIEW_PX[size] : size;
   const spins = name === 'loader' || name === 'status-running';
   const shared = {
-    width: size,
-    height: size,
+    width: px,
+    height: px,
     'aria-hidden': label ? undefined : true,
     role: label ? 'img' : undefined,
     focusable: 'false' as const,
     className: ['icon', spins ? 'icon--spin' : '', className].filter(Boolean).join(' '),
     'data-icon': name,
+    style: { '--icon-size': `${px}px`, ...style } as CSSProperties,
     ...rest,
   };
   const title = label ? <title>{label}</title> : null;
+
+  if (set === 'review') {
+    const f = family[name];
+    return (
+      <svg viewBox="0 0 256 256" fill="currentColor" data-weight={f.w} {...shared}>
+        {title}
+        <path d={f.d} fillRule={f.eo ? 'evenodd' : undefined} />
+      </svg>
+    );
+  }
 
   if (isSolid(name)) {
     return (

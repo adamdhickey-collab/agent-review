@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { ErrorState, LoadingState, SegmentedControl, type SegmentedOption } from '../../components';
+import { ErrorState, IconSetContext, LoadingState, SegmentedControl, type SegmentedOption } from '../../components';
 import type { Reproduce, Screen, Side, Viewport } from '../../data/types';
 import { PreviewScreen } from '../preview/screens';
 import { drawMark } from './mark';
@@ -199,7 +199,9 @@ export function ComponentPreview({ changeId, reproduce, screens = ['customers', 
             data-target={reproduce?.target}
             data-surface="product"
           >
-            <PreviewScreen changeId={changeId} screen={screen} side={side} selection={selection} />
+            <IconSetContext.Provider value="product">
+              <PreviewScreen changeId={changeId} screen={screen} side={side} selection={selection} />
+            </IconSetContext.Provider>
             <div ref={mark} className="preview__mark" aria-hidden="true" data-surface="review" hidden />
           </div>
         </div>

@@ -8,7 +8,7 @@
 }
 
 .record > .disclosure__summary .disclosure__chevron {
-  margin-top: calc((var(--text-md) * var(--leading-tight) - 14px) / 2); /* centred on the title's first line */
+  margin-top: calc((var(--text-md) * var(--leading-tight) - var(--icon-size)) / 2); /* the chevron, at the size it is drawn, centred on the title's first line */
 }
 
 .record > .disclosure__summary .disclosure__title {

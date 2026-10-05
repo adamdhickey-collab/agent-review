@@ -59,7 +59,7 @@
 
 .delegation__by .icon {
   flex: none;
-  margin-top: calc((var(--text-sm) * var(--leading-ui) - var(--space-4)) / 2); /* a 16px icon, centred on the line */
+  margin-top: calc((var(--text-sm) * var(--leading-ui) - var(--icon-size)) / 2); /* the icon, at the size it is drawn, centred on the line */
   color: var(--color-text);
 }
 
