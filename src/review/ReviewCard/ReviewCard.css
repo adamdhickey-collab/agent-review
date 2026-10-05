@@ -4,7 +4,7 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--color-divider);
   transition: background-color var(--motion-fast) var(--ease);
 }
 

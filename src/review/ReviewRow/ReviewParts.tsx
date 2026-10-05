@@ -7,7 +7,7 @@ import './ReviewRow.css';
    lane added or a tone changed is changed once and the two cannot say
    different things about the same change. */
 
-const STATE_TONE: Record<ReviewState, StatusTone> = {
+export const STATE_TONE: Record<ReviewState, StatusTone> = {
   'needs-review': 'warning',
   ready: 'success',
   validating: 'neutral',

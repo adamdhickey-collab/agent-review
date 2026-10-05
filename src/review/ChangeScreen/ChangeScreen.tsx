@@ -116,11 +116,16 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
         <ValidationSummary summary={change.validation} active={lane} onSelect={setLane} />
         <div className="change__touched">
           <span className="change__touched-label">Components touched</span>
-          {change.componentsTouched.map((c) => (
-            <Badge key={c} tone={change.files.some((f) => f.shared && f.path.includes(`/${c}/`)) ? 'warning' : 'neutral'}>
-              {c}
-            </Badge>
-          ))}
+          {change.componentsTouched.map((c) => {
+            const shared = change.files.some((f) => f.shared && f.path.includes(`/${c}/`));
+            return (
+              <span key={c} className={shared ? 'change__component change__component--shared' : 'change__component'}>
+                {shared ? <Icon name="alert" size={12} /> : null}
+                {c}
+                {shared ? <span className="visually-hidden"> (a shared component)</span> : null}
+              </span>
+            );
+          })}
         </div>
       </div>
 

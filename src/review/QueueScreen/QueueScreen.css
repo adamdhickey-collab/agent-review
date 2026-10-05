@@ -24,6 +24,51 @@
   min-width: 56rem;
 }
 
+/* A row is one line, 40px, and its line is the row's, not each cell's: the
+   cells carry no border and the row carries one, which is seven fewer lines
+   a row for the eye to cross. The header keeps the band it had, with its
+   rule drawn as an inset shadow so it travels with a sticky cell. */
+.queue__table .table__th {
+  border-bottom: 0;
+  box-shadow: inset 0 calc(var(--border-width) * -1) 0 var(--color-border);
+}
+
+.queue__table .table__td {
+  height: 2.5rem;
+  border-bottom: 0;
+}
+
+.queue__table .table__tr {
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+/* What the pointer is on is the row you can see. */
+.queue__table.table--interactive .table__tr:hover {
+  background: var(--color-surface-hover-strong);
+}
+
+/* A state's header: the state as the dot and word it has always been, with
+   how many, on the page's own ground so it reads as a label between groups
+   and not as a row. */
+.queue__group th {
+  height: 2rem; /* the table head's height, a whole number of pixels */
+  padding: 0 var(--table-pad-x);
+  border-bottom: var(--border-width) solid var(--color-divider);
+  background: var(--color-canvas);
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.queue__group th > * + * {
+  margin-left: var(--space-2);
+}
+
+.queue__group-count {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .queue__list {
   margin: 0;
   padding: 0;
@@ -43,7 +88,7 @@
 /* What "Sample" on a row means, said once, under the rows. */
 .queue__note {
   padding: var(--space-3) var(--space-4);
-  border-top: var(--border-width) solid var(--color-border);
+  border-top: var(--border-width) solid var(--color-divider);
   color: var(--color-text-muted);
   font-size: var(--text-sm);
 }

@@ -22,6 +22,11 @@
   color: var(--color-accent);
 }
 
+/* A disclosure's rule is a divider inside its panel, one step fainter than a panel's edge. */
+[data-surface='review'] .disclosure {
+  border-top-color: var(--color-divider);
+}
+
 /* On the review's surface a row that opens does not turn blue under the
    pointer: its chevron takes the ink, which is enough to say it answers. */
 [data-surface='review'] .disclosure__summary:hover {

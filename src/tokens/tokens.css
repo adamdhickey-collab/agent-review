@@ -108,11 +108,22 @@
   --color-surface: light-dark(#ffffff, oklch(0.205 0.006 285));
   --color-surface-sunken: light-dark(#f2f2f4, oklch(0.255 0.007 285));
   --color-surface-hover: light-dark(#f4f4f6, oklch(0.235 0.007 285));
+  /* A row under the pointer in a list a reviewer scans (the review's queue):
+     one step further than hover, so the row you are on is the one you can
+     see. As far as muted text allows: 4.57:1 on it in the light (L 0.947), 5.48:1
+     in the dark; one step more and the muted columns fail 4.5:1. */
+  --color-surface-hover-strong: light-dark(oklch(0.947 0.006 285), oklch(0.29 0.008 285));
 
   /* Lines. The hairline divides; the control border is the one boundary a
      reader has to find (3.1:1 on white, for WCAG 1.4.11; 4.3:1 on the dark
      surface). */
   --color-border: light-dark(#e4e4e8, oklch(0.31 0.008 285));
+  /* A line inside a panel: between the rows of a list, between a panel's
+     parts. The border above is for a panel's edge and a region's band; a
+     divider is the same line one step fainter (1.15:1 on white where the
+     border is 1.30), so a list of rows is read as rows and not as a stack of
+     rules. Decorative, like the border: nothing depends on seeing it. */
+  --color-divider: light-dark(oklch(0.945 0.004 286), oklch(0.27 0.006 285));
   --color-border-control: light-dark(#8c8c96, oklch(0.56 0.014 285));
 
   /* Ink. Three steps. Muted is the quietest text allowed, and it clears

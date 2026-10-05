@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
+import { expect, fn } from 'storybook/test';
 import { bulkActionsWithRules, queue } from '../../data/scenario';
 import type { Finding } from '../../data/types';
 import { FindingList } from './FindingList';
@@ -101,5 +101,19 @@ export const Included: Story = {
   args: { included: new Set(returnableIds) },
   parameters: {
     docs: { description: { story: 'Every returnable finding checked for the return message. The interaction finding has no box, so six of seven are included.' } },
+  },
+};
+
+export const SeverityIsAWord: Story = {
+  parameters: {
+    docs: { description: { story: 'The severity is a word in its own ink, not a tinted pill: the marker beside the title says it by shape, and a column of identical pills was the loudest thing in the list. Every finding still carries its word, so a reader who cannot tell the inks apart loses nothing. A row is about 54px with its one-line title.' } },
+  },
+  play: async ({ canvasElement }) => {
+    await expect(canvasElement.querySelectorAll('.finding__meta .badge').length).toBe(0);
+    const words = Array.from(canvasElement.querySelectorAll('.finding__severity')).map((e) => e.textContent);
+    await expect(words.length).toBe(findings.length);
+    for (const w of words) await expect(['Blocking', 'Needs a decision', 'Note']).toContain(w);
+    const first = canvasElement.querySelector('.finding__row') as HTMLElement;
+    await expect(first.getBoundingClientRect().height).toBeLessThanOrEqual(56);
   },
 };
