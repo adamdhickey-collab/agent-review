@@ -81,6 +81,9 @@ export function QueueScreen({ changes: given, list }: { changes?: Change[]; /** 
           </tbody>
         </Table>
       )}
+      {rows.some((c) => c.sample) ? (
+        <p className="queue__note">The three bulk-actions changes are the experiment’s own branches, recorded from real runs. Rows marked Sample are invented, so the queue reads as a queue.</p>
+      ) : null}
     </div>
   );
 }

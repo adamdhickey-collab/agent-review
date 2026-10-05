@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { Icon } from '../../components';
+import { Icon, IconButton } from '../../components';
 import type { Route } from '../../app/router';
+import { useTheme } from '../../app/useTheme';
 import './Shell.css';
 
 /* The chrome: one bar. The product's name, where you are, and who you
@@ -12,9 +13,16 @@ import './Shell.css';
    The route is the URL's hash, so a link to "#main" would be read as a
    route and replace the screen with "nothing at this address". The skip
    link keeps its href, for a browser that runs no script, and moves focus
-   itself. */
+   itself.
+
+   The bar is quiet on purpose: it sits on the page's own ground, not on a
+   white band, and the place you are in is said by ink and by the line
+   under it, the same line a selected tab carries, so the first thing with
+   weight on a screen is the screen's own heading. The theme toggle is a
+   pressed button (app/useTheme.ts): pressed is dark. */
 
 export function Shell({ route, children }: { route: Route; children: ReactNode }) {
+  const { theme, toggle } = useTheme();
   return (
     <div className="shell" data-surface="review">
       <a
@@ -54,6 +62,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
           </a>
         </nav>
         <div className="shell__context">
+          <IconButton icon="moon" label="Dark theme" pressed={theme === 'dark'} onClick={toggle} />
           <span className="shell__repo">
             <Icon name="git-branch" size={14} />
             <code>relay/web</code>

@@ -85,3 +85,10 @@ export const AsList: Story = {
     await expect(canvas.getAllByRole('link')).toHaveLength(2);
   },
 };
+
+export const Dark: Story = {
+  globals: { theme: 'dark' },
+  parameters: {
+    docs: { description: { story: 'The queue in the dark theme: the status marks, the lanes and the sample badges on dark grounds, with axe on all of it.' } },
+  },
+};

@@ -20,14 +20,20 @@
   translate: 0 0;
 }
 
+/* On the page's ground, with a hairline under it: a bar the eye passes
+   over on the way to the screen. */
 .shell__bar {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: var(--space-6);
   height: 2.75rem;
   padding: 0 var(--space-4);
   border-bottom: var(--border-width) solid var(--color-border);
-  background: var(--color-surface);
+  background: var(--color-canvas);
+}
+
+.shell__bar > * {
+  align-self: center;
 }
 
 .shell__brand {
@@ -53,6 +59,15 @@
   color: var(--color-surface);
 }
 
+/* The places. Each is the bar's full height, so the line under the one you
+   are in sits on the bar's own hairline, as a selected tab's does on its
+   list's. Quiet ink until it is the place you are in or the one under the
+   pointer. No pill: a filled shape in the bar was the heaviest thing above
+   the screen's heading. */
+.shell__bar > .shell__nav {
+  align-self: stretch;
+}
+
 .shell__nav {
   display: flex;
   gap: var(--space-1);
@@ -62,17 +77,24 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  height: var(--control-height);
+  min-height: var(--control-height);
   padding: 0 var(--space-2);
-  border-radius: var(--radius-sm);
-  color: var(--color-text-secondary);
+  box-shadow: inset 0 calc(var(--border-width) * -2) 0 transparent; /* square-cornered, so the line under it is a straight one */
+  color: var(--color-text-muted);
   font-weight: var(--weight-medium);
+  transition:
+    color var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease);
 }
 
 .shell__nav a:hover {
-  background: var(--color-surface-hover);
   color: var(--color-text);
   text-decoration: none;
+}
+
+.shell__nav a:focus-visible {
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
 }
 
 .shell__short {
@@ -81,7 +103,7 @@
 
 .shell__nav a[aria-current='page'] {
   color: var(--color-text);
-  background: var(--color-surface-sunken);
+  box-shadow: inset 0 calc(var(--border-width) * -2) 0 var(--color-text);
 }
 
 .shell__context {
@@ -178,6 +200,7 @@
     flex: 1 0 100%;
     gap: var(--space-1);
     margin-inline: calc(var(--space-2) * -1);
+    margin-bottom: calc(var(--space-1) * -1); /* down through the bar's padding, so the line under the place you are in still sits on the hairline */
   }
 
   .shell__long {

@@ -1,5 +1,6 @@
+import { Badge } from '../../components';
 import type { Change } from '../../data/types';
-import { href } from '../../app/router';
+import { href, titleTransitionName } from '../../app/router';
 import { relativeTime } from '../format';
 import { ReviewLanes, ReviewStatus } from '../ReviewRow/ReviewParts';
 import './ReviewCard.css';
@@ -19,13 +20,14 @@ export function ReviewCard({ change }: { change: Change }) {
   const to = href({ name: 'change', id: change.id });
   return (
     <div className="review-card" data-state={change.state}>
-      <a href={to} className="review-card__title">
+      <a href={to} className="review-card__title" style={{ viewTransitionName: titleTransitionName(change.id) }}>
         {change.title}
       </a>
       <span className="review-card__meta">
         <code>{change.branch}</code>
         <span aria-hidden="true">·</span>
         <code>{change.commit}</code>
+        {change.sample ? <Badge variant="quiet">Sample</Badge> : null}
       </span>
       <span className="review-card__verdict">
         <ReviewStatus change={change} />
