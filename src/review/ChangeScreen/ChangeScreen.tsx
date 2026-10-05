@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Badge, Button, EmptyState, Icon, Tabs } from '../../components';
 import { useStore } from '../../app/store';
-import { navigate } from '../../app/router';
+import { navigate, titleTransitionName } from '../../app/router';
 import type { Finding, Screen, ValidationSummary as Summary } from '../../data/types';
 import { relativeTime } from '../format';
 import { ValidationSummary, kindsForLane } from '../ValidationSummary/ValidationSummary';
@@ -64,7 +64,7 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
             <Icon name="arrow-left" size={14} />
             Reviews
           </a>
-          <h1 className="change__title" tabIndex={-1}>
+          <h1 className="change__title" tabIndex={-1} style={{ viewTransitionName: titleTransitionName(change.id) }}>
             {change.title}
           </h1>
           <p className="change__meta">
@@ -92,6 +92,14 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
             </span>
             <Icon name="clock" size={12} />
             {relativeTime(change.openedAt)}
+            {change.sample ? (
+              <>
+                <span className="change__sep" aria-hidden="true">
+                  ·
+                </span>
+                <Badge variant="quiet">Sample, not a real run</Badge>
+              </>
+            ) : null}
           </p>
         </div>
         <DecisionBar

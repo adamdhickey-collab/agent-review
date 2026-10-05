@@ -5,7 +5,7 @@
   min-height: 0;
   margin: var(--space-4);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
   overflow: hidden;
 }
@@ -38,4 +38,12 @@
   .queue {
     margin: var(--space-2);
   }
+}
+
+/* What "Sample" on a row means, said once, under the rows. */
+.queue__note {
+  padding: var(--space-3) var(--space-4);
+  border-top: var(--border-width) solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
 }

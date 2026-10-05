@@ -71,3 +71,12 @@ export const Decided: Story = {
     docs: { description: { story: 'An accepted change. The decision bar is a record rather than three buttons, and the rest of the review is still there to read.' } },
   },
 };
+
+export const Dark: Story = {
+  ...WithFindingOpen,
+  globals: { theme: 'dark' },
+  parameters: {
+    ...WithFindingOpen.parameters,
+    docs: { description: { story: 'A change in the dark theme. The review around the preview is dark; the product inside the frame is not, because the frame is the product’s surface and that surface is always light: the reviewer sees Relay as the checks measured it, whatever the review is wearing.' } },
+  },
+};

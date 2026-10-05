@@ -76,6 +76,32 @@ test.describe('on a phone, 375', () => {
   });
 });
 
+/* The dark theme, at one width: the three screens under a reader's system
+   setting, with no choice made. The change is the one to look at: the
+   review is dark and the product in its frame is not, because the frame is
+   the product's surface and that surface is always light. */
+test.describe('in the dark theme, at 1280', () => {
+  test.use({ viewport: { width: 1280, height: 900 }, colorScheme: 'dark' });
+
+  test('the delegated work', async ({ page }) => {
+    await page.goto('#/');
+    await settle(page);
+    await expect(page).toHaveScreenshot('delegation-1280-dark.png', { fullPage: true });
+  });
+
+  test('the review queue', async ({ page }) => {
+    await page.goto('#/queue');
+    await settle(page);
+    await expect(page).toHaveScreenshot('queue-1280-dark.png', { fullPage: true });
+  });
+
+  test('the change, with the first finding open', async ({ page }) => {
+    await page.goto('#/changes/rv-2041/findings/f1-shared-table');
+    await settle(page);
+    await expect(page).toHaveScreenshot('change-1280-dark.png', { fullPage: true });
+  });
+});
+
 test.describe('the product screens', () => {
   for (const width of WIDTHS) {
     test(`customers, before, at ${width}`, async ({ page }) => {
@@ -84,6 +110,12 @@ test.describe('the product screens', () => {
       await settle(page);
       await page.getByRole('radio', { name: 'Before' }).click();
       await page.getByRole('radio', { name: `${width === 768 ? 'Tablet' : 'Desktop'}, ${width}` }).click();
+      /* Below 64rem the review's decision bar is fixed to the bottom of the
+         screen, over the lower edge of the frame, and a picture of the frame
+         took it along: the product's baseline held three of the review's
+         buttons, and moved whenever the review's chrome did. It is hidden
+         for this capture, so the baseline is the product and nothing else. */
+      await page.addStyleTag({ content: '.change__header .decision { visibility: hidden !important; }' });
       const frame = page.locator('.preview__frame');
       await expect(frame).toHaveScreenshot(`customers-before-${width}.png`);
     });

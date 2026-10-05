@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 /* A hash router in fifty lines. Four routes, one hook. The hash is the
    state, so a URL names a screen and a finding, and the back button
@@ -41,10 +42,41 @@ export function navigate(route: Route, replace = false) {
   if (replace) window.dispatchEvent(new HashChangeEvent('hashchange'));
 }
 
+/* Which screen a route is. Selecting a finding changes the route and not
+   the screen, and so does not move focus (useRouteEffects) or run a
+   transition (below). */
+export function screenOf(route: Route): string {
+  return route.name === 'change' ? `change:${route.id}` : route.name;
+}
+
+/* The name a change's title carries in a view transition, in the queue and
+   at the head of its own screen. The same name in both places is the whole
+   mechanism: the browser pairs them and moves one into the other. */
+export function titleTransitionName(id: string): string {
+  return `change-title-${id.replace(/[^\w-]/g, '-')}`;
+}
+
+type TransitionDocument = Document & { startViewTransition?: (update: () => void) => unknown };
+
 export function useRoute(): Route {
   const [route, setRoute] = useState<Route>(() => parse(location.hash));
   useEffect(() => {
-    const on = () => setRoute(parse(location.hash));
+    let screen = screenOf(parse(location.hash));
+    const on = () => {
+      const next = parse(location.hash);
+      const moved = screenOf(next) !== screen;
+      screen = screenOf(next);
+      const doc = document as TransitionDocument;
+      /* An enhancement, asked for only when the screen changes, the browser
+         can, and the reader has not asked for stillness. flushSync, so the
+         new screen is in the page when the browser takes its second
+         picture. Everywhere else the route just changes, as it always did. */
+      if (moved && doc.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        doc.startViewTransition(() => flushSync(() => setRoute(next)));
+      } else {
+        setRoute(next);
+      }
+    };
     window.addEventListener('hashchange', on);
     return () => window.removeEventListener('hashchange', on);
   }, []);

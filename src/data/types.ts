@@ -237,6 +237,8 @@ export interface Decision {
 
 export interface Change {
   id: string;
+  /** Invented, so the queue reads as a queue: its name, branch, figures and decision. Said wherever the change is shown. */
+  sample?: boolean;
   title: string;
   repo: string;
   branch: string;

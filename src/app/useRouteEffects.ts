@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { Route } from './router';
+import { screenOf, type Route } from './router';
 import { useStore } from './store';
 
 /* What a route change owes a reader who cannot see the page change. The
@@ -32,7 +32,7 @@ export function useRouteEffects(route: Route) {
     document.title = `${screen} · ${NAME}`;
   }, [screen]);
 
-  const key = route.name === 'change' ? `change:${route.id}` : route.name;
+  const key = screenOf(route);
   const seen = useRef(key);
   useEffect(() => {
     if (seen.current === key) return;

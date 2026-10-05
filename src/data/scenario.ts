@@ -7,9 +7,12 @@ import type { Change, Finding } from './types';
    its diff excerpts, its findings, its figures and the words in its
    rationale are transcribed from the branch (agent/bulk-actions-customers
    at e50a20e), its CHANGE.md and the checks run on it. rv-2042 is Run 2,
-   the same request without the rules, recorded the same way. The other
-   four changes exist so the queue is a queue, and are invented
-   throughout: their names, branches, figures and decisions. */
+   the same request without the rules, recorded the same way. rv-2043 is
+   the branch broken by hand. The other five changes exist so the queue is
+   a queue, and are invented throughout: their names, branches, figures
+   and decisions. Each is marked `sample`, and the queue and the change's
+   own screen say so on the row, because a reader who follows the case
+   study here should not have to guess which rows are a record. */
 
 const dana = { name: 'Dana Whitfield', role: 'Product design' };
 const tomas = { name: 'Tomas Reyes', role: 'Engineering' };
@@ -661,6 +664,7 @@ export const queue: Change[] = [
   bulkActionsDrift,
   {
     id: 'rv-2040',
+    sample: true,
     title: 'Empty state for the invoices list',
     repo: 'relay/web',
     branch: 'agent/invoices-empty-state',
@@ -691,6 +695,7 @@ export const queue: Change[] = [
   },
   {
     id: 'rv-2038',
+    sample: true,
     title: 'Fix date formatting in the activity feed',
     repo: 'relay/web',
     branch: 'agent/activity-dates',
@@ -721,6 +726,7 @@ export const queue: Change[] = [
   },
   {
     id: 'rv-2036',
+    sample: true,
     title: 'Keyboard shortcuts for the inbox',
     repo: 'relay/web',
     branch: 'agent/inbox-shortcuts',
@@ -760,6 +766,7 @@ export const queue: Change[] = [
   },
   {
     id: 'rv-2033',
+    sample: true,
     title: 'Rename "Archive" to "Close account" in the customer menu',
     repo: 'relay/web',
     branch: 'agent/close-account-copy',
@@ -791,6 +798,7 @@ export const queue: Change[] = [
   },
   {
     id: 'rv-2029',
+    sample: true,
     title: 'Add a density toggle to data tables',
     repo: 'relay/web',
     branch: 'agent/table-density',

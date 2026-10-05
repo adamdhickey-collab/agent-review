@@ -198,3 +198,15 @@ export const TheWholeLoop: Story = {
     });
   },
 };
+
+export const Dark: Story = {
+  decorators: [inStore(start)],
+  globals: { theme: 'dark' },
+  parameters: {
+    docs: { description: { story: 'The delegated work in the dark theme. Every color is light-dark(light, dark) in tokens.css, so the theme is one color-scheme and no component knows about it; axe runs on this story as on every other, which is what holds each ink to 4.5:1 on each dark ground.' } },
+  },
+  play: async ({ canvasElement }) => {
+    await expect(getComputedStyle(canvasElement.ownerDocument.documentElement).colorScheme).toBe('dark');
+    await expect(within(canvasElement).getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
+  },
+};

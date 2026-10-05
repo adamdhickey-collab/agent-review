@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from 'react';
-import { Cell, Row } from '../../components';
+import { Badge, Cell, Row } from '../../components';
 import type { Change } from '../../data/types';
-import { href } from '../../app/router';
+import { href, titleTransitionName } from '../../app/router';
 import { relativeTime } from '../format';
 import { ReviewLanes, ReviewStatus } from './ReviewParts';
 import './ReviewRow.css';
@@ -26,13 +26,14 @@ export function ReviewRow({ change }: { change: Change }) {
   return (
     <Row onClick={open} onKeyDown={onKey} className="review-row" data-state={change.state}>
       <Cell rowHeader className="review-row__change">
-        <a href={to} className="review-row__title" onClick={(e) => e.stopPropagation()}>
+        <a href={to} className="review-row__title" style={{ viewTransitionName: titleTransitionName(change.id) }} onClick={(e) => e.stopPropagation()}>
           {change.title}
         </a>
         <span className="review-row__meta">
           <code>{change.branch}</code>
           <span aria-hidden="true">·</span>
           <code>{change.commit}</code>
+          {change.sample ? <Badge variant="quiet">Sample</Badge> : null}
         </span>
       </Cell>
       <Cell>
