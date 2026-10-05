@@ -58,11 +58,15 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
      held behind it), so it gets no wording of its own beyond "waiting". */
   const decisions = a.asking.length === 1 ? 'decision' : plural(a.asking.length, 'decision');
 
-  const segments: Segment[] = [
+  /* Every kind keeps its segment in the bar, at zero when it is empty, so
+     an answer that merges what was waiting moves the boundary between them
+     rather than redrawing the bar; the legend names only what is there. */
+  const kinds: Segment[] = [
     { kind: 'made' as const, n: a.valuesMade, label: 'merged' },
     { kind: 'waiting' as const, n: valuesIn(a.asking) + valuesIn(a.waiting), label: a.asking.length ? `waiting on your ${decisions}` : 'waiting' },
     { kind: 'back' as const, n: valuesIn(back), label: 'reverted or left by you' },
-  ].filter((s) => s.n > 0);
+  ];
+  const segments = kinds.filter((s) => s.n > 0);
 
   const checked = [...a.made, ...a.reverted].filter((w) => w.checks);
   const checks = CHECKS.map(({ name, short }) => {
@@ -71,9 +75,13 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
     const failed = results.filter((c) => c!.state === 'failed').length;
     const unsure = results.filter((c) => c!.state === 'inconclusive').length;
     const tone: BadgeTone = failed ? 'danger' : unsure ? 'neutral' : 'success';
+    /* A check that passed asks nothing of the reader, so its badge is quiet:
+       the mark keeps the green and the ground stays neutral. A failure keeps
+       its tint, and so the one that needs a look is the one that has color. */
+    const variant = tone === 'success' ? ('quiet' as const) : ('tint' as const);
     const icon: IconName = failed ? 'status-failed' : unsure ? 'status-inconclusive' : 'status-passed';
     const extra = [failed ? `${failed} failed` : '', unsure ? `${unsure} inconclusive` : ''].filter(Boolean).join(', ');
-    return { name, text: `${short}: ${passed} of ${results.length} passed${extra ? `, ${extra}` : ''}`, tone, icon };
+    return { name, text: `${short}: ${passed} of ${results.length} passed${extra ? `, ${extra}` : ''}`, tone, variant, icon };
   });
 
   const unresolved: { icon: IconName; text: string }[] = [];
@@ -120,8 +128,8 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
           <strong>{a.valuesMade === a.total ? `All ${a.total}` : `${a.valuesMade} of ${a.total}`}</strong> literals are tokens now, and none moved a pixel.
         </p>
         <div className="outcome__bar" aria-hidden="true">
-          {segments.map((s) => (
-            <span key={s.kind} className="outcome__segment" data-kind={s.kind} style={{ flexGrow: s.n }} />
+          {kinds.map((s) => (
+            <span key={s.kind} className="outcome__segment" data-kind={s.kind} data-empty={s.n === 0 || undefined} style={{ flexGrow: s.n }} />
           ))}
         </div>
         <ul className="outcome__legend" aria-label="Where the literals are">
@@ -143,7 +151,7 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
             <ul className="outcome__checks" aria-label="Checks run on every change">
               {checks.map((c) => (
                 <li key={c.name}>
-                  <Badge size="large" tone={c.tone} icon={c.icon}>
+                  <Badge size="large" tone={c.tone} variant={c.variant} icon={c.icon}>
                     {c.text}
                   </Badge>
                 </li>

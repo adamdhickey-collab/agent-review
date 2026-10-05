@@ -16,7 +16,7 @@ import './Shell.css';
 
 export function Shell({ route, children }: { route: Route; children: ReactNode }) {
   return (
-    <div className="shell">
+    <div className="shell" data-surface="review">
       <a
         className="shell__skip"
         href="#main"

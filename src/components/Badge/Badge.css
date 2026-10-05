@@ -36,6 +36,21 @@
   background: transparent;
 }
 
+/* The tone in the mark only: no ground, a hairline edge, the word in the
+   neutral ink and the icon in the tone's. Set after the tones, which set
+   the ink. Groundless on purpose: a neutral tint is itself a ground, and a
+   quiet badge beside a neutral one (a passed check beside an inconclusive
+   one) has to read as the quieter of the two. */
+.badge.badge--quiet {
+  border-color: var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.badge--quiet .icon {
+  color: var(--badge-ink);
+}
+
 .badge--accent {
   --badge-ink: var(--color-accent);
   --badge-ground: var(--color-accent-subtle);

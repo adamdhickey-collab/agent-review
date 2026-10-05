@@ -14,14 +14,24 @@ import './Badge.css';
    screen. It is 24px tall, the compact control's height written as a size
    rather than as that token (a coarse pointer raises the token for
    controls, and a badge is not one), with the small type and a 14px icon.
-   The default is as it was. */
+   The default is as it was.
+
+   Three variants. Tint is the default. Outline is for a badge inside a row
+   that is already tinted. Quiet keeps the meaning in the mark and drops it
+   from the ground: no ground, a hairline edge, the neutral ink, and the
+   icon in the tone's ink. It is for a state that asks nothing of the reader (a check that
+   passed, a label that names a kind), so that on a screen of badges the
+   tinted ones are the ones that need a person. Added for the delegated
+   work, where seven tinted pills competed with the one decision that
+   mattered; the tint and outline badges are unchanged. */
 
 export type BadgeTone = 'neutral' | 'accent' | 'success' | 'warning' | 'danger';
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   tone?: BadgeTone;
-  /** Outline instead of a tinted ground, for a badge inside a tinted row. */
-  variant?: 'tint' | 'outline';
+  /** Outline instead of a tinted ground, for a badge inside a tinted row.
+      Quiet, for a state that needs nothing: a neutral badge whose icon carries the tone. */
+  variant?: 'tint' | 'outline' | 'quiet';
   icon?: IconName;
   /** Monospace, for a value a machine wrote: a hash, a token, a count. */
   mono?: boolean;
