@@ -33,10 +33,18 @@ const preview: Preview = {
     },
   },
   decorators: [
-    (Story) => (
+    /* Each story on the surface it belongs to (app/global.css): the review's
+       stories on the review's, the product's on the product's. The wrapper
+       draws nothing, so a story's layout is the one it had. */
+    (Story, context) => (
       <>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
-        <Story />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Inter:opsz,wght@14..32,400..600&display=swap" />
+        <div
+          style={{ display: 'contents' }}
+          data-surface={context.title.startsWith('Review/') ? 'review' : context.title.startsWith('Product/') ? 'product' : undefined}
+        >
+          <Story />
+        </div>
       </>
     ),
   ],

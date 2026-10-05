@@ -16,6 +16,25 @@ html {
   background: var(--color-canvas);
   -webkit-font-smoothing: antialiased;
   text-size-adjust: 100%;
+  font-optical-sizing: none; /* the product's type: Inter's text cut at every size, as it always was */
+}
+
+/* Two surfaces. The review is drawn a step further than the product it
+   reviews (tokens.css says how), and the step is taken here, on the
+   review's own surface, so that the product inside the preview frame, a
+   surface of its own, reads exactly what it read before. The shell marks
+   the review, the frame marks the product, and the Storybook marks each
+   story by where it lives. */
+[data-surface='review'] {
+  --font-mono: var(--font-mono-review);
+  font-optical-sizing: auto;
+  font-feature-settings: var(--font-features-review);
+}
+
+[data-surface='product'] {
+  --font-mono: var(--font-mono-system);
+  font-optical-sizing: none;
+  font-feature-settings: normal;
 }
 
 body {

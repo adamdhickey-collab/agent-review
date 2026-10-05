@@ -49,6 +49,20 @@ export const Outline: Story = {
   },
 };
 
+export const Quiet: Story = {
+  render: () => (
+    <div style={row}>
+      <Badge variant="quiet" tone="success" icon="status-passed">Token lint: 7 of 7 passed</Badge>
+      <Badge variant="quiet" tone="accent" icon="message-question">What a value means</Badge>
+      <Badge variant="quiet" tone="warning" icon="lock">Outside the delegation</Badge>
+      <Badge variant="quiet" tone="success" icon="status-passed" size="large">Visual baselines: 7 of 7 passed</Badge>
+    </div>
+  ),
+  parameters: {
+    docs: { description: { story: 'The meaning in the mark, not the ground: a neutral badge whose icon takes the tone. For a state that asks nothing of the reader, a check that passed or a label naming a kind, so the tinted badges on the same screen are the ones that need a person.' } },
+  },
+};
+
 export const WithIcon: Story = {
   render: () => (
     <div style={row}>

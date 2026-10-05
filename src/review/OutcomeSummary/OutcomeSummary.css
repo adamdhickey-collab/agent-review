@@ -49,32 +49,53 @@
 
 .outcome__bar {
   display: flex;
-  gap: calc(var(--border-width) * 2);
   height: var(--space-2);
   overflow: hidden;
   border-radius: var(--radius-sm);
   background: var(--color-surface-sunken);
 }
 
+/* Each kind keeps its segment (OutcomeSummary.tsx), so an answer moves the
+   boundary between merged and waiting at the base motion instead of
+   redrawing the bar; under reduced motion the base stylesheet stops it. A
+   segment with nothing in it closes to nothing, its gap with it. */
 .outcome__segment {
   flex-basis: 0;
   min-width: var(--space-1);
+  transition: flex-grow var(--motion-base) var(--ease);
 }
 
-/* A segment's ground and its swatch's are the same, set once per kind. */
+.outcome__segment + .outcome__segment {
+  margin-left: calc(var(--border-width) * 2);
+}
+
+.outcome__segment[data-empty] {
+  min-width: 0;
+  margin-left: 0;
+}
+
+/* A segment's ground and its swatch's are the same, set once per kind, in
+   the fill step of each meaning (tokens.css), never its text ink. What is
+   merged is solid. What waits on the person is hatched amber inside an
+   amber edge: blocked, not empty, and said by the pattern as well as the
+   hue. What was taken back is the neutral solid. */
 .outcome [data-kind='made'] {
-  --kind-ground: var(--color-success);
-  --kind-edge: var(--color-success);
+  --kind-ground: var(--color-success-solid);
+  --kind-edge: var(--color-success-solid);
 }
 
 .outcome [data-kind='waiting'] {
-  --kind-ground: var(--color-warning-subtle);
-  --kind-edge: var(--color-warning);
+  --kind-ground: repeating-linear-gradient(
+    -45deg,
+    var(--color-warning-solid) 0 calc(var(--border-width) * 2),
+    var(--color-warning-subtle) 0 calc(var(--border-width) * 5)
+  );
+  --kind-edge: var(--color-warning-border);
 }
 
 .outcome [data-kind='back'] {
-  --kind-ground: var(--color-border-control);
-  --kind-edge: var(--color-border-control);
+  --kind-ground: var(--color-neutral-solid);
+  --kind-edge: var(--color-neutral-solid);
 }
 
 .outcome__segment,

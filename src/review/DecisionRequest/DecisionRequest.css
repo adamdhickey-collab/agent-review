@@ -1,10 +1,15 @@
+/* One flat surface. What is inside it is either read (the question, why
+   it asks) or pressed (an answer), and only the pressed things are raised:
+   the card was three borders deep, a panel holding cards holding a boxed
+   specimen, and every box said the same thing as the one around it. The
+   large radius keeps the outer curve wider than the cards' inside it. */
 .ask {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-4);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
 }
 
@@ -41,16 +46,14 @@
   line-height: var(--leading-body);
 }
 
-/* The element as a reader of the billing screen sees it. */
+/* The element as a reader of the billing screen sees it: a line of the
+   card, not a box in it. The card around it is the frame. */
 .ask__sample {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-1) var(--space-3);
   align-self: flex-start;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface-sunken);
 }
 
 .ask__sample-label {
@@ -108,6 +111,8 @@
   gap: var(--space-3);
 }
 
+/* An answer is the one thing on the card that is pressed, so it is the
+   one thing raised: the hairline, and the raised shadow under it. */
 .ask__choice {
   display: flex;
   flex-direction: column;
@@ -116,13 +121,15 @@
   padding: var(--space-3);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
 }
 
 /* The recommended answer's edge is the accent, twice the hairline, drawn
    inside so the two cards keep one size. */
 .ask__choice[data-recommended] {
   border-color: var(--color-accent);
-  box-shadow: inset 0 0 0 var(--border-width) var(--color-accent);
+  box-shadow: inset 0 0 0 var(--border-width) var(--color-accent), var(--shadow-raised);
 }
 
 .ask__choice .btn {

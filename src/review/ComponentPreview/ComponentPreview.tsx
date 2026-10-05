@@ -197,9 +197,10 @@ export function ComponentPreview({ changeId, reproduce, screens = ['customers', 
             className="preview__frame"
             style={{ width: `${viewport}px`, transform: `scale(${scale})` }}
             data-target={reproduce?.target}
+            data-surface="product"
           >
             <PreviewScreen changeId={changeId} screen={screen} side={side} selection={selection} />
-            <div ref={mark} className="preview__mark" aria-hidden="true" hidden />
+            <div ref={mark} className="preview__mark" aria-hidden="true" data-surface="review" hidden />
           </div>
         </div>
       </div>

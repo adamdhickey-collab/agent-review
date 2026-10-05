@@ -8,25 +8,29 @@
 
 export const TOKEN_GROUPS = {
   type: [
-    '--font-ui', '--font-mono',
+    '--font-ui', '--font-mono', '--font-mono-system', '--font-mono-review', '--font-features-review',
     '--text-xs', '--text-sm', '--text-md', '--text-lg', '--text-xl',
     '--leading-tight', '--leading-ui', '--leading-body',
     '--weight-regular', '--weight-medium', '--weight-semibold',
   ],
   space: ['--space-1', '--space-2', '--space-3', '--space-4', '--space-5', '--space-6', '--space-8'],
   control: ['--control-height', '--control-height-compact', '--control-height-touch', '--control-padding-x', '--control-padding-x-compact'],
-  shape: ['--radius-sm', '--radius-md', '--border-width'],
+  shape: ['--radius-sm', '--radius-md', '--radius-lg', '--border-width'],
   ground: ['--color-canvas', '--color-surface', '--color-surface-sunken', '--color-surface-hover'],
   line: ['--color-border', '--color-border-control'],
   ink: ['--color-text', '--color-text-secondary', '--color-text-muted', '--color-text-on-accent'],
-  accent: ['--color-accent', '--color-accent-hover', '--color-accent-subtle'],
+  accent: ['--color-accent', '--color-accent-hover', '--color-accent-subtle', '--color-accent-border'],
   meaning: [
     '--color-success', '--color-success-subtle',
     '--color-warning', '--color-warning-subtle',
     '--color-danger', '--color-danger-subtle',
+    '--color-success-solid', '--color-success-border',
+    '--color-warning-solid', '--color-warning-border',
+    '--color-danger-solid', '--color-danger-border',
+    '--color-neutral-solid',
   ],
   diff: ['--color-diff-add', '--color-diff-add-ink', '--color-diff-remove', '--color-diff-remove-ink'],
-  elevation: ['--shadow-menu', '--color-scrim'],
+  elevation: ['--shadow-menu', '--shadow-raised', '--color-scrim'],
   focus: ['--focus-ring-color', '--focus-ring-width', '--focus-ring-offset'],
   motion: ['--motion-fast', '--motion-base', '--motion-ambient', '--ease'],
 } as const;
