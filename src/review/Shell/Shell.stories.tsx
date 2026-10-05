@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
+import { setSingleKeys } from '../../app/shortcuts';
 import { Shell } from './Shell';
 
 const meta = {
@@ -80,5 +81,51 @@ export const LinksOutAreQuieter: Story = {
     const avatar = canvasElement.querySelector('.shell__avatar') as HTMLElement;
     await expect(getComputedStyle(avatar).color).not.toBe(resolve('--color-accent'));
     await expect(getComputedStyle(avatar).color).toBe(resolve('--color-text-secondary'));
+  },
+};
+
+export const ShortcutsFromTheKeyboard: Story = {
+  parameters: {
+    docs: { description: { story: 'A question mark, pressed with nothing in particular focused, opens the list of shortcuts; Escape closes it. Then the keyboard button in the bar opens it, its close button closes it, and focus is back on the button that opened it. The button’s tooltip carries the key.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    const trigger = within(canvasElement).getByRole('button', { name: 'Keyboard shortcuts' });
+    await expect(trigger).toHaveAttribute('data-tooltip', 'Keyboard shortcuts (?)');
+    await expect(trigger).toHaveAttribute('aria-keyshortcuts', 'Shift+/');
+    await expect(body.queryByRole('dialog')).toBeNull();
+
+    await userEvent.keyboard('?');
+    await expect(body.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await expect(body.queryByRole('dialog')).toBeNull();
+
+    await userEvent.click(trigger);
+    const dialog = body.getByRole('dialog', { name: 'Keyboard shortcuts' });
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
+    await expect(body.queryByRole('dialog')).toBeNull();
+    await expect(trigger).toHaveFocus();
+  },
+};
+
+export const SingleKeysSwitchedOff: Story = {
+  parameters: {
+    docs: { description: { story: 'With single-key shortcuts switched off, a question mark does nothing and the button no longer advertises it; the button still opens the list. The switch is put back at the end.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    setSingleKeys(false);
+    try {
+      const trigger = await within(canvasElement).findByRole('button', { name: 'Keyboard shortcuts' });
+      await expect(trigger).toHaveAttribute('data-tooltip', 'Keyboard shortcuts');
+      await expect(trigger).not.toHaveAttribute('aria-keyshortcuts');
+      await userEvent.keyboard('?');
+      await expect(body.queryByRole('dialog')).toBeNull();
+      await userEvent.click(trigger);
+      await expect(body.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeVisible();
+      await userEvent.keyboard('{Escape}');
+    } finally {
+      setSingleKeys(true);
+    }
   },
 };

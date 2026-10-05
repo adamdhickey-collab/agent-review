@@ -82,3 +82,14 @@ export const InRow: Story = {
     </div>
   ),
 };
+
+export const WithShortcut: Story = {
+  args: { icon: 'keyboard', label: 'Keyboard shortcuts', shortcut: '?' },
+  parameters: {
+    docs: { description: { story: 'A button whose action also has a key shows the key after its label in the tooltip, which is where a person looking at the button learns it. The accessible name is still the label alone.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Keyboard shortcuts' });
+    await expect(button).toHaveAttribute('data-tooltip', 'Keyboard shortcuts (?)');
+  },
+};

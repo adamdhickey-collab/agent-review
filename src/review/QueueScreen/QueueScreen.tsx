@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { EmptyState, HeaderCell, SegmentedControl, StatusIndicator, Table, Toolbar } from '../../components';
 import { useStore } from '../../app/store';
 import { useMediaQuery } from '../../app/useMediaQuery';
+import { listKeys } from '../../app/shortcuts';
 import { REVIEW_STATE_LABEL, type Change, type ReviewState } from '../../data/types';
 import { ReviewCard } from '../ReviewCard/ReviewCard';
 import { ReviewRow } from '../ReviewRow/ReviewRow';
@@ -20,6 +21,10 @@ import './QueueScreen.css';
    them. */
 
 type Filter = 'open' | 'returned' | 'done' | 'all';
+
+/* J and K, and the arrows, move between the changes while one has focus: a
+   row in the table or a card in the list, each by its title link. */
+const onListKey = listKeys('.review-row, .review-card', 'a[href]');
 
 /** The table's columns: the change, validation, agent, requested by, opened, components. */
 const COLUMNS = 6;
@@ -43,7 +48,7 @@ export function QueueScreen({ changes: given, list }: { changes?: Change[]; /** 
   const groups = states.map((state) => ({ state, rows: rows.filter((c) => c.state === state) })).filter((g) => g.rows.length > 0);
 
   return (
-    <div className="queue">
+    <div className="queue" onKeyDown={onListKey}>
       <Toolbar
         label="Review queue"
         className="queue__toolbar"

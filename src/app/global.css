@@ -163,6 +163,7 @@ samp {
   .change__spine,
   .preview__bar,
   .return,
+  .shortcuts,
   .delegation {
     --control-height: var(--control-height-touch);
     --control-height-compact: var(--control-height-touch);

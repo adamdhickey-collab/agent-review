@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn } from 'storybook/test';
+import { expect, fn, userEvent } from 'storybook/test';
 import { bulkActionsWithRules, queue } from '../../data/scenario';
 import type { Finding } from '../../data/types';
 import { FindingList } from './FindingList';
@@ -115,5 +115,23 @@ export const SeverityIsAWord: Story = {
     for (const w of words) await expect(['Blocking', 'Needs a decision', 'Note']).toContain(w);
     const first = canvasElement.querySelector('.finding__row') as HTMLElement;
     await expect(first.getBoundingClientRect().height).toBeLessThanOrEqual(56);
+  },
+};
+
+export const ListKeys: Story = {
+  parameters: {
+    docs: { description: { story: 'With a finding focused, J and the down arrow move to the next finding and K and the up arrow to the one before. The keys move focus and nothing else: no finding is opened and no box is checked.' } },
+  },
+  play: async ({ canvasElement, args }) => {
+    const buttons = Array.from(canvasElement.querySelectorAll<HTMLElement>('.finding__button'));
+    buttons[0].focus();
+    await userEvent.keyboard('j');
+    await expect(buttons[1]).toHaveFocus();
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(buttons[2]).toHaveFocus();
+    await userEvent.keyboard('k');
+    await expect(buttons[1]).toHaveFocus();
+    await expect(args.onSelect).not.toHaveBeenCalled();
+    await expect(args.onInclude).not.toHaveBeenCalled();
   },
 };

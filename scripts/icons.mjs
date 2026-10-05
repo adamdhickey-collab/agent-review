@@ -63,6 +63,7 @@ const MAP = {
   smartphone: ['device-mobile', 'bold'],
   tablet: ['device-tablet', 'bold'],
   monitor: ['monitor', 'bold'],
+  keyboard: ['keyboard', 'bold'],
   /* Meaning and state: solid. */
   alert: ['warning', 'fill'],
   info: ['info', 'fill'],

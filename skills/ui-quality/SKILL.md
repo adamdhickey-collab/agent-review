@@ -77,9 +77,19 @@ Enter or Space to press it, arrow keys inside a group (tabs, a segmented
 control, a menu). Nothing may be available only on hover: a tooltip also
 shows on focus, a row action also has a focusable control.
 
+A keyboard shortcut is a second way to do something a control already does,
+and the few the review has are listed in `src/app/shortcuts.ts`, which is
+also what the shortcut sheet shows: add one there or not at all. A
+single-character shortcut only works while the thing it acts on has focus,
+or can be switched off (WCAG 2.1.4); it never fires while a person is
+typing; and it never decides anything. Accept, Reject, Return and an answer
+to a decision have no shortcut.
+
 How to check: open the Storybook, put the pointer away, and Tab through
 the story. Every control you can click, you can reach. For a tooltip, Tab
-to the control and it appears.
+to the control and it appears. For a shortcut, `tests/keyboard.spec.ts`
+presses real keys: a question mark typed into a message stays a question
+mark.
 
 ## 5. Every interactive element shows focus
 
