@@ -30,7 +30,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The account a delegated run opens on, built to be read at a glance: whether anything needs the person, then a bar of where the literals the lint reported are now (merged, asking, waiting, taken back), each check as a large Badge with its count, and a line each for what is unresolved and for scope. Every figure is counted from the work, never carried. When nothing needs the person, the lead says so first: the quiet state is the result the screen is for.',
+          'The account a delegated run opens on, built to be read at a glance: whether anything needs the person, then a bar of where the literals the lint reported are now (merged, waiting on the person’s decisions, taken back), each check as a large Badge with its count, and a line each for what is unresolved and for scope. Every figure is counted from the work, never carried. When nothing needs the person, the lead says so first: the quiet state is the result the screen is for.',
       },
     },
   },
@@ -44,7 +44,7 @@ export const NeedsYou: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
     await expect(canvas.getByText('26 of 36')).toBeInTheDocument();
-    await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('26 merged3 asking you7 waiting on an answer');
+    await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('26 merged10 waiting on your 2 decisions');
     await expect(canvas.getByText('Axe: 6 of 7 passed, 1 inconclusive')).toBeInTheDocument();
     await expect(canvas.getByText(/A first try in the plan card failed two checks and was fixed\./)).toBeInTheDocument();
   },
@@ -63,6 +63,7 @@ export const WithAReversal: Story = {
   parameters: { docs: { description: { story: 'Quiet, with one change reverted by the person: the account says so, and that the lint reports its two literals again.' } } },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByText(/1 change reverted by you\./)).toBeInTheDocument();
+    await expect(within(canvasElement).getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('34 merged2 reverted or left by you');
   },
 };
 
