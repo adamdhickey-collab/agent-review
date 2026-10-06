@@ -184,6 +184,21 @@ Decisions:
   louder later: with the diff pair only the failure gets louder, with
   danger and success both do. The rule's preview also says what a rule is
   for: next time, a case that matches does not ask.
+- **The meaning before the name (2026-10-06, later).** The card showed all
+  of that and a reader still had to work out what the two answers stood
+  for: a tile called the plan change "this change", the answers sat under
+  a token's name ("If `--color-danger` is made louder later:"), and nothing
+  said which answer kept the two meanings apart. Now each tile says what
+  its red is before its token ("A failure", "A replaced value"); the line
+  under the checks says they can't tell whether the two reds mean the same
+  thing, and that this matters the next time the danger style changes; the
+  answers sit under "Now imagine the failure style gets stronger." and one
+  sentence on what each does; each answer names its choice ("Separate the
+  meanings", "Keep the meanings coupled") over its outcome; and under its
+  two specimens it says what each takes, "Payment failed → danger",
+  "Starter → replaced value", with the token beside it as the detail. The
+  tokens stay on the card for anyone who reads them; the story no longer
+  needs them.
 - **Three reasons to stop, not three tabs.** A problem the agent can solve
   with the evidence and permission it has (it named a token that does not
   exist; the lint and the visual check failed; it corrected the name) is

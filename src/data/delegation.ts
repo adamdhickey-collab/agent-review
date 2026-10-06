@@ -139,6 +139,12 @@ export interface Question {
   /** The checks, run with each answer in place in turn, when every answer
       gave the same result: the record that no check can choose between them. */
   tried?: Check[];
+  /** What the value in question is, in plain words, set against the twin's
+      meaning: "A replaced value". */
+  means?: string;
+  /** What each answer does if the twin's token changes later, in a sentence
+      over the answers: both change, or only the twin does. */
+  later?: string;
   note?: string;
 }
 
@@ -152,8 +158,8 @@ export interface Twin {
   screen: string;
   /** The token it was given. */
   token: string;
-  /** Who gave it that token, and on what authority: "the agent, under boundary 2". */
-  by: string;
+  /** What that token is for, in a word, as an answer names it: "danger". */
+  role: string;
 }
 
 /** A rendered specimen of the element in question, so a designer sees it as well as reads it. */

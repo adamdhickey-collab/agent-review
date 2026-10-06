@@ -118,8 +118,14 @@
 }
 
 .ask__tile-means {
+  color: var(--color-text-secondary);
+}
+
+/* What the red is, said first and a weight up, so the two tiles read as
+   "a failure" against "a replaced value" before anything else on them. */
+.ask__tile-means strong {
   color: var(--color-text);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
 }
 
 .ask__tile-token {
@@ -176,9 +182,21 @@
   gap: var(--space-2);
 }
 
+/* "Now imagine the failure style gets stronger.": the turn from today to
+   later, so it is a heading for the answers rather than a label over them,
+   with the one sentence under it that says what each answer does. */
 .ask__if {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+}
+
+.ask__later {
+  max-width: 44rem;
+  margin-top: calc(var(--space-1) * -1);
+  margin-bottom: var(--space-1);
   color: var(--color-text-secondary);
-  font-size: var(--text-sm);
+  line-height: var(--leading-body);
 }
 
 .ask__choices {
@@ -194,6 +212,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-2);
+  container: answer / inline-size; /* what it takes is laid out by the card's width, not the screen's */
   padding: var(--space-3);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
@@ -235,7 +254,7 @@
   align-items: flex-start;
   gap: var(--space-2);
   color: var(--color-text);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   line-height: var(--leading-body);
 }
 
@@ -250,6 +269,52 @@
 
 .ask__outcome [data-icon='alert'] {
   color: var(--color-warning);
+}
+
+/* Under the specimens, what each element takes: "Payment failed → danger",
+   and the token beside it in a column of its own, quieter than the meaning,
+   so the meanings are read down one edge and the names down another. In a
+   card too narrow for both columns, each token goes under its meaning; in
+   between, a long value wraps inside its own column, never into the
+   token's. */
+.ask__takes {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) max-content;
+  gap: var(--space-1) var(--space-4);
+  align-self: stretch;
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.ask__takes li {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+}
+
+.ask__takes li > span {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-1);
+}
+
+.ask__takes strong {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.ask__takes .inline-name {
+  color: var(--color-text-muted);
+}
+
+@container answer (max-width: 21rem) {
+  .ask__takes {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-2);
+  }
 }
 
 /* The facts inside the Disclosure: the label over its text. */
