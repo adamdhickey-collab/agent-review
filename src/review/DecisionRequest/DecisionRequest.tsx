@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Badge, Button, Checkbox, Disclosure, Icon } from '../../components';
-import { BOUNDARY_GROUP_ICON, RULE_EXCLUDES, type Boundary, type Option, type Sample, type Work } from '../../data/delegation';
+import { BOUNDARY_GROUP_ICON, RULE_EXCLUDES, type Boundary, type Check, type Option, type Sample, type Twin, type Work } from '../../data/delegation';
 import { plural } from '../format';
 import './DecisionRequest.css';
 import { Inline } from '../Inline';
@@ -41,12 +41,50 @@ import { Inline } from '../Inline';
    them, the boundary that stopped it, on one line. What was found, the
    code, the evidence, the reason for the recommendation and the changes
    held behind it are in one Disclosure, closed, with the count of held
-   changes in the card's head where it can be seen without opening it. */
+   changes in the card's head where it can be seen without opening it.
+
+   ONE RED, TWO MEANINGS, SHOWN BEFORE IT IS NAMED (2026-10-06). The
+   question used to be a sentence: "Both answers are the same pixels, so
+   every check passes either way." That sentence is the whole reason the
+   agent stopped, and a person who does not think in tokens read past it.
+   Now, for a value whose meaning is in question, the card shows it beside
+   the twin it is confused with: the element the agent settled on its own
+   because its meaning was never in doubt ("Payment failed", a failure),
+   and this one, in the same red, under the two names either could take.
+   Under them, the checks as they came back with each name in place, every
+   one passed, and then the one line that says what that means: nothing
+   failed, and no check can say what the red means. The answers then show
+   both elements as they would render if danger were made louder later,
+   because the difference between the answers is not this element alone,
+   it is whether this element keeps company with the failure. */
 
 /* Whether choosing an option ties the element to --color-danger, so that a
    change to danger's red would reach it. Read from the values the option
    writes, not from its label. */
 const followsDanger = (o: Option) => o.after.some((v) => v.includes('--color-danger)'));
+
+/* The twin as it renders: the status text in the red both names draw. */
+function TwinSpecimen({ twin, loud }: { twin: Twin; loud?: boolean }) {
+  return (
+    <p className={['ask__sample', loud ? 'ask__sample--loud' : ''].filter(Boolean).join(' ')}>
+      <span className="ask__sample-status">{twin.text}</span>
+    </p>
+  );
+}
+
+/* A token name out of the value an option writes: "var(--color-danger)" is
+   --color-danger. */
+const tokenOf = (value: string) => value.replace(/^var\((.*)\)$/, '$1');
+
+/* A check's result as a badge: a pass is quiet, anything else is said. */
+function CheckBadge({ check }: { check: Check }) {
+  const passed = check.state === 'passed';
+  return (
+    <Badge size="large" tone={passed ? 'success' : 'neutral'} variant={passed ? 'quiet' : 'tint'} icon={passed ? 'status-passed' : 'status-inconclusive'}>
+      {check.name}: {check.label}
+    </Badge>
+  );
+}
 
 function Specimen({ sample, loud }: { sample: Sample; loud?: boolean }) {
   /* The element as it renders. Both names in question draw these two colors
@@ -123,7 +161,18 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
   };
 
   const sample = work.sample;
+  const twin = q.kind === 'intent' ? q.twin : undefined;
   const contrast = sample && q.options.some(followsDanger) && q.options.some((o) => !followsDanger(o));
+  /* The names the value in question could take, from what the options write
+     to its first line, in the order the options are offered. */
+  const names = Array.from(new Set(q.options.map((o) => o.after[0]).filter(Boolean).map(tokenOf)));
+  /* The twin's name first, so the tile reads as a choice between its token
+     and the other one. */
+  if (twin) names.sort((x, y) => Number(y === twin.token) - Number(x === twin.token));
+  /* What each answer does when danger gets louder, said of the two elements
+     the answer shows: "Only the failure gets louder", "Both get louder". */
+  const outcome = (follows: boolean) =>
+    twin ? (follows ? 'Both get louder' : `Only ${twin.means.replace(/^an? /i, 'the ').toLowerCase()} gets louder`) : follows ? 'Follows it' : 'Stays as it is';
   const moreLabel = q.kind === 'intent' ? (q.evidence ? 'The evidence and the code' : 'The code') : 'Why it stopped';
 
   return (
@@ -150,6 +199,53 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
       </h3>
 
       {why ? <p className="ask__why">{why}</p> : null}
+
+      {twin && sample ? (
+        <div className="ask__today" role="group" aria-labelledby={`${id}-today`}>
+          <p className="ask__label" id={`${id}-today`}>
+            Today, the same red
+          </p>
+          <ul className="ask__pair">
+            <li className="ask__tile">
+              <TwinSpecimen twin={twin} />
+              <p className="ask__tile-means">
+                {twin.means}, in the {twin.screen.toLowerCase()}
+              </p>
+              <p className="ask__tile-token">
+                <Inline text={twin.token} />, {twin.by}
+              </p>
+            </li>
+            <li className="ask__tile" data-current>
+              <Specimen sample={sample} />
+              <p className="ask__tile-means">This change, in the {work.screen.toLowerCase()}</p>
+              <p className="ask__tile-token">
+                {names.map((n, i) => (
+                  <span key={n}>
+                    {i ? ' or ' : ''}
+                    <Inline text={n} />
+                  </span>
+                ))}
+                ?
+              </p>
+            </li>
+          </ul>
+        </div>
+      ) : null}
+
+      {q.kind === 'intent' && q.tried ? (
+        <div className="ask__tried" role="group" aria-labelledby={`${id}-tried`}>
+          <p className="ask__label" id={`${id}-tried`}>
+            The checks, with either name
+          </p>
+          <ul className="ask__checks">
+            {q.tried.map((c) => (
+              <li key={c.name}>
+                <CheckBadge check={c} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {q.kind === 'intent' ? (
         <p className="ask__gap">
@@ -204,6 +300,9 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                       {Array.from(new Set(p.settles.map((w) => w.screen.toLowerCase()))).join(', ')}.
                     </p>
                   ) : null}
+                  <p>
+                    <strong>Next time:</strong> a case that matches doesn’t ask you. The agent follows the rule and says so in its record.
+                  </p>
                   <p>You can edit or revoke it under the boundaries. Revoking it doesn’t undo what it already did.</p>
                 </div>
               ) : (
@@ -243,7 +342,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                     {contrast ? (
                       <p className="ask__outcome">
                         <Icon name={follows ? 'alert' : 'check'} size={16} />
-                        <span>{follows ? 'Follows it' : 'Stays as it is'}</span>
+                        <span>{outcome(follows)}</span>
                       </p>
                     ) : null}
                     {o.recommended ? (
@@ -253,7 +352,10 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                     ) : null}
                   </div>
                   {contrast && sample ? (
-                    <Specimen sample={sample} loud={follows} />
+                    <div className="ask__samples">
+                      {twin ? <TwinSpecimen twin={twin} loud /> : null}
+                      <Specimen sample={sample} loud={follows} />
+                    </div>
                   ) : (
                     <p className="ask__effect-line">
                       <Inline text={o.effect} />

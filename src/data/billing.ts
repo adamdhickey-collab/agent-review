@@ -1,4 +1,4 @@
-import { cleanChecks, type Boundary, type DelegationState, type Option, type Pattern, type Question, type Work } from './delegation';
+import { cleanChecks, type Boundary, type DelegationState, type Option, type Pattern, type Question, type Twin, type Work } from './delegation';
 
 /* The delegated run the product opens on: Claude Code moving Relay's billing
    screens onto the token layer. SIMULATED THROUGHOUT. Unlike rv-2041 and
@@ -273,12 +273,28 @@ function struck(pattern: Pattern): Option[] {
 
 const EVIDENCE_TOKENS = 'tokens.css says the diff pair is for “a line added and a line removed”.';
 
-function struckQuestion(pattern: Pattern, ask: string, found: string, recommendation: string): Question {
+/* The red every struck-through value shares, where its meaning was never in
+   doubt: the status “Payment failed”, which the agent gave --color-danger on
+   its own (paymentFailed, above). A question about what a struck value means
+   shows it beside the value, so the person sees one red with two meanings
+   before reading the name of a token. */
+const FAILED: Twin = {
+  text: 'Payment failed',
+  means: 'A failure',
+  screen: 'Payment history',
+  token: '--color-danger',
+  by: 'chosen by the agent',
+};
+
+/* Every struck-through value was tried with both names before it was held or
+   asked about: the two names are one red, so the checks come back the same
+   with each, which is the whole reason it cannot choose. */
+function struckQuestion(pattern: Pattern, ask: string, found: string, recommendation: string, frames: number, stories: number): Question {
   return {
     kind: 'intent',
     ask,
     found,
-    gap: 'Both answers are the same pixels, so every check passes either way. What the checks can’t say is what the colors mean, and that decides what happens here if either token changes later.',
+    gap: 'Nothing failed. The checks can prove no pixel moved; they can’t say what the red means, and that decides what happens here if either token changes later.',
     evidence:
       pattern === 'replaced'
         ? [
@@ -293,6 +309,8 @@ function struckQuestion(pattern: Pattern, ask: string, found: string, recommenda
     paused: [5],
     options: struck(pattern),
     pattern,
+    twin: FAILED,
+    tried: cleanChecks(frames, stories),
   };
 }
 
@@ -311,11 +329,16 @@ const activityRed: Work = {
     'replaced',
     'Is the red in a plan change a failure, or a value that was replaced?',
     'A plan change shows the old plan in red with a line through it, and the new plan in green.',
-    'A plan change isn’t a failure. If danger’s red is ever made louder, a past plan change shouldn’t follow it.',
+    'A plan change isn’t a failure; it shows the value that was replaced. If danger’s red is ever made louder, a past plan change shouldn’t follow it.',
+    2,
+    2,
   ),
   frames: 2,
   stories: 2,
-  history: [{ at: '13:09', who: 'agent', text: 'Asked: two tokens are this red, and the evidence for which one it means conflicts (boundary 5).' }],
+  history: [
+    { at: '13:09', who: 'agent', text: 'Tried both names in turn. With each, the token lint passed, 0 of 2 frames moved and 2 of 2 stories passed.' },
+    { at: '13:09', who: 'agent', text: 'Asked: two tokens are this red, and the evidence for which one it means conflicts (boundary 5).' },
+  ],
 };
 
 /* Held behind the first question, because the same answer may settle them:
@@ -333,8 +356,11 @@ function held(
     ...w,
     status: 'waiting',
     waitsOn: 'activity-red',
-    question: struckQuestion(pattern, ask, found, recommendation),
-    history: [{ at, who: 'agent', text: 'Held: the same two tokens as the billing activity’s question. The answer to that one may settle it.' }],
+    question: struckQuestion(pattern, ask, found, recommendation, w.frames, w.stories),
+    history: [
+      { at, who: 'agent', text: `Tried both names in turn. With each, the token lint passed, 0 of ${w.frames} frames moved and ${w.stories} of ${w.stories} stories passed.` },
+      { at, who: 'agent', text: 'Held: the same two tokens as the billing activity’s question. The answer to that one may settle it.' },
+    ],
   };
 }
 

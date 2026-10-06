@@ -46,18 +46,29 @@ type Story = StoryObj<typeof meta>;
 
 export const WhatAValueMeans: Story = {
   parameters: {
-    docs: { description: { story: 'The first question of the billing run: the same red is two tokens, and the evidence points both ways. The answers are two cards, and each shows the plan change as it would render if --color-danger were made louder later: the diff pair stays as it is, danger and success follows it. The recommended card carries the badge. The four changes held behind it are counted in the head and listed under the evidence.' } },
+    docs: { description: { story: 'The first question of the billing run: the same red is two tokens, and the evidence points both ways. Before any token is named, the card shows the plan change beside its twin, “Payment failed”, which the agent made --color-danger on its own: one red, two meanings. Under them, the checks as they came back with each name in place, all passed, and the line that says why that stops the agent: nothing failed, and no check can say what the red means. The answers are two cards, and each shows both elements as they would render if --color-danger were made louder later: with the diff pair only the failure gets louder, with danger and success both do. The recommended card carries the badge. The four changes held behind it are counted in the head and listed under the evidence.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('4 changes wait on this')).toBeInTheDocument();
+    const today = canvas.getByRole('group', { name: 'Today, the same red' });
+    const tiles = within(today).getAllByRole('listitem');
+    await expect(tiles).toHaveLength(2);
+    await expect(tiles[0]).toHaveTextContent('Payment failed');
+    await expect(tiles[0]).toHaveTextContent('--color-danger, chosen by the agent');
+    await expect(tiles[1]).toHaveTextContent('--color-danger or --color-diff-remove-ink?');
+    const tried = canvas.getByRole('group', { name: 'The checks, with either name' });
+    await expect(within(tried).getAllByRole('listitem')).toHaveLength(3);
+    await expect(tried).toHaveTextContent('Visual baselines: 0 of 2 frames moved');
+    await expect(canvas.getByText(/^Nothing failed\./)).toBeInTheDocument();
     const answers = canvas.getByRole('group', { name: /is made louder later/ });
     const cards = within(answers).getAllByRole('listitem');
     await expect(cards).toHaveLength(2);
-    await expect(cards[0]).toHaveTextContent('Stays as it is');
+    await expect(cards[0]).toHaveTextContent('Only the failure gets louder');
     await expect(cards[0]).toHaveTextContent('Recommended');
-    await expect(cards[1]).toHaveTextContent('Follows it');
-    await expect(cards[1].querySelector('.ask__sample--loud')).not.toBeNull();
+    await expect(cards[0].querySelectorAll('.ask__sample--loud')).toHaveLength(1);
+    await expect(cards[1]).toHaveTextContent('Both get louder');
+    await expect(cards[1].querySelectorAll('.ask__sample--loud')).toHaveLength(2);
     await expect(canvas.getByText(/4 changes are held until you answer/)).not.toBeVisible();
   },
 };
@@ -65,7 +76,7 @@ export const WhatAValueMeans: Story = {
 export const Choosing: Story = {
   args: { initialChoice: 'diff' },
   parameters: {
-    docs: { description: { story: 'An answer chosen. The answers have become the question, focus is on Apply, and the rule box is unchecked: this answer applies to this change only until the person says otherwise. Checking it shows the rule as it will read and the three changes it would settle now. Escape cancels and puts focus back on the answer.' } },
+    docs: { description: { story: 'An answer chosen. The answers have become the question, focus is on Apply, and the rule box is unchecked: this answer applies to this change only until the person says otherwise. Checking it shows the rule as it will read, the three changes it would settle now, and that a matching case will not ask again. Escape cancels and puts focus back on the answer.' } },
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
@@ -74,6 +85,7 @@ export const Choosing: Story = {
     await userEvent.click(canvas.getByText('Also use this answer for similar cases'));
     await expect(canvas.getByText('The rule, as it will read')).toBeInTheDocument();
     await expect(canvas.getByText(/It settles now:/).closest('p')).toHaveTextContent('3 changes that match');
+    await expect(canvas.getByText(/Next time:/).closest('p')).toHaveTextContent('a case that matches doesn’t ask you');
     await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
     await expect(args.onAnswer).toHaveBeenCalledWith('diff', true);
   },

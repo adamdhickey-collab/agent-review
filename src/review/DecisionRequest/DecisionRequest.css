@@ -69,12 +69,88 @@
   color: var(--color-diff-add-ink);
 }
 
+/* The twin: a status in the red, as the payment history sets it. */
+.ask__sample-status {
+  color: var(--color-danger);
+  font-weight: var(--weight-medium);
+}
+
+/* TODAY, THE SAME RED: the value in question beside its twin, each a tile
+   with what it is and the name it has, or might have, under it. They are
+   read, not pressed, so they sit on the sunken ground and are not raised;
+   only the answers are. The columns are the answers' own, so a tile stands
+   over the answer card that decides it. The specimens are a step larger
+   than the card's text, because the red is the subject. */
+.ask__today,
+.ask__tried {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ask__label {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.ask__pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-3);
+}
+
+.ask__tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+}
+
+.ask__tile .ask__sample {
+  margin-bottom: var(--space-1);
+  font-size: var(--text-lg);
+}
+
+.ask__tile .ask__sample-label {
+  font-size: var(--text-md);
+}
+
+.ask__tile-means {
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+}
+
+.ask__tile-token {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+/* The checks as they came back with either name: the badges the account
+   uses, in a row. */
+.ask__checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* In an answer, the twin over the value in question, as both would render. */
+.ask__samples {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
 /* As it would look if danger's red were made louder and this followed it:
    the red as a ground under the text, at the weight an error takes, which
    is what a louder danger looks like wherever the system already shouts
    (a danger Button). An illustration of the consequence, said in words
    above it. */
-.ask__sample--loud .ask__sample-old {
+.ask__sample--loud .ask__sample-old,
+.ask__sample--loud .ask__sample-status {
   padding: 0 var(--space-1);
   border-radius: var(--radius-sm);
   background: var(--color-danger);

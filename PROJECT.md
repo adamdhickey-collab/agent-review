@@ -170,6 +170,20 @@ Decisions:
   names its check columns once, marks only work not done on its own, and
   folds the routine swaps into one row. The line icons take a stroke for
   the size they are shown at, because one stroke scaled to 1px at 14px.
+- **One red, two meanings, shown before it is named (2026-10-06).** The
+  card used to say why the agent stopped in a sentence ("both answers are
+  the same pixels, so every check passes either way"), and a reader who
+  does not think in tokens read past it. A question about what a value
+  means now shows the value beside its twin: "Payment failed", which the
+  agent made `--color-danger` on its own because its meaning was never in
+  doubt, and the plan change, in the same red, under the two names it
+  could take. Under them, the three checks as they came back with each
+  name in place, all passed (the record says it tried both), and one line:
+  nothing failed, and no check can say what the red means. Each answer
+  card then shows both elements as they would render if danger were made
+  louder later: with the diff pair only the failure gets louder, with
+  danger and success both do. The rule's preview also says what a rule is
+  for: next time, a case that matches does not ask.
 - **Three reasons to stop, not three tabs.** A problem the agent can solve
   with the evidence and permission it has (it named a token that does not
   exist; the lint and the visual check failed; it corrected the name) is
