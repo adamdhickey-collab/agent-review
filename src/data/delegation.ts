@@ -132,7 +132,28 @@ export interface Question {
   options: Option[];
   /** The struck-through pattern this is an instance of, so an answer can become a rule for it. */
   pattern?: Pattern;
+  /** For a question about what a value means: an element drawn in the same
+      value whose meaning is not in question, so the person sees one color
+      with two meanings side by side before reading a token's name. */
+  twin?: Twin;
+  /** The checks, run with each answer in place in turn, when every answer
+      gave the same result: the record that no check can choose between them. */
+  tried?: Check[];
   note?: string;
+}
+
+/** An element in the same color as the one in question, whose meaning was settled. */
+export interface Twin {
+  /** The element as it reads: "Payment failed". */
+  text: string;
+  /** What it is, in plain words: "A failure". */
+  means: string;
+  /** The screen it is on, in words. */
+  screen: string;
+  /** The token it was given. */
+  token: string;
+  /** Who gave it that token, and on what authority: "the agent, under boundary 2". */
+  by: string;
 }
 
 /** A rendered specimen of the element in question, so a designer sees it as well as reads it. */
