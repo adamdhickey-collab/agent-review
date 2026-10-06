@@ -283,18 +283,20 @@ const FAILED: Twin = {
   means: 'A failure',
   screen: 'Payment history',
   token: '--color-danger',
-  by: 'chosen by the agent',
+  role: 'danger',
 };
 
 /* Every struck-through value was tried with both names before it was held or
    asked about: the two names are one red, so the checks come back the same
    with each, which is the whole reason it cannot choose. */
-function struckQuestion(pattern: Pattern, ask: string, found: string, recommendation: string, frames: number, stories: number): Question {
+function struckQuestion(pattern: Pattern, subject: string, ask: string, found: string, recommendation: string, frames: number, stories: number): Question {
   return {
     kind: 'intent',
     ask,
     found,
-    gap: 'Nothing failed. The checks can prove no pixel moved; they can’t say what the red means, and that decides what happens here if either token changes later.',
+    gap: 'Nothing failed. The checks can prove the interface is stable, but they can’t tell us whether these two reds mean the same thing. That matters the next time the danger style changes.',
+    means: pattern === 'replaced' ? 'A replaced value' : 'A removed value',
+    later: `If both reds share the danger token, both change. If ${subject} has its own ${pattern === 'replaced' ? 'replacement' : 'removal'} token, only the actual failure changes.`,
     evidence:
       pattern === 'replaced'
         ? [
@@ -327,6 +329,7 @@ const activityRed: Work = {
   ],
   question: struckQuestion(
     'replaced',
+    'the plan change',
     'Is the red in a plan change a failure, or a value that was replaced?',
     'A plan change shows the old plan in red with a line through it, and the new plan in green.',
     'A plan change isn’t a failure; it shows the value that was replaced. If danger’s red is ever made louder, a past plan change shouldn’t follow it.',
@@ -347,6 +350,7 @@ const activityRed: Work = {
 function held(
   w: Pick<Work, 'id' | 'file' | 'screen' | 'title' | 'sample' | 'lines' | 'frames' | 'stories'>,
   pattern: Pattern,
+  subject: string,
   ask: string,
   found: string,
   at: string,
@@ -356,7 +360,7 @@ function held(
     ...w,
     status: 'waiting',
     waitsOn: 'activity-red',
-    question: struckQuestion(pattern, ask, found, recommendation, w.frames, w.stories),
+    question: struckQuestion(pattern, subject, ask, found, recommendation, w.frames, w.stories),
     history: [
       { at, who: 'agent', text: `Tried both names in turn. With each, the token lint passed, 0 of ${w.frames} frames moved and ${w.stories} of ${w.stories} stories passed.` },
       { at, who: 'agent', text: 'Held: the same two tokens as the billing activity’s question. The answer to that one may settle it.' },
@@ -379,6 +383,7 @@ const invoiceAmount = held(
     stories: 4,
   },
   'replaced',
+  'the changed amount',
   'Is the red in a changed amount a failure, or a value that was replaced?',
   'An edited invoice shows the old amount in red with a line through it, and the new amount in green.',
   '13:12',
@@ -397,6 +402,7 @@ const invoiceRemoved = held(
     stories: 4,
   },
   'removed',
+  'the removed line item',
   'Is the red on a removed line item a failure, or a value that was removed?',
   'An edited invoice shows a removed line item in red with a line through it. Nothing replaced it.',
   '13:12',
@@ -418,6 +424,7 @@ const planSeats = held(
     stories: 2,
   },
   'replaced',
+  'the changed seat count',
   'Is the red in a changed seat count a failure, or a value that was replaced?',
   'After a seat change, the plan card shows the old count in red with a line through it, and the new one in green.',
   '13:20',
@@ -439,6 +446,7 @@ const settingsEmail = held(
     stories: 2,
   },
   'replaced',
+  'the changed billing email',
   'Is the red in a changed billing email a failure, or a value that was replaced?',
   'The settings history shows the old billing email in red with a line through it, and the new one in green.',
   '13:31',

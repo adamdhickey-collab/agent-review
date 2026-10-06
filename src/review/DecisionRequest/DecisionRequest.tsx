@@ -56,7 +56,19 @@ import { Inline } from '../Inline';
    failed, and no check can say what the red means. The answers then show
    both elements as they would render if danger were made louder later,
    because the difference between the answers is not this element alone,
-   it is whether this element keeps company with the failure. */
+   it is whether this element keeps company with the failure.
+
+   THE MEANING BEFORE THE NAME (2026-10-06, later). The card showed all of
+   that and still had to be decoded: a tile called the plan change "this
+   change", the answers were headed by a token name ("If --color-danger is
+   made louder later:"), and nothing said which answer kept the two
+   meanings apart. Now each tile says what its red is, in words, before its
+   token ("A failure", "A replaced value"); the answers sit under "Now
+   imagine the failure style gets stronger." and one sentence saying what
+   each does; each answer names the choice it makes ("Separate the
+   meanings", "Keep the meanings coupled") over what follows from it; and
+   under its two specimens it says what each element takes, the meaning
+   first and the token after it as the detail. */
 
 /* Whether choosing an option ties the element to --color-danger, so that a
    change to danger's red would reach it. Read from the values the option
@@ -75,6 +87,29 @@ function TwinSpecimen({ twin, loud }: { twin: Twin; loud?: boolean }) {
 /* A token name out of the value an option writes: "var(--color-danger)" is
    --color-danger. */
 const tokenOf = (value: string) => value.replace(/^var\((.*)\)$/, '$1');
+
+/* A meaning without its article, for the middle of a sentence: "A failure"
+   is "failure". */
+const bare = (means: string) => means.replace(/^an? /i, '').toLowerCase();
+
+/* Under an answer's specimens, what each element takes if it is chosen: the
+   meaning first, then the token that carries it, as the detail. */
+function Takes({ rows }: { rows: { what: string; role: string; token: string }[] }) {
+  return (
+    <ul className="ask__takes">
+      {rows.map((r) => (
+        <li key={r.what}>
+          <span>
+            {r.what} <Icon name="arrow-right" size={12} />
+            <span className="visually-hidden"> takes </span>
+            <strong>{r.role}</strong>
+          </span>
+          <Inline text={r.token} />
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 /* A check's result as a badge: a pass is quiet, anything else is said. */
 function CheckBadge({ check }: { check: Check }) {
@@ -209,15 +244,17 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
             <li className="ask__tile">
               <TwinSpecimen twin={twin} />
               <p className="ask__tile-means">
-                {twin.means}, in the {twin.screen.toLowerCase()}
+                <strong>{twin.means}</strong>, in the {twin.screen.toLowerCase()}
               </p>
               <p className="ask__tile-token">
-                <Inline text={twin.token} />, {twin.by}
+                <Inline text={twin.token} />
               </p>
             </li>
             <li className="ask__tile" data-current>
               <Specimen sample={sample} />
-              <p className="ask__tile-means">This change, in the {work.screen.toLowerCase()}</p>
+              <p className="ask__tile-means">
+                <strong>{q.means ?? 'This change'}</strong>, in the {work.screen.toLowerCase()}
+              </p>
               <p className="ask__tile-token">
                 {names.map((n, i) => (
                   <span key={n}>
@@ -328,7 +365,14 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
         </form>
       ) : (
         <div className="ask__options" role="group" aria-labelledby={contrast ? `${id}-if` : undefined} aria-label={contrast ? undefined : 'Answers'}>
-          {contrast ? (
+          {contrast && twin ? (
+            <>
+              <p className="ask__if" id={`${id}-if`}>
+                Now imagine the {bare(twin.means)} style gets stronger.
+              </p>
+              {q.later ? <p className="ask__later">{q.later}</p> : null}
+            </>
+          ) : contrast ? (
             <p className="ask__if" id={`${id}-if`}>
               If <Inline text="--color-danger" /> is made louder later:
             </p>
@@ -339,7 +383,9 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
               return (
                 <li key={o.id} className="ask__choice" data-recommended={o.recommended || undefined}>
                   <div className="ask__choice-head">
-                    {contrast ? (
+                    {contrast && twin ? (
+                      <p className="ask__label">{follows ? 'Keep the meanings coupled' : 'Separate the meanings'}</p>
+                    ) : contrast ? (
                       <p className="ask__outcome">
                         <Icon name={follows ? 'alert' : 'check'} size={16} />
                         <span>{outcome(follows)}</span>
@@ -351,10 +397,24 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                       </Badge>
                     ) : null}
                   </div>
+                  {contrast && twin ? (
+                    <p className="ask__outcome">
+                      <Icon name={follows ? 'alert' : 'check'} size={16} />
+                      <span>{outcome(follows)}</span>
+                    </p>
+                  ) : null}
                   {contrast && sample ? (
                     <div className="ask__samples">
                       {twin ? <TwinSpecimen twin={twin} loud /> : null}
                       <Specimen sample={sample} loud={follows} />
+                      {twin ? (
+                        <Takes
+                          rows={[
+                            { what: twin.text, role: twin.role, token: twin.token },
+                            { what: sample.old, role: follows ? twin.role : bare(q.means ?? 'a new value'), token: tokenOf(o.after[0]) },
+                          ]}
+                        />
+                      ) : null}
                     </div>
                   ) : (
                     <p className="ask__effect-line">
