@@ -276,27 +276,37 @@ const EVIDENCE_TOKENS = 'tokens.css says the diff pair is for “a line added an
 /* The red every struck-through value shares, where its meaning was never in
    doubt: the status “Payment failed”, which the agent gave --color-danger on
    its own (paymentFailed, above). A question about what a struck value means
-   shows it beside the value, so the person sees one red with two meanings
-   before reading the name of a token. */
+   shows it beside the value, so the person sees two reds that look the same,
+   and what each one means, before reading the name of a token. */
 const FAILED: Twin = {
   text: 'Payment failed',
-  means: 'A failure',
-  screen: 'Payment history',
+  means: 'Failure',
+  says: 'Red means something went wrong.',
   token: '--color-danger',
   role: 'danger',
 };
 
+/* What a struck value's red means, by pattern, in the words the card uses. */
+const STRUCK_MEANS: Record<Pattern, { means: string; says: string; noun: string; word: string }> = {
+  replaced: { means: 'Replaced value', says: 'Red means this value was replaced.', noun: 'Replacement', word: 'replaced' },
+  removed: { means: 'Removed value', says: 'Red means this value was removed.', noun: 'Removal', word: 'removed' },
+};
+
 /* Every struck-through value was tried with both names before it was held or
    asked about: the two names are one red, so the checks come back the same
-   with each, which is the whole reason it cannot choose. */
-function struckQuestion(pattern: Pattern, subject: string, ask: string, found: string, recommendation: string, frames: number, stories: number): Question {
+   with each, which is the whole reason it cannot choose. Every one asks the
+   same question, because it is the same two reds: the struck value and the
+   failure. */
+function struckQuestion(pattern: Pattern, found: string, recommendation: string, frames: number, stories: number): Question {
+  const m = STRUCK_MEANS[pattern];
   return {
     kind: 'intent',
-    ask,
+    ask: 'These two reds look the same. Should they mean the same thing?',
     found,
-    gap: 'Nothing failed. The checks can prove the interface is stable, but they can’t tell us whether these two reds mean the same thing. That matters the next time the danger style changes.',
-    means: pattern === 'replaced' ? 'A replaced value' : 'A removed value',
-    later: `If both reds share the danger token, both change. If ${subject} has its own ${pattern === 'replaced' ? 'replacement' : 'removal'} token, only the actual failure changes.`,
+    gap: `The interface can be stable and accessible either way. The checks can’t decide whether “${m.word}” and “failed” should share the same meaning.`,
+    means: m.means,
+    says: m.says,
+    noun: m.noun,
     evidence:
       pattern === 'replaced'
         ? [
@@ -329,8 +339,6 @@ const activityRed: Work = {
   ],
   question: struckQuestion(
     'replaced',
-    'the old plan',
-    'Is the old plan red because something failed, or because it was replaced?',
     'A plan change shows the old plan in red with a line through it, and the new plan in green.',
     'A plan change isn’t a failure; it shows the value that was replaced. If danger’s red is ever made louder, a past plan change shouldn’t follow it.',
     2,
@@ -350,8 +358,6 @@ const activityRed: Work = {
 function held(
   w: Pick<Work, 'id' | 'file' | 'screen' | 'title' | 'sample' | 'lines' | 'frames' | 'stories'>,
   pattern: Pattern,
-  subject: string,
-  ask: string,
   found: string,
   at: string,
   recommendation: string,
@@ -360,7 +366,7 @@ function held(
     ...w,
     status: 'waiting',
     waitsOn: 'activity-red',
-    question: struckQuestion(pattern, subject, ask, found, recommendation, w.frames, w.stories),
+    question: struckQuestion(pattern, found, recommendation, w.frames, w.stories),
     history: [
       { at, who: 'agent', text: `Tried both names in turn. With each, the token lint passed, 0 of ${w.frames} frames moved and ${w.stories} of ${w.stories} stories passed.` },
       { at, who: 'agent', text: 'Held: the same two tokens as the billing activity’s question. The answer to that one may settle it.' },
@@ -383,8 +389,6 @@ const invoiceAmount = held(
     stories: 4,
   },
   'replaced',
-  'the old amount',
-  'Is the old amount red because something failed, or because it was replaced?',
   'An edited invoice shows the old amount in red with a line through it, and the new amount in green.',
   '13:12',
   'An edited amount isn’t a failure; it is the same case as the plan change.',
@@ -402,8 +406,6 @@ const invoiceRemoved = held(
     stories: 4,
   },
   'removed',
-  'the removed line item',
-  'Is the removed line item red because something failed, or because it was removed?',
   'An edited invoice shows a removed line item in red with a line through it. Nothing replaced it.',
   '13:12',
   'A line taken off an invoice is what the diff’s remove ink is for, and removing a fee isn’t a failure.',
@@ -424,8 +426,6 @@ const planSeats = held(
     stories: 2,
   },
   'replaced',
-  'the old seat count',
-  'Is the old seat count red because something failed, or because it was replaced?',
   'After a seat change, the plan card shows the old count in red with a line through it, and the new one in green.',
   '13:20',
   'A seat change isn’t a failure; it is the same case as the plan change.',
@@ -446,8 +446,6 @@ const settingsEmail = held(
     stories: 2,
   },
   'replaced',
-  'the old billing email',
-  'Is the old billing email red because something failed, or because it was replaced?',
   'The settings history shows the old billing email in red with a line through it, and the new one in green.',
   '13:31',
   'A changed email isn’t a failure; it is the same case as the plan change.',

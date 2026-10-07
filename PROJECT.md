@@ -199,6 +199,23 @@ Decisions:
   "Starter → replaced value", with the token beside it as the detail. The
   tokens stay on the card for anyone who reads them; the story no longer
   needs them.
+- **Two reds that look the same (2026-10-07).** The question had become
+  "Is the old plan red because something failed, or because it was
+  replaced?", which still made a reader diagnose a red before knowing what
+  was being decided. Now every struck-through value asks the decision
+  itself: "These two reds look the same. Should they mean the same thing?"
+  The tiles are headed by meaning ("Replaced value", "Failure"), each says
+  what its red means in a sentence, and each names its one token under
+  that, quietly; the plan's tile no longer offers two. The checks sit
+  under "Both approaches pass the automated checks.", followed by the line
+  a person should take away, "So this isn't a testing problem. It's a
+  meaning decision." The answers sit under "Should these meanings stay
+  separate?" and "Imagine the danger style becomes stronger later.", are
+  headed "Keep the meanings separate" and "Keep the meanings linked", and
+  show each element beside what happens to it ("Failure changes",
+  "Replacement stays the same"), with "Only the failure gets louder" and
+  "Both get louder" last, as the summary. The lesson is not which variable
+  to use: the agent found a semantic decision no check could safely make.
 - **Three reasons to stop, not three tabs.** A problem the agent can solve
   with the evidence and permission it has (it named a token that does not
   exist; the lint and the visual check failed; it corrected the name) is

@@ -139,12 +139,14 @@ export interface Question {
   /** The checks, run with each answer in place in turn, when every answer
       gave the same result: the record that no check can choose between them. */
   tried?: Check[];
-  /** What the value in question is, in plain words, set against the twin's
-      meaning: "A replaced value". */
+  /** What the value in question is, as its tile is headed: "Replaced value". */
   means?: string;
-  /** What each answer does if the twin's token changes later, in a sentence
-      over the answers: both change, or only the twin does. */
-  later?: string;
+  /** What its red means, in a sentence a person who has never heard of a
+      token can read: "Red means this value was replaced." */
+  says?: string;
+  /** The meaning as a noun, for what each answer does to it: "Replacement
+      stays the same". */
+  noun?: string;
   note?: string;
 }
 
@@ -152,10 +154,10 @@ export interface Question {
 export interface Twin {
   /** The element as it reads: "Payment failed". */
   text: string;
-  /** What it is, in plain words: "A failure". */
+  /** What it is, as its tile is headed and as a noun: "Failure". */
   means: string;
-  /** The screen it is on, in words. */
-  screen: string;
+  /** What its red means, in a sentence: "Red means something went wrong." */
+  says: string;
   /** The token it was given. */
   token: string;
   /** What that token is for, in a word, as an answer names it: "danger". */

@@ -46,39 +46,40 @@ type Story = StoryObj<typeof meta>;
 
 export const WhatAValueMeans: Story = {
   parameters: {
-    docs: { description: { story: 'The first question of the billing run: the same red is two tokens, and the evidence points both ways. The question names the element and asks why it is red: “Is the old plan red because something failed, or because it was replaced?” Under it, two tiles: what the agent wants to change, the old plan struck through beside the new one, and the existing pattern with the same red, “Payment failed”, which the agent made --color-danger on its own. One red, two meanings, each tile saying its meaning first (a replaced value, a failure) and its token after. Under them, the checks as they came back with each token in place, all passed, and the line that says why that stops the agent: nothing failed, and no check can say whether the two reds mean the same thing. Then “Now imagine the failure style gets stronger.”, with one sentence on what each answer does. The answers are two cards, each naming its choice (separate the meanings, or keep them coupled) over what follows: both elements as they would render with a stronger danger, and what each takes, meaning first and token second. With the diff pair only the failure gets louder; with danger and success both do. The recommended card carries the badge. The four changes held behind it are counted in the head and listed under the evidence.' } },
+    docs: { description: { story: 'The first question of the billing run: two tokens draw the same red, and the evidence points both ways. The card asks the decision itself: “These two reds look the same. Should they mean the same thing?” Under it, the two reds as tiles, each headed by its meaning: “Replaced value”, the old plan struck through with an arrow to the new one, and “Failure”, “Payment failed”, which the agent made --color-danger on its own. Each says what its red means in a sentence, and names its one token under that, quietly. Then “Both approaches pass the automated checks.” over the three checks, all passed with either token in place, and the line that says why that stops the agent, louder than the sentence explaining it: “So this isn’t a testing problem. It’s a meaning decision.” The answers sit under “Should these meanings stay separate?” and “Imagine the danger style becomes stronger later.” Each card is headed by its choice in words (keep the meanings separate, or keep them linked), says what it does without a token’s name, and shows both elements as they would render with a stronger danger, each beside what happens to it; “Only the failure gets louder” and “Both get louder” come last, as the summary. The recommended card carries the badge. The four changes held behind it are counted in the head and listed under the evidence.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('4 changes wait on this')).toBeInTheDocument();
-    await expect(canvas.getByRole('heading', { name: 'Is the old plan red because something failed, or because it was replaced?' })).toBeInTheDocument();
-    const pair = canvas.getByRole('list', { name: 'What the agent wants to change, and the existing pattern with the same red' });
+    await expect(canvas.getByRole('heading', { name: 'These two reds look the same. Should they mean the same thing?' })).toBeInTheDocument();
+    const pair = canvas.getByRole('list', { name: 'The two reds' });
     const tiles = within(pair).getAllByRole('listitem');
     await expect(tiles).toHaveLength(2);
-    await expect(tiles[0]).toHaveTextContent(/^What the agent wants to change/);
-    await expect(tiles[0]).toHaveTextContent('A replaced value, in the billing activity');
-    await expect(tiles[0]).toHaveTextContent('--color-danger or --color-diff-remove-ink?');
-    await expect(tiles[1]).toHaveTextContent(/^An existing pattern with the same red/);
+    await expect(tiles[0]).toHaveTextContent(/^Replaced value/);
+    await expect(tiles[0]).toHaveTextContent('Red means this value was replaced.');
+    await expect(tiles[0]).toHaveTextContent(/--color-diff-remove-ink$/);
+    await expect(tiles[0]).not.toHaveTextContent('--color-danger');
+    await expect(tiles[1]).toHaveTextContent(/^Failure/);
     await expect(tiles[1]).toHaveTextContent('Payment failed');
-    await expect(tiles[1]).toHaveTextContent('A failure, in the payment history');
-    await expect(tiles[1]).toHaveTextContent('--color-danger');
-    const tried = canvas.getByRole('group', { name: 'The checks, with either token' });
+    await expect(tiles[1]).toHaveTextContent('Red means something went wrong.');
+    await expect(tiles[1]).toHaveTextContent(/--color-danger$/);
+    const tried = canvas.getByRole('group', { name: 'Both approaches pass the automated checks.' });
     await expect(within(tried).getAllByRole('listitem')).toHaveLength(3);
     await expect(tried).toHaveTextContent('Visual baselines: 0 of 2 frames moved');
-    await expect(canvas.getByText(/^Nothing failed\./)).toHaveTextContent('whether these two reds mean the same thing');
-    const answers = canvas.getByRole('group', { name: 'Now imagine the failure style gets stronger.' });
-    await expect(answers).toHaveTextContent('If the old plan has its own replacement token, only the actual failure changes.');
+    await expect(canvas.getByText('So this isn’t a testing problem. It’s a meaning decision.')).toBeVisible();
+    await expect(canvas.getByText(/^The interface can be stable and accessible either way\./)).toHaveTextContent('whether “replaced” and “failed” should share the same meaning');
+    const answers = canvas.getByRole('group', { name: 'Should these meanings stay separate?' });
+    await expect(answers).toHaveTextContent('Imagine the danger style becomes stronger later.');
     const cards = answers.querySelectorAll<HTMLElement>('.ask__choice');
     await expect(cards).toHaveLength(2);
-    await expect(cards[0]).toHaveTextContent('Separate the meanings');
-    await expect(cards[0]).toHaveTextContent('Only the failure gets louder');
-    await expect(cards[0]).toHaveTextContent('Recommended');
+    await expect(cards[0]).toHaveTextContent(/^Keep the meanings separate\s*Recommended/);
+    await expect(cards[0]).toHaveTextContent('Replacement and failure use different semantic tokens.');
+    await expect(cards[0]).toHaveTextContent(/Failure changes.*Replacement stays the same.*Only the failure gets louder/);
     await expect(cards[0].querySelectorAll('.ask__sample--loud')).toHaveLength(1);
-    await expect(cards[0]).toHaveTextContent(/Starter\s*takes\s*replaced value\s*--color-diff-remove-ink/);
-    await expect(cards[1]).toHaveTextContent('Keep the meanings coupled');
-    await expect(cards[1]).toHaveTextContent('Both get louder');
+    await expect(cards[1]).toHaveTextContent(/^Keep the meanings linked/);
+    await expect(cards[1]).toHaveTextContent('Both meanings continue using the danger token.');
+    await expect(cards[1]).toHaveTextContent(/Failure changes.*Replacement changes too.*Both get louder/);
     await expect(cards[1].querySelectorAll('.ask__sample--loud')).toHaveLength(2);
-    await expect(cards[1]).toHaveTextContent(/Starter\s*takes\s*danger\s*--color-danger/);
     await expect(canvas.getByText(/4 changes are held until you answer/)).not.toBeVisible();
   },
 };
@@ -140,6 +141,8 @@ export const OutsideYourRule: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
+    await expect(canvas.getByRole('list', { name: 'The two reds' })).toHaveTextContent(/^Removed value.*Red means this value was removed\./);
+    await expect(canvas.getByRole('group', { name: 'Should these meanings stay separate?' })).toHaveTextContent(/Removal stays the same.*Removal changes too/);
     await userEvent.click(canvas.getByRole('button', { name: 'Use the diff remove ink' }));
     await expect(canvas.getByText('Add this case to your rule')).toBeInTheDocument();
   },

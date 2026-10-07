@@ -46,6 +46,21 @@
   line-height: var(--leading-body);
 }
 
+/* Why a person is needed: the verdict, then the sentence that explains it.
+   The verdict is the line to take away, so it is the louder of the two. */
+.ask__why-person {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ask__verdict {
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
 /* The element as a reader of the billing screen sees it: a line of the
    card, not a box in it. The card around it is the frame. */
 .ask__sample {
@@ -69,19 +84,25 @@
   color: var(--color-diff-add-ink);
 }
 
+/* From the old value to the new: "replaced", drawn. The card's, not the
+   billing screen's, so it is quiet. */
+.ask__sample-arrow {
+  align-self: center;
+  color: var(--color-text-muted);
+}
+
 /* The twin: a status in the red, as the payment history sets it. */
 .ask__sample-status {
   color: var(--color-danger);
   font-weight: var(--weight-medium);
 }
 
-/* WHAT IT WANTS TO CHANGE, BESIDE THE PATTERN IT MATCHES: the value in
-   question first, then its twin, each a tile labelled with its part in the
-   question, then what it is and the name it has, or might have, under it.
-   They are read, not pressed, so they sit on the sunken ground and are not
-   raised; only the answers are. The columns are the answers' own. The
-   specimens are a step larger than the card's text, because the red is the
-   subject. */
+/* THE TWO REDS: the value in question first, then its twin, each a tile
+   headed by its meaning, then the specimen, the sentence saying what its red
+   means, and its token under that, quietly. They are read, not pressed, so
+   they sit on the sunken ground and are not raised; only the answers are.
+   The columns are the answers' own. The specimens are a step larger than
+   the card's text, because the red is the subject. */
 .ask__tried {
   display: flex;
   flex-direction: column;
@@ -91,6 +112,11 @@
 .ask__label {
   color: var(--color-text-secondary);
   font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.ask__tried-label {
+  color: var(--color-text-secondary);
 }
 
 .ask__pair {
@@ -117,15 +143,11 @@
   font-size: var(--text-md);
 }
 
+/* What the red means, in a sentence: the line that makes the two tiles two
+   different things, so it is the card's own ink, not a label's. */
 .ask__tile-means {
-  color: var(--color-text-secondary);
-}
-
-/* What the red is, said first and a weight up, so the two tiles read as
-   "a failure" against "a replaced value" before anything else on them. */
-.ask__tile-means strong {
   color: var(--color-text);
-  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
 }
 
 .ask__tile-token {
@@ -135,14 +157,14 @@
 }
 
 /* The checks as they came back with either token: the badges the account
-   uses, in a row. */
+   uses, in a row, under the sentence that says both approaches pass. */
 .ask__checks {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
 }
 
-/* In an answer, the twin over the value in question, as both would render. */
+/* Without a twin, the value in question as it would render. */
 .ask__samples {
   display: flex;
   flex-direction: column;
@@ -182,10 +204,12 @@
   gap: var(--space-2);
 }
 
-/* "Now imagine the failure style gets stronger.": the turn from today to
-   later, so it is a heading for the answers rather than a label over them,
-   with the one sentence under it that says what each answer does. */
+/* "Should these meanings stay separate?": the decision, so it is a heading
+   for the answers rather than a label over them, with the one sentence
+   under it that sets up what each answer shows. A step of air above it
+   parts it from the verdict, which is the end of the argument before it. */
 .ask__if {
+  margin-top: var(--space-2);
   color: var(--color-text);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-body);
@@ -249,6 +273,19 @@
   line-height: var(--leading-body);
 }
 
+/* An answer's choice, in words: the heading of its card. */
+.ask__choice-title {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+}
+
+.ask__choice-says {
+  margin-top: calc(var(--space-1) * -1);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
 .ask__outcome {
   display: flex;
   align-items: flex-start;
@@ -271,49 +308,39 @@
   color: var(--color-warning);
 }
 
-/* Under the specimens, what each element takes: "Payment failed → danger",
-   and the token beside it in a column of its own, quieter than the meaning,
-   so the meanings are read down one edge and the names down another. In a
-   card too narrow for both columns, each token goes under its meaning; in
-   between, a long value wraps inside its own column, never into the
-   token's. */
-.ask__takes {
+/* WHAT HAPPENS TO EACH, if danger's style gets stronger: both elements as
+   they would render, each beside what happens to it, "Failure changes",
+   "Replacement stays the same". The specimens are read down one edge and
+   what happens to them down another, so the two cards compare row by row.
+   In a card too narrow for both, each line goes under its element. */
+.ask__then {
   display: grid;
-  grid-template-columns: minmax(0, max-content) max-content;
-  gap: var(--space-1) var(--space-4);
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
   align-self: stretch;
-  margin-top: var(--space-1);
-  color: var(--color-text-secondary);
-  font-size: var(--text-sm);
-  line-height: var(--leading-body);
 }
 
-.ask__takes li {
+.ask__then li {
   display: grid;
   grid-template-columns: subgrid;
   grid-column: 1 / -1;
+  align-items: baseline;
 }
 
-.ask__takes li > span {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 var(--space-1);
-}
-
-.ask__takes strong {
-  color: var(--color-text);
-  font-weight: var(--weight-semibold);
-}
-
-.ask__takes .inline-name {
-  color: var(--color-text-muted);
+.ask__then-what {
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
 }
 
 @container answer (max-width: 21rem) {
-  .ask__takes {
+  .ask__then {
     grid-template-columns: minmax(0, 1fr);
-    row-gap: var(--space-2);
+    row-gap: var(--space-3);
+  }
+
+  .ask__then li {
+    row-gap: var(--space-1);
   }
 }
 
