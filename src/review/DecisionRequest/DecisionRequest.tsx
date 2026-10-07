@@ -535,7 +535,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
               If <Inline text="--color-danger" /> is made louder later:
             </p>
           ) : null}
-          <ul className="ask__choices">
+          <ul className="ask__choices" data-count={q.options.length}>
             {q.options.map((o) => {
               const follows = followsDanger(o);
               return (

@@ -231,6 +231,12 @@
 
 /* An answer is the one thing on the card that is pressed, so it is the
    one thing raised: the hairline, and the raised shadow under it. */
+/* Three answers stay one row down to a card about 39rem wide (the main
+   column at 1100), rather than wrapping two and one; two keep 14rem. */
+.ask__choices[data-count='3'] {
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
 .ask__choice {
   display: flex;
   flex-direction: column;
