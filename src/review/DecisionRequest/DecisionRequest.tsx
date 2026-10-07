@@ -79,7 +79,27 @@ import { Inline } from '../Inline';
    names the element and asks why it is red ("Is the old plan red because
    something failed, or because it was replaced?"), the element comes first
    under "What the agent wants to change", and its twin second under "An
-   existing pattern with the same red". */
+   existing pattern with the same red".
+
+   TWO REDS THAT LOOK THE SAME (2026-10-07, later). That question still made
+   a reader diagnose why something was red before they knew what was being
+   decided. Now the card asks the decision itself, "These two reds look the
+   same. Should they mean the same thing?", and reads top to bottom as the
+   argument: the two reds, each headed by its meaning ("Replaced value",
+   "Failure") with a sentence saying what its red means and its one token
+   under that, quietly, no longer a choice between two; the checks, under
+   "Both approaches pass the automated checks."; then the one line that
+   says why a person is needed, "So this isn't a testing problem. It's a
+   meaning decision.", louder than the sentence explaining it. The answers
+   sit under "Should these meanings stay separate?" and "Imagine the danger
+   style becomes stronger later." Each is headed by the choice in words
+   ("Keep the meanings separate", "Keep the meanings linked"), says what it
+   does without a token's name, and shows both elements as they would
+   render, each beside what happens to it ("Failure changes", "Replacement
+   stays the same"); "Only the failure gets louder" and "Both get louder"
+   come last, as the summary of what is shown rather than the explanation.
+   The replaced value's specimen draws an arrow from the old value to the
+   new, so "replaced" can be seen before it is read. */
 
 /* Whether choosing an option ties the element to --color-danger, so that a
    change to danger's red would reach it. Read from the values the option
@@ -99,28 +119,6 @@ function TwinSpecimen({ twin, loud }: { twin: Twin; loud?: boolean }) {
    --color-danger. */
 const tokenOf = (value: string) => value.replace(/^var\((.*)\)$/, '$1');
 
-/* A meaning without its article, for the middle of a sentence: "A failure"
-   is "failure". */
-const bare = (means: string) => means.replace(/^an? /i, '').toLowerCase();
-
-/* Under an answer's specimens, what each element takes if it is chosen: the
-   meaning first, then the token that carries it, as the detail. */
-function Takes({ rows }: { rows: { what: string; role: string; token: string }[] }) {
-  return (
-    <ul className="ask__takes">
-      {rows.map((r) => (
-        <li key={r.what}>
-          <span>
-            {r.what} <Icon name="arrow-right" size={12} />
-            <span className="visually-hidden"> takes </span>
-            <strong>{r.role}</strong>
-          </span>
-          <Inline text={r.token} />
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 /* A check's result as a badge: a pass is quiet, anything else is said. */
 function CheckBadge({ check }: { check: Check }) {
@@ -132,22 +130,27 @@ function CheckBadge({ check }: { check: Check }) {
   );
 }
 
-function Specimen({ sample, loud }: { sample: Sample; loud?: boolean }) {
+function Specimen({ sample, loud, unlabelled }: { sample: Sample; loud?: boolean; unlabelled?: boolean }) {
   /* The element as it renders. Both names in question draw these two colors
      today, so the specimen is the same whichever is chosen; `loud` draws it
-     as it would look if danger's red were made louder and it followed. */
+     as it would look if danger's red were made louder and it followed.
+     `unlabelled` leaves its label ("Plan") to the tile above, where an
+     answer card shows it again beside what happens to it. */
   return (
     <p className={['ask__sample', loud ? 'ask__sample--loud' : ''].filter(Boolean).join(' ')}>
-      <span className="ask__sample-label">{sample.label}</span>
+      {unlabelled ? null : <span className="ask__sample-label">{sample.label}</span>}
       <s className="ask__sample-old">
         <span className="visually-hidden">was </span>
         {sample.old}
       </s>
       {sample.replacement ? (
-        <span className="ask__sample-new">
-          <span className="visually-hidden">, now </span>
-          {sample.replacement}
-        </span>
+        <>
+          <Icon name="arrow-right" size={12} className="ask__sample-arrow" />
+          <span className="ask__sample-new">
+            <span className="visually-hidden">, now </span>
+            {sample.replacement}
+          </span>
+        </>
       ) : (
         <span className="visually-hidden">, removed</span>
       )}
@@ -209,16 +212,14 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
   const sample = work.sample;
   const twin = q.kind === 'intent' ? q.twin : undefined;
   const contrast = sample && q.options.some(followsDanger) && q.options.some((o) => !followsDanger(o));
-  /* The names the value in question could take, from what the options write
-     to its first line, in the order the options are offered. */
-  const names = Array.from(new Set(q.options.map((o) => o.after[0]).filter(Boolean).map(tokenOf)));
-  /* The twin's name first, so the tile reads as a choice between its token
-     and the other one. */
-  if (twin) names.sort((x, y) => Number(y === twin.token) - Number(x === twin.token));
+  /* The value in question's own token: the name an answer writes to its first
+     line that is not the twin's. Its tile shows that one only, as the token
+     its meaning would have, not as a choice between two. */
+  const own = twin ? q.options.map((o) => o.after[0]).filter(Boolean).map(tokenOf).find((n) => n !== twin.token) : undefined;
   /* What each answer does when danger gets louder, said of the two elements
      the answer shows: "Only the failure gets louder", "Both get louder". */
   const outcome = (follows: boolean) =>
-    twin ? (follows ? 'Both get louder' : `Only ${twin.means.replace(/^an? /i, 'the ').toLowerCase()} gets louder`) : follows ? 'Follows it' : 'Stays as it is';
+    twin ? (follows ? 'Both get louder' : `Only the ${twin.means.toLowerCase()} gets louder`) : follows ? 'Follows it' : 'Stays as it is';
   const moreLabel = q.kind === 'intent' ? (q.evidence ? 'The evidence and the code' : 'The code') : 'Why it stopped';
 
   return (
@@ -247,29 +248,21 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
       {why ? <p className="ask__why">{why}</p> : null}
 
       {twin && sample ? (
-        <ul className="ask__pair" aria-label="What the agent wants to change, and the existing pattern with the same red">
+        <ul className="ask__pair" aria-label="The two reds">
           <li className="ask__tile" data-current>
-            <p className="ask__label">What the agent wants to change</p>
+            <p className="ask__label">{q.means}</p>
             <Specimen sample={sample} />
-            <p className="ask__tile-means">
-              <strong>{q.means ?? 'This change'}</strong>, in the {work.screen.toLowerCase()}
-            </p>
-            <p className="ask__tile-token">
-              {names.map((n, i) => (
-                <span key={n}>
-                  {i ? ' or ' : ''}
-                  <Inline text={n} />
-                </span>
-              ))}
-              ?
-            </p>
+            <p className="ask__tile-means">{q.says}</p>
+            {own ? (
+              <p className="ask__tile-token">
+                <Inline text={own} />
+              </p>
+            ) : null}
           </li>
           <li className="ask__tile">
-            <p className="ask__label">An existing pattern with the same red</p>
+            <p className="ask__label">{twin.means}</p>
             <TwinSpecimen twin={twin} />
-            <p className="ask__tile-means">
-              <strong>{twin.means}</strong>, in the {twin.screen.toLowerCase()}
-            </p>
+            <p className="ask__tile-means">{twin.says}</p>
             <p className="ask__tile-token">
               <Inline text={twin.token} />
             </p>
@@ -279,8 +272,8 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
 
       {q.kind === 'intent' && q.tried ? (
         <div className="ask__tried" role="group" aria-labelledby={`${id}-tried`}>
-          <p className="ask__label" id={`${id}-tried`}>
-            The checks, with either token
+          <p className="ask__tried-label" id={`${id}-tried`}>
+            Both approaches pass the automated checks.
           </p>
           <ul className="ask__checks">
             {q.tried.map((c) => (
@@ -293,9 +286,14 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
       ) : null}
 
       {q.kind === 'intent' ? (
-        <p className="ask__gap">
-          <Inline text={q.gap} />
-        </p>
+        <div className="ask__why-person">
+          {/* What the checks passing means, said before why: the line a
+              person should take away is that this one is theirs. */}
+          {q.tried ? <p className="ask__verdict">So this isn’t a testing problem. It’s a meaning decision.</p> : null}
+          <p className="ask__gap">
+            <Inline text={q.gap} />
+          </p>
+        </div>
       ) : (
         <pre className="ask__code">
           <code>{work.lines.map((l) => `${l.selector} { ${l.property}: ${l.before}; }`).join('\n')}</code>
@@ -376,9 +374,9 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
           {contrast && twin ? (
             <>
               <p className="ask__if" id={`${id}-if`}>
-                Now imagine the {bare(twin.means)} style gets stronger.
+                Should these meanings stay separate?
               </p>
-              {q.later ? <p className="ask__later">{q.later}</p> : null}
+              <p className="ask__later">Imagine the {twin.role} style becomes stronger later.</p>
             </>
           ) : contrast ? (
             <p className="ask__if" id={`${id}-if`}>
@@ -392,7 +390,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                 <li key={o.id} className="ask__choice" data-recommended={o.recommended || undefined}>
                   <div className="ask__choice-head">
                     {contrast && twin ? (
-                      <p className="ask__label">{follows ? 'Keep the meanings coupled' : 'Separate the meanings'}</p>
+                      <p className="ask__choice-title">{follows ? 'Keep the meanings linked' : 'Keep the meanings separate'}</p>
                     ) : contrast ? (
                       <p className="ask__outcome">
                         <Icon name={follows ? 'alert' : 'check'} size={16} />
@@ -405,24 +403,33 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                       </Badge>
                     ) : null}
                   </div>
-                  {contrast && twin ? (
-                    <p className="ask__outcome">
-                      <Icon name={follows ? 'alert' : 'check'} size={16} />
-                      <span>{outcome(follows)}</span>
-                    </p>
-                  ) : null}
-                  {contrast && sample ? (
+                  {contrast && twin && sample ? (
+                    <>
+                      <p className="ask__choice-says">
+                        {follows ? `Both meanings continue using the ${twin.role} token.` : `${q.noun} and ${twin.means.toLowerCase()} use different semantic tokens.`}
+                      </p>
+                      {/* Both elements as they would render with a stronger
+                          danger, each beside what happens to it. */}
+                      <ul className="ask__then" aria-label={`If the ${twin.role} style becomes stronger`}>
+                        <li>
+                          <TwinSpecimen twin={twin} loud />
+                          <span className="ask__then-what">{twin.means} changes</span>
+                        </li>
+                        <li>
+                          <Specimen sample={sample} loud={follows} unlabelled />
+                          <span className="ask__then-what">
+                            {q.noun} {follows ? 'changes too' : 'stays the same'}
+                          </span>
+                        </li>
+                      </ul>
+                      <p className="ask__outcome">
+                        <Icon name={follows ? 'alert' : 'check'} size={16} />
+                        <span>{outcome(follows)}</span>
+                      </p>
+                    </>
+                  ) : contrast && sample ? (
                     <div className="ask__samples">
-                      {twin ? <TwinSpecimen twin={twin} loud /> : null}
                       <Specimen sample={sample} loud={follows} />
-                      {twin ? (
-                        <Takes
-                          rows={[
-                            { what: twin.text, role: twin.role, token: twin.token },
-                            { what: sample.old, role: follows ? twin.role : bare(q.means ?? 'a new value'), token: tokenOf(o.after[0]) },
-                          ]}
-                        />
-                      ) : null}
                     </div>
                   ) : (
                     <p className="ask__effect-line">

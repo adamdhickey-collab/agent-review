@@ -147,7 +147,7 @@ export const TheWholeLoop: Story = {
 
     await step('The case outside the rule pauses, and says why', async () => {
       await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
-      await expect(canvas.getByRole('heading', { name: /removed line item/ })).toBeInTheDocument();
+      await expect(canvas.getByRole('list', { name: 'The two reds' })).toHaveTextContent(/^Removed value\s*Onboarding fee/);
     });
 
     await step('Widen the rule, and it settles that case', async () => {
