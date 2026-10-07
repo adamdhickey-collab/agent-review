@@ -75,13 +75,13 @@
   font-weight: var(--weight-medium);
 }
 
-/* TODAY, THE SAME RED: the value in question beside its twin, each a tile
-   with what it is and the name it has, or might have, under it. They are
-   read, not pressed, so they sit on the sunken ground and are not raised;
-   only the answers are. The columns are the answers' own, so a tile stands
-   over the answer card that decides it. The specimens are a step larger
-   than the card's text, because the red is the subject. */
-.ask__today,
+/* WHAT IT WANTS TO CHANGE, BESIDE THE PATTERN IT MATCHES: the value in
+   question first, then its twin, each a tile labelled with its part in the
+   question, then what it is and the name it has, or might have, under it.
+   They are read, not pressed, so they sit on the sunken ground and are not
+   raised; only the answers are. The columns are the answers' own. The
+   specimens are a step larger than the card's text, because the red is the
+   subject. */
 .ask__tried {
   display: flex;
   flex-direction: column;
@@ -134,7 +134,7 @@
   line-height: var(--leading-body);
 }
 
-/* The checks as they came back with either name: the badges the account
+/* The checks as they came back with either token: the badges the account
    uses, in a row. */
 .ask__checks {
   display: flex;
