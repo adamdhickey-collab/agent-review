@@ -68,7 +68,18 @@ import { Inline } from '../Inline';
    each does; each answer names the choice it makes ("Separate the
    meanings", "Keep the meanings coupled") over what follows from it; and
    under its two specimens it says what each element takes, the meaning
-   first and the token after it as the detail. */
+   first and the token after it as the detail.
+
+   WHAT IT WANTS TO CHANGE, AND WHY THAT STOPPED IT (2026-10-07). Read
+   aloud, the card still did not say the two things a person explaining it
+   says first: the agent wants to change this red, and it stopped because
+   the same red is already an existing pattern. The question asked whether
+   "the red in a plan change" was "a value that was replaced", which reads
+   as a change of plan and a word only a developer uses. Now the question
+   names the element and asks why it is red ("Is the old plan red because
+   something failed, or because it was replaced?"), the element comes first
+   under "What the agent wants to change", and its twin second under "An
+   existing pattern with the same red". */
 
 /* Whether choosing an option ties the element to --color-danger, so that a
    change to danger's red would reach it. Read from the values the option
@@ -236,43 +247,40 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
       {why ? <p className="ask__why">{why}</p> : null}
 
       {twin && sample ? (
-        <div className="ask__today" role="group" aria-labelledby={`${id}-today`}>
-          <p className="ask__label" id={`${id}-today`}>
-            Today, the same red
-          </p>
-          <ul className="ask__pair">
-            <li className="ask__tile">
-              <TwinSpecimen twin={twin} />
-              <p className="ask__tile-means">
-                <strong>{twin.means}</strong>, in the {twin.screen.toLowerCase()}
-              </p>
-              <p className="ask__tile-token">
-                <Inline text={twin.token} />
-              </p>
-            </li>
-            <li className="ask__tile" data-current>
-              <Specimen sample={sample} />
-              <p className="ask__tile-means">
-                <strong>{q.means ?? 'This change'}</strong>, in the {work.screen.toLowerCase()}
-              </p>
-              <p className="ask__tile-token">
-                {names.map((n, i) => (
-                  <span key={n}>
-                    {i ? ' or ' : ''}
-                    <Inline text={n} />
-                  </span>
-                ))}
-                ?
-              </p>
-            </li>
-          </ul>
-        </div>
+        <ul className="ask__pair" aria-label="What the agent wants to change, and the existing pattern with the same red">
+          <li className="ask__tile" data-current>
+            <p className="ask__label">What the agent wants to change</p>
+            <Specimen sample={sample} />
+            <p className="ask__tile-means">
+              <strong>{q.means ?? 'This change'}</strong>, in the {work.screen.toLowerCase()}
+            </p>
+            <p className="ask__tile-token">
+              {names.map((n, i) => (
+                <span key={n}>
+                  {i ? ' or ' : ''}
+                  <Inline text={n} />
+                </span>
+              ))}
+              ?
+            </p>
+          </li>
+          <li className="ask__tile">
+            <p className="ask__label">An existing pattern with the same red</p>
+            <TwinSpecimen twin={twin} />
+            <p className="ask__tile-means">
+              <strong>{twin.means}</strong>, in the {twin.screen.toLowerCase()}
+            </p>
+            <p className="ask__tile-token">
+              <Inline text={twin.token} />
+            </p>
+          </li>
+        </ul>
       ) : null}
 
       {q.kind === 'intent' && q.tried ? (
         <div className="ask__tried" role="group" aria-labelledby={`${id}-tried`}>
           <p className="ask__label" id={`${id}-tried`}>
-            The checks, with either name
+            The checks, with either token
           </p>
           <ul className="ask__checks">
             {q.tried.map((c) => (
