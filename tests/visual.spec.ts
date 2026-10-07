@@ -30,6 +30,12 @@ for (const width of WIDTHS) {
       await expect(page).toHaveScreenshot(`delegation-${width}.png`, { fullPage: true });
     });
 
+    test('the shared-table run', async ({ page }) => {
+      await page.goto('#/runs/shared-table');
+      await settle(page);
+      await expect(page).toHaveScreenshot(`shared-table-${width}.png`, { fullPage: true });
+    });
+
     test('the review queue', async ({ page }) => {
       await page.goto('#/queue');
       await settle(page);
@@ -66,6 +72,11 @@ test.describe('on a phone, 375', () => {
   test('the delegated work', async ({ page }) => {
     await open(page, '#/');
     await expect(page).toHaveScreenshot('delegation-375.png', { fullPage: true });
+  });
+
+  test('the shared-table run', async ({ page }) => {
+    await open(page, '#/runs/shared-table');
+    await expect(page).toHaveScreenshot('shared-table-375.png', { fullPage: true });
   });
 
   test('the review queue', async ({ page }) => {

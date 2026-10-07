@@ -242,3 +242,61 @@
     min-height: var(--control-height-touch);
   }
 }
+
+/* The sample runs, two links in the strip that says this is a simulation.
+   Drawn as the system's segmented control is, a sunken track with the
+   current one raised, but they are links (DelegationScreen.tsx says why),
+   so the current one is aria-current rather than aria-checked. As tall as
+   the Reset button beside them, so the strip keeps its one line. */
+.delegation__runs {
+  display: inline-flex;
+  align-items: stretch;
+  height: var(--control-height-compact);
+  padding: var(--border-width);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+}
+
+.delegation__run {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--space-2);
+  border-radius: calc(var(--radius-sm) - var(--border-width));
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--motion-fast) var(--ease),
+    color var(--motion-fast) var(--ease);
+}
+
+.delegation__run:hover {
+  color: var(--color-text);
+}
+
+.delegation__run[aria-current='page'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 0 0 var(--border-width) var(--color-border);
+}
+
+.delegation__run:focus-visible {
+  outline-offset: calc(var(--focus-ring-width) * -1);
+}
+
+/* A fingertip on a touch screen: the links are 44px, so the track is that
+   and its own edge, rather than 44px around links that are not. */
+@media (pointer: coarse) {
+  .delegation__runs {
+    height: auto;
+    padding: 0;
+  }
+
+  .delegation__run {
+    min-height: var(--control-height-touch);
+  }
+}

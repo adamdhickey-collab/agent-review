@@ -3,6 +3,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test';
 import type { ReactNode } from 'react';
 import { StoreProvider } from '../../app/store';
 import { initialDelegation } from '../../data/billing';
+import { initialTableRun } from '../../data/table';
 import { account, play, type DelegationState } from '../../data/delegation';
 import { DelegationScreen } from './DelegationScreen';
 
@@ -239,5 +240,115 @@ export const DecisionFirst: Story = {
     const accent = getComputedStyle(probe).color;
     probe.remove();
     await expect(getComputedStyle(canvas.getByText('Simulated')).color).not.toBe(accent);
+  },
+};
+
+/* The second run: the shared table. A permission boundary rather than
+   missing intent, and three answers that end differently. */
+const table = initialTableRun();
+const tableApproved = play(table, { type: 'answer', id: 'table-rows', option: 'shared', makeRule: false });
+
+export const SharedTable: Story = {
+  args: { run: 'shared-table' },
+  decorators: [inStore(table)],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The second sample run, a permission boundary. Asked to fix a cramped customer table, the agent made two fixes on that screen on its own and stopped at the third: the fix that fits is one line in the shared Table that forty screens draw, and changing a shared component is outside this delegation. The strip names the run on screen and links to the other.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const a = account(table);
+    await expect(a.total).toBe(table.brief.literals);
+    await expect(canvas.getByText('2 changes made and checked. 1 decision needs you.')).toBeInTheDocument();
+    await expect(canvas.getByRole('list', { name: 'Where the fixes are' })).toHaveTextContent('2 merged1 waiting on your decision');
+    const runs = canvas.getByRole('navigation', { name: 'Sample runs' });
+    await expect(within(runs).getByRole('link', { name: /Shared table/ })).toHaveAttribute('aria-current', 'page');
+    await expect(within(runs).getByRole('link', { name: /Two reds/ })).toHaveAttribute('href', '#/');
+    await expect(canvas.getByText('Permission boundary')).toBeInTheDocument();
+    await expect(canvas.getByText(/One stopped at the edge: the fix is in a shared component\./)).toBeInTheDocument();
+    await expect(canvas.getByText('2 routine fixes')).toBeInTheDocument();
+  },
+};
+
+export const SharedTableThreeAnswers: Story = {
+  args: { run: 'shared-table' },
+  decorators: [inStore(table)],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Each answer ends differently. More evidence decides nothing: the question comes back with what the agent found. Approving the shared change is allowed once, merges, and leaves the screens nobody has looked at in the account. Keeping the fix on the screen merges a local override, leaves the other screens as they were, says so, and can be kept as a rule scoped to the customer screens, with where it applies, why, and who made it.',
+      },
+    },
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement);
+
+    await step('Ask for more evidence: nothing is decided, and the question comes back', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: 'Show me the 40 screens' }));
+      await expect(canvas.getByText(/Nothing decided yet\./)).toBeInTheDocument();
+      await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveFocus();
+      await expect(canvas.getByRole('list', { name: 'What is known' })).toHaveTextContent(/On 5, a panel of fixed height now cuts off the last row/);
+      await expect(canvas.queryByRole('button', { name: 'Show me the 40 screens' })).toBeNull();
+      await expect(canvas.getByText('2 changes made and checked. 1 decision needs you.')).toBeInTheDocument();
+    });
+
+    await step('Approving offers no rule, and says whose permission a standing one needs', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: 'Approve, this once' }));
+      await expect(canvas.queryByText('Also use this answer for similar cases')).toBeNull();
+      await expect(canvas.getByText(/only its owner, Priya Raman/)).toBeInTheDocument();
+      await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }));
+    });
+
+    await step('Keep it to the screen, as a rule for the customer screens', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: 'Fix this screen only' }));
+      await userEvent.click(canvas.getByText('Also use this answer for similar cases'));
+      await expect(canvas.getByText(/You can revoke it under the boundaries/)).toBeInTheDocument();
+      await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
+      await waitFor(() => expect(canvas.getByText('Nothing needs your attention.')).toBeInTheDocument());
+      await expect(canvas.getByText(/Answered, and made a rule\./)).toBeInTheDocument();
+      await expect(canvas.getByText(/The other 39 screens keep their tighter rows/)).toBeInTheDocument();
+      await expect(canvas.getByRole('list', { name: 'Where the fixes are' })).toHaveTextContent('3 merged');
+    });
+
+    await step('The rule says where it applies and why, and can be revoked, not widened', async () => {
+      const rule = canvasElement.querySelector('.rule') as HTMLElement;
+      await expect(rule).toHaveTextContent(/Applies toThe customer screens/);
+      await expect(rule).toHaveTextContent(/WhyA shared component is its owner’s to change/);
+      await expect(rule).toHaveTextContent(/Made by you/);
+      await expect(within(rule).queryByRole('button', { name: 'Edit' })).toBeNull();
+      await expect(within(rule).getByRole('button', { name: 'Revoke' })).toBeInTheDocument();
+    });
+
+    await step('Reset puts this run back at its start', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: 'Reset the demo' }));
+      await expect(canvas.getByText('2 changes made and checked. 1 decision needs you.')).toBeInTheDocument();
+      await expect(canvas.getByRole('button', { name: 'Show me the 40 screens' })).toBeInTheDocument();
+    });
+  },
+};
+
+export const SharedTableApproved: Story = {
+  args: { run: 'shared-table' },
+  decorators: [inStore(tableApproved)],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The shared change approved once, without more evidence. It merged and is marked allowed once; the visual check says it changed rather than passed, and the account lists the 28 screens nobody has looked at as unresolved, rather than calling the change verified.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('Nothing needs your attention.')).toBeInTheDocument();
+    await expect(canvas.getByText('Allowed once')).toBeInTheDocument();
+    await expect(canvas.getByText('Visual baselines: 2 of 3 passed, 1 changed')).toBeInTheDocument();
+    await expect(canvas.getByText(/28 screens draw the taller rows and have no visual baseline\. Nobody has looked at them\./)).toBeInTheDocument();
+    await expect(canvas.getByText(/One went past them because you allowed it, once\./)).toBeInTheDocument();
   },
 };

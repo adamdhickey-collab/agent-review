@@ -45,6 +45,7 @@ for (const width of WIDTHS) {
 
     const SCREENS: [string, string][] = [
       ['the delegated work', '#/'],
+      ['the shared-table run', '#/runs/shared-table'],
       ['the queue', '#/queue'],
       ['a change', '#/changes/rv-2041'],
       ['a finding open, with the preview at its width', '#/changes/rv-2043/findings/f3-overflow'],

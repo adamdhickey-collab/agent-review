@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { initialDelegation } from '../../data/billing';
+import { initialTableRun } from '../../data/table';
 import { find, play, waitingOn, whyAsking, type DelegationState, type Work } from '../../data/delegation';
 import type { DecisionRequestProps, RulePreview } from './DecisionRequest';
 import { DecisionRequest } from './DecisionRequest';
@@ -35,7 +36,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A change the agent stopped on, asking for one decision, and saying which kind. The answers are the body of the card, each a card with its button. What a value means: the agent can make the change and cannot tell which is meant, so the card says what no check can settle and each answer shows the element as it would render if --color-danger changed later, which is the whole difference between them. Outside the delegation: the agent knows what to do and may not, so the card shows the line it would change and what each answer does. Both cite the boundary that stopped them on one line, and fold what was found, the code, the evidence and the reason for the recommendation. Answering is the system’s inline confirmation: the answers become "apply this?", Escape cancels, focus goes to Apply. That second step is where an intent answer can become a rule, never by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
+          'A change the agent stopped on, asking for one decision, and saying which kind. The answers are the body of the card, each a card with its button. Missing intent: the agent can make the change and cannot tell which is meant, so the card says what no check can settle and each answer shows the element as it would render if --color-danger changed later, which is the whole difference between them. A permission boundary: the agent knows what to do and may not, so the card shows the line it would change and what each answer does, and, for a fix in a shared component, who else it reaches and what has and hasn’t been checked. Both cite the boundary that stopped them on one line, and fold what was found, the code, the evidence and the reason for the recommendation. Answering is the system’s inline confirmation: the answers become "apply this?", Escape cancels, focus goes to Apply. That second step is where an intent answer can become a rule, never by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
       },
     },
   },
@@ -122,7 +123,7 @@ export const OutsideTheDelegation: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('Outside the delegation')).toBeInTheDocument();
+    await expect(canvas.getByText('Permission boundary')).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'Add --radius-full, this once' }));
     await expect(canvas.queryByRole('checkbox')).toBeNull();
     await expect(canvas.getByText(/doesn’t widen the delegation/)).toBeInTheDocument();
@@ -155,5 +156,101 @@ export const AnsweredOnceElsewhere: Story = {
   },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByText(/A one-time answer doesn’t carry over/)).toBeInTheDocument();
+  },
+};
+
+/* The shared-table run's question: a permission boundary about a fix that
+   reaches past the screen asked about. */
+const table = initialTableRun();
+const tableSeen = play(table, { type: 'answer', id: 'table-rows', option: 'evidence', makeRule: false });
+const keepLocal: RulePreview = {
+  offer: 'make',
+  text: 'On the customer screens, when a fix would change a shared component, make it on the screen instead, and tell the component’s owner.',
+  excludes: 'Other screens, a bug in a shared component itself, and any change a component’s owner asks for.',
+  scope: 'The customer screens',
+  fixed: true,
+  settles: [],
+};
+
+export const SharedComponent: Story = {
+  args: { ...props(table, 'table-rows', keepLocal), preview: (o: string) => (o === 'local' ? keepLocal : { offer: 'none', settles: [] }) },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A permission boundary: the agent knows the fix, the checks it could run pass, and the fix is in the shared Table forty screens draw. The card says what it was asked and what it proposes, shows the change, who else it reaches (the screens by area, every one under a fold, and the owner), what has been checked beside what has not, and that this is a permission decision rather than a technical one. Three answers, each saying what happens after: keep it to the screen asked about, approve the shared change once, or have the agent gather more evidence first.',
+      },
+    },
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('Permission boundary')).toBeInTheDocument();
+    await expect(canvas.getByText('Asked')).toBeInTheDocument();
+    await expect(canvas.getByText('Proposes')).toBeInTheDocument();
+    await expect(canvas.getByRole('group', { name: 'Who else it reaches' })).toHaveTextContent(/40 screens draw the shared Table, which Priya Raman \(Design systems\) owns\./);
+    await expect(canvas.getByRole('list', { name: 'Screens by area' }).children).toHaveLength(6);
+    const known = canvas.getByRole('list', { name: 'What is known' });
+    await expect(known).toHaveTextContent(/Checked.*12 of the 40 screens have one/);
+    await expect(known).toHaveTextContent(/Not checked.*28 screens have no visual baseline/);
+    await expect(canvas.getByText('So this isn’t a technical problem. It’s a permission decision.')).toBeInTheDocument();
+    for (const name of ['Fix this screen only', 'Approve, this once', 'Show me the 40 screens']) await expect(canvas.getByRole('button', { name })).toBeInTheDocument();
+    /* Gathering evidence decides nothing, so it asks no second question. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Show me the 40 screens' }));
+    await expect(args.onAnswer).toHaveBeenCalledWith('evidence', false);
+    await expect(canvas.queryByRole('button', { name: 'Apply' })).toBeNull();
+  },
+};
+
+export const SharedComponentApproveOnce: Story = {
+  args: { ...props(table, 'table-rows', { offer: 'none', settles: [] }), initialChoice: 'shared' },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Approving the shared change is a step past the boundary, for this change only, so it offers no rule. The confirmation says whose permission a standing one would need: the component’s owner, who this does not ask.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Apply' })).toHaveFocus();
+    await expect(canvas.queryByRole('checkbox')).toBeNull();
+    await expect(canvas.getByText(/only its owner, Priya Raman \(Design systems\), can give/)).toBeInTheDocument();
+  },
+};
+
+export const SharedComponentKeepLocal: Story = {
+  args: { ...props(table, 'table-rows', keepLocal), initialChoice: 'local' },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Keeping the fix on the screen asked about is within the agent’s authority, so it is an answer, and it can be kept for similar cases: a rule scoped to the customer screens, in its own words, which can be revoked but not widened.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByText('Also use this answer for similar cases'));
+    await expect(canvas.getByText(/On the customer screens, when a fix would change a shared component/)).toBeInTheDocument();
+    await expect(canvas.getByText(/You can revoke it under the boundaries/)).toBeInTheDocument();
+  },
+};
+
+export const SharedComponentAfterEvidence: Story = {
+  args: props(tableSeen, 'table-rows', keepLocal),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'After the agent gathered the evidence it was asked for: the same question, with what it found. All forty rendered, five cut off their last row, and what is still not known. Two answers now; the one that asked for more is gone.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('list', { name: 'What is known' })).toHaveTextContent(/On 5, a panel of fixed height now cuts off the last row/);
+    await expect(canvas.queryByRole('button', { name: 'Show me the 40 screens' })).toBeNull();
+    await expect(canvas.getByRole('button', { name: 'Approve, this once' })).toBeInTheDocument();
   },
 };

@@ -14,7 +14,7 @@ function Screens() {
   useRouteEffects(route);
   return (
     <Shell route={route}>
-      {route.name === 'delegation' ? <DelegationScreen /> : null}
+      {route.name === 'delegation' ? <DelegationScreen run={route.run ?? 'billing'} /> : null}
       {route.name === 'queue' ? <QueueScreen /> : null}
       {route.name === 'change' ? <ChangeScreen id={route.id} findingId={route.findingId} /> : null}
       {route.name === 'not-found' ? (

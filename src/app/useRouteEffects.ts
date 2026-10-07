@@ -21,7 +21,9 @@ export function useRouteEffects(route: Route) {
   const store = useStore();
   const screen =
     route.name === 'delegation'
-      ? 'Delegated work'
+      ? route.run === 'shared-table'
+        ? 'Delegated work: the shared table'
+        : 'Delegated work'
       : route.name === 'queue'
         ? 'Review queue'
         : route.name === 'change'
