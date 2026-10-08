@@ -19,9 +19,10 @@ const meta = {
       test: 'error',
       /* The preview frame renders the product at a width and scales it to fit
          the column, so Relay's 24px controls are measured here at 18px or
-         less. They are checked at their real size in their own stories; the
-         rest of this screen is checked at its real size in its components'
-         stories (DiffViewer, DecisionBar, FindingList). */
+         less. They are checked at their real size in their own stories, and
+         at Actual size in this one (ActualSize); the rest of this screen is
+         checked at its real size in its components' stories (DiffViewer,
+         DecisionBar, FindingList). */
       options: { rules: { 'target-size': { enabled: false } } },
     },
     docs: {
@@ -86,6 +87,36 @@ export const NarrowColumn: Story = {
   ],
   parameters: {
     docs: { description: { story: 'The Default preview in a 480px column. The 1280 frame scales to fit and the bar says at what percentage, so the width being shown is never mistaken for the width of the column.' } },
+  },
+};
+
+export const ActualSize: Story = {
+  decorators: [
+    (Story) => (
+      <div style={{ width: 480 }}>
+        <Story />
+      </div>
+    ),
+  ],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The NarrowColumn preview with Actual size chosen. The frame is drawn at 100% and the column pans, so the product’s text grows with browser zoom like the rest of the page and its controls are their real 24px; fitted, zoom only narrows the column and the frame shrinks again. The choice shows only where fitting shrinks the frame.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const size = within(canvas.getByRole('radiogroup', { name: 'Preview size' }));
+    await expect(canvas.getByText(/^at \d+%$/)).toBeInTheDocument();
+    await userEvent.click(size.getByRole('radio', { name: 'Actual size' }));
+    await expect(size.getByRole('radio', { name: 'Actual size' })).toHaveAttribute('aria-checked', 'true');
+    await waitFor(() => expect(canvas.queryByText(/^at \d+%$/)).not.toBeInTheDocument());
+    const column = canvas.getByRole('region', { name: 'The product at 1280px, scrolls sideways' });
+    await expect(column).toHaveAttribute('tabindex', '0');
+    const filter = canvas.getByRole('button', { name: 'Filter customers' });
+    await waitFor(() => expect(filter.getBoundingClientRect().height).toBeGreaterThanOrEqual(24));
   },
 };
 

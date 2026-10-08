@@ -197,7 +197,9 @@ like one; it is not a button restyled down to 18px. One screen is measured
 differently: the review's preview frame scales the product to fit its
 column, so Relay's controls are smaller there than they are, and the stories
 that render the frame turn the rule off, with the reason beside it. Those
-controls are checked at their real size in their own stories.
+controls are checked at their real size in their own stories, and the frame
+offers Actual size, which draws them at it and lets browser zoom enlarge the
+product's text (WCAG 1.4.4), so fitting is a view a reviewer can leave.
 
 How to check: `npm run test:stories` is green.
 

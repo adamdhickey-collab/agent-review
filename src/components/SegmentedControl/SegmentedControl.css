@@ -35,10 +35,18 @@
   color: var(--color-text);
 }
 
+/* The chosen option is a raised step on the track, and its edge is what says
+   it is chosen, so the edge is drawn in muted ink rather than the hairline
+   (WCAG 1.4.11 asks 3:1 of what identifies a state). On the hairline the
+   step was 1.12:1 against the track in the light and 1.13:1 in the dark: a
+   lighter rectangle that said nothing to a reader who could not see that
+   difference. The muted ink is 4.9:1 on the light track and clears 3:1 on
+   the dark one. The control border would not do: it is 2.98:1 on the
+   track, 3:1 only against white. */
 .segmented__option[aria-checked='true'] {
   background: var(--color-surface);
   color: var(--color-text);
-  box-shadow: 0 0 0 var(--border-width) var(--color-border);
+  box-shadow: 0 0 0 var(--border-width) var(--color-text-muted);
 }
 
 /* The ring is drawn inside the control so it is not clipped by neighbours. */

@@ -4,7 +4,7 @@ import { useStore } from '../../app/store';
 import { navigate, titleTransitionName } from '../../app/router';
 import type { Finding, Screen, ValidationSummary as Summary } from '../../data/types';
 import { relativeTime } from '../format';
-import { ValidationSummary, kindsForLane } from '../ValidationSummary/ValidationSummary';
+import { ValidationSummary, kindsForLane, laneLabel } from '../ValidationSummary/ValidationSummary';
 import { FindingList } from '../FindingList/FindingList';
 import { ComponentPreview } from '../ComponentPreview/ComponentPreview';
 import { hasVersions } from '../preview/screens';
@@ -26,6 +26,13 @@ import './ChangeScreen.css';
 
 const STORYBOOK = 'storybook/';
 
+/* What the evidence column is showing for a finding, as one sentence: the
+   line above the diff says it, and so does the status line. */
+function showing(f: Finding): string {
+  const r = f.reproduce;
+  return `Showing ${f.title}${r ? `: ${r.side}, at ${r.viewport}px${r.target ? ', the element outlined' : ''}` : ''}`;
+}
+
 type LeftTab = 'findings' | 'files' | 'stories' | 'rationale';
 
 export function ChangeScreen({ id, findingId }: { id: string; findingId?: string }) {
@@ -35,9 +42,22 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
   const [tab, setTab] = useState<LeftTab>('findings');
   const [included, setIncluded] = useState<Set<string>>(() => new Set(change?.findings.filter((f) => f.severity !== 'note' && f.correction).map((f) => f.id)));
   const [returning, setReturning] = useState(false);
+  /* The one status line for the screen. Filtering by a lane and opening a
+     finding both change what a reader is looking at without moving focus,
+     so each says what it did here (WCAG 4.1.3). It is always in the page,
+     because a live region added along with its text is not reliably read;
+     its text is set by the action, so a first load says nothing. */
+  const [said, setSaid] = useState('');
 
   const selected = useMemo(() => change?.findings.find((f) => f.id === findingId), [change, findingId]);
-  const select = useCallback((fid: string | undefined) => navigate({ name: 'change', id, findingId: fid }, true), [id]);
+  const select = useCallback(
+    (fid: string | undefined) => {
+      navigate({ name: 'change', id, findingId: fid }, true);
+      const f = fid ? change?.findings.find((x) => x.id === fid) : undefined;
+      setSaid(f ? showing(f) : '');
+    },
+    [id, change],
+  );
   const openStory = useCallback((storyId: string) => window.open(`${STORYBOOK}?path=/story/${storyId}`, '_blank', 'noopener'), []);
 
   if (!change) {
@@ -55,6 +75,11 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
   const screens: Screen[] = Array.from(new Set(change.findings.map((f) => f.reproduce?.screen).filter(Boolean))) as Screen[];
   const previewScreens = screens.length ? screens : ['customers' as Screen];
   const afterMissing = !hasVersions(change.id);
+  const pickLane = (next: keyof Summary | undefined) => {
+    setLane(next);
+    const shown = next ? change.findings.filter((f) => kindsForLane(next).includes(f.kind)).length : change.findings.length;
+    setSaid(next ? `Showing ${shown} of ${change.findings.length} findings: ${laneLabel(next)}` : `Showing all ${change.findings.length} findings`);
+  };
 
   return (
     <div className="change">
@@ -113,7 +138,7 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
       </header>
 
       <div className="change__summary">
-        <ValidationSummary summary={change.validation} active={lane} onSelect={setLane} />
+        <ValidationSummary summary={change.validation} active={lane} onSelect={pickLane} />
         <div className="change__touched">
           <span className="change__touched-label">Components touched</span>
           {change.componentsTouched.map((c) => {
@@ -130,7 +155,14 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
       </div>
 
       <div className="change__body">
-        <aside className="change__spine" aria-label="Findings and details">
+        <aside className="change__spine" aria-labelledby="spine-title">
+          {/* The screen's own sections are headings as well as landmarks, so
+              moving by heading reaches them, and not only the product's
+              headings inside the preview. Visually the tabs and the frame
+              already say what each is. */}
+          <h2 id="spine-title" className="visually-hidden">
+            Findings and details
+          </h2>
           <Tabs
             label="Review details"
             tabs={[
@@ -147,7 +179,7 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
                 {lane ? (
                   <div className="change__filter">
                     Showing {visible.length} of {change.findings.length}
-                    <Button size="compact" variant="ghost" onClick={() => setLane(undefined)}>
+                    <Button size="compact" variant="ghost" onClick={() => pickLane(undefined)}>
                       Show all
                     </Button>
                   </div>
@@ -174,6 +206,7 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
         </aside>
 
         <section className="change__evidence" aria-label="Preview and diff">
+          <h2 className="visually-hidden">Preview</h2>
           <ComponentPreview
             changeId={change.id}
             reproduce={selected?.reproduce}
@@ -182,7 +215,7 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
             note={afterMissing ? 'The agent’s branch has not been loaded into this build; the After side shows the baseline.' : undefined}
           />
           {selected ? (
-            <p className="change__reproducing" role="status">
+            <p className="change__reproducing">
               <Icon name="eye" size={14} />
               Showing <strong>{selected.title}</strong>
               {selected.reproduce ? (
@@ -197,10 +230,19 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
             <h2 id="diff" className="change__section-title" tabIndex={-1}>
               Diff
             </h2>
-            <DiffViewer hunks={change.diff} selectedFindingId={findingId} onSelectFinding={(fid) => select(fid)} />
+            <DiffViewer
+              hunks={change.diff}
+              selectedFindingId={findingId}
+              onSelectFinding={(fid) => select(fid)}
+              findingTitle={(fid) => change.findings.find((f) => f.id === fid)?.title}
+            />
           </div>
         </section>
       </div>
+
+      <p className="visually-hidden" role="status">
+        {said}
+      </p>
 
       {returning ? (
         <ReturnPanel

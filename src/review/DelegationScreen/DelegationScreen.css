@@ -278,10 +278,13 @@
   color: var(--color-text);
 }
 
+/* The current one's edge in muted ink, as the segmented control's chosen
+   option has it, and for the same reason: the edge is what says which run
+   this is, and on the hairline it was 1.1:1 against the track (1.4.11). */
 .delegation__run[aria-current='page'] {
   background: var(--color-surface);
   color: var(--color-text);
-  box-shadow: 0 0 0 var(--border-width) var(--color-border);
+  box-shadow: 0 0 0 var(--border-width) var(--color-text-muted);
 }
 
 .delegation__run:focus-visible {

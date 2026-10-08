@@ -8,6 +8,12 @@
   animation: icon-spin var(--motion-ambient) linear infinite;
 }
 
+/* A running check is a status, not a load: it turns a few times and stops
+   (--motion-ambient-repeat says why), and its label goes on saying it runs. */
+.icon--spin[data-icon='status-running'] {
+  animation-iteration-count: var(--motion-ambient-repeat);
+}
+
 @keyframes icon-spin {
   to {
     transform: rotate(360deg);
