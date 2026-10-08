@@ -231,6 +231,12 @@
 
 /* An answer is the one thing on the card that is pressed, so it is the
    one thing raised: the hairline, and the raised shadow under it. */
+/* Three answers stay one row down to a card about 39rem wide (the main
+   column at 1100), rather than wrapping two and one; two keep 14rem. */
+.ask__choices[data-count='3'] {
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
 .ask__choice {
   display: flex;
   flex-direction: column;
@@ -495,10 +501,153 @@
 
 /* A fingertip: the answers and the rule's box are the height of a touch
    target where the pointer is coarse, as the rest of the review's chrome is. */
+/* A permission decision about a shared component (ReachCase). What was
+   asked and what is proposed are two short rows with their labels in the
+   margin, the way a record labels its parts; who else it reaches is a line,
+   the areas as quiet badges with their counts, and every screen under a
+   fold; what is known is the two-tile pair the intent card uses for its two
+   reds, checked beside not checked, each line led by its result's mark. */
+.ask__brief {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-1) var(--space-3);
+  line-height: var(--leading-body);
+}
+
+.ask__brief > div {
+  display: contents;
+}
+
+.ask__brief dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: calc(var(--text-md) * var(--leading-body));
+}
+
+.ask__brief dd {
+  color: var(--color-text);
+}
+
+.ask__reach {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ask__reach-lead {
+  color: var(--color-text);
+  line-height: var(--leading-body);
+}
+
+.ask__reach-lead strong {
+  font-weight: var(--weight-semibold);
+}
+
+.ask__areas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ask__area-n {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ask__screens > .disclosure__summary {
+  align-self: flex-start;
+  padding-left: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.ask__screens-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ask__screens-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.ask__screens-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.ask__screens-areas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: var(--space-3) var(--space-4);
+}
+
+.ask__screens-area {
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.ask__screens-areas li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.ask__screens-areas li > span:first-child {
+  flex: 0 1 auto;
+}
+
+.ask__screens-areas .icon,
+.ask__screens-key .icon {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.ask__asked {
+  color: var(--color-text-muted);
+}
+
+.ask__known-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ask__known-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-text);
+  line-height: var(--leading-body);
+}
+
+.ask__known-list .test-status {
+  flex: none;
+  height: calc(var(--text-md) * var(--leading-body));
+}
+
 @media (pointer: coarse) {
   .ask .checkbox,
   .ask .disclosure__summary {
     min-height: var(--control-height-touch);
+  }
+
+  /* The proposed change's two lines are a focusable region (it scrolls
+     sideways on a phone), so it is a fingertip tall too. A table's height
+     is its minimum. */
+  .ask .diff__table {
+    height: var(--control-height-touch);
   }
 }
 

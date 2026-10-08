@@ -1,4 +1,4 @@
-import { cleanChecks, type Boundary, type DelegationState, type Option, type Pattern, type Question, type Twin, type Work } from './delegation';
+import { cleanChecks, RULE_EXCLUDES, type Boundary, type DelegationState, type Option, type Pattern, type Question, type RuleDraft, type Twin, type Work } from './delegation';
 
 /* The delegated run the product opens on: Claude Code moving Relay's billing
    screens onto the token layer. SIMULATED THROUGHOUT. Unlike rv-2041 and
@@ -14,6 +14,9 @@ import { cleanChecks, type Boundary, type DelegationState, type Option, type Pat
    The arithmetic, which the stories assert: the lint reported 36 literals.
    Seven changes the agent made on its own hold 26 of them; two questions
    hold 3; four changes waiting on the first question hold the other 7. */
+
+/** The two cases a struck-through value can be; the shared-table run has the third. */
+type Struck = Exclude<Pattern, 'shared'>;
 
 const dana = { name: 'Dana Whitfield', role: 'Product design' };
 const AREA = 'src/product/billing/';
@@ -252,11 +255,11 @@ const settingsRoutine: Work = {
 
 /* The answers to "what does this red mean". The same two for every
    struck-through value, so a rule can choose one for all of them. */
-function struck(pattern: Pattern): Option[] {
+function struck(pattern: Struck): Option[] {
   if (pattern === 'removed') {
     return [
-      { id: 'diff', label: 'Use the diff remove ink', after: ['var(--color-diff-remove-ink)'], effect: 'The struck value takes --color-diff-remove-ink.', recommended: true },
-      { id: 'danger', label: 'Use danger', after: ['var(--color-danger)'], effect: 'The struck value takes --color-danger.' },
+      { id: 'diff', label: 'Use the diff remove ink', after: ['var(--color-diff-remove-ink)'], effect: 'The struck value takes --color-diff-remove-ink.', recommended: true, rule: KEEP_APART },
+      { id: 'danger', label: 'Use danger', after: ['var(--color-danger)'], effect: 'The struck value takes --color-danger.', rule: KEEP_LINKED },
     ];
   }
   return [
@@ -266,10 +269,26 @@ function struck(pattern: Pattern): Option[] {
       after: ['var(--color-diff-remove-ink)', 'var(--color-diff-add-ink)'],
       effect: 'The old value takes --color-diff-remove-ink and the new one --color-diff-add-ink.',
       recommended: true,
+      rule: KEEP_APART,
     },
-    { id: 'danger', label: 'Use danger and success', after: ['var(--color-danger)', 'var(--color-success)'], effect: 'The old value takes --color-danger and the new one --color-success.' },
+    { id: 'danger', label: 'Use danger and success', after: ['var(--color-danger)', 'var(--color-success)'], effect: 'The old value takes --color-danger and the new one --color-success.', rule: KEEP_LINKED },
   ];
 }
+
+/* What either answer becomes if a person keeps it: where it applies, what
+   it leaves out, and why, so the rule can be read, and revoked, by someone
+   who wasn't there when it was made. The text is built from what it covers
+   (ruleText), because a person can widen or narrow that. */
+const KEEP_APART: RuleDraft = {
+  scope: 'Struck-through values on the billing screens',
+  excludes: RULE_EXCLUDES,
+  why: 'A struck value shows what was replaced or removed, not a failure, so it shouldn’t follow danger’s red if that changes.',
+};
+const KEEP_LINKED: RuleDraft = {
+  scope: 'Struck-through values on the billing screens',
+  excludes: RULE_EXCLUDES,
+  why: 'You chose to keep a struck value and a failure in one red, so they change together.',
+};
 
 const EVIDENCE_TOKENS = 'tokens.css says the diff pair is for “a line added and a line removed”.';
 
@@ -287,7 +306,7 @@ const FAILED: Twin = {
 };
 
 /* What a struck value's red means, by pattern, in the words the card uses. */
-const STRUCK_MEANS: Record<Pattern, { means: string; says: string; noun: string; word: string }> = {
+const STRUCK_MEANS: Record<Struck, { means: string; says: string; noun: string; word: string }> = {
   replaced: { means: 'Replaced value', says: 'Red means this value was replaced.', noun: 'Replacement', word: 'replaced' },
   removed: { means: 'Removed value', says: 'Red means this value was removed.', noun: 'Removal', word: 'removed' },
 };
@@ -297,7 +316,7 @@ const STRUCK_MEANS: Record<Pattern, { means: string; says: string; noun: string;
    with each, which is the whole reason it cannot choose. Every one asks the
    same question, because it is the same two reds: the struck value and the
    failure. */
-function struckQuestion(pattern: Pattern, found: string, recommendation: string, frames: number, stories: number): Question {
+function struckQuestion(pattern: Struck, found: string, recommendation: string, frames: number, stories: number): Question {
   const m = STRUCK_MEANS[pattern];
   return {
     kind: 'intent',
@@ -357,7 +376,7 @@ const activityRed: Work = {
    same, a line struck through with nothing beside it. */
 function held(
   w: Pick<Work, 'id' | 'file' | 'screen' | 'title' | 'sample' | 'lines' | 'frames' | 'stories'>,
-  pattern: Pattern,
+  pattern: Struck,
   found: string,
   at: string,
   recommendation: string,
@@ -470,6 +489,7 @@ const meterRadius: Work = {
     options: [
       {
         id: 'add',
+        grants: true,
         label: 'Add --radius-full, this once',
         after: ['var(--radius-full)'],
         effect: 'It adds --radius-full: 999px to tokens.css and tokens.ts, uses it here, runs the checks, and merges.',
@@ -482,6 +502,7 @@ const meterRadius: Work = {
       { id: 'leave', label: 'Leave it as written', after: ['999px'], effect: 'The line stays as it is, and the lint keeps reporting it.', leaves: true },
     ],
     note: 'Allowing this once doesn’t widen the delegation. The next token it needs, it will ask about.',
+    edge: 'it needs a new token',
   },
   frames: 2,
   stories: 3,
@@ -491,6 +512,7 @@ const meterRadius: Work = {
 export function initialDelegation(): DelegationState {
   return {
     brief: {
+      id: 'billing',
       title: 'Bring the billing screens onto the token layer',
       request:
         'The token lint reports 36 literals in src/product/billing/, the screens that came over from the old billing app. Move them onto the token layer. Merge what doesn’t move a pixel, and ask me about the rest.',

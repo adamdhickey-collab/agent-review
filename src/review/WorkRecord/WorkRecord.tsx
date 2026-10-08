@@ -30,6 +30,8 @@ export interface WorkRecordProps {
   boundaries: Boundary[];
   /** The rule that made it, when a rule did. */
   rule?: Rule;
+  /** What the run counts a line as, for the summary: "value", "declaration". */
+  line?: string;
   onRevert?: () => void;
   onRestore?: () => void;
   open?: boolean;
@@ -66,7 +68,7 @@ function hunks(work: Work): DiffHunk[] {
   return [own, ...Array.from(added, ([file, texts]) => ({ file, header: 'a new token', lines: texts.map((text) => ({ kind: 'add' as const, text })) }))];
 }
 
-export function WorkRecord({ work, boundaries, rule, onRevert, onRestore, open }: WorkRecordProps) {
+export function WorkRecord({ work, boundaries, rule, line = 'value', onRevert, onRestore, open }: WorkRecordProps) {
   const basis = work.basis;
   const badge = work.status === 'left' ? { label: 'Left as written', tone: 'neutral' as BadgeTone } : basis ? BASIS[basis.kind] : undefined;
   const cited = basis?.kind === 'boundary' ? boundaries.filter((b) => basis.boundaries.includes(b.n)) : [];
@@ -83,7 +85,7 @@ export function WorkRecord({ work, boundaries, rule, onRevert, onRestore, open }
             <Inline text={work.title} />
           </span>
           <span className="record__where">
-            {work.screen} <span aria-hidden="true">·</span> {plural(n, 'value')}
+            {work.screen} <span aria-hidden="true">·</span> {plural(n, line)}
             {work.commit && work.status !== 'left' ? (
               <>
                 {' '}
@@ -199,7 +201,9 @@ export function WorkRecord({ work, boundaries, rule, onRevert, onRestore, open }
         {work.status === 'made' || work.status === 'reverted' ? (
           <div className="record__part record__undo">
             <p>
-              {work.status === 'made'
+              {work.status === 'made' && work.undo
+                ? work.undo
+                : work.status === 'made'
                 ? `Reverting adds a commit to main that puts the ${n === 1 ? 'literal' : 'literals'} back${work.adds?.length ? ' and takes the new token out' : ''}. The lint will report ${n === 1 ? 'it' : 'them'} again, and the agent won’t redo it.`
                 : `Reverted. Restoring applies ${work.commit} again.`}
             </p>

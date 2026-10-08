@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { initialDelegation } from '../../data/billing';
+import { initialTableRun } from '../../data/table';
 import { play } from '../../data/delegation';
 import { Boundaries } from './Boundaries';
 
@@ -87,4 +88,29 @@ export const RevokingARule: Story = {
 export const Revoked: Story = {
   args: { rules: revoked.rules, work: revoked.work },
   parameters: { docs: { description: { story: 'A revoked rule, kept as a record of what it did, with no actions left on it.' } } },
+};
+
+/* A rule written in its own words: the shared-table run's, scoped to the
+   customer screens. */
+const table = initialTableRun();
+const tableRule = play(table, { type: 'answer', id: 'table-rows', option: 'local', makeRule: true });
+
+export const RuleInItsOwnWords: Story = {
+  args: { boundaries: table.boundaries, by: table.brief.by, rules: tableRule.rules, work: tableRule.work },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Every rule says where it applies, why, what it leaves out and who made it, so a person who was not there can review it. This one, from the shared-table run, is written in its own words rather than built from the cases it covers, so it can be revoked but not widened: there is no Edit.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('Applies to')).toBeInTheDocument();
+    await expect(canvas.getByText('The customer screens')).toBeInTheDocument();
+    await expect(canvas.getByText(/A shared component is its owner’s to change/)).toBeInTheDocument();
+    await expect(canvas.queryByRole('button', { name: 'Edit' })).toBeNull();
+    await expect(canvas.getByRole('button', { name: 'Revoke' })).toBeInTheDocument();
+  },
 };

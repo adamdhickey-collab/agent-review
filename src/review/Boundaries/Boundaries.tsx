@@ -103,7 +103,7 @@ export const Boundaries = forwardRef<HTMLElement, BoundariesProps>(function Boun
           Your rules <span className="bounds__count">{active}</span>
         </h3>
         {rules.length === 0 ? (
-          <p className="bounds__empty">None yet. An answer about what a value means can become a rule for similar cases, never by default.</p>
+          <p className="bounds__empty">None yet. An answer can become a rule for similar cases, never by default.</p>
         ) : (
           rules.map((r) => <RuleCard key={r.id} rule={r} work={work} onEdit={(covers) => onEditRule(r.id, covers)} onRevoke={() => onRevokeRule(r.id)} initialMode={initialMode} />)
         )}
@@ -167,9 +167,21 @@ export function RuleCard({ rule, work, onEdit, onRevoke, initialMode }: RuleCard
         <Inline text={ruleText(rule)} />
       </p>
       <dl className="rule__facts">
+        {rule.scope ? (
+          <div>
+            <dt>Applies to</dt>
+            <dd>{rule.scope}</dd>
+          </div>
+        ) : null}
+        {rule.why ? (
+          <div>
+            <dt>Why</dt>
+            <dd>{rule.why}</dd>
+          </div>
+        ) : null}
         <div>
           <dt>It doesn’t cover</dt>
-          <dd>{RULE_EXCLUDES}</dd>
+          <dd>{rule.excludes ?? RULE_EXCLUDES}</dd>
         </div>
         <div>
           <dt>What it has done</dt>
@@ -256,9 +268,13 @@ export function RuleCard({ rule, work, onEdit, onRevoke, initialMode }: RuleCard
         </div>
       ) : active ? (
         <div className="rule__actions">
-          <Button ref={edit} size="compact" variant="secondary" onClick={() => setMode('edit')}>
-            Edit
-          </Button>
+          {/* A rule built from the cases it covers can be widened or narrowed;
+              one written in its own words can only be kept or revoked. */}
+          {rule.text ? null : (
+            <Button ref={edit} size="compact" variant="secondary" onClick={() => setMode('edit')}>
+              Edit
+            </Button>
+          )}
           <Button ref={revoke} size="compact" variant="danger" onClick={() => setMode('revoke')}>
             Revoke
           </Button>

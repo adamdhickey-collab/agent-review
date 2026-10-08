@@ -36,7 +36,32 @@ export interface Boundary {
   text: string;
 }
 
+/** The delegated runs the product can play, each its own scenario. */
+export type RunId = 'billing' | 'shared-table';
+
+/** The words a run counts and reports its work in, where they differ by job.
+    The billing run counts the literals the lint reported; the shared-table
+    run counts the fixes the request asked for. */
+export interface Words {
+  /** What the job counts, one and many: ['literal', 'literals']. */
+  unit: [string, string];
+  /** Said of the merged ones, after "4 of 6 literals": "are tokens now, and none moved a pixel". */
+  done: string;
+  /** A completed change with nothing to look at, one and many, as the folded row counts it: ['routine swap', 'routine swaps']. */
+  routine: [string, string];
+  /** What a completed change's record counts its lines as: "value". */
+  line: string;
+}
+
+export const BILLING_WORDS: Words = {
+  unit: ['literal', 'literals'],
+  done: 'are tokens now, and none moved a pixel',
+  routine: ['routine swap', 'routine swaps'],
+  line: 'value',
+};
+
 export interface Brief {
+  id: RunId;
   title: string;
   /** The request, as the person who delegated it wrote it. */
   request: string;
@@ -48,9 +73,15 @@ export interface Brief {
   delegatedAt: string;
   /** When the agent last did anything. */
   lastActive: string;
-  /** What the token lint reported when the run started. Every item below accounts for some of it. */
+  /** What the job counted when the run started: the literals the token lint
+      reported, or the fixes the request asked for. Every item below accounts
+      for some of it. */
   literals: number;
+  /** The words this run counts in; the billing run's when absent. */
+  words?: Words;
 }
+
+export const wordsOf = (b: Brief): Words => b.words ?? BILLING_WORDS;
 
 /** On what authority a change was made. */
 export type Basis =
@@ -92,13 +123,42 @@ export interface Addition {
   text: string;
 }
 
-/** A value shown struck through: beside the value that replaced it, or on its own. */
-export type Pattern = 'replaced' | 'removed';
+/** A case an answer can be kept for: a value struck through beside the value
+    that replaced it, or on its own; or a fix that would reach past the
+    screen asked about into a shared component. */
+export type Pattern = 'replaced' | 'removed' | 'shared';
 
 export const PATTERN_LABEL: Record<Pattern, string> = {
   replaced: 'a value struck through beside the one that replaced it',
   removed: 'a value struck through with nothing replacing it',
+  shared: 'a fix that would change a shared component',
 };
+
+/** What an answer becomes if a person keeps it for similar cases. A rule
+    always says where it applies, what it leaves out and why, because a rule
+    nobody can read the reason for is a rule nobody can safely revoke. */
+export interface RuleDraft {
+  /** The rule in words, when it is not built from the patterns it covers (ruleText). */
+  text?: string;
+  /** Where it applies, in a few words: "The billing screens". */
+  scope: string;
+  /** What it doesn't cover. */
+  excludes: string;
+  /** Why, in a sentence. */
+  why: string;
+}
+
+/** What follows from choosing an option, when it is more than the run's
+    usual clean pass: the checks as they came back, what no check could
+    establish, what stays open in the account, and the record's words. */
+export interface Then {
+  checks?: Check[];
+  unchecked?: string;
+  /** What stays unresolved once it is merged, for the account. */
+  open?: string;
+  /** What the agent did, for the record, in place of the usual three lines. */
+  history?: string[];
+}
 
 export interface Option {
   id: string;
@@ -113,6 +173,41 @@ export interface Option {
   adds?: Addition[];
   /** Choosing it leaves the code as it is. */
   leaves?: boolean;
+  /** Choosing it lets the agent past the boundary that stopped it, for this
+      change only: the work is "allowed once", not answered. */
+  grants?: boolean;
+  /** The choice, as its card is headed: "Keep it to the customer table". */
+  title?: string;
+  /** What happens after it is chosen, in a sentence, on the card. */
+  outcome?: string;
+  /** Choosing it decides nothing: the agent gathers this evidence and asks again with this question. */
+  asks?: Question;
+  /** Where this option writes, when not the change's own lines: a local override in place of a shared one. */
+  file?: string;
+  lines?: Line[];
+  /** The change's title in the record once this is made, and where, when that is not the screen asked about. */
+  record?: string;
+  screen?: string;
+  /** What follows from it, when it is more than the run's usual clean pass. */
+  then?: Then;
+  /** What it becomes if kept for similar cases; no draft, no rule offered. */
+  rule?: RuleDraft;
+  /** Said in the confirmation, in place of the question's note. */
+  note?: string;
+}
+
+/** Everything a fix in a shared component would reach, for a question about scope. */
+export interface Reach {
+  /** The component, as a person names it: "Table". */
+  component: string;
+  /** Who owns it, and so who could let an agent change it for good. */
+  owner: { name: string; role: string };
+  /** The screens that draw it, by area. The one asked about is first. */
+  areas: { area: string; screens: { name: string; baseline?: boolean; fixed?: boolean; asked?: boolean }[] }[];
+  /** What has been checked, each a result. */
+  checked: { state: TestState; text: string }[];
+  /** What has not, each a sentence. */
+  unknown: string[];
 }
 
 export interface Question {
@@ -148,6 +243,16 @@ export interface Question {
       stays the same". */
   noun?: string;
   note?: string;
+  /** For a scope question, what the agent was asked to do, in a sentence. */
+  asked?: string;
+  /** For a scope question, the change it would make, in a sentence. */
+  proposes?: string;
+  /** For a scope question about a shared component: who else it reaches, and what is known. */
+  reach?: Reach;
+  /** The one line that says why a person is needed, louder than the gap. */
+  verdict?: string;
+  /** Why it stopped, in a clause for the account's scope line: "it needs a new token". */
+  edge?: string;
 }
 
 /** An element in the same color as the one in question, whose meaning was settled. */
@@ -198,6 +303,10 @@ export interface Work {
   /** How many frames and stories the checks cover on this screen. */
   frames: number;
   stories: number;
+  /** What stays unresolved once it is merged, for the account. */
+  open?: string;
+  /** What reverting it does, when it is not putting literals back. */
+  undo?: string;
 }
 
 export interface Rule {
@@ -211,6 +320,12 @@ export interface Rule {
   /** The changes it settled, in order. */
   applied: string[];
   history: Entry[];
+  /** The rule in words, when it is not built from what it covers. */
+  text?: string;
+  /** Where it applies, what it leaves out, and why: from the answer's RuleDraft. */
+  scope?: string;
+  excludes?: string;
+  why?: string;
 }
 
 export interface DelegationState {
@@ -258,8 +373,10 @@ export function waitingOn(s: DelegationState, id: string): Work[] {
   return s.work.filter((w) => w.status === 'waiting' && w.waitsOn === id);
 }
 
-/** What a rule says, in words, from what it covers and what it chooses. */
-export function ruleText(rule: Pick<Rule, 'answer' | 'covers'>): string {
+/** What a rule says, in words, from what it covers and what it chooses. A
+    rule written in its own words (the shared-table run's) says those. */
+export function ruleText(rule: Pick<Rule, 'answer' | 'covers' | 'text'>): string {
+  if (rule.text) return rule.text;
   const diff = rule.answer === 'diff';
   const old = diff ? '--color-diff-remove-ink' : '--color-danger';
   const replacement = diff ? '--color-diff-add-ink' : '--color-success';
@@ -347,22 +464,32 @@ export function cleanChecks(frames: number, stories: number): Check[] {
   ];
 }
 
+/* Make a change as an option says. An option that writes elsewhere (a local
+   override in place of a shared one) brings its own file, lines and title,
+   and one whose checks are not the usual clean pass brings what they said
+   (Then), so the record shows what was run on the change that was made. */
 function make(w: Work, option: Option, basis: Basis, at: string, how: string, unchecked: string): Work {
   const commit = hash(`${w.id}:${option.id}:${basis.kind}`);
-  const lines = w.lines.map((l, i) => ({ ...l, after: option.after[i] }));
+  const lines = (option.lines ?? w.lines).map((l, i) => ({ ...l, after: option.after[i] }));
+  const then = option.then;
+  const ran = then?.history ?? [`Ran the checks: the token lint passed, 0 of ${w.frames} frames moved, ${w.stories} of ${w.stories} stories passed.`];
   return {
     ...w,
     status: 'made',
+    file: option.file ?? w.file,
+    title: option.record ?? w.title,
+    screen: option.screen ?? w.screen,
     lines,
     adds: option.adds,
     basis,
-    checks: cleanChecks(w.frames, w.stories),
-    unchecked,
+    checks: then?.checks ?? cleanChecks(w.frames, w.stories),
+    unchecked: then?.unchecked ?? unchecked,
+    open: then?.open,
     commit,
     history: [
       ...w.history,
       { at, who: 'agent', text: `${how} ${option.effect}` },
-      { at, who: 'agent', text: `Ran the checks: the token lint passed, 0 of ${w.frames} frames moved, ${w.stories} of ${w.stories} stories passed.` },
+      ...ran.map((text) => ({ at, who: 'agent' as const, text })),
       { at, who: 'agent', text: `Merged to main as ${commit}.` },
     ],
   };
@@ -432,10 +559,27 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
       const option = w?.question?.options.find((o) => o.id === a.option);
       if (!w || w.status !== 'asking' || !w.question || !option) return s;
       const q = w.question;
+
+      /* Asking for more evidence decides nothing. The change stays where it
+         is, asking, and the question comes back with what was gathered. */
+      if (option.asks) {
+        const again: Work = {
+          ...w,
+          question: option.asks,
+          history: [
+            ...w.history,
+            { at, who: 'you', text: `Asked for more evidence before deciding.` },
+            ...(option.then?.history ?? []).map((text) => ({ at, who: 'agent' as const, text })),
+            { at, who: 'agent', text: 'Asked again, with what it found.' },
+          ],
+        };
+        return { ...s, ...tick, work: s.work.map((x) => (x.id === w.id ? again : x)), notice: 'Nothing decided yet. It gathered the evidence you asked for, and is asking again.' };
+      }
+
       let rules = s.rules;
       let ruleNote = '';
       const current = activeRule(s);
-      if (a.makeRule && q.pattern && (!current || current.answer === option.id)) {
+      if (a.makeRule && q.pattern && option.rule && (!current || current.answer === option.id)) {
         if (current) {
           rules = rules.map((r) =>
             r.id === current.id
@@ -447,7 +591,16 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
           const id = `rule-${rules.length + 1}`;
           rules = [
             ...rules,
-            { id, answer: option.id, covers: [q.pattern], status: 'active', from: w.id, applied: [], history: [{ at, who: 'you', text: `Made it from the ${w.screen.toLowerCase()}’s question.` }] },
+            {
+              id,
+              answer: option.id,
+              covers: [q.pattern],
+              status: 'active',
+              from: w.id,
+              applied: [],
+              history: [{ at, who: 'you', text: `Made it from the ${w.screen.toLowerCase()}’s question.` }],
+              ...option.rule,
+            },
           ];
           ruleNote = ' You made it a rule.';
         }
@@ -461,7 +614,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
           basis: { kind: 'answer', at },
           history: [...w.history, { at, who: 'you', text: `Chose: ${option.label.toLowerCase()}. ${option.effect}` }],
         };
-      } else if (q.kind === 'scope') {
+      } else if (option.grants) {
         done = make(
           { ...w, history: [...w.history, { at, who: 'you', text: `Allowed this one change past boundary ${q.paused[q.paused.length - 1]}.` }] },
           option,
@@ -484,7 +637,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
       const next = { ...s, ...tick, rules, work: s.work.map((x) => (x.id === w.id ? done : x)) };
       const { state, settled, asked } = settle(next, at);
       const ruled = ruleNote === ' You made it a rule.' ? ', and made a rule' : ruleNote ? ', and added the case to your rule' : '';
-      const lead = option.leaves ? 'Left as written.' : q.kind === 'scope' ? 'Allowed once, made and merged.' : `Answered${ruled}.`;
+      const lead = option.leaves ? 'Left as written.' : option.grants ? 'Allowed once, made and merged.' : `Answered${ruled}.`;
       const quiet = state.work.some((x) => x.status === 'asking') ? '' : 'Nothing else needs you.';
       return { ...state, notice: [lead, tell(settled, asked), quiet].filter(Boolean).join(' ') };
     }
@@ -498,7 +651,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
         ...tick,
         work: s.work.map((x) =>
           x.id === w.id
-            ? { ...x, status: 'reverted', history: [...x.history, { at, who: 'you', text: `Reverted it: ${commit} on main puts the ${w.lines.length === 1 ? 'literal' : 'literals'} back. The agent won’t redo it.` }] }
+            ? { ...x, status: 'reverted', history: [...x.history, { at, who: 'you', text: w.undo ? `Reverted it: ${commit} on main undoes it. The agent won’t redo it.` : `Reverted it: ${commit} on main puts the ${w.lines.length === 1 ? 'literal' : 'literals'} back. The agent won’t redo it.` }] }
             : x,
         ),
         notice: `Reverted: ${w.title}.`,

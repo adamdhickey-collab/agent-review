@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { Badge, Icon, type BadgeTone, type IconName } from '../../components';
-import { account, valuesIn, type CheckName, type DelegationState } from '../../data/delegation';
+import { account, valuesIn, wordsOf, type CheckName, type DelegationState } from '../../data/delegation';
 import { plural } from '../format';
 import './OutcomeSummary.css';
 
@@ -52,13 +52,17 @@ function factsOf(a: ReturnType<typeof account>) {
     const passed = results.filter((c) => c!.state === 'passed').length;
     const failed = results.filter((c) => c!.state === 'failed').length;
     const unsure = results.filter((c) => c!.state === 'inconclusive').length;
-    const tone: BadgeTone = failed ? 'danger' : unsure ? 'neutral' : 'success';
+    /* A check that changed is one a person approved moving (the shared-table
+       run's baselines): not a pass, so not counted as one, and not a
+       failure either. It is said, with the caution mark the check uses. */
+    const changed = results.filter((c) => c!.state === 'changed').length;
+    const tone: BadgeTone = failed ? 'danger' : unsure || changed ? 'neutral' : 'success';
     /* A check that passed asks nothing of the reader, so its badge is quiet:
        the mark keeps the green and the ground stays neutral. A failure keeps
        its tint, and so the one that needs a look is the one that has color. */
     const variant = tone === 'success' ? ('quiet' as const) : ('tint' as const);
-    const icon: IconName = failed ? 'status-failed' : unsure ? 'status-inconclusive' : 'status-passed';
-    const extra = [failed ? `${failed} failed` : '', unsure ? `${unsure} inconclusive` : ''].filter(Boolean).join(', ');
+    const icon: IconName = failed ? 'status-failed' : unsure ? 'status-inconclusive' : changed ? 'status-changed' : 'status-passed';
+    const extra = [failed ? `${failed} failed` : '', unsure ? `${unsure} inconclusive` : '', changed ? `${changed} changed` : ''].filter(Boolean).join(', ');
     return { name, text: `${short}: ${passed} of ${results.length} passed${extra ? `, ${extra}` : ''}`, tone, variant, icon };
   });
 
@@ -66,9 +70,21 @@ function factsOf(a: ReturnType<typeof account>) {
   for (const w of a.inconclusive) {
     unresolved.push({ icon: 'status-inconclusive', text: `Axe couldn’t measure whether a label in the ${w.screen.toLowerCase()} clears 4.5:1, before this run or after.` });
   }
+  /* What a change left open once it merged, in its own words: the screens
+     nobody has looked at after a shared change was allowed, or the other
+     screens a local fix left as they were. */
+  for (const w of a.made) {
+    if (w.open) unresolved.push({ icon: w.basis?.kind === 'allowed-once' ? 'status-changed' : 'status-note', text: w.open });
+  }
   if (a.reverted.length) {
     const n = valuesIn(a.reverted);
-    unresolved.push({ icon: 'undo', text: `${plural(a.reverted.length, 'change')} reverted by you. The lint reports ${a.reverted.length === 1 ? 'its' : 'their'} ${plural(n, 'literal')} again.` });
+    const lint = a.reverted.some((w) => !w.undo);
+    unresolved.push({
+      icon: 'undo',
+      text: lint
+        ? `${plural(a.reverted.length, 'change')} reverted by you. The lint reports ${a.reverted.length === 1 ? 'its' : 'their'} ${plural(n, 'literal')} again.`
+        : `${plural(a.reverted.length, 'change')} reverted by you.`,
+    });
   }
   if (a.left.length) {
     unresolved.push({ icon: 'undo', text: `${plural(a.left.length, 'line')} left as written, by you. The lint still reports ${a.left.length === 1 ? 'it' : 'them'}.` });
@@ -79,7 +95,7 @@ function factsOf(a: ReturnType<typeof account>) {
   if (a.made.some((w) => w.basis?.kind === 'answer')) bases.push('your answers');
   const scope = [`Every change was made under ${join(bases, 'or')}.`];
   if (a.allowedOnce.length) scope.push(`${a.allowedOnce.length === 1 ? 'One' : a.allowedOnce.length} went past them because you allowed it, once.`);
-  if (a.scopeAsks.length) scope.push('One stopped at the edge: it needs a new token.');
+  if (a.scopeAsks.length) scope.push(`One stopped at the edge: ${a.scopeAsks[0].question?.edge ?? 'it needs permission'}.`);
   return { checks, unresolved, scope };
 }
 
@@ -89,6 +105,7 @@ export interface OutcomeSummaryProps {
 
 export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryProps>(function OutcomeSummary({ state }, ref) {
   const a = account(state);
+  const words = wordsOf(state.brief);
   const quiet = a.asking.length === 0;
   const back = [...a.reverted, ...a.left];
   /* A change held behind a question with nothing asking is a state the
@@ -128,14 +145,14 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
 
       <div className="outcome__progress">
         <p className="outcome__share">
-          <strong>{a.valuesMade === a.total ? `All ${a.total}` : `${a.valuesMade} of ${a.total}`}</strong> literals are tokens now, and none moved a pixel.
+          <strong>{a.valuesMade === a.total ? `All ${a.total}` : `${a.valuesMade} of ${a.total}`}</strong> {words.unit[1]} {words.done}.
         </p>
         <div className="outcome__bar" aria-hidden="true">
           {kinds.map((s) => (
             <span key={s.kind} className="outcome__segment" data-kind={s.kind} data-empty={s.n === 0 || undefined} style={{ flexGrow: s.n }} />
           ))}
         </div>
-        <ul className="outcome__legend" aria-label="Where the literals are">
+        <ul className="outcome__legend" aria-label={`Where the ${words.unit[1]} are`}>
           {segments.map((s) => (
             <li key={s.kind} data-kind={s.kind}>
               <span className="outcome__swatch" aria-hidden="true" />

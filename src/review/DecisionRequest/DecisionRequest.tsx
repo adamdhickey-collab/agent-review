@@ -1,19 +1,27 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Badge, Button, Checkbox, Disclosure, Icon } from '../../components';
-import { BOUNDARY_GROUP_ICON, RULE_EXCLUDES, type Boundary, type Check, type Option, type Sample, type Twin, type Work } from '../../data/delegation';
+import { Badge, Button, Checkbox, Disclosure, Icon, TestStatus } from '../../components';
+import { BOUNDARY_GROUP_ICON, RULE_EXCLUDES, type Boundary, type Check, type Option, type Reach, type Sample, type Twin, type Work } from '../../data/delegation';
+import { DiffViewer } from '../DiffViewer/DiffViewer';
 import { plural } from '../format';
 import './DecisionRequest.css';
 import { Inline } from '../Inline';
 
 /* A change the agent stopped on, asking for one decision. Two kinds, said
-   in the badge because they want different things from the person:
+   in the badge because they want different things from the person, and
+   named as the case study names them (since 2026-10-07; they were "What a
+   value means" and "Outside the delegation"):
 
-   - What a value means (intent). The agent can make the change and cannot
-     tell which change is meant. The card says what no check can settle,
-     lays the evidence for each reading side by side, and recommends one.
-   - Outside the delegation (scope). The agent knows exactly what to do and
-     is not allowed to. The card says what it would do and why that is past
-     its authority, and asks for that one change only.
+   - Missing intent (intent): a person decides. The agent can make the
+     change and cannot tell which change is meant. The card says what no
+     check can settle, lays the evidence for each reading side by side, and
+     recommends one. Not a failure: nothing is broken.
+   - Permission boundary (scope): a person authorizes. The agent knows
+     exactly what to do and is not allowed to. The card says what it would
+     do and why that is past its authority, and asks for that one change
+     only. Not a technical problem: the checks it could run pass.
+
+   Routine work, the third kind, never reaches this card: the agent does it
+   inside its boundaries and the completed work records it.
 
    Both say which boundary stopped it, in the boundary's own words, so the
    pause explains itself where it happens rather than in a settings page.
@@ -99,7 +107,21 @@ import { Inline } from '../Inline';
    stays the same"); "Only the failure gets louder" and "Both get louder"
    come last, as the summary of what is shown rather than the explanation.
    The replaced value's specimen draws an arrow from the old value to the
-   new, so "replaced" can be seen before it is read. */
+   new, so "replaced" can be seen before it is read.
+
+   A FIX THAT REACHES PAST THE SCREEN (2026-10-07, the shared-table run). A
+   scope question about a shared component carries its reach (Reach), and
+   the card reads as the case for a permission decision: what the agent was
+   asked and what it proposes, the change as a diff, who else it reaches (the
+   screens by area, every one named under a fold, and the component's
+   owner), what has been checked beside what hasn't, and the one line that
+   says what kind of decision this is, as the intent card has its own. Its
+   answers are headed by what they choose and say what happens after; an
+   answer that only gathers evidence decides nothing, so it acts on the
+   first press with no confirmation, and the question comes back with what
+   was found. Only an answer within the agent's authority can become a rule,
+   and the one that grants past it says whose permission a standing version
+   would need. */
 
 /* Whether choosing an option ties the element to --color-danger, so that a
    change to danger's red would reach it. Read from the values the option
@@ -158,11 +180,139 @@ function Specimen({ sample, loud, unlabelled }: { sample: Sample; loud?: boolean
   );
 }
 
+/* The case for a permission decision about a shared component, in the
+   order a person would make it: what was asked and what is proposed, the
+   change itself, who else it reaches, what is known beside what isn't, and
+   what kind of decision that leaves. */
+function ReachCase({ work, reach, id }: { work: Work; reach: Reach; id: string }) {
+  const q = work.question!;
+  const proposal = q.options.find((o) => o.grants);
+  const screens = reach.areas.reduce((n, a) => n + a.screens.length, 0);
+  return (
+    <>
+      <dl className="ask__brief">
+        <div>
+          <dt>Asked</dt>
+          <dd>{q.asked}</dd>
+        </div>
+        <div>
+          <dt>Proposes</dt>
+          <dd>
+            <Inline text={q.proposes ?? ''} />
+          </dd>
+        </div>
+      </dl>
+      {proposal ? (
+        <DiffViewer
+          hunks={[
+            {
+              file: work.file,
+              header: 'the change it would make',
+              lines: work.lines.flatMap((l, i) => [
+                { kind: 'remove' as const, text: `${l.selector} { ${l.property}: ${l.before}; }` },
+                { kind: 'add' as const, text: `${l.selector} { ${l.property}: ${proposal.after[i]}; }` },
+              ]),
+            },
+          ]}
+        />
+      ) : null}
+
+      <div className="ask__reach" role="group" aria-labelledby={`${id}-reach`}>
+        <p className="ask__label" id={`${id}-reach`}>
+          Who else it reaches
+        </p>
+        <p className="ask__reach-lead">
+          <strong>{screens} screens</strong> draw the shared {reach.component}, which {reach.owner.name} ({reach.owner.role}) owns.
+        </p>
+        <ul className="ask__areas" aria-label="Screens by area">
+          {reach.areas.map((a) => (
+            <li key={a.area}>
+              <Badge variant="quiet">
+                {a.area} <span className="ask__area-n">{a.screens.length}</span>
+              </Badge>
+            </li>
+          ))}
+        </ul>
+        <Disclosure className="ask__screens" summary={`All ${screens} screens`}>
+          <div className="ask__screens-body">
+            <p className="ask__screens-key">
+              <span>
+                <Icon name="eye" size={16} /> has a visual baseline
+              </span>
+              <span>
+                <Icon name="ruler" size={16} /> table in a panel of fixed height
+              </span>
+            </p>
+            <div className="ask__screens-areas">
+              {reach.areas.map((a) => (
+                <div key={a.area}>
+                  <p className="ask__screens-area">{a.area}</p>
+                  <ul>
+                    {a.screens.map((sc) => (
+                      <li key={sc.name}>
+                        <span>
+                          {sc.name}
+                          {sc.asked ? <span className="ask__asked"> (asked about)</span> : null}
+                        </span>
+                        {sc.baseline ? <Icon name="eye" size={16} label="has a visual baseline" /> : null}
+                        {sc.fixed ? <Icon name="ruler" size={16} label="table in a panel of fixed height" /> : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Disclosure>
+      </div>
+
+      <ul className="ask__pair ask__known" aria-label="What is known">
+        <li className="ask__tile">
+          <p className="ask__label">Checked</p>
+          <ul className="ask__known-list">
+            {reach.checked.map((c) => (
+              <li key={c.text}>
+                <TestStatus state={c.state} iconOnly />
+                <span>
+                  <Inline text={c.text} />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </li>
+        <li className="ask__tile">
+          <p className="ask__label">Not checked</p>
+          <ul className="ask__known-list">
+            {reach.unknown.map((u) => (
+              <li key={u}>
+                <TestStatus state="skipped" iconOnly />
+                <span>{u}</span>
+              </li>
+            ))}
+          </ul>
+        </li>
+      </ul>
+
+      <div className="ask__why-person">
+        {q.verdict ? <p className="ask__verdict">{q.verdict}</p> : null}
+        <p className="ask__gap">
+          <Inline text={q.gap} />
+        </p>
+      </div>
+    </>
+  );
+}
+
 export interface RulePreview {
   /** Whether an answer here can make or widen a rule, and if not, why. */
   offer: 'make' | 'widen' | 'conflict' | 'none';
   /** The rule as it would read. */
   text?: string;
+  /** What it would not cover, and where it applies, from the answer's draft. */
+  excludes?: string;
+  scope?: string;
+  /** A rule written in its own words can be revoked but not edited. */
+  fixed?: boolean;
   /** What it would settle now, besides this change. */
   settles: Work[];
   /** For a conflict: the rule that already answers differently. */
@@ -220,7 +370,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
      the answer shows: "Only the failure gets louder", "Both get louder". */
   const outcome = (follows: boolean) =>
     twin ? (follows ? 'Both get louder' : `Only the ${twin.means.toLowerCase()} gets louder`) : follows ? 'Follows it' : 'Stays as it is';
-  const moreLabel = q.kind === 'intent' ? (q.evidence ? 'The evidence and the code' : 'The code') : 'Why it stopped';
+  const moreLabel = q.kind === 'intent' ? (q.evidence ? 'The evidence and the code' : 'The code') : q.reach ? 'What it found' : 'Why it stopped';
 
   return (
     <article className="ask" data-kind={q.kind} aria-labelledby={`${id}-title`}>
@@ -229,7 +379,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
             boundary group's own (the panel's lock or question), in that
             group's color, so the card and the panel name it the same way. */}
         <Badge tone={q.kind === 'scope' ? 'warning' : 'neutral'} variant="quiet" icon={BOUNDARY_GROUP_ICON[q.kind === 'scope' ? 'outside' : 'asks']}>
-          {q.kind === 'scope' ? 'Outside the delegation' : 'What a value means'}
+          {q.kind === 'scope' ? 'Permission boundary' : 'Missing intent'}
         </Badge>
         <span className="ask__where">
           {work.screen} <span aria-hidden="true">·</span> <code>{basename(work.file)}</code>
@@ -285,7 +435,9 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
         </div>
       ) : null}
 
-      {q.kind === 'intent' ? (
+      {q.kind === 'scope' && q.reach ? (
+        <ReachCase work={work} reach={q.reach} id={id} />
+      ) : q.kind === 'intent' ? (
         <div className="ask__why-person">
           {/* What the checks passing means, said before why: the line a
               person should take away is that this one is theirs. */}
@@ -335,7 +487,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                     <Inline text={p.text ?? ''} />
                   </p>
                   <p>
-                    <strong>It doesn’t cover:</strong> {RULE_EXCLUDES}
+                    <strong>It doesn’t cover:</strong> {p.excludes ?? RULE_EXCLUDES}
                   </p>
                   {p.settles.length ? (
                     <p>
@@ -346,7 +498,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                   <p>
                     <strong>Next time:</strong> a case that matches doesn’t ask you. The agent follows the rule and says so in its record.
                   </p>
-                  <p>You can edit or revoke it under the boundaries. Revoking it doesn’t undo what it already did.</p>
+                  <p>You can {p.fixed ? 'revoke' : 'edit or revoke'} it under the boundaries. Revoking it doesn’t undo what it already did.</p>
                 </div>
               ) : (
                 <p className="ask__once">This answer applies to this change only.</p>
@@ -355,9 +507,9 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
           ) : p.offer === 'conflict' ? (
             <p className="ask__once">Your rule gives a different answer for cases like this, so this one applies to this change only. To change the rule, edit or revoke it.</p>
           ) : null}
-          {q.note ? (
+          {option.note ?? q.note ? (
             <p className="ask__note">
-              <Inline text={q.note} />
+              <Inline text={option.note ?? q.note ?? ''} />
             </p>
           ) : null}
           <div className="ask__actions">
@@ -383,7 +535,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
               If <Inline text="--color-danger" /> is made louder later:
             </p>
           ) : null}
-          <ul className="ask__choices">
+          <ul className="ask__choices" data-count={q.options.length}>
             {q.options.map((o) => {
               const follows = followsDanger(o);
               return (
@@ -391,6 +543,8 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                   <div className="ask__choice-head">
                     {contrast && twin ? (
                       <p className="ask__choice-title">{follows ? 'Keep the meanings linked' : 'Keep the meanings separate'}</p>
+                    ) : o.title ? (
+                      <p className="ask__choice-title">{o.title}</p>
                     ) : contrast ? (
                       <p className="ask__outcome">
                         <Icon name={follows ? 'alert' : 'check'} size={16} />
@@ -431,6 +585,10 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                     <div className="ask__samples">
                       <Specimen sample={sample} loud={follows} />
                     </div>
+                  ) : o.outcome ? (
+                    <p className="ask__effect-line">
+                      <Inline text={o.outcome} />
+                    </p>
                   ) : (
                     <p className="ask__effect-line">
                       <Inline text={o.effect} />
@@ -441,7 +599,9 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                       optionRefs.current[o.id] = el;
                     }}
                     variant={o.recommended ? 'primary' : 'secondary'}
-                    onClick={() => setChoice(o.id)}
+                    /* Gathering evidence decides nothing, so it needs no
+                       second step: the question comes back with more. */
+                    onClick={() => (o.asks ? onAnswer(o.id, false) : setChoice(o.id))}
                   >
                     {o.label}
                   </Button>
@@ -485,14 +645,16 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
               <p>
                 <Inline text={q.found} />
               </p>
-              <dl className="ask__facts">
-                <div>
-                  <dt>Why it stopped</dt>
-                  <dd>
-                    <Inline text={q.gap} />
-                  </dd>
-                </div>
-              </dl>
+              {q.reach ? null : (
+                <dl className="ask__facts">
+                  <div>
+                    <dt>Why it stopped</dt>
+                    <dd>
+                      <Inline text={q.gap} />
+                    </dd>
+                  </div>
+                </dl>
+              )}
             </>
           )}
           <dl className="ask__facts">

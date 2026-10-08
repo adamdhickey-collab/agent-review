@@ -253,6 +253,51 @@ Decisions:
   you" section is not there and the account says "Nothing needs your
   attention." Nothing is invented to fill the space.
 
+### A second run: the shared table (2026-10-07)
+
+The billing run's decision is missing intent, and a reader could take the
+product for a tool about token names. A second simulated run,
+`#/runs/shared-table` (`src/data/table.ts`), is the other kind of stop: a
+permission boundary. Claude Code is asked to fix a cramped customer table;
+it makes two fixes on that screen on its own and stops at the third,
+because the fix that fits is one line in the shared Table
+(`--table-pad-y`, in `src/components/Table/Table.css`, which is real), and
+forty screens draw it. Rule 9 of the UI rules is about exactly that file.
+Relay's forty screens are written into the scenario, not built: only the
+customer list exists here, and the strip says the run is simulated.
+
+- **Two runs, one strip.** The strip that says this is a simulation names
+  the run on screen and links to the other ("Two reds", "Shared table").
+  They are links, not a SegmentedControl, because each run is a place with
+  an address; each keeps its own state, and Reset puts back the one shown.
+- **The case for a permission decision.** The card says what the agent was
+  asked and what it proposes, shows the change as a diff, who else it
+  reaches (forty screens by area, every one named under a fold, and the
+  Table's owner), what has been checked beside what has not (12 of the 40
+  have a visual baseline; 28 have none; 5 hold the table in a panel of
+  fixed height, known from their CSS rather than from looking), and the
+  line "So this isn't a technical problem. It's a permission decision."
+- **Three answers that end differently.** Fix this screen only: a local
+  override, within the agent's authority, so it is an answer; only the
+  customer list moves, and the account says the other 39 keep their rows
+  and the owner has a note. Approve, this once: past the boundary for this
+  change only; it merges with the visual check marked changed, not passed,
+  and the 28 screens nobody has looked at listed as unresolved. Show me the
+  40 screens: decides nothing, needs no second step, and the question comes
+  back with what the agent found (35 only get taller rows, 5 cut off their
+  last row), without that answer. Approving after that lists the 5 instead.
+- **A rule has a scope, a reason and an owner.** Keeping the fix on the
+  screen can become a rule scoped to the customer screens, written in its
+  own words, so it can be revoked but not widened. Approving the shared
+  change offers no rule, and says why: a standing permission to change a
+  shared component is its owner's to give, and this doesn't ask her. Every
+  rule, in either run, now shows where it applies and why beside what it
+  doesn't cover and who made it.
+- **The kinds are named as the case study names them.** The decision
+  card's badge reads "Missing intent" or "Permission boundary" (it read
+  "What a value means" and "Outside the delegation"). Routine work never
+  reaches a card.
+
 What would tell whether this works, none of it tested yet:
 
 - Can a person explain what they have delegated?
@@ -295,7 +340,7 @@ src/
   product/           the customer table under review: the baseline and the agent's version
   review/            Agent Review's own screens and composed components
   data/              the scenario: the change, the findings, the validation report;
-                     the delegated run (billing.ts) and the reducer it moves by (delegation.ts)
+                     the two delegated runs (billing.ts, table.ts) and the reducer they move by (delegation.ts)
   app/               the shell and the hash router
 skills/ui-quality/   the rules an agent reads before touching UI
 docs/exploration/    the three directions
@@ -335,9 +380,10 @@ FindingList, FindingEvidence (eight evidence kinds), ComponentPreview (the
 frame, with loading and error), DiffViewer, AgentRationale, DecisionBar,
 ReturnPanel, StoryList, FileList. 111 stories.
 
-Every story runs through axe, with WCAG 2.2's target size on. 207 as of
-2026-10-04: 82 for the system, 14 for the product, 111 for the review; it
-was 203 (79, 14, 110) before the glanceable pass added four, and 173 (78,
+Every story runs through axe, with WCAG 2.2's target size on. 241 as of
+2026-10-07: 88 for the system and its tokens, 14 for the product, 139 for
+the review; it was 233 before the shared-table run added eight, 207 on
+2026-10-04 (82, 14, 111), 203 (79, 14, 110) before the glanceable pass added four, and 173 (78,
 14, 81) before the delegated work added thirty. (The
 case study on adamhickey.com said 161 when it was written; the number moves
 whenever a story is added, so it is read from `npm run test:stories` or from

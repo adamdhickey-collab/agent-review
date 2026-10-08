@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Badge, Button, Disclosure, Icon } from '../../components';
 import { useStore } from '../../app/store';
-import { account, activeRule, ruleText, waitingOn, whyAsking, wouldSettle, type Pattern, type Work } from '../../data/delegation';
+import { href } from '../../app/router';
+import { account, activeRule, ruleText, waitingOn, whyAsking, wordsOf, wouldSettle, type Action, type Pattern, type RunId, type Work } from '../../data/delegation';
 import { plural, relativeTime } from '../format';
 import { OutcomeFacts, OutcomeSummary } from '../OutcomeSummary/OutcomeSummary';
 import { DecisionRequest, type RulePreview } from '../DecisionRequest/DecisionRequest';
@@ -41,7 +42,26 @@ import { Inline } from '../Inline';
    was not done on its own, and folds the routine swaps, where every check
    passed and nothing needed judgment, into one row; and the boundaries are
    three counted rows (Boundaries). Nothing was removed that the person can
-   act on, and nothing simulated is said as if it were real. */
+   act on, and nothing simulated is said as if it were real.
+
+   TWO RUNS, SINCE 2026-10-07. The billing run's decision is missing
+   intent: two reds, and no check can say which meaning is right. A second
+   run, the shared table, is a permission boundary: the agent knows exactly
+   how to make the fix, and the fix is in a component forty screens share.
+   The strip that says this is a simulation also says which one is playing,
+   and switches between them. They are links, not the system's
+   SegmentedControl, because a run is a place with an address
+   (#/runs/shared-table), so it can be linked to, bookmarked and gone back
+   from, and following one moves focus to the new run's title the way any
+   change of screen does; a radio group that navigated would take focus
+   away from the arrow key that moved it. Each run keeps its own state while
+   the other is on screen, and Reset puts back the one shown. */
+
+/* The runs, as the switch names them: what each is about, in two words. */
+const RUNS: { id: RunId; label: string; kind: string }[] = [
+  { id: 'billing', label: 'Two reds', kind: 'missing intent' },
+  { id: 'shared-table', label: 'Shared table', kind: 'a permission boundary' },
+];
 
 /* Work with nothing to look at: made on its own, every check passed on the
    first run, nothing chosen by meaning. Folded into one row. */
@@ -61,8 +81,11 @@ function latest(w: Work): string {
   return w.history[w.history.length - 1]?.at ?? '';
 }
 
-export function DelegationScreen() {
-  const { delegation: s, delegate, resetDelegation } = useStore();
+export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
+  const { runs, delegate: dispatch, resetDelegation } = useStore();
+  const s = runs[run];
+  const delegate = (action: Action) => dispatch(run, action);
+  const words = wordsOf(s.brief);
   const a = account(s);
   const needs = useRef<HTMLHeadingElement>(null);
   const lead = useRef<HTMLParagraphElement>(null);
@@ -75,17 +98,22 @@ export function DelegationScreen() {
     (needs.current ?? lead.current)?.focus();
   });
 
+  /* Whether an answer can become a rule, and the rule as it would read. Only
+     an answer that carries a draft can (data/delegation.ts, RuleDraft): an
+     answer about what a value means, or keeping a fix on the screen asked
+     about. Allowing a change past a boundary never can, and says why. */
   const preview = useCallback(
     (w: Work) =>
       (optionId: string): RulePreview => {
         const pattern = w.question?.pattern;
-        if (!pattern || w.question?.kind !== 'intent') return { offer: 'none', settles: [] };
+        const draft = w.question?.options.find((o) => o.id === optionId)?.rule;
+        if (!pattern || !draft) return { offer: 'none', settles: [] };
         const current = activeRule(s);
         if (current && current.answer !== optionId) return { offer: 'conflict', settles: [], existing: ruleText(current) };
         const covers: Pattern[] = current ? Array.from(new Set([...current.covers, pattern])) : [pattern];
-        const draft = { answer: optionId, covers };
-        const settles = wouldSettle(s, draft, w.id).filter((x) => x.id !== w.id);
-        return { offer: current ? 'widen' : 'make', text: ruleText(draft), settles };
+        const rule = { answer: optionId, covers, text: draft.text };
+        const settles = wouldSettle(s, rule, w.id).filter((x) => x.id !== w.id);
+        return { offer: current ? 'widen' : 'make', text: ruleText(rule), excludes: draft.excludes, scope: draft.scope, fixed: Boolean(draft.text), settles };
       },
     [s],
   );
@@ -99,6 +127,7 @@ export function DelegationScreen() {
     <WorkRecord
       work={w}
       boundaries={s.boundaries}
+      line={words.line}
       rule={w.basis?.kind === 'rule' ? s.rules.find((r) => w.basis?.kind === 'rule' && r.id === w.basis.ruleId) : undefined}
       onRevert={() => delegate({ type: 'revert', id: w.id })}
       onRestore={() => delegate({ type: 'restore', id: w.id })}
@@ -112,12 +141,20 @@ export function DelegationScreen() {
           Simulated
         </Badge>
         <p>A sample run, played back the same way every time. No model runs, and no real repository is touched.</p>
+        <nav className="delegation__runs" aria-label="Sample runs">
+          {RUNS.map((r) => (
+            <a key={r.id} className="delegation__run" href={href({ name: 'delegation', run: r.id })} aria-current={r.id === run ? 'page' : undefined}>
+              {r.label}
+              <span className="visually-hidden">, {r.kind}</span>
+            </a>
+          ))}
+        </nav>
         <Button
           size="compact"
           variant="secondary"
           leadingIcon="undo"
           onClick={() => {
-            resetDelegation();
+            resetDelegation(run);
             top.current?.focus();
           }}
         >
@@ -194,7 +231,7 @@ export function DelegationScreen() {
                 <li>
                   <Disclosure
                     className="delegation__routine"
-                    summary={`${plural(easy.length, 'routine swap')}`}
+                    summary={plural(easy.length, ...words.routine)}
                     meta={
                       <span className="delegation__routine-meta">
                         <Icon name="status-passed" size={16} />
