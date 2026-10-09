@@ -13,14 +13,27 @@ import type { AgentIdentity, Person } from './types';
    A rule exists because a person made one, says in words what it covers,
    and stops applying the moment it is revoked. */
 
-/** The three things a boundary can say about an action. */
+/** The three things a boundary can say about an action, which are the
+    three kinds of work the screen tells apart (2026-10-09, one word per
+    kind everywhere, as the case study names them): the agent proceeds on
+    its own; it stops for a person's judgment, a question of meaning or
+    intent no check settles; or it stops for a person's approval, an action
+    past what this delegation lets it do. Judgment and approval are not the
+    same stop: an agent can know exactly what a change does and still not be
+    allowed to make it. */
 export type BoundaryGroup = 'own' | 'asks' | 'outside';
 
 export const BOUNDARY_GROUP_LABEL: Record<BoundaryGroup, string> = {
-  own: 'Does on its own',
-  asks: 'Asks you first',
-  outside: 'Outside this delegation',
+  own: 'Proceeds on its own',
+  asks: 'Asks for your judgment',
+  outside: 'Needs your approval',
 };
+
+/** Which group a question's kind belongs to, and the status a change
+    stopped on it shows: a question of intent wants judgment, a question
+    of scope wants approval. */
+export const KIND_GROUP: Record<Question['kind'], BoundaryGroup> = { intent: 'asks', scope: 'outside' };
+export const KIND_STATUS: Record<Question['kind'], string> = { intent: 'Needs judgment', scope: 'Needs approval' };
 
 /** Each group's mark, the same in the boundaries panel and on a paused change. */
 export const BOUNDARY_GROUP_ICON: Record<BoundaryGroup, IconName> = {
@@ -337,6 +350,10 @@ export interface DelegationState {
   clock: number;
   /** The last thing that happened, for the live region and the screen's notice. */
   notice?: string;
+  /** What kind of thing it was: work done or settled, something taken back, or a question left open. */
+  noticeKind?: 'done' | 'back' | 'open';
+  /** The rule the last answer made, widened or applied, if one did, so the notice can point at it. */
+  noticeRule?: string;
 }
 
 export type Action =
@@ -428,9 +445,18 @@ export function account(s: DelegationState) {
   const inconclusive = checked.filter((w) => w.checks?.some((c) => c.state === 'inconclusive'));
   const allowedOnce = made.filter((w) => w.basis?.kind === 'allowed-once');
   const byRule = made.filter((w) => w.basis?.kind === 'rule');
+  /* The three kinds of work, as the screen counts them: proceeded on its
+     own, under a boundary alone; stopped for judgment; stopped for
+     approval. What a person settled, by an answer, a rule, an allowance, a
+     revert or leaving a line, is the fourth count, and the only one that
+     grows. */
+  const own = made.filter((w) => w.basis?.kind === 'boundary');
+  const settled = [...made.filter((w) => w.basis?.kind !== 'boundary'), ...reverted, ...left];
   return {
     made,
     asking,
+    own,
+    settled,
     waiting,
     reverted,
     left,
@@ -442,6 +468,7 @@ export function account(s: DelegationState) {
     literalsLeft: valuesIn([...asking, ...waiting, ...reverted, ...left]),
     total: valuesIn(s.work),
     scopeAsks: asking.filter((w) => w.question?.kind === 'scope'),
+    intentAsks: asking.filter((w) => w.question?.kind === 'intent'),
   };
 }
 
@@ -573,7 +600,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
             { at, who: 'agent', text: 'Asked again, with what it found.' },
           ],
         };
-        return { ...s, ...tick, work: s.work.map((x) => (x.id === w.id ? again : x)), notice: 'Nothing decided yet. It gathered the evidence you asked for, and is asking again.' };
+        return { ...s, ...tick, work: s.work.map((x) => (x.id === w.id ? again : x)), notice: 'Nothing decided yet. It gathered the evidence you asked for, and is asking again.', noticeKind: 'open', noticeRule: undefined };
       }
 
       let rules = s.rules;
@@ -639,7 +666,8 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
       const ruled = ruleNote === ' You made it a rule.' ? ', and made a rule' : ruleNote ? ', and added the case to your rule' : '';
       const lead = option.leaves ? 'Left as written.' : option.grants ? 'Allowed once, made and merged.' : `Answered${ruled}.`;
       const quiet = state.work.some((x) => x.status === 'asking') ? '' : 'Nothing else needs you.';
-      return { ...state, notice: [lead, tell(settled, asked), quiet].filter(Boolean).join(' ') };
+      const rule = ruleNote || settled.length ? activeRule(state)?.id : undefined;
+      return { ...state, notice: [lead, tell(settled, asked), quiet].filter(Boolean).join(' '), noticeKind: 'done', noticeRule: rule };
     }
 
     case 'revert': {
@@ -655,6 +683,8 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
             : x,
         ),
         notice: `Reverted: ${w.title}.`,
+        noticeKind: 'back',
+        noticeRule: undefined,
       };
     }
 
@@ -666,6 +696,8 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
         ...tick,
         work: s.work.map((x) => (x.id === w.id ? { ...x, status: 'made', history: [...x.history, { at, who: 'you', text: `Restored it: ${w.commit} is applied again.` }] } : x)),
         notice: `Restored: ${w.title}.`,
+        noticeKind: 'done',
+        noticeRule: undefined,
       };
     }
 
@@ -681,7 +713,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
         ),
       };
       const { state, settled, asked } = settle(next, at);
-      return { ...state, notice: ['Rule saved.', tell(settled, asked)].filter(Boolean).join(' ') };
+      return { ...state, notice: ['Rule saved.', tell(settled, asked)].filter(Boolean).join(' '), noticeKind: 'done', noticeRule: r.id };
     }
 
     case 'revoke-rule': {
@@ -692,6 +724,8 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
         ...tick,
         rules: s.rules.map((x) => (x.id === r.id ? { ...x, status: 'revoked', history: [...x.history, { at, who: 'you', text: 'Revoked it.' }] } : x)),
         notice: `Rule revoked. The ${plural(r.applied.length, 'change')} it made ${r.applied.length === 1 ? 'stays' : 'stay'} merged; a matching case will ask you again.`,
+        noticeKind: 'back',
+        noticeRule: undefined,
       };
     }
   }

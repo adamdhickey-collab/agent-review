@@ -42,10 +42,10 @@ export const AGroupOpen: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const asks = canvas.getByText('Asks you first').closest('details')!;
+    const asks = canvas.getByText('Asks for your judgment').closest('details')!;
     await expect(asks.open).toBe(false);
-    await expect(asks).toHaveTextContent('Asks you first2 boundaries');
-    await userEvent.click(canvas.getByText('Asks you first'));
+    await expect(asks).toHaveTextContent('Asks for your judgment2 boundaries');
+    await userEvent.click(canvas.getByText('Asks for your judgment'));
     await expect(asks.open).toBe(true);
     await expect(canvas.getByText('When no token has the value, so a swap would move pixels.')).toBeVisible();
   },

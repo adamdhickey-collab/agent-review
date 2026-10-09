@@ -36,7 +36,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A change the agent stopped on, asking for one decision, and saying which kind. The answers are the body of the card, each a card with its button. Missing intent: the agent can make the change and cannot tell which is meant, so the card says what no check can settle and each answer shows the element as it would render if --color-danger changed later, which is the whole difference between them. A permission boundary: the agent knows what to do and may not, so the card shows the line it would change and what each answer does, and, for a fix in a shared component, who else it reaches and what has and hasn’t been checked. Both cite the boundary that stopped them on one line, and fold what was found, the code, the evidence and the reason for the recommendation. Answering is the system’s inline confirmation: the answers become "apply this?", Escape cancels, focus goes to Apply. That second step is where an intent answer can become a rule, never by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
+          'A change the agent stopped on, asking for one decision, and saying which kind as its status: Needs judgment or Needs approval. The answers are the body of the card, each a card with its button. Needs judgment: the agent can make the change and cannot tell which is meant, so the card says what no check can settle and each answer shows the element as it would render if --color-danger changed later, which is the whole difference between them. Needs approval: the agent knows what to do and may not, so the card shows the line it would change and what each answer does, and, for a fix in a shared component, who else it reaches and what has and hasn’t been checked. Both cite the boundary that stopped them on one line, and fold what was found, the code, the evidence and the reason for the recommendation. Answering is the system’s inline confirmation: the answers become "apply this?", Escape cancels, focus goes to Apply. That second step is where an intent answer can become a rule, never by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
       },
     },
   },
@@ -47,7 +47,7 @@ type Story = StoryObj<typeof meta>;
 
 export const WhatAValueMeans: Story = {
   parameters: {
-    docs: { description: { story: 'The first question of the billing run: two tokens draw the same red, and the evidence points both ways. The card asks the decision itself: “These two reds look the same. Should they mean the same thing?” Under it, the two reds as tiles, each headed by its meaning: “Replaced value”, the old plan struck through with an arrow to the new one, and “Failure”, “Payment failed”, which the agent made --color-danger on its own. Each says what its red means in a sentence, and names its one token under that, quietly. Then “Both approaches pass the automated checks.” over the three checks, all passed with either token in place, and the line that says why that stops the agent, louder than the sentence explaining it: “So this isn’t a testing problem. It’s a meaning decision.” The answers sit under “Should these meanings stay separate?” and “Imagine the danger style becomes stronger later.” Each card is headed by its choice in words (keep the meanings separate, or keep them linked), says what it does without a token’s name, and shows both elements as they would render with a stronger danger, each beside what happens to it; “Only the failure gets louder” and “Both get louder” come last, as the summary. The recommended card carries the badge. The four changes held behind it are counted in the head and listed under the evidence.' } },
+    docs: { description: { story: 'The first question of the billing run: two tokens draw the same red, and the evidence points both ways. The card asks the decision itself: “These two reds look the same. Should they mean the same thing?” Under it, the two reds as tiles, each headed by its meaning: “Replaced value”, the old plan struck through with an arrow to the new one, and “Failure”, “Payment failed”, which the agent made --color-danger on its own. Each says what its red means in a sentence, and names its one token under that, quietly. Then one line, “All 3 automated checks passed, with either token.”, with the three results and what each established one press away, and the line that says why that stops the agent, louder than the sentence explaining it: “So this isn’t a testing problem. It’s a meaning decision.” The answers sit under “Should these meanings stay separate?” and “Imagine the danger style becomes stronger later.” Each card is headed by its choice in words (keep the meanings separate, or keep them linked), says what it does without a token’s name, and shows both elements as they would render with a stronger danger, each beside what happens to it; “Only the failure gets louder” and “Both get louder” come last, as the summary. The recommended card carries the badge. The four changes held behind it are counted in the head and listed under the evidence.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -64,9 +64,16 @@ export const WhatAValueMeans: Story = {
     await expect(tiles[1]).toHaveTextContent('Payment failed');
     await expect(tiles[1]).toHaveTextContent('Red means something went wrong.');
     await expect(tiles[1]).toHaveTextContent(/--color-danger$/);
-    const tried = canvas.getByRole('group', { name: 'Both approaches pass the automated checks.' });
-    await expect(within(tried).getAllByRole('listitem')).toHaveLength(3);
-    await expect(tried).toHaveTextContent('Visual baselines: 0 of 2 frames moved');
+    await expect(canvas.getByText('Needs judgment')).toBeInTheDocument();
+    const tried = canvas.getByText('All 3 automated checks passed, with either token.').closest('details')!;
+    await expect(tried).not.toHaveAttribute('open');
+    await userEvent.click(canvas.getByText('All 3 automated checks passed, with either token.'));
+    await expect(tried).toHaveAttribute('open');
+    const checks = within(tried).getByRole('list', { name: 'The checks, with either token in place' });
+    await expect(within(checks).getAllByRole('listitem')).toHaveLength(3);
+    await expect(checks).toHaveTextContent('Visual baselines: 0 of 2 frames moved');
+    await expect(checks).toHaveTextContent('Nothing on the screen moved, at 1280 and at 768.');
+    await expect(canvas.queryByText(/Can become a rule for/)).toBeNull();
     await expect(canvas.getByText('So this isn’t a testing problem. It’s a meaning decision.')).toBeVisible();
     await expect(canvas.getByText(/^The interface can be stable and accessible either way\./)).toHaveTextContent('whether “replaced” and “failed” should share the same meaning');
     const answers = canvas.getByRole('group', { name: 'Should these meanings stay separate?' });
@@ -123,7 +130,9 @@ export const OutsideTheDelegation: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('Permission boundary')).toBeInTheDocument();
+    await expect(canvas.getByText('Needs approval')).toBeInTheDocument();
+    await expect(canvas.getByText('Allowed once. The boundary stays where it is.')).toBeInTheDocument();
+    await expect(canvas.getByText(/^Needs your approval: Changing a shared component/)).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'Add --radius-full, this once' }));
     await expect(canvas.queryByRole('checkbox')).toBeNull();
     await expect(canvas.getByText(/doesn’t widen the delegation/)).toBeInTheDocument();
@@ -184,7 +193,7 @@ export const SharedComponent: Story = {
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('Permission boundary')).toBeInTheDocument();
+    await expect(canvas.getByText('Needs approval')).toBeInTheDocument();
     await expect(canvas.getByText('Asked')).toBeInTheDocument();
     await expect(canvas.getByText('Proposes')).toBeInTheDocument();
     await expect(canvas.getByRole('group', { name: 'Who else it reaches' })).toHaveTextContent(/40 screens draw the shared Table, which Priya Raman \(Design systems\) owns\./);

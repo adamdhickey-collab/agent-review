@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { Badge, Icon, type BadgeTone, type IconName } from '../../components';
-import { account, valuesIn, wordsOf, type CheckName, type DelegationState } from '../../data/delegation';
+import { account, BOUNDARY_GROUP_ICON, valuesIn, wordsOf, type CheckName, type DelegationState } from '../../data/delegation';
 import { plural } from '../format';
 import './OutcomeSummary.css';
 
@@ -32,7 +32,17 @@ import './OutcomeSummary.css';
    decisions, the ones held behind a question as much as the question's
    own, so the bar reads as progress: what is done, and what remains on
    the person. It takes the waiting style rather than the warning fill,
-   because what it shows is remaining, not wrong. */
+   because what it shows is remaining, not wrong.
+
+   THE THREE KINDS OF WORK, COUNTED, SINCE 2026-10-09. Under the lead, one
+   line says how the run's changes were handled, in the three modes the
+   product is built around: how many the agent proceeded with on its own,
+   how many stopped for the person's judgment, and how many stopped for
+   their approval, each with the mark its boundary group carries. A fourth
+   count, what the person has settled, appears once there is one. The
+   reader who arrives knowing nothing is told in one line what kind of
+   product this is: most of the work needed nobody, and the two that did
+   are two different kinds of stop. */
 
 const join = (parts: string[], word = 'and') =>
   parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} ${word} ${parts[parts.length - 1]}`;
@@ -142,6 +152,36 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
           {plural(a.made.length, 'change')} made and checked. Completed work is below.
         </p>
       ) : null}
+
+      <ul className="outcome__modes" aria-label="How the work was handled">
+        <li data-mode="own" data-zero={a.own.length === 0 || undefined}>
+          <Icon name={BOUNDARY_GROUP_ICON.own} size={16} />
+          <span>
+            <strong>{a.own.length}</strong> proceeded on its own
+          </span>
+        </li>
+        <li data-mode="asks" data-zero={a.intentAsks.length === 0 || undefined}>
+          <Icon name={BOUNDARY_GROUP_ICON.asks} size={16} />
+          <span>
+            <strong>{a.intentAsks.length}</strong> {a.intentAsks.length === 1 ? 'needs' : 'need'} your judgment
+            {a.waiting.length ? <span className="outcome__mode-note"> · {a.waiting.length} more wait on it</span> : null}
+          </span>
+        </li>
+        <li data-mode="outside" data-zero={a.scopeAsks.length === 0 || undefined}>
+          <Icon name={BOUNDARY_GROUP_ICON.outside} size={16} />
+          <span>
+            <strong>{a.scopeAsks.length}</strong> {a.scopeAsks.length === 1 ? 'needs' : 'need'} your approval
+          </span>
+        </li>
+        {a.settled.length ? (
+          <li data-mode="you">
+            <Icon name="user" size={16} />
+            <span>
+              <strong>{a.settled.length}</strong> settled by you
+            </span>
+          </li>
+        ) : null}
+      </ul>
 
       <div className="outcome__progress">
         <p className="outcome__share">
