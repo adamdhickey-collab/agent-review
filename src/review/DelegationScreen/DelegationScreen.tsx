@@ -6,7 +6,7 @@ import { account, activeRule, ruleText, waitingOn, whyAsking, wordsOf, wouldSett
 import { plural, relativeTime } from '../format';
 import { OutcomeFacts, OutcomeSummary } from '../OutcomeSummary/OutcomeSummary';
 import { DecisionRequest, type RulePreview } from '../DecisionRequest/DecisionRequest';
-import { WorkRecord } from '../WorkRecord/WorkRecord';
+import { RecordHead, WorkRecord } from '../WorkRecord/WorkRecord';
 import { Boundaries } from '../Boundaries/Boundaries';
 import './DelegationScreen.css';
 import { Inline } from '../Inline';
@@ -83,9 +83,6 @@ function routine(w: Work): boolean {
     (w.checks ?? []).every((c) => c.state === 'passed' && !c.earlier)
   );
 }
-
-/* The check columns over the completed work, in the order the marks are. */
-const COLUMNS = ['Lint', 'Pixels', 'Axe'];
 
 function latest(w: Work): string {
   return w.history[w.history.length - 1]?.at ?? '';
@@ -242,16 +239,9 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
           <OutcomeFacts state={s} />
 
           <section className="delegation__section delegation__done" aria-labelledby="done-title">
-            <div className="delegation__done-head">
-              <h2 id="done-title" className="delegation__h2">
-                Completed work <span className="delegation__count">{done.length}</span>
-              </h2>
-              <p className="delegation__columns" aria-hidden="true">
-                {COLUMNS.map((c) => (
-                  <span key={c}>{c}</span>
-                ))}
-              </p>
-            </div>
+            <h2 id="done-title" className="delegation__h2">
+              Completed work <span className="delegation__count">{done.length}</span>
+            </h2>
             <p className="delegation__hint">Done on its own unless marked. Open one for what changed, why, and what the checks established.</p>
             <ul className="delegation__records">
               {notable.map((w) => (
@@ -261,13 +251,7 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
                 <li>
                   <Disclosure
                     className="delegation__routine"
-                    summary={plural(easy.length, ...words.routine)}
-                    meta={
-                      <span className="delegation__routine-meta">
-                        <Icon name="status-passed" size={16} />
-                        Every check passed
-                      </span>
-                    }
+                    summary={<RecordHead state="passed" label="Every check passed" title={plural(easy.length, ...words.routine)} where="Every check passed, on the first try" />}
                   >
                     <ul>
                       {easy.map((w) => (

@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
-import { Badge, Button, Checkbox, Disclosure, Icon } from '../../components';
+import { Badge, Button, Checkbox, Disclosure, EmptyState, Icon } from '../../components';
 import {
   BOUNDARY_GROUP_ICON,
   BOUNDARY_GROUP_LABEL,
@@ -103,7 +103,14 @@ export const Boundaries = forwardRef<HTMLElement, BoundariesProps>(function Boun
           Your rules <span className="bounds__count">{active}</span>
         </h3>
         {rules.length === 0 ? (
-          <p className="bounds__empty">None yet. An answer can become a rule for similar cases, never by default.</p>
+          /* A place a rule will go, not a sentence about its absence: the
+             system's empty state, compact, in a dashed frame, the way the
+             products in the 2026-10-09 research show a list that fills as
+             you use it ("Saved approvals (0)", "Link a new account"). The
+             count beside the heading still says 0. */
+          <div className="bounds__empty">
+            <EmptyState compact icon="book" title="No rules yet" description="An answer can become a rule for similar cases, never by default." />
+          </div>
         ) : (
           rules.map((r) => <RuleCard key={r.id} rule={r} work={work} onEdit={(covers) => onEditRule(r.id, covers)} onRevoke={() => onRevokeRule(r.id)} initialMode={initialMode} />)
         )}

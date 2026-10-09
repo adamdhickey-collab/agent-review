@@ -98,7 +98,7 @@ export const AnsweredOnce: Story = {
     await expect(canvas.getByText('8 changes made and checked. 5 decisions need you.')).toBeInTheDocument();
     await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('28 merged8 waiting on your 5 decisions');
     await expect(canvas.getAllByText(/A one-time answer doesn’t carry over to another change/)).toHaveLength(4);
-    await expect(canvas.getByText(/None yet\./)).toBeInTheDocument();
+    await expect(canvas.getByText('No rules yet')).toBeInTheDocument();
   },
 };
 
