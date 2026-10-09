@@ -292,12 +292,10 @@
   box-shadow: var(--shadow-raised);
 }
 
-/* The recommended answer's edge is the accent, twice the hairline, drawn
-   inside so the two cards keep one size. */
-.ask__choice[data-recommended] {
-  border-color: var(--color-accent);
-  box-shadow: inset 0 0 0 var(--border-width) var(--color-accent), var(--shadow-raised);
-}
+/* The recommended answer is the same card as the other. Until 2026-10-09
+   its edge was the accent, twice the hairline; the accent is the act now,
+   and the act is its button (DecisionRequest.tsx, "The accent, spent
+   once"). */
 
 .ask__choice .btn {
   margin-top: auto;
@@ -504,15 +502,44 @@
   gap: var(--space-2);
 }
 
-/* The answers become the question: the same place, a tinted ground, Apply
-   with focus. */
+/* The answers become the question: the same place, a step of ground, Apply
+   with focus. The ground was the accent's tint until 2026-10-09; the blue
+   is Apply's alone now. */
 .ask__confirm {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-3);
   border-radius: var(--radius-sm);
-  background: var(--color-accent-subtle);
+  background: var(--color-surface-sunken);
+}
+
+/* Cancel and Apply in a bar at the confirmation's foot, with what Apply will
+   do beside them. It sticks to the bottom of the window while the
+   confirmation runs past it (a rule's preview can), on the confirmation's
+   own ground with a hairline over it, so the act is in view with the words
+   that name it; once the confirmation's end is on screen it is just its
+   last row. */
+.ask__bar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  margin: 0 calc(var(--space-3) * -1) calc(var(--space-3) * -1);
+  padding: var(--space-3);
+  border-top: var(--border-width) solid var(--color-divider);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  background: var(--color-surface-sunken);
+}
+
+.ask__bar-what {
+  min-width: 0;
+  color: var(--color-text-secondary);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-ui);
 }
 
 .ask__effect {
@@ -722,6 +749,10 @@
 
   .ask__choice .btn {
     align-self: stretch;
+  }
+
+  .ask__actions {
+    flex: 1 1 100%;
   }
 
   .ask__actions .btn {

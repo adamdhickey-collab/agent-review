@@ -86,7 +86,7 @@
 }
 
 .outcome__modes [data-mode='you'] .icon {
-  color: var(--color-accent);
+  color: var(--color-text); /* the person's own mark is ink: the accent is for acting, not for having acted */
 }
 
 .outcome__modes [data-zero],

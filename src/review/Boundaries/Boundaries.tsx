@@ -160,7 +160,10 @@ export function RuleCard({ rule, work, onEdit, onRevoke, initialMode }: RuleCard
   return (
     <article className="rule" data-status={rule.status} aria-labelledby={`${id}-text`}>
       <p className="rule__head">
-        <Badge tone={active ? 'accent' : 'neutral'}>{active ? 'Active' : 'Revoked'}</Badge>
+        {/* Neutral, both: a rule in force is a record, not an act, and the
+            accent is the act's alone (DecisionRequest.tsx). Revoked is the
+            outline, the lighter of the two. */}
+        <Badge variant={active ? 'tint' : 'outline'}>{active ? 'Active' : 'Revoked'}</Badge>
         <span>Made by you at {made?.at}</span>
       </p>
       <p className="rule__text" id={`${id}-text`}>
