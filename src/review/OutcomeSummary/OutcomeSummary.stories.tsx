@@ -49,6 +49,37 @@ export const NeedsYou: Story = {
   },
 };
 
+/* The modes as tiles, since 2026-10-09: one per mode, the count as the
+   headline and what it counts under it, so these stories read the tiles as
+   well as the line's text, which is unchanged. */
+export const Settled: Story = {
+  args: { state: withRule },
+  parameters: { docs: { description: { story: 'The first question answered with a rule. A fourth tile, settled by you, arrives with the first answer, and the four share the row.' } } },
+  play: async ({ canvasElement }) => {
+    const modes = within(canvasElement).getByRole('list', { name: 'How the work was handled' });
+    await expect(modes).toHaveTextContent('7 proceeded on its own1 needs your judgment1 needs your approval4 settled by you');
+    await expect(within(modes).getAllByRole('listitem')).toHaveLength(4);
+  },
+};
+
+export const Narrow: Story = {
+  decorators: [
+    (Story) => (
+      <div style={{ width: 360 }}>
+        <Story />
+      </div>
+    ),
+  ],
+  parameters: { docs: { description: { story: 'The account in a 360px column, as on a phone. Four tiles across would leave each a word wide, so each mode is a row: the mark and count, then the words, the held changes under them. The account’s own width decides, not the window’s.' } } },
+  play: async ({ canvasElement }) => {
+    const modes = within(canvasElement).getByRole('list', { name: 'How the work was handled' });
+    await expect(modes).toHaveTextContent('7 proceeded on its own1 needs your judgment · 4 more wait on it1 needs your approval');
+    await expect(modes.scrollWidth).toBeLessThanOrEqual(modes.clientWidth);
+    const [own, asks] = within(modes).getAllByRole('listitem');
+    await expect(asks.getBoundingClientRect().top).toBeGreaterThan(own.getBoundingClientRect().top);
+  },
+};
+
 export const Facts: Story = {
   render: (args) => <OutcomeFacts state={args.state} />,
   parameters: {

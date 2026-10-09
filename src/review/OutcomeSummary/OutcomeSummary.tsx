@@ -42,7 +42,21 @@ import './OutcomeSummary.css';
    count, what the person has settled, appears once there is one. The
    reader who arrives knowing nothing is told in one line what kind of
    product this is: most of the work needed nobody, and the two that did
-   are two different kinds of stop. */
+   are two different kinds of stop.
+
+   AS TILES, SINCE 2026-10-09. The counts were one line of three cells, the
+   number the size of the words beside it, so the account still read as a
+   sentence. Every product the research looked at that reports a run
+   (Gumloop's insights, Linear's project progress, the health and budget
+   apps) sets the count as the headline and the words as its caption, and
+   that is what this is now: a tile per mode, its mark and its number on
+   the first line, what the number counts under it, and the changes held
+   behind the judgment as a muted third line on that tile. The tiles are
+   tonal, not raised: the decisions stay the screen's only cards. The text
+   a screen reader or a test reads is the line's, to the character: a
+   space still parts the number from its words, and the separator before
+   the held changes is in the text and hidden on the screen, where the
+   note has a line of its own. */
 
 const join = (parts: string[], word = 'and') =>
   parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} ${word} ${parts[parts.length - 1]}`;
@@ -109,6 +123,28 @@ function factsOf(a: ReturnType<typeof account>) {
   return { checks, unresolved, scope };
 }
 
+/* One tile's contents: the mark and the count on the first line, the words
+   under them, and a note under those. The space between the count and the
+   words, and the separator before the note, are what keep the list's text
+   the sentence it was ("1 needs your judgment · 4 more wait on it"). */
+function Mode({ icon, n, words, note }: { icon: IconName; n: number; words: string; note?: string }) {
+  return (
+    <>
+      <span className="outcome__mode-head">
+        <Icon name={icon} size={16} />
+        <strong>{n}</strong>
+      </span>{' '}
+      <span className="outcome__mode-words">{words}</span>
+      {note ? (
+        <span className="outcome__mode-note">
+          <span className="outcome__mode-sep"> · </span>
+          {note}
+        </span>
+      ) : null}
+    </>
+  );
+}
+
 export interface OutcomeSummaryProps {
   state: DelegationState;
 }
@@ -155,30 +191,22 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
 
       <ul className="outcome__modes" aria-label="How the work was handled">
         <li data-mode="own" data-zero={a.own.length === 0 || undefined}>
-          <Icon name={BOUNDARY_GROUP_ICON.own} size={16} />
-          <span>
-            <strong>{a.own.length}</strong> proceeded on its own
-          </span>
+          <Mode icon={BOUNDARY_GROUP_ICON.own} n={a.own.length} words="proceeded on its own" />
         </li>
         <li data-mode="asks" data-zero={a.intentAsks.length === 0 || undefined}>
-          <Icon name={BOUNDARY_GROUP_ICON.asks} size={16} />
-          <span>
-            <strong>{a.intentAsks.length}</strong> {a.intentAsks.length === 1 ? 'needs' : 'need'} your judgment
-            {a.waiting.length ? <span className="outcome__mode-note"> · {a.waiting.length} more wait on it</span> : null}
-          </span>
+          <Mode
+            icon={BOUNDARY_GROUP_ICON.asks}
+            n={a.intentAsks.length}
+            words={`${a.intentAsks.length === 1 ? 'needs' : 'need'} your judgment`}
+            note={a.waiting.length ? `${a.waiting.length} more wait on it` : undefined}
+          />
         </li>
         <li data-mode="outside" data-zero={a.scopeAsks.length === 0 || undefined}>
-          <Icon name={BOUNDARY_GROUP_ICON.outside} size={16} />
-          <span>
-            <strong>{a.scopeAsks.length}</strong> {a.scopeAsks.length === 1 ? 'needs' : 'need'} your approval
-          </span>
+          <Mode icon={BOUNDARY_GROUP_ICON.outside} n={a.scopeAsks.length} words={`${a.scopeAsks.length === 1 ? 'needs' : 'need'} your approval`} />
         </li>
         {a.settled.length ? (
           <li data-mode="you">
-            <Icon name="user" size={16} />
-            <span>
-              <strong>{a.settled.length}</strong> settled by you
-            </span>
+            <Mode icon="user" n={a.settled.length} words="settled by you" />
           </li>
         ) : null}
       </ul>
