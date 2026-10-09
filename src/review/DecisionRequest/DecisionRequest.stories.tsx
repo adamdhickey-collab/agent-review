@@ -95,13 +95,18 @@ export const WhatAValueMeans: Story = {
 export const Choosing: Story = {
   args: { initialChoice: 'diff' },
   parameters: {
-    docs: { description: { story: 'An answer chosen. The answers have become the question, focus is on Apply, and the rule box is unchecked: this answer applies to this change only until the person says otherwise. Checking it shows the rule as it will read, the three changes it would settle now, and that a matching case will not ask again. Escape cancels and puts focus back on the answer.' } },
+    docs: { description: { story: 'An answer chosen. The answers have become the question, focus is on Apply, and the rule box is unchecked: this answer applies to this change only until the person says otherwise. Checking it shows the rule as it will read, the three changes it would settle now, and that a matching case will not ask again. Cancel and Apply sit in a bar at the confirmation’s foot with what Apply will do beside them, and the bar stays at the bottom of the window while the confirmation runs past it. Apply is the confirmation’s one accent. Escape cancels and puts focus back on the answer.' } },
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('button', { name: 'Apply' })).toHaveFocus();
     await expect(canvas.getByText('This answer applies to this change only.')).toBeInTheDocument();
+    const bar = canvasElement.querySelector('.ask__bar') as HTMLElement;
+    await expect(getComputedStyle(bar).position).toBe('sticky');
+    await expect(within(bar).getByRole('button', { name: 'Apply' })).toBeInTheDocument();
+    await expect(bar.querySelector('.ask__bar-what')).toHaveTextContent(/^Use the diff pair$/);
     await userEvent.click(canvas.getByText('Also use this answer for similar cases'));
+    await expect(bar.querySelector('.ask__bar-what')).toHaveTextContent('Use the diff pair, kept as a rule');
     await expect(canvas.getByText('The rule, as it will read')).toBeInTheDocument();
     await expect(canvas.getByText(/It settles now:/).closest('p')).toHaveTextContent('3 changes that match');
     await expect(canvas.getByText(/Next time:/).closest('p')).toHaveTextContent('a case that matches doesn’t ask you');
