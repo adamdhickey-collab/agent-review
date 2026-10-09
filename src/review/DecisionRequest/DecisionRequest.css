@@ -117,15 +117,26 @@
    automated checks passed, with either token.", and the three results a
    press away, each beside what it established. The line is read, not
    pressed for its own sake, so it carries no rule over it and no indent
-   under it; the chevron is what says it opens. */
+   under it; the chevron is what says it opens. The chevron and the pass
+   mark are each centred on the line's first line of text, at the size each
+   is drawn, so the three sit on one centre and stay on line one when the
+   sentence wraps on a phone. The line is a flex box rather than an
+   inline-flex one: inline, it sat on a line box of its own, whose
+   descender room under it put the chevron 2.4px below the mark and the
+   text (2026-10-09). */
 .ask__tried {
   border-top: 0;
 }
 
 .ask__tried > .disclosure__summary {
   align-self: flex-start;
+  align-items: flex-start;
   padding: 0;
   font-weight: var(--weight-regular);
+}
+
+.ask__tried > .disclosure__summary .disclosure__chevron {
+  margin-top: calc((var(--text-md) * var(--leading-ui) - var(--icon-size)) / 2);
 }
 
 .ask__tried > .disclosure__body {
@@ -133,13 +144,14 @@
 }
 
 .ask__tried-sum {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  align-items: flex-start;
   gap: var(--space-2);
   color: var(--color-text-secondary);
 }
 
 .ask__tried-sum .icon {
+  margin-top: calc((var(--text-md) * var(--leading-ui) - var(--icon-size)) / 2);
   color: var(--color-success);
 }
 
