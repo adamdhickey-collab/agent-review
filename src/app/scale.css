@@ -1,0 +1,29 @@
+/* The app's reading size: in a wide desktop window the whole page is drawn
+   larger, as the browser's own zoom would draw it (tokens.css, "Reading
+   size", has why and where the steps are). Imported by the app's entry only,
+   so the Storybook keeps every component at its real size.
+
+   --zoom is the step in force, and anything sized from the window divides
+   by it: a zoomed root zooms viewport units too, so 100vh would be taller
+   than the screen by the step. Where nothing sets it, as in the Storybook,
+   those read it as 1.
+
+   A pointer that is not fine is left at 1: a touch screen's chrome already
+   takes its own 44px heights (app/global.css), and a desktop is the reading
+   distance this is for. */
+:root {
+  --zoom: 1;
+  zoom: var(--zoom);
+}
+
+@media (pointer: fine) and (min-width: 81rem) {
+  :root {
+    --zoom: var(--zoom-desktop);
+  }
+}
+
+@media (pointer: fine) and (min-width: 90rem) {
+  :root {
+    --zoom: var(--zoom-wide);
+  }
+}

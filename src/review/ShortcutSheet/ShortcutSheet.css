@@ -18,7 +18,7 @@
 .shortcuts__panel {
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - var(--space-8));
+  max-height: calc(100vh / var(--zoom, 1) - var(--space-8));
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);

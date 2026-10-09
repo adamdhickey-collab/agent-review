@@ -214,4 +214,19 @@
      stopping it would read as a hang. */
   --motion-ambient-repeat: 4;
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Reading size. How much larger the app draws itself in a wide desktop
+     window. The type above is set for a tool read at arm's length, and on a
+     desktop it read small enough that people zoomed in twice to use it; these
+     are that zoom, taken by default. They are a page zoom, not larger type:
+     everything grows at once, the type, the space, the icons, and the product
+     in its frame, so every proportion the review is about (a literal beside a
+     token, a 32px head row) holds, and the product's values are still the
+     product's. A step is taken only where the window leaves the review 72rem
+     of room after it, the width its widest screen is laid out in, so the
+     first starts at 1296px and the second at 1440px. The app takes them
+     (app/scale.css); the Storybook does not, because it shows components at
+     their real size. */
+  --zoom-desktop: 1.125;
+  --zoom-wide: 1.25;
 }
