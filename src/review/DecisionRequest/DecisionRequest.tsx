@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Badge, Button, Checkbox, Disclosure, Icon, TestStatus } from '../../components';
-import { BOUNDARY_GROUP_ICON, RULE_EXCLUDES, type Boundary, type Check, type Option, type Reach, type Sample, type Twin, type Work } from '../../data/delegation';
+import { Badge, Button, Checkbox, Disclosure, Icon, TestStatus, type IconName } from '../../components';
+import { BOUNDARY_GROUP_ICON, BOUNDARY_GROUP_LABEL, KIND_GROUP, KIND_STATUS, RULE_EXCLUDES, type Boundary, type Check, type Option, type Reach, type Sample, type Twin, type Work } from '../../data/delegation';
 import { DiffViewer } from '../DiffViewer/DiffViewer';
 import { plural } from '../format';
 import './DecisionRequest.css';
@@ -8,14 +8,17 @@ import { Inline } from '../Inline';
 
 /* A change the agent stopped on, asking for one decision. Two kinds, said
    in the badge because they want different things from the person, and
-   named as the case study names them (since 2026-10-07; they were "What a
-   value means" and "Outside the delegation"):
+   named as the case study names them (since 2026-10-09 the badge is the
+   status, "Needs judgment" or "Needs approval", in the amber the account
+   gives what waits on the person; it read "Missing intent" and "Permission
+   boundary" from 2026-10-07, and "What a value means" and "Outside the
+   delegation" before that):
 
-   - Missing intent (intent): a person decides. The agent can make the
+   - Needs judgment (intent): a person decides. The agent can make the
      change and cannot tell which change is meant. The card says what no
      check can settle, lays the evidence for each reading side by side, and
      recommends one. Not a failure: nothing is broken.
-   - Permission boundary (scope): a person authorizes. The agent knows
+   - Needs approval (scope): a person authorizes. The agent knows
      exactly what to do and is not allowed to. The card says what it would
      do and why that is past its authority, and asks for that one change
      only. Not a technical problem: the checks it could run pass.
@@ -121,7 +124,22 @@ import { Inline } from '../Inline';
    first press with no confirmation, and the question comes back with what
    was found. Only an answer within the agent's authority can become a rule,
    and the one that grants past it says whose permission a standing version
-   would need. */
+   would need.
+
+   READ IN THE ORDER A DECISION IS MADE (2026-10-09). Three changes, each
+   so that a reader who has never seen the product knows within a few
+   lines what kind of stop this is and what each answer costs. The badge is
+   the status and carries the amber of "waiting on you", not the grey of a
+   label. The three checks that passed with either token fold to one line,
+   "All 3 automated checks passed, with either token.", with the results
+   one press away: three green badges in a row were the loudest thing on a
+   card whose point is that passing is not the answer. And where the
+   answers differ in kind, each says what it means for the system beyond
+   this change, under its own heading: within the agent's authority and
+   able to become a rule; allowed once, with the boundary left where it
+   is; or deciding nothing yet. The two-reds card's answers are the same
+   kind, so they say nothing there and the confirmation's rule box carries
+   it. */
 
 /* Whether choosing an option ties the element to --color-danger, so that a
    change to danger's red would reach it. Read from the values the option
@@ -140,6 +158,18 @@ function TwinSpecimen({ twin, loud }: { twin: Twin; loud?: boolean }) {
 /* A token name out of the value an option writes: "var(--color-danger)" is
    --color-danger. */
 const tokenOf = (value: string) => value.replace(/^var\((.*)\)$/, '$1');
+
+/* What an answer means for the system beyond this change, read from what
+   the option does rather than from its words: gathering evidence decides
+   nothing, granting lets the agent past a boundary once, and an answer
+   within its authority is the only kind that can become a rule. Leaving a
+   line as written says so in its own effect, and gets no second line. */
+function consequence(o: Option): { icon: IconName; text: string } | undefined {
+  if (o.asks) return { icon: 'search', text: 'Decides nothing yet. The question comes back with what it finds.' };
+  if (o.grants) return { icon: 'lock', text: 'Allowed once. The boundary stays where it is.' };
+  if (o.rule) return { icon: 'circle-check', text: `Within the agent’s authority. Can become a rule for ${o.rule.scope.charAt(0).toLowerCase()}${o.rule.scope.slice(1)}.` };
+  return undefined;
+}
 
 
 /* A check's result as a badge: a pass is quiet, anything else is said. */
@@ -371,15 +401,19 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
   const outcome = (follows: boolean) =>
     twin ? (follows ? 'Both get louder' : `Only the ${twin.means.toLowerCase()} gets louder`) : follows ? 'Follows it' : 'Stays as it is';
   const moreLabel = q.kind === 'intent' ? (q.evidence ? 'The evidence and the code' : 'The code') : q.reach ? 'What it found' : 'Why it stopped';
+  /* Whether the answers differ in what they mean for the system, which is
+     when each says so. */
+  const differ = q.options.some((o) => o.asks || o.grants || o.leaves);
 
   return (
     <article className="ask" data-kind={q.kind} aria-labelledby={`${id}-title`}>
       <header className="ask__head">
-        {/* The kind is a label, not a state, so it is quiet; its mark is the
-            boundary group's own (the panel's lock or question), in that
-            group's color, so the card and the panel name it the same way. */}
-        <Badge tone={q.kind === 'scope' ? 'warning' : 'neutral'} variant="quiet" icon={BOUNDARY_GROUP_ICON[q.kind === 'scope' ? 'outside' : 'asks']}>
-          {q.kind === 'scope' ? 'Permission boundary' : 'Missing intent'}
+        {/* The kind is the card's status, in the amber the account's bar
+            gives what waits on the person; its mark is the boundary
+            group's own (the panel's question or lock), so the card and the
+            panel name the stop the same way. */}
+        <Badge tone="warning" icon={BOUNDARY_GROUP_ICON[KIND_GROUP[q.kind]]}>
+          {KIND_STATUS[q.kind]}
         </Badge>
         <span className="ask__where">
           {work.screen} <span aria-hidden="true">·</span> <code>{basename(work.file)}</code>
@@ -421,18 +455,24 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
       ) : null}
 
       {q.kind === 'intent' && q.tried ? (
-        <div className="ask__tried" role="group" aria-labelledby={`${id}-tried`}>
-          <p className="ask__tried-label" id={`${id}-tried`}>
-            Both approaches pass the automated checks.
-          </p>
-          <ul className="ask__checks">
+        <Disclosure
+          className="ask__tried"
+          summary={
+            <span className="ask__tried-sum">
+              <Icon name="status-passed" size={16} />
+              All {q.tried.length} automated checks passed, with either token.
+            </span>
+          }
+        >
+          <ul className="ask__checks" aria-label="The checks, with either token in place">
             {q.tried.map((c) => (
               <li key={c.name}>
                 <CheckBadge check={c} />
+                <span className="ask__check-says">{c.established}</span>
               </li>
             ))}
           </ul>
-        </div>
+        </Disclosure>
       ) : null}
 
       {q.kind === 'scope' && q.reach ? (
@@ -594,6 +634,12 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                       <Inline text={o.effect} />
                     </p>
                   )}
+                  {differ && consequence(o) ? (
+                    <p className="ask__choice-keeps">
+                      <Icon name={consequence(o)!.icon} size={14} />
+                      <span>{consequence(o)!.text}</span>
+                    </p>
+                  ) : null}
                   <Button
                     ref={(el) => {
                       optionRefs.current[o.id] = el;
@@ -621,7 +667,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
             </span>
             <span>
               <span className="visually-hidden">Boundary {b.n}, </span>
-              {b.group === 'asks' ? 'Asks you first: ' : b.group === 'outside' ? 'Outside this delegation: ' : ''}
+              {b.group === 'own' ? '' : `${BOUNDARY_GROUP_LABEL[b.group]}: `}
               {b.text}
             </span>
           </li>

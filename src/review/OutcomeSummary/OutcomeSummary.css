@@ -27,6 +27,68 @@
   color: var(--color-text-secondary);
 }
 
+/* The three kinds of work, counted, on one line under the lead: each a
+   mark in its group's color, the count in the text ink, and the words in
+   the secondary ink, parted by hairlines so the line reads as three cells
+   rather than a sentence. A count of nothing goes muted, mark and all: in
+   the quiet state the two stops read as resolved, not as alarms with a
+   zero in them. The waiting changes are a note on the judgment cell,
+   because they are that decision's, not a kind of their own. */
+.outcome__modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin-top: calc(var(--space-2) * -1);
+}
+
+.outcome__modes li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--space-6);
+}
+
+.outcome__modes li + li {
+  padding-left: var(--space-3);
+  border-left: var(--border-width) solid var(--color-divider);
+}
+
+.outcome__modes .icon {
+  flex: none;
+}
+
+.outcome__modes strong {
+  color: var(--color-text);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.outcome__modes [data-mode='own'] .icon {
+  color: var(--color-success);
+}
+
+.outcome__modes [data-mode='asks'] .icon,
+.outcome__modes [data-mode='outside'] .icon {
+  color: var(--color-warning);
+}
+
+.outcome__modes [data-mode='you'] .icon {
+  color: var(--color-accent);
+}
+
+.outcome__modes [data-zero],
+.outcome__modes [data-zero] .icon,
+.outcome__modes [data-zero] strong {
+  color: var(--color-text-muted);
+}
+
+.outcome__mode-note {
+  color: var(--color-text-muted);
+}
+
 /* The job's progress: one bar in the request's own unit, a segment per
    place a literal can be, and a legend that says each in words, so the
    bar repeats the legend rather than standing in for it. */

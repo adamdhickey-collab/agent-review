@@ -55,7 +55,17 @@ import { Inline } from '../Inline';
    from, and following one moves focus to the new run's title the way any
    change of screen does; a radio group that navigated would take focus
    away from the arrow key that moved it. Each run keeps its own state while
-   the other is on screen, and Reset puts back the one shown. */
+   the other is on screen, and Reset puts back the one shown.
+
+   WHAT HAPPENED NEXT, SINCE 2026-10-09. After a decision the card that
+   asked is gone, and what used to stand in its place was one grey line.
+   It is a result now: a mark for the kind of thing that happened (done,
+   taken back, or left open), the sentence, and, when the answer made or
+   used a rule, a button to the rule under the boundaries, so a person who
+   has just decided can see what the decision became without hunting for
+   it. The sentence is still the live region. Nothing is claimed that the
+   reducer did not do: the agent merged what the answer settled, and a rule
+   exists because the person made one. */
 
 /* The runs, as the switch names them: what each is about, in two words. */
 const RUNS: { id: RunId; label: string; kind: string }[] = [
@@ -90,6 +100,7 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
   const needs = useRef<HTMLHeadingElement>(null);
   const lead = useRef<HTMLParagraphElement>(null);
   const top = useRef<HTMLHeadingElement>(null);
+  const bounds = useRef<HTMLElement>(null);
   const focusNext = useRef(false);
 
   useEffect(() => {
@@ -183,9 +194,28 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
 
           <OutcomeSummary ref={lead} state={s} />
 
-          <p className="delegation__notice" aria-live="polite">
-            {s.notice ? <Inline text={s.notice} /> : null}
-          </p>
+          <div className="delegation__notice" data-kind={s.noticeKind} aria-live="polite">
+            {s.notice ? (
+              <>
+                <Icon name={s.noticeKind === 'back' ? 'undo' : s.noticeKind === 'open' ? 'status-inconclusive' : 'status-passed'} size={16} />
+                <p>
+                  <Inline text={s.notice} />
+                </p>
+                {s.noticeRule && s.rules.some((r) => r.id === s.noticeRule && r.status === 'active') ? (
+                  <Button
+                    size="compact"
+                    variant="secondary"
+                    onClick={() => {
+                      bounds.current?.scrollIntoView({ block: 'nearest' });
+                      bounds.current?.focus();
+                    }}
+                  >
+                    See your rule
+                  </Button>
+                ) : null}
+              </>
+            ) : null}
+          </div>
 
           {asking.length ? (
             <section className="delegation__section" aria-labelledby="needs-title">
@@ -253,6 +283,7 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
 
         <aside className="delegation__aside" aria-label="Boundaries and your rules">
           <Boundaries
+            ref={bounds}
             boundaries={s.boundaries}
             by={s.brief.by}
             rules={s.rules}

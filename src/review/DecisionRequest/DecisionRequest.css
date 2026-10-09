@@ -101,12 +101,53 @@
    headed by its meaning, then the specimen, the sentence saying what its red
    means, and its token under that, quietly. They are read, not pressed, so
    they sit on the sunken ground and are not raised; only the answers are.
-   The columns are the answers' own. The specimens are a step larger than
-   the card's text, because the red is the subject. */
+   The columns are the answers' own. The specimens are two steps larger than
+   the card's text (2026-10-09; one before), because the red is the subject:
+   two reds at the size of a heading, side by side, are the demonstration
+   that they look the same, and the question over them says it in words. A
+   "Same red" label on the seam between the tiles was tried the same day
+   and covered the second tile's heading. */
+/* THE CHECKS, FOLDED (2026-10-09): one line with the pass mark, "All 3
+   automated checks passed, with either token.", and the three results a
+   press away, each beside what it established. The line is read, not
+   pressed for its own sake, so it carries no rule over it and no indent
+   under it; the chevron is what says it opens. */
 .ask__tried {
-  display: flex;
-  flex-direction: column;
+  border-top: 0;
+}
+
+.ask__tried > .disclosure__summary {
+  align-self: flex-start;
+  padding: 0;
+  font-weight: var(--weight-regular);
+}
+
+.ask__tried > .disclosure__body {
+  padding: var(--space-2) 0 var(--space-1);
+}
+
+.ask__tried-sum {
+  display: inline-flex;
+  align-items: center;
   gap: var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+.ask__tried-sum .icon {
+  color: var(--color-success);
+}
+
+.ask__checks li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+
+.ask__check-says {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
 }
 
 .ask__label {
@@ -136,8 +177,9 @@
 
 .ask__tile .ask__sample {
   margin-bottom: var(--space-1);
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
 }
+
 
 .ask__tile .ask__sample-label {
   font-size: var(--text-md);
@@ -157,10 +199,10 @@
 }
 
 /* The checks as they came back with either token: the badges the account
-   uses, in a row, under the sentence that says both approaches pass. */
+   uses, one a line, each beside what it established. */
 .ask__checks {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--space-2);
 }
 
@@ -259,6 +301,24 @@
 
 .ask__choice .btn {
   margin-top: auto;
+}
+
+/* What an answer means for the system beyond this change, under the
+   answer's own lines and over its button: a mark and a short sentence in
+   the secondary ink, at the small size. */
+.ask__choice-keeps {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.ask__choice-keeps .icon {
+  flex: none;
+  margin-top: calc((var(--text-sm) * var(--leading-body) - var(--icon-size)) / 2);
+  color: var(--color-text-muted);
 }
 
 /* What choosing it does, and the badge on the recommended one, on one row

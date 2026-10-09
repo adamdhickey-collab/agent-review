@@ -297,6 +297,31 @@ customer list exists here, and the strip says the run is simulated.
   card's badge reads "Missing intent" or "Permission boundary" (it read
   "What a value means" and "Outside the delegation"). Routine work never
   reaches a card.
+- **Three modes, one word each, and the decision as the centre
+  (2026-10-09).** The three kinds of work are the three modes the product
+  is built around, and the screen says them the same way everywhere now:
+  the agent *proceeds on its own*; it stops for the person's *judgment*, a
+  question of meaning or intent no check settles; or it stops for their
+  *approval*, an action past what the delegation allows. The boundaries
+  panel's three groups are "Proceeds on its own", "Asks for your judgment"
+  and "Needs your approval"; a decision card's badge is its status, "Needs
+  judgment" or "Needs approval", in the amber the account's bar gives what
+  waits on the person (it was a grey label, "Missing intent"); and the
+  account opens on one line that counts the run's changes by mode, with a
+  fourth count, "settled by you", once there is one. Judgment and approval
+  share the amber and are told apart by their marks and their words, a
+  question and a lock, never by hue alone. On the two-reds card the three
+  checks that passed with either token fold to one line, "All 3 automated
+  checks passed, with either token.", with the results and what each
+  established one press away: three green badges in a row were the
+  loudest thing on a card whose point is that passing is not the answer.
+  Where a card's answers differ in kind, each says what it means for the
+  system beyond this change (within the agent's authority and able to
+  become a rule; allowed once, with the boundary left where it is;
+  deciding nothing yet). And after a decision, what stood in the card's
+  place is a result rather than a grey line: a mark for what happened, the
+  sentence, and "See your rule" when the answer made or used one. Nothing
+  learns, still; a rule exists because a person made one.
 
 What would tell whether this works, none of it tested yet:
 

@@ -60,6 +60,8 @@ export const Initial: Story = {
     await expect(a.valuesMade + a.literalsLeft).toBe(start.brief.literals);
     await expect(canvas.getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
     await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('26 merged10 waiting on your 2 decisions');
+    await expect(canvas.getByRole('list', { name: 'How the work was handled' })).toHaveTextContent('7 proceeded on its own1 needs your judgment · 4 more wait on it1 needs your approval');
+    await expect(canvas.queryByText(/settled by you/)).toBeNull();
     await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveTextContent('2');
     await expect(canvas.getByRole('heading', { name: /Completed work/ })).toHaveTextContent('7');
     await expect(canvas.getByText(/4 changes are held until you answer/)).toBeInTheDocument();
@@ -78,6 +80,8 @@ export const AfterARule: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('11 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
     await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('34 merged2 waiting on your 2 decisions');
+    await expect(canvas.getByRole('list', { name: 'How the work was handled' })).toHaveTextContent('7 proceeded on its own1 needs your judgment1 needs your approval4 settled by you');
+    await expect(canvas.getByRole('button', { name: 'See your rule' })).toBeInTheDocument();
     await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
     await expect(canvas.getAllByText('Your rule')).toHaveLength(3);
     await expect(canvas.getByText('Active')).toBeInTheDocument();
@@ -110,6 +114,7 @@ export const Quiet: Story = {
     await expect(canvas.getByRole('heading', { name: /Completed work/ })).toHaveTextContent('13');
     await expect(canvas.getByText('All 36')).toBeInTheDocument();
     await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('36 merged');
+    await expect(canvas.getByRole('list', { name: 'How the work was handled' })).toHaveTextContent('7 proceeded on its own0 need your judgment0 need your approval6 settled by you');
   },
 };
 
@@ -268,7 +273,7 @@ export const SharedTable: Story = {
     const runs = canvas.getByRole('navigation', { name: 'Sample runs' });
     await expect(within(runs).getByRole('link', { name: /Shared table/ })).toHaveAttribute('aria-current', 'page');
     await expect(within(runs).getByRole('link', { name: /Two reds/ })).toHaveAttribute('href', '#/');
-    await expect(canvas.getByText('Permission boundary')).toBeInTheDocument();
+    await expect(canvas.getByText('Needs approval')).toBeInTheDocument();
     await expect(canvas.getByText(/One stopped at the edge: the fix is in a shared component\./)).toBeInTheDocument();
     await expect(canvas.getByText('2 routine fixes')).toBeInTheDocument();
   },

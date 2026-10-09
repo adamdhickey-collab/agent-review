@@ -106,12 +106,19 @@
   color: var(--color-text-muted);
 }
 
-/* What just happened, in a sentence. Empty until something does; a live
-   region, so it is in the tree from the start. */
+/* What just happened: a mark, a sentence, and a way to the rule it made
+   when it made one. Empty until something does; a live region, so it is
+   in the tree from the start. The mark says what kind of thing happened,
+   done, taken back or left open, in the result's own color; the ground
+   stays the sunken grey, because a result is a record, not an alarm. */
 .delegation__notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
   margin-top: calc(var(--space-3) * -1);
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: var(--color-surface-sunken);
   color: var(--color-text);
   line-height: var(--leading-body);
@@ -119,6 +126,20 @@
 
 .delegation__notice:empty {
   display: none;
+}
+
+.delegation__notice > p {
+  flex: 1 1 20rem;
+}
+
+.delegation__notice .icon {
+  flex: none;
+  color: var(--color-success);
+}
+
+.delegation__notice[data-kind='back'] .icon,
+.delegation__notice[data-kind='open'] .icon {
+  color: var(--color-text-muted);
 }
 
 .delegation__section {
