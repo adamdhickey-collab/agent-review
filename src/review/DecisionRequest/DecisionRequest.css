@@ -3,14 +3,20 @@
    the card was three borders deep, a panel holding cards holding a boxed
    specimen, and every box said the same thing as the one around it. The
    large radius keeps the outer curve wider than the cards' inside it. */
+/* Depth by tone, not by line (2026-10-09): the card is a step of ground
+   above the page with a short shadow under it, and no hairline round it.
+   On the dark ground the step is what reads (a shadow there is nearly
+   black on nearly black); on the light one, where the page and the card
+   are a few points apart, the shadow is. The edge only said again what the
+   ground already did. */
 .ask {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-4);
-  border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
 }
 
 .ask__head {
@@ -498,8 +504,11 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* No rule over the fold: the boundary's line just above it ends the card's
+   body, and a hairline under that said it twice. */
 .ask__more {
   margin-top: calc(var(--space-1) * -1);
+  border-top: 0;
 }
 
 .ask__more-body {

@@ -16,10 +16,32 @@
   min-width: 0;
 }
 
+/* A row's head (RecordHead): the mark beside the title, centred on its
+   first line, and the grey line under the title, starting where the title
+   does. Flex, not inline-flex: an inline-flex box inside a summary's title
+   sits on a line box with a strut and makes the title taller than its
+   text, and the chevron centres on the taller box (agent-review#25). */
 .record__summary {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-1) var(--space-2);
+}
+
+/* The mark and the title are the grid's first row; the grey line is the
+   second, in the title's column, so it starts where the title does
+   whatever size the review draws the mark at. */
+.record__line {
+  display: contents;
+}
+
+.record__mark {
+  align-self: start; /* a grid item stretches to a two-line title, and the status centres its icon in what it is given */
+}
+
+/* --icon-size is set on the icon itself (Icon.tsx), so the centring is
+   written on it, not on the mark's wrapper. */
+.record__mark .icon {
+  margin-top: calc((var(--text-md) * var(--leading-tight) - var(--icon-size)) / 2);
 }
 
 .record__title {
@@ -27,9 +49,18 @@
 }
 
 .record__where {
+  grid-column: 2;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   font-weight: var(--weight-regular);
+}
+
+/* The words for a check that did not plainly pass, in the secondary ink so
+   they are read before the commit beside them. Not in the warning's
+   colour: the mark carries the state, and the line says what it is. */
+.record__note {
+  color: var(--color-text-secondary);
+  font-weight: var(--weight-medium);
 }
 
 .record__meta {
@@ -37,20 +68,6 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
-}
-
-/* The three checks as marks, each in a column as wide as its heading over
-   the list ("Lint", "Pixels", "Axe"), so a mark is read against a name
-   rather than counted from the left. The column width is shared with that
-   heading through --record-mark-width. */
-.record__marks {
-  display: inline-flex;
-  gap: var(--space-1);
-}
-
-.record__marks .test-status {
-  justify-content: center;
-  width: var(--record-mark-width, auto);
 }
 
 .record[data-status='reverted'] .record__title,
@@ -143,26 +160,69 @@
   font-weight: var(--weight-semibold);
 }
 
+/* The history as a timeline: one rail down the left, a dot per event
+   centred on its first line, the event in the text ink and when and who
+   after it in the muted ink, on the event's line where there is room and
+   under it where there is not. Each event draws the rail from its own dot
+   down to the next one's, so the rail runs from the first dot to the last
+   however many lines an event takes, and reads as one run of events
+   rather than a border. */
 .record__history {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-}
-
-.record__history li {
-  display: grid;
-  grid-template-columns: 3rem 6.5rem minmax(0, 1fr);
   gap: var(--space-2);
 }
 
-.record__history time {
-  color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
+.record__history li {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 var(--space-3);
+  padding-left: calc(var(--space-2) + var(--space-3));
+  line-height: var(--leading-body);
 }
 
-.record__who {
+.record__history li::before {
+  content: '';
+  position: absolute;
+  top: calc((var(--text-md) * var(--leading-body) - var(--space-2)) / 2);
+  left: 0;
+  width: var(--space-2);
+  height: var(--space-2);
+  z-index: 1;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 calc(var(--border-width) * 2) var(--color-border-control);
+}
+
+.record__history li[data-who='you']::before {
+  background: var(--color-text);
+  box-shadow: none;
+}
+
+.record__history li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc((var(--text-md) * var(--leading-body)) / 2);
+  bottom: calc((var(--space-2) + (var(--text-md) * var(--leading-body)) / 2) * -1);
+  left: calc((var(--space-2) - var(--border-width)) / 2);
+  width: var(--border-width);
+  background: var(--color-border); /* the panel's edge colour, not the fainter divider: on the dark ground a divider-coloured rail all but disappears */
+}
+
+.record__what {
+  flex: 1 1 18rem;
+  min-width: 0;
   color: var(--color-text);
-  font-weight: var(--weight-medium);
+}
+
+.record__when {
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
 }
 
 .record__undo {
@@ -192,11 +252,4 @@
     padding: 0 var(--space-3) var(--space-3);
   }
 
-  .record__history li {
-    grid-template-columns: 3rem minmax(0, 1fr);
-  }
-
-  .record__what {
-    grid-column: 2;
-  }
 }

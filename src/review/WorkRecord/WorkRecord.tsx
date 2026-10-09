@@ -1,4 +1,5 @@
-import { Badge, Button, Disclosure, TestStatus, type BadgeTone } from '../../components';
+import type { ReactNode } from 'react';
+import { Badge, Button, Disclosure, TestStatus, type BadgeTone, type TestState } from '../../components';
 import { ruleText, type Boundary, type Rule, type Work } from '../../data/delegation';
 import type { DiffHunk } from '../../data/types';
 import { DiffViewer } from '../DiffViewer/DiffViewer';
@@ -23,7 +24,53 @@ import { Inline } from '../Inline';
    literal back), so it is offered on every merged change and the record
    keeps both events. The button stays the same element when it turns into
    Restore, so focus stays on it. Nothing is offered for a line left as
-   written: nothing changed. */
+   written: nothing changed.
+
+   ONE MARK A ROW, SINCE 2026-10-09. Closed, a row was three marks in three
+   columns named once over the list (Lint, Pixels, Axe), and a reader
+   counted columns to find the one that was not a pass. Every checklist the
+   visual research looked at (Klaviyo's review submission, Linear's issues)
+   gives a row one mark, its title and one grey line, and says the
+   exception in words. So: the row's worst check is its mark, beside the
+   title, and the grey line under it names any check that did not plainly
+   pass ("Axe inconclusive") and a fix after a failed first try. The three
+   checks one by one are what the open record says first. Nothing a row
+   said is gone; what was a pattern of marks is a phrase. */
+
+/* The checks' short names, as the old columns had them. */
+const SHORT: Record<string, string> = { 'Token lint': 'Lint', 'Visual baselines': 'Pixels', 'Stories with axe': 'Axe' };
+const WORST: TestState[] = ['failed', 'inconclusive', 'changed'];
+
+/* One mark for a row: its worst check, labelled with what it is, and the
+   words the grey line adds when a check did not plainly pass or passed
+   only after a failed first try. */
+export function verdict(work: Work): { state: TestState; label: string; note?: string } {
+  if (work.status === 'left') return { state: 'skipped', label: 'Nothing changed' };
+  const checks = work.checks ?? [];
+  const worst = WORST.find((s) => checks.some((c) => c.state === s)) ?? 'passed';
+  const odd = checks.filter((c) => c.state !== 'passed').map((c) => `${SHORT[c.name] ?? c.name} ${c.state}`);
+  const fixed = checks.some((c) => c.state === 'passed' && c.earlier?.state === 'failed');
+  const note = [...odd, fixed ? 'fixed after a failed first try' : ''].filter(Boolean).join(', ');
+  return {
+    state: worst,
+    label: odd.length ? odd.join(', ') : 'Every check passed',
+    note: note ? note.charAt(0).toUpperCase() + note.slice(1) : undefined,
+  };
+}
+
+/* A row's head: the mark beside the title, and the grey line under it,
+   aligned with the title. The routine swaps' row uses it too. */
+export function RecordHead({ state, label, title, where }: { state: TestState; label: string; title: ReactNode; where: ReactNode }) {
+  return (
+    <span className="record__summary">
+      <span className="record__line">
+        <TestStatus state={state} label={label} iconOnly className="record__mark" />
+        <span className="record__title">{title}</span>
+      </span>
+      <span className="record__where">{where}</span>
+    </span>
+  );
+}
 
 export interface WorkRecordProps {
   work: Work;
@@ -73,6 +120,7 @@ export function WorkRecord({ work, boundaries, rule, line = 'value', onRevert, o
   const badge = work.status === 'left' ? { label: 'Left as written', tone: 'neutral' as BadgeTone } : basis ? BASIS[basis.kind] : undefined;
   const cited = basis?.kind === 'boundary' ? boundaries.filter((b) => basis.boundaries.includes(b.n)) : [];
   const n = work.lines.length;
+  const v = verdict(work);
 
   return (
     <Disclosure
@@ -80,37 +128,42 @@ export function WorkRecord({ work, boundaries, rule, line = 'value', onRevert, o
       data-status={work.status}
       open={open}
       summary={
-        <span className="record__summary">
-          <span className="record__title">
-            <Inline text={work.title} />
-          </span>
-          <span className="record__where">
-            {work.screen} <span aria-hidden="true">·</span> {plural(n, line)}
-            {work.commit && work.status !== 'left' ? (
-              <>
-                {' '}
-                <span aria-hidden="true">·</span> <code>{work.commit}</code>
-              </>
-            ) : null}
-          </span>
-        </span>
+        <RecordHead
+          state={v.state}
+          label={v.label}
+          title={<Inline text={work.title} />}
+          where={
+            <>
+              {work.screen} <span aria-hidden="true">·</span> {plural(n, line)}
+              {work.commit && work.status !== 'left' ? (
+                <>
+                  {' '}
+                  <span aria-hidden="true">·</span> <code>{work.commit}</code>
+                </>
+              ) : null}
+              {v.note ? (
+                <>
+                  {' '}
+                  <span aria-hidden="true">·</span> <span className="record__note" data-state={v.state}>{v.note}</span>
+                </>
+              ) : null}
+            </>
+          }
+        />
       }
+      /* Only when there is a badge to show: an empty meta still took a
+         line of its own under the title on a phone. */
       meta={
-        <span className="record__meta">
-          {work.status === 'reverted' ? (
-            <Badge tone="neutral" icon="undo">
-              Reverted
-            </Badge>
-          ) : null}
-          {badge ? <Badge tone={badge.tone}>{badge.label}</Badge> : null}
-          {work.checks && work.status !== 'left' ? (
-            <span className="record__marks">
-              {work.checks.map((c) => (
-                <TestStatus key={c.name} state={c.state} label={`${c.name}: ${c.label}`} iconOnly />
-              ))}
-            </span>
-          ) : null}
-        </span>
+        work.status === 'reverted' || badge ? (
+          <span className="record__meta">
+            {work.status === 'reverted' ? (
+              <Badge tone="neutral" icon="undo">
+                Reverted
+              </Badge>
+            ) : null}
+            {badge ? <Badge tone={badge.tone}>{badge.label}</Badge> : null}
+          </span>
+        ) : undefined
       }
     >
       <div className="record__body">
@@ -185,13 +238,20 @@ export function WorkRecord({ work, boundaries, rule, line = 'value', onRevert, o
 
         <div className="record__part">
           <p className="record__label">History</p>
+          {/* A timeline, since 2026-10-09: a dot per event on one rail, what
+              happened as the line, and when and who beside it, the way an
+              agent run's activity reads elsewhere (Mintlify's). It was a
+              three-column table of time, who and what, where the reader met
+              the clock first and the event last. A dot is the person's when
+              the person did it. */}
           <ol className="record__history">
             {work.history.map((e, i) => (
-              <li key={i}>
-                <time>{e.at}</time>
-                <span className="record__who">{e.who === 'you' ? 'You' : 'Claude Code'}</span>
+              <li key={i} data-who={e.who}>
                 <span className="record__what">
                   <Inline text={e.text} />
+                </span>
+                <span className="record__when">
+                  <time>{e.at}</time> <span aria-hidden="true">·</span> {e.who === 'you' ? 'You' : 'Claude Code'}
                 </span>
               </li>
             ))}

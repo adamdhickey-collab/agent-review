@@ -125,7 +125,11 @@
 }
 
 .bounds__empty {
-  color: var(--color-text-secondary);
+  border: var(--border-width) dashed var(--color-border-control);
+  border-radius: var(--radius-md);
+}
+
+.bounds__empty .state {
   line-height: var(--leading-body);
 }
 

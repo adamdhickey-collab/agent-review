@@ -244,12 +244,12 @@
 
 /* Three rows, each a line or two, the label in a narrow column beside it.
    On a phone the label sits over its row instead. */
+/* No rule over the facts since 2026-10-09: they follow the decisions, and
+   the space between says the section changed as well as a line did. */
 .outcome__facts {
   display: grid;
   grid-template-columns: 6rem minmax(0, 1fr);
   gap: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: var(--border-width) solid var(--color-divider);
 }
 
 .outcome__facts > div {
