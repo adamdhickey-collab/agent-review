@@ -6,7 +6,7 @@ import { play } from '../../data/delegation';
 import { Boundaries } from './Boundaries';
 
 const start = initialDelegation();
-const withRule = play(start, { type: 'answer', id: 'activity-red', option: 'diff', makeRule: true });
+const withRule = play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: true });
 const revoked = play(withRule, { type: 'revoke-rule', id: 'rule-1' });
 
 const meta = {

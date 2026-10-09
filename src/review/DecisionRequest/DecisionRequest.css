@@ -224,28 +224,6 @@
   gap: var(--space-2);
 }
 
-/* Without a twin, the value in question as it would render. */
-.ask__samples {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-}
-
-/* As it would look if danger's red were made louder and this followed it:
-   the red as a ground under the text, at the weight an error takes, which
-   is what a louder danger looks like wherever the system already shouts
-   (a danger Button). An illustration of the consequence, said in words
-   above it. */
-.ask__sample--loud .ask__sample-old,
-.ask__sample--loud .ask__sample-status {
-  padding: 0 var(--space-1);
-  border-radius: var(--radius-sm);
-  background: var(--color-danger);
-  color: var(--color-text-on-accent);
-  font-weight: var(--weight-semibold);
-}
-
 .ask__code {
   margin: 0;
   padding: var(--space-2) var(--space-3);
@@ -264,7 +242,7 @@
   gap: var(--space-2);
 }
 
-/* "Should these meanings stay separate?": the decision, so it is a heading
+/* "Which trade-off is acceptable?": the decision, so it is a heading
    for the answers rather than a label over them, with the one sentence
    under it that sets up what each answer shows. A step of air above it
    parts it from the verdict, which is the end of the argument before it. */
@@ -368,7 +346,62 @@
   line-height: var(--leading-body);
 }
 
-.ask__outcome {
+/* A TRADE-OFF (2026-10-09, later). The screen a tile is on, after its
+   meaning, in the muted ink: where the red lives, not what it means. */
+.ask__tile-where {
+  color: var(--color-text-muted);
+  font-weight: var(--weight-regular);
+}
+
+/* The agent's read: the same pair of tiles as the two reds, the
+   recommendation on the sunken ground and what it can't determine on the
+   warning's, the one colour the screen keeps for what waits on a person.
+   Its label carries the question mark the boundary group uses. */
+.ask__read-head {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.ask__unknown {
+  background: var(--color-warning-subtle);
+}
+
+.ask__read .ask__label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.ask__read .ask__label .icon {
+  flex: none;
+  margin-top: calc((var(--text-sm) * var(--leading-ui) - var(--icon-size)) / 2);
+  color: var(--color-warning);
+}
+
+.ask__read .ask__tile-token strong {
+  color: var(--color-text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+.ask__evidence {
+  align-self: flex-start;
+  margin-top: var(--space-1);
+}
+
+/* What the agent found when asked: a short record, its labels in the
+   margin as the permission card's brief has them, on the sunken ground the
+   tiles use, because it is read, not pressed. */
+.ask__gathered {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+}
+
+.ask__gathered-head {
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
@@ -377,53 +410,145 @@
   line-height: var(--leading-body);
 }
 
-.ask__outcome .icon {
+.ask__gathered-head .icon {
   flex: none;
   margin-top: calc((var(--text-md) * var(--leading-body) - var(--icon-size)) / 2);
+  color: var(--color-text-secondary);
 }
 
-.ask__outcome [data-icon='check'] {
-  color: var(--color-success);
+.ask__gathered-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
-.ask__outcome [data-icon='alert'] {
-  color: var(--color-warning);
+.ask__gathered strong {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
 }
 
-/* WHAT HAPPENS TO EACH, if danger's style gets stronger: both elements as
-   they would render, each beside what happens to it, "Failure changes",
-   "Replacement stays the same". The specimens are read down one edge and
-   what happens to them down another, so the two cards compare row by row.
-   In a card too narrow for both, each line goes under its element. */
-.ask__then {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  align-items: baseline;
-  gap: var(--space-2) var(--space-4);
-  align-self: stretch;
-}
-
-.ask__then li {
-  display: grid;
-  grid-template-columns: subgrid;
-  grid-column: 1 / -1;
-  align-items: baseline;
-}
-
-.ask__then-what {
+.ask__gathered .ask__brief dd {
   color: var(--color-text-secondary);
   line-height: var(--leading-body);
 }
 
-@container answer (max-width: 21rem) {
-  .ask__then {
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: var(--space-3);
-  }
+.ask__proposed {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
 
-  .ask__then li {
-    row-gap: var(--space-1);
-  }
+/* THE TWO DIRECTIONS: two cards of one shape, side by side down to a
+   column too narrow for both, each the same rows in the same order so they
+   compare line by line. Neither is the louder card. */
+.ask__choices--tradeoff {
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+/* Chosen, not decided: a second hairline in the secondary ink inside the
+   card's own, and the button pressed. The accent stays Apply's. */
+.ask__choice[data-chosen] {
+  border-color: var(--color-text-secondary);
+  box-shadow:
+    inset 0 0 0 var(--border-width) var(--color-text-secondary),
+    var(--shadow-raised);
+}
+
+/* Both elements as the direction would draw them, on the sunken ground the
+   two reds sit on above, so the difference reads as a picture before the
+   lists under it say it in words. */
+.ask__looks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-self: stretch;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+}
+
+.ask__sample--labelled {
+  align-items: center;
+}
+
+.ask__sample--labelled[data-look='neutral'] .ask__sample-old {
+  color: var(--color-text-muted);
+}
+
+.ask__sample--labelled[data-look='neutral'] .ask__sample-new {
+  color: var(--color-text);
+}
+
+/* Benefits and risks: a label over each list, a plus or a minus at the
+   head of each line in its tone, the words in the card's own ink. */
+.ask__weigh {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-self: stretch;
+}
+
+.ask__weigh-label {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.ask__weigh-list + .ask__weigh-label {
+  margin-top: var(--space-2);
+}
+
+.ask__weigh-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ask__weigh-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-text);
+  line-height: var(--leading-body);
+}
+
+.ask__weigh-list .icon {
+  flex: none;
+  margin-top: calc((var(--text-md) * var(--leading-body) - var(--icon-size)) / 2);
+}
+
+.ask__weigh-list[data-kind='benefit'] .icon {
+  color: var(--color-success);
+}
+
+.ask__weigh-list[data-kind='risk'] .icon {
+  color: var(--color-warning);
+}
+
+/* What the agent will do if the chosen direction is applied, in order,
+   then the person's reason, the rule box, and the bar. */
+.ask__plan-head {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+}
+
+.ask__plan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-left: var(--space-5);
+  color: var(--color-text);
+  line-height: var(--leading-body);
+  list-style: decimal;
+}
+
+.ask__plan li::marker {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ask__reason {
+  max-width: 44rem;
 }
 
 /* The facts inside the Disclosure: the label over its text. */

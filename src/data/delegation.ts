@@ -130,10 +130,13 @@ export interface Line {
   after?: string;
 }
 
-/** A line written outside the screen's own stylesheet: a new token. */
+/** A line written outside the screen's own stylesheet: a new token, a label
+    in the screen's markup, or a line in the design system's exceptions. */
 export interface Addition {
   file: string;
   text: string;
+  /** What the line is, as its hunk is headed: "a new token" when absent. */
+  header?: string;
 }
 
 /** A case an answer can be kept for: a value struck through beside the value
@@ -171,6 +174,10 @@ export interface Then {
   open?: string;
   /** What the agent did, for the record, in place of the usual three lines. */
   history?: string[];
+  /** What it did when a rule applied the option to a later change, in place of history: no new follow-up, no new decision. */
+  ruled?: string[];
+  /** For gathering evidence, what the notice says once it has: in place of the usual "Nothing decided yet". */
+  notice?: string;
 }
 
 export interface Option {
@@ -207,6 +214,65 @@ export interface Option {
   rule?: RuleDraft;
   /** Said in the confirmation, in place of the question's note. */
   note?: string;
+  /** For one of two defensible directions: what it is good for and what it
+      costs, three each, so the two cards weigh the same. */
+  benefits?: string[];
+  risks?: string[];
+  /** What the agent will do if it is applied, in order, as the person reads
+      it before Apply. */
+  plan?: string[];
+  /** The same plan, done, as the decision record lists it. */
+  done?: string[];
+  /** The record a decision for this direction leaves. */
+  decision?: DecisionDraft;
+}
+
+/** What a decision records beyond the choice: what it traded for what, the
+    risk it leaves, the follow-up it opens, and the reason the agent drafts
+    for the person to keep or rewrite. The record says which they did. */
+export interface DecisionDraft {
+  tradeoff: string;
+  risk: string;
+  followUp: string;
+  reason: string;
+}
+
+/** A decision a person made, as the screen keeps it: the direction, their
+    reason, what they accepted, what is still a risk, what it leaves to do,
+    what the agent did, and the guidance it became, if they kept it for
+    similar cases. Nothing here is learned: it is a record, and a later
+    change consults it only through a rule the person made. */
+export interface Decision {
+  id: string;
+  /** The change it was made on. */
+  from: string;
+  option: string;
+  /** The question it answered, and the direction chosen, in words. */
+  question: string;
+  direction: string;
+  reason: string;
+  /** Whether the reason is the agent's draft, kept as written, or the person's own words. */
+  reasonBy: 'you' | 'draft';
+  tradeoff: string;
+  risk: string;
+  followUp: string;
+  /** What the agent did, in order: the plan, done. */
+  did: string[];
+  /** The rule it made or widened, when kept for similar cases. */
+  rule?: string;
+  at: string;
+}
+
+/** What the agent found when a person asked for evidence before deciding a
+    trade-off: where the thing in question is used, what each direction
+    would change, what depends on it, what it could not verify, and a way to
+    find out, proposed and not run. */
+export interface Gathered {
+  uses: { what: string; places: string }[];
+  changes: { direction: string; text: string }[];
+  depends: string[];
+  unverified: string[];
+  validation: string;
 }
 
 /** Everything a fix in a shared component would reach, for a question about scope. */
@@ -266,6 +332,14 @@ export interface Question {
   verdict?: string;
   /** Why it stopped, in a clause for the account's scope line: "it needs a new token". */
   edge?: string;
+  /** For a trade-off between two defensible directions: what the agent can't
+      determine that could change its recommendation, and what it inferred
+      rather than checked. Said beside the recommendation, so the reason a
+      person is needed is the agent's own words. */
+  unknown?: string;
+  inferred?: string;
+  /** What it found when asked for evidence. */
+  gathered?: Gathered;
 }
 
 /** An element in the same color as the one in question, whose meaning was settled. */
@@ -274,6 +348,8 @@ export interface Twin {
   text: string;
   /** What it is, as its tile is headed and as a noun: "Failure". */
   means: string;
+  /** The screen it is on: "Payment history". */
+  screen: string;
   /** What its red means, in a sentence: "Red means something went wrong." */
   says: string;
   /** The token it was given. */
@@ -346,6 +422,8 @@ export interface DelegationState {
   boundaries: Boundary[];
   work: Work[];
   rules: Rule[];
+  /** The decisions a person made on a trade-off, newest last. */
+  decisions: Decision[];
   /** Minutes after the scenario's now (14:26) at which the next thing a person does happens. */
   clock: number;
   /** The last thing that happened, for the live region and the screen's notice. */
@@ -354,10 +432,12 @@ export interface DelegationState {
   noticeKind?: 'done' | 'back' | 'open';
   /** The rule the last answer made, widened or applied, if one did, so the notice can point at it. */
   noticeRule?: string;
+  /** The decision the last answer recorded, so the notice can point at it. */
+  noticeDecision?: string;
 }
 
 export type Action =
-  | { type: 'answer'; id: string; option: string; makeRule: boolean }
+  | { type: 'answer'; id: string; option: string; makeRule: boolean; reason?: string }
   | { type: 'revert'; id: string }
   | { type: 'restore'; id: string }
   | { type: 'edit-rule'; id: string; covers: Pattern[] }
@@ -391,16 +471,20 @@ export function waitingOn(s: DelegationState, id: string): Work[] {
 }
 
 /** What a rule says, in words, from what it covers and what it chooses. A
-    rule written in its own words (the shared-table run's) says those. */
+    rule written in its own words (the shared-table run's) says those. The
+    billing run's two directions: separate the meanings, so red is a
+    failure's alone, or keep the red for now, as a written exception. */
 export function ruleText(rule: Pick<Rule, 'answer' | 'covers' | 'text'>): string {
   if (rule.text) return rule.text;
-  const diff = rule.answer === 'diff';
-  const old = diff ? '--color-diff-remove-ink' : '--color-danger';
-  const replacement = diff ? '--color-diff-add-ink' : '--color-success';
   const both = rule.covers.includes('replaced') && rule.covers.includes('removed');
-  if (both) return `On the billing screens, a value struck through takes ${old}, whether or not a new value stands beside it; a new value beside it takes ${replacement}.`;
-  if (rule.covers.includes('removed')) return `On the billing screens, a value struck through with nothing replacing it takes ${old}.`;
-  return `On the billing screens, a value struck through beside the one that replaced it takes ${old}, and the new value takes ${replacement}.`;
+  const what = both ? 'a value replaced or removed' : rule.covers.includes('removed') ? 'a value removed with nothing in its place' : 'a value replaced by another';
+  if (rule.answer === 'separate') return `On the billing screens, ${what} is neutral and struck through, with a label that says what happened. Red is for failures.`;
+  return `On the billing screens, ${what} stays red for now, with a label that says what happened: an exception to red meaning a failure, to review once a neutral style is tested.`;
+}
+
+/** The decision a rule was made from, if a person made it from one. */
+export function decisionOf(s: DelegationState, ruleId: string): Decision | undefined {
+  return s.decisions.find((d) => d.rule === ruleId);
 }
 
 export const RULE_EXCLUDES = 'Any other red or green, a row’s background, shared components, and every screen outside billing.';
@@ -429,7 +513,7 @@ export function whyAsking(s: DelegationState, w: Work): string {
     return `Your rule for this was revoked at ${at}, so it asks again.`;
   }
   const answered = first?.history.find((e) => e.who === 'you');
-  return `You answered the same question for the ${first?.screen.toLowerCase()} at ${answered?.at ?? 'an earlier time'}, once. A one-time answer doesn’t carry over to another change.`;
+  return `You decided the same question for the ${first?.screen.toLowerCase()} at ${answered?.at ?? 'an earlier time'}, for that change only. A one-time decision doesn’t carry over to another change.`;
 }
 
 /** The account the screen opens on. Every number is counted from the work, never carried. */
@@ -499,7 +583,7 @@ function make(w: Work, option: Option, basis: Basis, at: string, how: string, un
   const commit = hash(`${w.id}:${option.id}:${basis.kind}`);
   const lines = (option.lines ?? w.lines).map((l, i) => ({ ...l, after: option.after[i] }));
   const then = option.then;
-  const ran = then?.history ?? [`Ran the checks: the token lint passed, 0 of ${w.frames} frames moved, ${w.stories} of ${w.stories} stories passed.`];
+  const ran = (basis.kind === 'rule' ? then?.ruled : undefined) ?? then?.history ?? [`Ran the checks: the token lint passed, 0 of ${w.frames} frames moved, ${w.stories} of ${w.stories} stories passed.`];
   return {
     ...w,
     status: 'made',
@@ -534,13 +618,17 @@ function settle(s: DelegationState, at: string): { state: DelegationState; settl
     if (rule && w.question.pattern && rule.covers.includes(w.question.pattern)) {
       const option = w.question.options.find((o) => o.id === rule.answer);
       if (!option) return w;
+      /* A change a rule settles says which decision the rule came from, so
+         the record shows the person's reasoning being consulted, not an
+         agent that has learned something. */
+      const from = decisionOf(state, rule.id);
       const done = make(
         w,
         option,
         { kind: 'rule', ruleId: rule.id },
         at,
-        'Followed your rule.',
-        'Whether your rule fits this case. Both answers are the same pixels, so no check can tell; your rule decided it.',
+        from ? `Followed your rule, from your decision at ${from.at} (${from.direction.toLowerCase()}): this is the case it covers.` : 'Followed your rule.',
+        'Whether your rule fits this case. No check can tell; your rule decided it.',
       );
       settled.push(done);
       return done;
@@ -600,8 +688,27 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
             { at, who: 'agent', text: 'Asked again, with what it found.' },
           ],
         };
-        return { ...s, ...tick, work: s.work.map((x) => (x.id === w.id ? again : x)), notice: 'Nothing decided yet. It gathered the evidence you asked for, and is asking again.', noticeKind: 'open', noticeRule: undefined };
+        return {
+          ...s,
+          ...tick,
+          work: s.work.map((x) => (x.id === w.id ? again : x)),
+          notice: option.then?.notice ?? 'Nothing decided yet. It gathered the evidence you asked for, and is asking again.',
+          noticeKind: 'open',
+          noticeRule: undefined,
+          noticeDecision: undefined,
+        };
       }
+
+      /* A direction of a trade-off leaves a record: the person's reason, in
+         their words or the agent's draft kept as written (the record says
+         which), what they accepted, what is still a risk, and what it
+         leaves to do. Cleared, the reason is none, and the record says so
+         rather than putting the draft back. */
+      const draft = option.decision;
+      const typed = a.reason?.trim();
+      const reason = draft ? (a.reason === undefined ? draft.reason : typed ?? '') : '';
+      const reasonBy: Decision['reasonBy'] = draft && (a.reason === undefined || typed === draft.reason) ? 'draft' : 'you';
+      const direction = option.title ?? option.label;
 
       let rules = s.rules;
       let ruleNote = '';
@@ -625,8 +732,11 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
               status: 'active',
               from: w.id,
               applied: [],
-              history: [{ at, who: 'you', text: `Made it from the ${w.screen.toLowerCase()}’s question.` }],
+              history: [{ at, who: 'you', text: draft ? `Made it from your decision: ${direction.toLowerCase()}.` : `Made it from the ${w.screen.toLowerCase()}’s question.` }],
               ...option.rule,
+              /* A rule made from a decision gives the person's reason as its
+                 why, so the reason travels with the guidance it became. */
+              ...(draft && reason ? { why: reason } : {}),
             },
           ];
           ruleNote = ' You made it a rule.';
@@ -652,22 +762,59 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
         );
       } else {
         done = make(
-          { ...w, history: [...w.history, { at, who: 'you', text: `Answered: ${option.label.toLowerCase()}.${ruleNote}` }] },
+          {
+            ...w,
+            history: [
+              ...w.history,
+              {
+                at,
+                who: 'you',
+                text: draft
+                  ? `Decided: ${direction.toLowerCase()}.${ruleNote}${reason ? ` Your reason: “${reason}”` : ''}`
+                  : `Answered: ${option.label.toLowerCase()}.${ruleNote}`,
+              },
+            ],
+          },
           option,
           { kind: 'answer', at },
           at,
           'Applied your answer.',
-          'Whether that is the right meaning. Both answers are the same pixels, so no check can tell; that was your answer.',
+          draft ? 'Whether this was the right trade-off. No check can tell; that was your decision.' : 'Whether that is the right meaning. No check can tell; that was your answer.',
         );
       }
 
-      const next = { ...s, ...tick, rules, work: s.work.map((x) => (x.id === w.id ? done : x)) };
+      const madeRule = ruleNote ? activeRule({ ...s, rules })?.id : undefined;
+      const decision: Decision | undefined = draft
+        ? {
+            id: `decision-${s.decisions.length + 1}`,
+            from: w.id,
+            option: option.id,
+            question: q.ask,
+            direction,
+            reason,
+            reasonBy,
+            tradeoff: draft.tradeoff,
+            risk: draft.risk,
+            followUp: draft.followUp,
+            did: option.done ?? option.plan ?? [],
+            rule: madeRule,
+            at,
+          }
+        : undefined;
+      const decisions = decision ? [...s.decisions, decision] : s.decisions;
+      const next = { ...s, ...tick, rules, decisions, work: s.work.map((x) => (x.id === w.id ? done : x)) };
       const { state, settled, asked } = settle(next, at);
       const ruled = ruleNote === ' You made it a rule.' ? ', and made a rule' : ruleNote ? ', and added the case to your rule' : '';
-      const lead = option.leaves ? 'Left as written.' : option.grants ? 'Allowed once, made and merged.' : `Answered${ruled}.`;
+      const lead = option.leaves
+        ? 'Left as written.'
+        : option.grants
+          ? 'Allowed once, made and merged.'
+          : decision
+            ? `Decided: ${direction.toLowerCase()}${ruled}. The agent applied it and recorded your reason.`
+            : `Answered${ruled}.`;
       const quiet = state.work.some((x) => x.status === 'asking') ? '' : 'Nothing else needs you.';
       const rule = ruleNote || settled.length ? activeRule(state)?.id : undefined;
-      return { ...state, notice: [lead, tell(settled, asked), quiet].filter(Boolean).join(' '), noticeKind: 'done', noticeRule: rule };
+      return { ...state, notice: [lead, tell(settled, asked), quiet].filter(Boolean).join(' '), noticeKind: 'done', noticeRule: rule, noticeDecision: decision?.id };
     }
 
     case 'revert': {
@@ -685,6 +832,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
         notice: `Reverted: ${w.title}.`,
         noticeKind: 'back',
         noticeRule: undefined,
+        noticeDecision: undefined,
       };
     }
 
@@ -698,6 +846,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
         notice: `Restored: ${w.title}.`,
         noticeKind: 'done',
         noticeRule: undefined,
+        noticeDecision: undefined,
       };
     }
 
@@ -713,7 +862,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
         ),
       };
       const { state, settled, asked } = settle(next, at);
-      return { ...state, notice: ['Rule saved.', tell(settled, asked)].filter(Boolean).join(' '), noticeKind: 'done', noticeRule: r.id };
+      return { ...state, notice: ['Rule saved.', tell(settled, asked)].filter(Boolean).join(' '), noticeKind: 'done', noticeRule: r.id, noticeDecision: undefined };
     }
 
     case 'revoke-rule': {
@@ -726,6 +875,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
         notice: `Rule revoked. The ${plural(r.applied.length, 'change')} it made ${r.applied.length === 1 ? 'stays' : 'stay'} merged; a matching case will ask you again.`,
         noticeKind: 'back',
         noticeRule: undefined,
+        noticeDecision: undefined,
       };
     }
   }

@@ -64,6 +64,7 @@ const MAP = {
   tablet: ['device-tablet', 'bold'],
   monitor: ['monitor', 'bold'],
   keyboard: ['keyboard', 'bold'],
+  swap: ['swap', 'bold'],
   /* Meaning and state: solid. */
   alert: ['warning', 'fill'],
   info: ['info', 'fill'],
@@ -78,6 +79,7 @@ const MAP = {
   clock: ['clock', 'fill'],
   send: ['paper-plane-tilt', 'fill'],
   lock: ['lock', 'fill'],
+  flag: ['flag', 'fill'],
   moon: ['moon', 'fill'],
   sun: ['sun', 'fill'],
   'message-question': ['chat-circle-dots', 'fill'],

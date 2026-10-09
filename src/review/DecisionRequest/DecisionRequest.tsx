@@ -1,6 +1,20 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Badge, Button, Checkbox, Disclosure, Icon, TestStatus, type IconName } from '../../components';
-import { BOUNDARY_GROUP_ICON, BOUNDARY_GROUP_LABEL, KIND_GROUP, KIND_STATUS, RULE_EXCLUDES, type Boundary, type Check, type Option, type Reach, type Sample, type Twin, type Work } from '../../data/delegation';
+import { Badge, Button, Checkbox, Disclosure, Icon, TestStatus, TextArea, type IconName } from '../../components';
+import {
+  BOUNDARY_GROUP_ICON,
+  BOUNDARY_GROUP_LABEL,
+  KIND_GROUP,
+  KIND_STATUS,
+  RULE_EXCLUDES,
+  type Boundary,
+  type Check,
+  type Gathered,
+  type Option,
+  type Reach,
+  type Sample,
+  type Twin,
+  type Work,
+} from '../../data/delegation';
 import { DiffViewer } from '../DiffViewer/DiffViewer';
 import { plural } from '../format';
 import './DecisionRequest.css';
@@ -153,25 +167,53 @@ import { Inline } from '../Inline';
    able to become a rule; allowed once, with the boundary left where it
    is; or deciding nothing yet. The two-reds card's answers are the same
    kind, so they say nothing there and the confirmation's rule box carries
-   it. */
+   it.
 
-/* Whether choosing an option ties the element to --color-danger, so that a
-   change to danger's red would reach it. Read from the values the option
-   writes, not from its label. */
-const followsDanger = (o: Option) => o.after.some((v) => v.includes('--color-danger)'));
+   A TRADE-OFF, NOT A RIDDLE (2026-10-09, later). Every version above asked
+   a question whose right answer was obvious once read: two token names
+   that drew the same pixels, one of them recommended, and nothing on the
+   other side. A stop that only a careless person could get wrong shows an
+   agent that asks for permission, not a decision that needs a person. Now
+   the billing run's question is a trade-off with two defensible directions
+   (data/billing.ts), and the card is built to weigh them:
+
+   - What the agent found, as before: the two reds side by side, each
+     headed by its meaning and the screen it is on, and under the value in
+     question the literal it is today. The checks, folded, say they pass
+     with either direction and that only this value moves.
+   - The agent's read, in two tiles: what it recommends and why, and what
+     it can't determine, which could change that, with what it inferred
+     rather than checked. That tile carries the warning's ground, the one
+     colour on the screen that means "waiting on a person", because it is
+     the reason the person is here. Beside it, a way to ask for evidence
+     before deciding, which decides nothing.
+   - The two directions as two cards of one shape: the direction, what it
+     does in a sentence, both elements as they would look, then three
+     benefits and three risks, so neither card is the longer argument.
+     "Recommended" is a quiet label on one of them and nothing else: both
+     buttons are the same, and the accent stays the act's (Apply).
+   - Choosing is not deciding. A card's button marks it chosen
+     (aria-pressed) and opens, under the cards, what the agent will do if
+     it is applied, in order, the person's reason, and the rule box; the
+     other card stays where it was, so a person can compare, switch, and
+     read the other plan with one press. Switching keeps what was typed
+     for each direction and clears the rule box, which is never on by
+     default. Focus goes to the plan's heading, so it is read before Apply.
+   - The reason starts as the agent's draft for that direction, and the
+     record says whether the person kept it or wrote their own. It is the
+     person's words that the record and any rule carry.
+
+   The other questions (a new token, a shared component) keep the shape
+   above: choosing an answer turns the answers into its confirmation. */
 
 /* The twin as it renders: the status text in the red both names draw. */
-function TwinSpecimen({ twin, loud }: { twin: Twin; loud?: boolean }) {
+function TwinSpecimen({ twin }: { twin: Twin }) {
   return (
-    <p className={['ask__sample', loud ? 'ask__sample--loud' : ''].filter(Boolean).join(' ')}>
+    <p className="ask__sample">
       <span className="ask__sample-status">{twin.text}</span>
     </p>
   );
 }
-
-/* A token name out of the value an option writes: "var(--color-danger)" is
-   --color-danger. */
-const tokenOf = (value: string) => value.replace(/^var\((.*)\)$/, '$1');
 
 /* What an answer means for the system beyond this change, read from what
    the option does rather than from its words: gathering evidence decides
@@ -185,25 +227,27 @@ function consequence(o: Option): { icon: IconName; text: string } | undefined {
   return undefined;
 }
 
-
 /* A check's result as a badge: a pass is quiet, anything else is said. */
 function CheckBadge({ check }: { check: Check }) {
   const passed = check.state === 'passed';
   return (
-    <Badge size="large" tone={passed ? 'success' : 'neutral'} variant={passed ? 'quiet' : 'tint'} icon={passed ? 'status-passed' : 'status-inconclusive'}>
+    <Badge
+      size="large"
+      tone={passed ? 'success' : 'neutral'}
+      variant={passed ? 'quiet' : 'tint'}
+      icon={passed ? 'status-passed' : check.state === 'changed' ? 'status-changed' : 'status-inconclusive'}
+    >
       {check.name}: {check.label}
     </Badge>
   );
 }
 
-function Specimen({ sample, loud, unlabelled }: { sample: Sample; loud?: boolean; unlabelled?: boolean }) {
-  /* The element as it renders. Both names in question draw these two colors
-     today, so the specimen is the same whichever is chosen; `loud` draws it
-     as it would look if danger's red were made louder and it followed.
-     `unlabelled` leaves its label ("Plan") to the tile above, where an
-     answer card shows it again beside what happens to it. */
+function Specimen({ sample, unlabelled }: { sample: Sample; unlabelled?: boolean }) {
+  /* The element as it renders today: the old value struck through in the
+     red, and the value that replaced it. `unlabelled` leaves its label
+     ("Plan") to the tile above. */
   return (
-    <p className={['ask__sample', loud ? 'ask__sample--loud' : ''].filter(Boolean).join(' ')}>
+    <p className="ask__sample">
       {unlabelled ? null : <span className="ask__sample-label">{sample.label}</span>}
       <s className="ask__sample-old">
         <span className="visually-hidden">was </span>
@@ -221,6 +265,99 @@ function Specimen({ sample, loud, unlabelled }: { sample: Sample; loud?: boolean
         <span className="visually-hidden">, removed</span>
       )}
     </p>
+  );
+}
+
+/* The element as a direction would draw it: the label that says what
+   happened, then the value, neutral or in the red it has today. The label
+   is the system's Badge with the swap mark, the same in both directions;
+   the color is the whole difference between them. */
+function Labelled({ sample, label, neutral }: { sample: Sample; label: string; neutral: boolean }) {
+  return (
+    <p className="ask__sample ask__sample--labelled" data-look={neutral ? 'neutral' : 'red'}>
+      <Badge icon="swap">{label}</Badge>
+      <span className="ask__sample-label">{sample.label}</span>
+      <s className="ask__sample-old">
+        <span className="visually-hidden">was </span>
+        {sample.old}
+      </s>
+      {sample.replacement ? (
+        <>
+          <Icon name="arrow-right" size={12} className="ask__sample-arrow" />
+          <span className="ask__sample-new">
+            <span className="visually-hidden">, now </span>
+            {sample.replacement}
+          </span>
+        </>
+      ) : null}
+    </p>
+  );
+}
+
+/* What the agent found when it was asked for evidence: a short record with
+   its labels in the margin, the way the permission card labels what it was
+   asked. What it couldn't verify is said as plainly as what it could, and
+   the way to find out is marked as proposed, because nobody has run it. */
+function GatheredEvidence({ g, id }: { g: Gathered; id: string }) {
+  const list = (items: string[]) => (
+    <ul className="ask__gathered-list">
+      {items.map((t) => (
+        <li key={t}>
+          <Inline text={t} />
+        </li>
+      ))}
+    </ul>
+  );
+  return (
+    <section className="ask__gathered" aria-labelledby={`${id}-gathered`}>
+      <p className="ask__gathered-head" id={`${id}-gathered`}>
+        <Icon name="search" size={16} />
+        What the agent found when you asked
+      </p>
+      <dl className="ask__brief">
+        <div>
+          <dt>Where this red is used</dt>
+          <dd>
+            <ul className="ask__gathered-list">
+              {g.uses.map((u) => (
+                <li key={u.what}>
+                  <strong>
+                    <Inline text={u.what} />:
+                  </strong>{' '}
+                  {u.places}
+                </li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+        <div>
+          <dt>What each would change</dt>
+          <dd>
+            <ul className="ask__gathered-list">
+              {g.changes.map((c) => (
+                <li key={c.direction}>
+                  <strong>{c.direction}:</strong> {c.text}
+                </li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+        <div>
+          <dt>What depends on it</dt>
+          <dd>{list(g.depends)}</dd>
+        </div>
+        <div>
+          <dt>Not verified</dt>
+          <dd>{list(g.unverified)}</dd>
+        </div>
+        <div>
+          <dt>A way to find out</dt>
+          <dd>
+            {g.validation} <span className="ask__proposed">Proposed, not run.</span>
+          </dd>
+        </div>
+      </dl>
+    </section>
   );
 }
 
@@ -372,7 +509,8 @@ export interface DecisionRequestProps {
   /** Changes held until this is answered. */
   waiting?: Work[];
   preview: (optionId: string) => RulePreview;
-  onAnswer: (optionId: string, makeRule: boolean) => void;
+  /** The answer, whether to keep it as a rule, and, for a trade-off, the person's reason. */
+  onAnswer: (optionId: string, makeRule: boolean, reason?: string) => void;
   /** Open with an answer already chosen, for a story. */
   initialChoice?: string;
 }
@@ -384,18 +522,28 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
   const id = useId();
   const [choice, setChoice] = useState<string | undefined>(initialChoice);
   const [makeRule, setMakeRule] = useState(false);
+  /* What the person has typed for each direction, so switching between
+     them and back loses nothing. Untouched, a direction's reason is the
+     agent's draft. */
+  const [reasons, setReasons] = useState<Record<string, string>>({});
   const apply = useRef<HTMLButtonElement>(null);
+  const plan = useRef<HTMLParagraphElement>(null);
   const optionRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const returnTo = useRef<string | undefined>(undefined);
 
+  /* A trade-off: two directions a person weighs, each with what it is good
+     for and what it costs (data/billing.ts). */
+  const tradeoff = q.options.some((o) => o.benefits);
+
   useEffect(() => {
-    if (choice) apply.current?.focus();
+    if (choice) (tradeoff ? plan.current : apply.current)?.focus();
     else if (returnTo.current) optionRefs.current[returnTo.current]?.focus();
-  }, [choice]);
+  }, [choice, tradeoff]);
 
   const option = q.options.find((o) => o.id === choice);
   const recommended = q.options.find((o) => o.recommended);
   const p = choice ? preview(choice) : undefined;
+  const ruleOn = makeRule && (p?.offer === 'make' || p?.offer === 'widen');
 
   const cancel = () => {
     returnTo.current = choice;
@@ -403,24 +551,99 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
     setMakeRule(false);
   };
 
+  /* Choosing a direction of a trade-off: the card stays, marked, and the
+     plan opens under the cards. Choosing the other switches; pressing the
+     chosen one again lets it go. */
+  const pick = (o: Option) => {
+    if (choice === o.id) return cancel();
+    returnTo.current = undefined;
+    setChoice(o.id);
+    setMakeRule(false);
+  };
+
   const sample = work.sample;
   const twin = q.kind === 'intent' ? q.twin : undefined;
-  const contrast = sample && q.options.some(followsDanger) && q.options.some((o) => !followsDanger(o));
-  /* The value in question's own token: the name an answer writes to its first
-     line that is not the twin's. Its tile shows that one only, as the token
-     its meaning would have, not as a choice between two. */
-  const own = twin ? q.options.map((o) => o.after[0]).filter(Boolean).map(tokenOf).find((n) => n !== twin.token) : undefined;
-  /* What each answer does when danger gets louder, said of the two elements
-     the answer shows: "Only the failure gets louder", "Both get louder". */
-  const outcome = (follows: boolean) =>
-    twin ? (follows ? 'Both get louder' : `Only the ${twin.means.toLowerCase()} gets louder`) : follows ? 'Follows it' : 'Stays as it is';
+  const directions = q.options.filter((o) => o.benefits);
+  const evidence = q.options.find((o) => o.asks);
   const moreLabel = q.kind === 'intent' ? (q.evidence ? 'The evidence and the code' : 'The code') : q.reach ? 'What it found' : 'Why it stopped';
   /* Whether the answers differ in what they mean for the system, which is
      when each says so. */
   const differ = q.options.some((o) => o.asks || o.grants || o.leaves);
+  /* The value's label in a direction ("Replaced"), from its means. */
+  const said = q.means?.split(' ')[0] ?? '';
+  const reasonOf = (o: Option) => reasons[o.id] ?? o.decision?.reason ?? '';
+
+  const rulePart = p ? (
+    p.offer === 'make' || p.offer === 'widen' ? (
+      <div className="ask__rule">
+        <Checkbox
+          label={p.offer === 'widen' ? 'Add this case to your rule' : tradeoff ? 'Use this decision for similar cases' : 'Also use this answer for similar cases'}
+          checked={makeRule}
+          onChange={(e) => setMakeRule(e.target.checked)}
+        />
+        {makeRule ? (
+          <div className="ask__rule-preview" aria-live="polite">
+            <p className="ask__rule-label">The rule, as it will read</p>
+            <p className="ask__rule-text">
+              <Inline text={p.text ?? ''} />
+            </p>
+            <p>
+              <strong>It doesn’t cover:</strong> {p.excludes ?? RULE_EXCLUDES}
+            </p>
+            {p.settles.length ? (
+              <p>
+                <strong>It settles now:</strong> {plural(p.settles.length, 'change')} that match, on the{' '}
+                {Array.from(new Set(p.settles.map((w) => w.screen.toLowerCase()))).join(', ')}.
+              </p>
+            ) : null}
+            <p>
+              <strong>Next time:</strong>{' '}
+              {tradeoff
+                ? 'a case that matches doesn’t ask you. The agent follows the rule, and its record names the decision the rule came from.'
+                : 'a case that matches doesn’t ask you. The agent follows the rule and says so in its record.'}
+            </p>
+            <p>You can {p.fixed ? 'revoke' : 'edit or revoke'} it under the boundaries. Revoking it doesn’t undo what it already did.</p>
+          </div>
+        ) : (
+          <p className="ask__once">{tradeoff ? 'This decision applies to this change only.' : 'This answer applies to this change only.'}</p>
+        )}
+      </div>
+    ) : p.offer === 'conflict' ? (
+      <p className="ask__once">Your rule gives a different answer for cases like this, so this one applies to this change only. To change the rule, edit or revoke it.</p>
+    ) : null
+  ) : null;
+
+  const bar = option ? (
+    <div className="ask__bar">
+      <p className="ask__bar-what">
+        <Inline text={option.label} />
+        {ruleOn ? ', kept as a rule' : ''}
+      </p>
+      <div className="ask__actions">
+        <Button variant="ghost" onClick={cancel}>
+          Cancel
+        </Button>
+        <Button ref={apply} variant="primary" type="submit">
+          Apply
+        </Button>
+      </div>
+    </div>
+  ) : null;
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!option) return;
+    onAnswer(option.id, Boolean(ruleOn), tradeoff ? reasonOf(option) : undefined);
+  };
+  const escape = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      cancel();
+    }
+  };
 
   return (
-    <article className="ask" data-kind={q.kind} aria-labelledby={`${id}-title`}>
+    <article className="ask" data-kind={q.kind} data-tradeoff={tradeoff || undefined} aria-labelledby={`${id}-title`}>
       <header className="ask__head">
         {/* The kind is the card's status, in the amber the account's bar
             gives what waits on the person; its mark is the boundary
@@ -448,17 +671,19 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
       {twin && sample ? (
         <ul className="ask__pair" aria-label="The two reds">
           <li className="ask__tile" data-current>
-            <p className="ask__label">{q.means}</p>
+            <p className="ask__label">
+              {q.means} <span className="ask__tile-where">· {work.screen}</span>
+            </p>
             <Specimen sample={sample} />
             <p className="ask__tile-means">{q.says}</p>
-            {own ? (
-              <p className="ask__tile-token">
-                <Inline text={own} />
-              </p>
-            ) : null}
+            <p className="ask__tile-token">
+              <Inline text={`Hard-coded ${work.lines[0]?.before ?? ''}, from the old billing app`} />
+            </p>
           </li>
           <li className="ask__tile">
-            <p className="ask__label">{twin.means}</p>
+            <p className="ask__label">
+              {twin.means} <span className="ask__tile-where">· {twin.screen}</span>
+            </p>
             <TwinSpecimen twin={twin} />
             <p className="ask__tile-means">{twin.says}</p>
             <p className="ask__tile-token">
@@ -474,11 +699,11 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
           summary={
             <span className="ask__tried-sum">
               <Icon name="status-passed" size={16} />
-              All {q.tried.length} automated checks passed, with either token.
+              {tradeoff ? 'Lint and accessibility pass with either direction. Only this value moves.' : `All ${q.tried.length} automated checks passed, with either token.`}
             </span>
           }
         >
-          <ul className="ask__checks" aria-label="The checks, with either token in place">
+          <ul className="ask__checks" aria-label={tradeoff ? 'The checks, with each direction in place' : 'The checks, with either token in place'}>
             {q.tried.map((c) => (
               <li key={c.name}>
                 <CheckBadge check={c} />
@@ -489,193 +714,223 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
         </Disclosure>
       ) : null}
 
-      {q.kind === 'scope' && q.reach ? (
-        <ReachCase work={work} reach={q.reach} id={id} />
-      ) : q.kind === 'intent' ? (
-        <div className="ask__why-person">
-          {/* What the checks passing means, said before why: the line a
-              person should take away is that this one is theirs. */}
-          {q.tried ? <p className="ask__verdict">So this isn’t a testing problem. It’s a meaning decision.</p> : null}
-          <p className="ask__gap">
-            <Inline text={q.gap} />
-          </p>
-        </div>
-      ) : (
-        <pre className="ask__code">
-          <code>{work.lines.map((l) => `${l.selector} { ${l.property}: ${l.before}; }`).join('\n')}</code>
-        </pre>
-      )}
-
-      {option && p ? (
-        <form
-          className="ask__confirm"
-          aria-label={`Apply: ${option.label}`}
-          onSubmit={(e) => {
-            e.preventDefault();
-            onAnswer(option.id, makeRule && (p.offer === 'make' || p.offer === 'widen'));
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              e.preventDefault();
-              cancel();
-            }
-          }}
-        >
-          <p className="ask__effect">
-            <strong>
-              <Inline text={option.label} />.
-            </strong>{' '}
-            <Inline text={option.effect} />
-          </p>
-          {p.offer === 'make' || p.offer === 'widen' ? (
-            <div className="ask__rule">
-              <Checkbox
-                label={p.offer === 'widen' ? 'Add this case to your rule' : 'Also use this answer for similar cases'}
-                checked={makeRule}
-                onChange={(e) => setMakeRule(e.target.checked)}
-              />
-              {makeRule ? (
-                <div className="ask__rule-preview" aria-live="polite">
-                  <p className="ask__rule-label">The rule, as it will read</p>
-                  <p className="ask__rule-text">
-                    <Inline text={p.text ?? ''} />
-                  </p>
-                  <p>
-                    <strong>It doesn’t cover:</strong> {p.excludes ?? RULE_EXCLUDES}
-                  </p>
-                  {p.settles.length ? (
-                    <p>
-                      <strong>It settles now:</strong> {plural(p.settles.length, 'change')} that match, on the{' '}
-                      {Array.from(new Set(p.settles.map((w) => w.screen.toLowerCase()))).join(', ')}.
-                    </p>
-                  ) : null}
-                  <p>
-                    <strong>Next time:</strong> a case that matches doesn’t ask you. The agent follows the rule and says so in its record.
-                  </p>
-                  <p>You can {p.fixed ? 'revoke' : 'edit or revoke'} it under the boundaries. Revoking it doesn’t undo what it already did.</p>
-                </div>
-              ) : (
-                <p className="ask__once">This answer applies to this change only.</p>
-              )}
-            </div>
-          ) : p.offer === 'conflict' ? (
-            <p className="ask__once">Your rule gives a different answer for cases like this, so this one applies to this change only. To change the rule, edit or revoke it.</p>
-          ) : null}
-          {option.note ?? q.note ? (
-            <p className="ask__note">
-              <Inline text={option.note ?? q.note ?? ''} />
-            </p>
-          ) : null}
-          <div className="ask__bar">
-            <p className="ask__bar-what">
-              <Inline text={option.label} />
-              {makeRule && (p.offer === 'make' || p.offer === 'widen') ? ', kept as a rule' : ''}
-            </p>
-            <div className="ask__actions">
-              <Button variant="ghost" onClick={cancel}>
-                Cancel
-              </Button>
-              <Button ref={apply} variant="primary" type="submit">
-                Apply
-              </Button>
-            </div>
-          </div>
-        </form>
-      ) : (
-        <div className="ask__options" role="group" aria-labelledby={contrast ? `${id}-if` : undefined} aria-label={contrast ? undefined : 'Answers'}>
-          {contrast && twin ? (
-            <>
-              <p className="ask__if" id={`${id}-if`}>
-                Should these meanings stay separate?
+      {tradeoff ? (
+        <>
+          {/* THE AGENT'S READ: what it recommends, and what it can't
+              determine that could change it. */}
+          <ul className="ask__pair ask__read" aria-label="The agent’s read">
+            {recommended ? (
+              <li className="ask__tile">
+                <p className="ask__label">Recommended</p>
+                <p className="ask__read-head">{recommended.title}</p>
+                <p className="ask__tile-means">
+                  <Inline text={q.recommendation} />
+                </p>
+              </li>
+            ) : null}
+            <li className="ask__tile ask__unknown">
+              <p className="ask__label">
+                <Icon name="message-question" size={16} />
+                What I can’t determine
               </p>
-              <p className="ask__later">Imagine the {twin.role} style becomes stronger later.</p>
-            </>
-          ) : contrast ? (
-            <p className="ask__if" id={`${id}-if`}>
-              If <Inline text="--color-danger" /> is made louder later:
-            </p>
-          ) : null}
-          <ul className="ask__choices" data-count={q.options.length}>
-            {q.options.map((o) => {
-              const follows = followsDanger(o);
-              return (
-                <li key={o.id} className="ask__choice" data-recommended={o.recommended || undefined}>
-                  <div className="ask__choice-head">
-                    {contrast && twin ? (
-                      <p className="ask__choice-title">{follows ? 'Keep the meanings linked' : 'Keep the meanings separate'}</p>
-                    ) : o.title ? (
-                      <p className="ask__choice-title">{o.title}</p>
-                    ) : contrast ? (
-                      <p className="ask__outcome">
-                        <Icon name={follows ? 'alert' : 'check'} size={16} />
-                        <span>{outcome(follows)}</span>
-                      </p>
-                    ) : null}
-                    {o.recommended ? (
-                      <Badge variant="quiet" className="ask__recommended">
-                        Recommended
-                      </Badge>
-                    ) : null}
-                  </div>
-                  {contrast && twin && sample ? (
-                    <>
-                      <p className="ask__choice-says">
-                        {follows ? `Both meanings continue using the ${twin.role} token.` : `${q.noun} and ${twin.means.toLowerCase()} use different semantic tokens.`}
-                      </p>
-                      {/* Both elements as they would render with a stronger
-                          danger, each beside what happens to it. */}
-                      <ul className="ask__then" aria-label={`If the ${twin.role} style becomes stronger`}>
-                        <li>
-                          <TwinSpecimen twin={twin} loud />
-                          <span className="ask__then-what">{twin.means} changes</span>
-                        </li>
-                        <li>
-                          <Specimen sample={sample} loud={follows} unlabelled />
-                          <span className="ask__then-what">
-                            {q.noun} {follows ? 'changes too' : 'stays the same'}
-                          </span>
-                        </li>
-                      </ul>
-                      <p className="ask__outcome">
-                        <Icon name={follows ? 'alert' : 'check'} size={16} />
-                        <span>{outcome(follows)}</span>
-                      </p>
-                    </>
-                  ) : contrast && sample ? (
-                    <div className="ask__samples">
-                      <Specimen sample={sample} loud={follows} />
-                    </div>
-                  ) : o.outcome ? (
-                    <p className="ask__effect-line">
-                      <Inline text={o.outcome} />
-                    </p>
-                  ) : (
-                    <p className="ask__effect-line">
-                      <Inline text={o.effect} />
-                    </p>
-                  )}
-                  {differ && consequence(o) ? (
-                    <p className="ask__choice-keeps">
-                      <Icon name={consequence(o)!.icon} size={14} />
-                      <span>{consequence(o)!.text}</span>
-                    </p>
-                  ) : null}
-                  <Button
-                    ref={(el) => {
-                      optionRefs.current[o.id] = el;
-                    }}
-                    variant={o.recommended ? 'primary' : 'secondary'}
-                    /* Gathering evidence decides nothing, so it needs no
-                       second step: the question comes back with more. */
-                    onClick={() => (o.asks ? onAnswer(o.id, false) : setChoice(o.id))}
-                  >
-                    {o.label}
-                  </Button>
-                </li>
-              );
-            })}
+              <p className="ask__tile-means">{q.unknown}</p>
+              {q.inferred ? (
+                <p className="ask__tile-token">
+                  <strong>Inferred, not checked:</strong> {q.inferred}
+                </p>
+              ) : null}
+              {evidence ? (
+                <Button
+                  className="ask__evidence"
+                  size="compact"
+                  variant="secondary"
+                  leadingIcon="search"
+                  ref={(el) => {
+                    optionRefs.current[evidence.id] = el;
+                  }}
+                  /* Asking for evidence decides nothing, so it needs no
+                     second step: the question comes back with more. */
+                  onClick={() => onAnswer(evidence.id, false)}
+                >
+                  {evidence.label}
+                </Button>
+              ) : null}
+            </li>
           </ul>
-        </div>
+
+          {q.gathered ? <GatheredEvidence g={q.gathered} id={id} /> : null}
+
+          <div className="ask__options" role="group" aria-labelledby={`${id}-if`}>
+            <p className="ask__if" id={`${id}-if`}>
+              Which trade-off is acceptable?
+            </p>
+            <p className="ask__later">Both directions are defensible, and the agent can apply either. Choosing one shows what it will do.</p>
+            <ul className="ask__choices ask__choices--tradeoff" data-count={directions.length}>
+              {directions.map((o) => {
+                const chosen = choice === o.id;
+                return (
+                  <li key={o.id} className="ask__choice" data-recommended={o.recommended || undefined} data-chosen={chosen || undefined}>
+                    <div className="ask__choice-head">
+                      <p className="ask__choice-title">{o.title}</p>
+                      {o.recommended ? (
+                        <Badge variant="quiet" className="ask__recommended">
+                          Recommended
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <p className="ask__choice-says">{o.outcome}</p>
+                    {twin && sample ? (
+                      <div className="ask__looks" aria-label={`How it looks: ${o.title}`} role="group">
+                        <TwinSpecimen twin={twin} />
+                        <Labelled sample={sample} label={said} neutral={o.id === 'separate'} />
+                      </div>
+                    ) : null}
+                    <div className="ask__weigh">
+                      <p className="ask__weigh-label" id={`${id}-${o.id}-good`}>
+                        Benefits
+                      </p>
+                      <ul className="ask__weigh-list" data-kind="benefit" aria-labelledby={`${id}-${o.id}-good`}>
+                        {o.benefits!.map((b) => (
+                          <li key={b}>
+                            <Icon name="plus" size={14} />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="ask__weigh-label" id={`${id}-${o.id}-cost`}>
+                        Risks
+                      </p>
+                      <ul className="ask__weigh-list" data-kind="risk" aria-labelledby={`${id}-${o.id}-cost`}>
+                        {(o.risks ?? []).map((r) => (
+                          <li key={r}>
+                            <Icon name="minus" size={14} />
+                            <span>{r}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <Button
+                      ref={(el) => {
+                        optionRefs.current[o.id] = el;
+                      }}
+                      className="ask__pick"
+                      variant="secondary"
+                      aria-pressed={chosen}
+                      leadingIcon={chosen ? 'check' : undefined}
+                      onClick={() => pick(o)}
+                    >
+                      {chosen ? 'Chosen' : 'Choose'}
+                      <span className="visually-hidden"> {o.title}</span>
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          {option && p ? (
+            <form className="ask__confirm ask__decide" aria-labelledby={`${id}-plan`} onSubmit={submit} onKeyDown={escape}>
+              <p ref={plan} className="ask__plan-head" id={`${id}-plan`} tabIndex={-1}>
+                If you apply “{option.title}”, the agent will:
+              </p>
+              <ol className="ask__plan">
+                {(option.plan ?? []).map((step) => (
+                  <li key={step}>
+                    <Inline text={step} />
+                  </li>
+                ))}
+              </ol>
+              {option.decision ? (
+                <TextArea
+                  className="ask__reason"
+                  label="Your reason"
+                  hint={
+                    reasonOf(option) === option.decision.reason
+                      ? 'Drafted by the agent from the direction you chose. Change it to what you know; the decision record keeps your words.'
+                      : 'In your words. The decision record keeps them.'
+                  }
+                  rows={2}
+                  value={reasonOf(option)}
+                  onChange={(e) => setReasons((r) => ({ ...r, [option.id]: e.target.value }))}
+                />
+              ) : null}
+              {rulePart}
+              {bar}
+            </form>
+          ) : null}
+        </>
+      ) : (
+        <>
+          {q.kind === 'scope' && q.reach ? (
+            <ReachCase work={work} reach={q.reach} id={id} />
+          ) : q.kind === 'intent' ? (
+            <div className="ask__why-person">
+              {q.verdict ? <p className="ask__verdict">{q.verdict}</p> : null}
+              <p className="ask__gap">
+                <Inline text={q.gap} />
+              </p>
+            </div>
+          ) : (
+            <pre className="ask__code">
+              <code>{work.lines.map((l) => `${l.selector} { ${l.property}: ${l.before}; }`).join('\n')}</code>
+            </pre>
+          )}
+
+          {option && p ? (
+            <form className="ask__confirm" aria-label={`Apply: ${option.label}`} onSubmit={submit} onKeyDown={escape}>
+              <p className="ask__effect">
+                <strong>
+                  <Inline text={option.label} />.
+                </strong>{' '}
+                <Inline text={option.effect} />
+              </p>
+              {rulePart}
+              {option.note ?? q.note ? (
+                <p className="ask__note">
+                  <Inline text={option.note ?? q.note ?? ''} />
+                </p>
+              ) : null}
+              {bar}
+            </form>
+          ) : (
+            <div className="ask__options" role="group" aria-label="Answers">
+              <ul className="ask__choices" data-count={q.options.length}>
+                {q.options.map((o) => (
+                  <li key={o.id} className="ask__choice" data-recommended={o.recommended || undefined}>
+                    <div className="ask__choice-head">
+                      {o.title ? <p className="ask__choice-title">{o.title}</p> : null}
+                      {o.recommended ? (
+                        <Badge variant="quiet" className="ask__recommended">
+                          Recommended
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <p className="ask__effect-line">
+                      <Inline text={o.outcome ?? o.effect} />
+                    </p>
+                    {differ && consequence(o) ? (
+                      <p className="ask__choice-keeps">
+                        <Icon name={consequence(o)!.icon} size={14} />
+                        <span>{consequence(o)!.text}</span>
+                      </p>
+                    ) : null}
+                    <Button
+                      ref={(el) => {
+                        optionRefs.current[o.id] = el;
+                      }}
+                      variant={o.recommended ? 'primary' : 'secondary'}
+                      /* Gathering evidence decides nothing, so it needs no
+                         second step: the question comes back with more. */
+                      onClick={() => (o.asks ? onAnswer(o.id, false) : setChoice(o.id))}
+                    >
+                      {o.label}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
       )}
 
       <ul className="ask__bounds" aria-label="Why it paused">
@@ -698,7 +953,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
         <div className="ask__more-body">
           {q.kind === 'intent' ? (
             <>
-              {!contrast && sample ? <Specimen sample={sample} /> : null}
+              {!twin && sample ? <Specimen sample={sample} /> : null}
               <p>
                 <Inline text={q.found} />
               </p>
@@ -738,7 +993,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                 </dd>
               </div>
             ) : null}
-            {recommended ? (
+            {recommended && !tradeoff ? (
               <div>
                 <dt>Why it recommends one</dt>
                 <dd>
@@ -753,7 +1008,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
               <div>
                 <dt>Also waiting</dt>
                 <dd>
-                  {plural(waiting.length, 'change')} {waiting.length === 1 ? 'is' : 'are'} held until you answer, because the same answer may settle {waiting.length === 1 ? 'it' : 'them'}:
+                  {plural(waiting.length, 'change')} {waiting.length === 1 ? 'is' : 'are'} held until you decide, because the same decision may settle {waiting.length === 1 ? 'it' : 'them'}:
                   <ul className="ask__list">
                     {waiting.map((w) => (
                       <li key={w.id}>

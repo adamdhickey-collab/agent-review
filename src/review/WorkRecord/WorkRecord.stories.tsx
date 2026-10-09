@@ -6,7 +6,7 @@ import { WorkRecord } from './WorkRecord';
 
 const start = initialDelegation();
 const work = (id: string, s = start) => find(s, id) as Work;
-const withRule = play(start, { type: 'answer', id: 'activity-red', option: 'diff', makeRule: true });
+const withRule = play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: true });
 const reverted = play(withRule, { type: 'revert', id: 'plan-seats' });
 const left = play(start, { type: 'answer', id: 'meter-radius', option: 'leave', makeRule: false });
 const allowed = play(start, { type: 'answer', id: 'meter-radius', option: 'add', makeRule: false });

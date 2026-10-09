@@ -107,16 +107,16 @@ for (const width of WIDTHS) {
   });
 }
 
-/* The delegated work with an answer chosen and the rule box checked: the
-   confirmation, the rule as it will read, and Apply. The one state on that
+/* The delegated work with a direction chosen and the rule box checked: the
+   plan, the reason, the rule as it will read, and Apply. The one state on that
    screen that adds controls, so the one measured beyond the first load. */
 test.describe('the delegated work on a phone, answering', () => {
   test.use({ ...phone, viewport: { width: 320, height: 800 }, deviceScaleFactor: 1 });
 
   test('the confirmation and the rule fit, and their controls are a fingertip', async ({ page }) => {
     await open(page, '#/');
-    await page.getByRole('button', { name: 'Use the diff pair' }).click();
-    await page.getByText('Also use this answer for similar cases').click();
+    await page.getByRole('button', { name: /^Choose\s+Separate the meanings$/ }).click();
+    await page.getByText('Use this decision for similar cases').click();
     await expect(page.getByText('The rule, as it will read')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
     for (const name of ['Cancel', 'Apply']) {
@@ -125,6 +125,30 @@ test.describe('the delegated work on a phone, answering', () => {
     }
     const label = await page.locator('.ask .checkbox').boundingBox();
     expect(label!.height, 'the rule box').toBeGreaterThanOrEqual(FLOOR);
+  });
+});
+
+/* The other path through the same card: evidence asked for, then the
+   direction the agent did not recommend chosen and applied. Every part it
+   adds (the evidence, the plan, the reason, the record) fits the screen. */
+test.describe('the delegated work on a phone, the other direction', () => {
+  test.use({ ...phone, viewport: { width: 320, height: 800 }, deviceScaleFactor: 1 });
+
+  test('the evidence, the plan and the record fit, and their controls are a fingertip', async ({ page }) => {
+    await open(page, '#/');
+    await page.getByRole('button', { name: 'Request evidence' }).click();
+    await expect(page.getByText('What the agent found when you asked')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    await page.getByRole('button', { name: /^Choose\s+Keep the red for now$/ }).click();
+    await expect(page.getByRole('textbox', { name: 'Your reason' })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    for (const name of [/^Chosen\s+Keep the red for now$/, /^Choose\s+Separate the meanings$/]) {
+      const box = await page.getByRole('button', { name }).boundingBox();
+      expect(box!.height, String(name)).toBeGreaterThanOrEqual(FLOOR);
+    }
+    await page.getByRole('button', { name: 'Apply', exact: true }).click();
+    await expect(page.getByRole('article', { name: 'Keep the red for now' })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   });
 });
 

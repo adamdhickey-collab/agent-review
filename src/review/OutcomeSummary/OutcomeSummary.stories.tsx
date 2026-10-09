@@ -5,14 +5,14 @@ import { play } from '../../data/delegation';
 import { OutcomeFacts, OutcomeSummary } from './OutcomeSummary';
 
 const start = initialDelegation();
-const withRule = play(start, { type: 'answer', id: 'activity-red', option: 'diff', makeRule: true });
+const withRule = play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: true });
 const quiet = play(
   withRule,
   { type: 'answer', id: 'meter-radius', option: 'add', makeRule: false },
-  { type: 'answer', id: 'invoice-removed', option: 'diff', makeRule: false },
+  { type: 'answer', id: 'invoice-removed', option: 'separate', makeRule: false },
 );
 const mixed = play(quiet, { type: 'revert', id: 'plan-seats' });
-const left = play(withRule, { type: 'answer', id: 'meter-radius', option: 'leave', makeRule: false }, { type: 'answer', id: 'invoice-removed', option: 'diff', makeRule: false });
+const left = play(withRule, { type: 'answer', id: 'meter-radius', option: 'leave', makeRule: false }, { type: 'answer', id: 'invoice-removed', option: 'separate', makeRule: false });
 
 const meta = {
   title: 'Review/OutcomeSummary',

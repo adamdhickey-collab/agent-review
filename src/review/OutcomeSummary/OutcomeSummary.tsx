@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { Badge, Icon, type BadgeTone, type IconName } from '../../components';
-import { account, BOUNDARY_GROUP_ICON, valuesIn, wordsOf, type CheckName, type DelegationState } from '../../data/delegation';
+import { account, BOUNDARY_GROUP_ICON, valuesIn, wordsOf, type CheckName, type Decision, type DelegationState } from '../../data/delegation';
 import { plural } from '../format';
 import './OutcomeSummary.css';
 
@@ -69,7 +69,7 @@ const CHECKS: { name: CheckName; short: string }[] = [
 
 type Segment = { kind: 'made' | 'waiting' | 'back'; n: number; label: string };
 
-function factsOf(a: ReturnType<typeof account>) {
+function factsOf(a: ReturnType<typeof account>, decisions: Decision[] = []) {
   const checked = [...a.made, ...a.reverted].filter((w) => w.checks);
   const checks = CHECKS.map(({ name, short }) => {
     const results = checked.map((w) => w.checks!.find((c) => c.name === name)).filter(Boolean);
@@ -99,6 +99,11 @@ function factsOf(a: ReturnType<typeof account>) {
      screens a local fix left as they were. */
   for (const w of a.made) {
     if (w.open) unresolved.push({ icon: w.basis?.kind === 'allowed-once' ? 'status-changed' : 'status-note', text: w.open });
+  }
+  /* What a decision left to do, until somebody does it: the follow-up it
+     opened, which no change in this run closes. */
+  for (const d of decisions) {
+    unresolved.push({ icon: 'flag', text: `Follow-up from your decision at ${d.at}: ${d.followUp.charAt(0).toLowerCase()}${d.followUp.slice(1)}` });
   }
   if (a.reverted.length) {
     const n = valuesIn(a.reverted);
@@ -243,7 +248,7 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
    hidden by being moved; the unresolved check is as visible as it was. */
 export function OutcomeFacts({ state }: { state: DelegationState }) {
   const a = account(state);
-  const { checks, unresolved, scope } = factsOf(a);
+  const { checks, unresolved, scope } = factsOf(a, state.decisions);
   return (
     <section className="outcome" aria-label="What the checks established">
       <dl className="outcome__facts">

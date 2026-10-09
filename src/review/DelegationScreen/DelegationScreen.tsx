@@ -6,6 +6,7 @@ import { account, activeRule, ruleText, waitingOn, whyAsking, wordsOf, wouldSett
 import { plural, relativeTime } from '../format';
 import { OutcomeFacts, OutcomeSummary } from '../OutcomeSummary/OutcomeSummary';
 import { DecisionRequest, type RulePreview } from '../DecisionRequest/DecisionRequest';
+import { DecisionRecord } from '../DecisionRecord/DecisionRecord';
 import { RecordHead, WorkRecord } from '../WorkRecord/WorkRecord';
 import { Boundaries } from '../Boundaries/Boundaries';
 import './DelegationScreen.css';
@@ -65,7 +66,15 @@ import { Inline } from '../Inline';
    has just decided can see what the decision became without hunting for
    it. The sentence is still the live region. Nothing is claimed that the
    reducer did not do: the agent merged what the answer settled, and a rule
-   exists because the person made one. */
+   exists because the person made one.
+
+   YOUR DECISIONS, SINCE 2026-10-09, LATER. A decision on a trade-off
+   leaves a record (DecisionRecord): what the agent did, the person's
+   reason, the trade-off they accepted, the risk that remains, the
+   follow-up it opened and whether it became a rule. The records are a
+   section of their own under the decisions still asking, newest first,
+   so the card that asked turns into what it decided a few lines down, and
+   the notice points at it. */
 
 /* The runs, as the switch names them: what each is about, in two words. */
 const RUNS: { id: RunId; label: string; kind: string }[] = [
@@ -98,6 +107,7 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
   const lead = useRef<HTMLParagraphElement>(null);
   const top = useRef<HTMLHeadingElement>(null);
   const bounds = useRef<HTMLElement>(null);
+  const records = useRef<Record<string, HTMLElement | null>>({});
   const focusNext = useRef(false);
 
   useEffect(() => {
@@ -198,7 +208,19 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
                 <p>
                   <Inline text={s.notice} />
                 </p>
-                {s.noticeRule && s.rules.some((r) => r.id === s.noticeRule && r.status === 'active') ? (
+                {s.noticeDecision && s.decisions.some((d) => d.id === s.noticeDecision) ? (
+                  <Button
+                    size="compact"
+                    variant="secondary"
+                    onClick={() => {
+                      const el = records.current[s.noticeDecision!];
+                      el?.scrollIntoView({ block: 'nearest' });
+                      el?.focus();
+                    }}
+                  >
+                    See the decision record
+                  </Button>
+                ) : s.noticeRule && s.rules.some((r) => r.id === s.noticeRule && r.status === 'active') ? (
                   <Button
                     size="compact"
                     variant="secondary"
@@ -227,12 +249,40 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
                   boundaries={s.boundaries.filter((b) => w.question!.paused.includes(b.n))}
                   waiting={waitingOn(s, w.id)}
                   preview={preview(w)}
-                  onAnswer={(option, makeRule) => {
+                  onAnswer={(option, makeRule, reason) => {
                     focusNext.current = true;
-                    delegate({ type: 'answer', id: w.id, option, makeRule });
+                    delegate({ type: 'answer', id: w.id, option, makeRule, reason });
                   }}
                 />
               ))}
+            </section>
+          ) : null}
+
+          {s.decisions.length ? (
+            <section className="delegation__section" aria-labelledby="decided-title">
+              <h2 id="decided-title" className="delegation__h2">
+                Your decisions <span className="delegation__count">{s.decisions.length}</span>
+              </h2>
+              <p className="delegation__hint">What you decided, why, and what it left to do. A later change follows one only through a rule you made from it.</p>
+              <ul className="delegation__decisions">
+                {[...s.decisions].reverse().map((d) => (
+                  <li key={d.id}>
+                    <DecisionRecord
+                      ref={(el) => {
+                        records.current[d.id] = el;
+                      }}
+                      decision={d}
+                      work={s.work.find((w) => w.id === d.from)}
+                      rule={d.rule ? s.rules.find((r) => r.id === d.rule) : undefined}
+                      all={s.work}
+                      onSeeRule={() => {
+                        bounds.current?.scrollIntoView({ block: 'nearest' });
+                        bounds.current?.focus();
+                      }}
+                    />
+                  </li>
+                ))}
+              </ul>
             </section>
           ) : null}
 

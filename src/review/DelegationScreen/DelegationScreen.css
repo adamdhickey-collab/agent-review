@@ -293,3 +293,10 @@
     min-height: var(--control-height-touch);
   }
 }
+
+/* The decisions a person made, newest first, one record each. */
+.delegation__decisions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}

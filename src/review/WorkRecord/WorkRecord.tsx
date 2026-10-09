@@ -91,7 +91,7 @@ export interface WorkRecordProps {
 const BASIS: Record<NonNullable<Work['basis']>['kind'], { label: string; tone: BadgeTone } | undefined> = {
   boundary: undefined,
   rule: { label: 'Your rule', tone: 'accent' },
-  answer: { label: 'Your answer', tone: 'accent' },
+  answer: { label: 'Your decision', tone: 'accent' },
   'allowed-once': { label: 'Allowed once', tone: 'warning' },
 };
 
@@ -110,9 +110,14 @@ function hunks(work: Work): DiffHunk[] {
         : [{ kind: 'context' as const, text: `${l.selector} { ${l.property}: ${l.before}; }` }],
     ),
   };
-  const added = new Map<string, string[]>();
-  for (const a of work.adds ?? []) added.set(a.file, [...(added.get(a.file) ?? []), a.text]);
-  return [own, ...Array.from(added, ([file, texts]) => ({ file, header: 'a new token', lines: texts.map((text) => ({ kind: 'add' as const, text })) }))];
+  /* Lines written elsewhere, a hunk per file, headed by what they are: a
+     new token, a label in the screen's markup, an exception written down. */
+  const added = new Map<string, { header: string; texts: string[] }>();
+  for (const a of work.adds ?? []) {
+    const had = added.get(a.file);
+    added.set(a.file, { header: had?.header ?? a.header ?? 'a new token', texts: [...(had?.texts ?? []), a.text] });
+  }
+  return [own, ...Array.from(added, ([file, { header, texts }]) => ({ file, header, lines: texts.map((text) => ({ kind: 'add' as const, text })) }))];
 }
 
 export function WorkRecord({ work, boundaries, rule, line = 'value', onRevert, onRestore, open }: WorkRecordProps) {
@@ -204,7 +209,7 @@ export function WorkRecord({ work, boundaries, rule, line = 'value', onRevert, o
           ) : basis?.kind === 'answer' && work.status === 'left' ? (
             <p>Your decision at {basis.at}. Nothing was changed.</p>
           ) : basis?.kind === 'answer' ? (
-            <p>Your answer at {basis.at}, for this change only. The agent had asked under boundary {work.question?.paused.join(' and ')}.</p>
+            <p>Your decision at {basis.at}, for this change only. The agent had asked under boundary {work.question?.paused.join(' and ')}.</p>
           ) : basis?.kind === 'allowed-once' ? (
             <p>You allowed it at {basis.at}, past boundary {work.question?.paused[work.question.paused.length - 1]}, for this change only. The delegation is as it was.</p>
           ) : null}
@@ -264,7 +269,7 @@ export function WorkRecord({ work, boundaries, rule, line = 'value', onRevert, o
               {work.status === 'made' && work.undo
                 ? work.undo
                 : work.status === 'made'
-                ? `Reverting adds a commit to main that puts the ${n === 1 ? 'literal' : 'literals'} back${work.adds?.length ? ' and takes the new token out' : ''}. The lint will report ${n === 1 ? 'it' : 'them'} again, and the agent won’t redo it.`
+                ? `Reverting adds a commit to main that puts the ${n === 1 ? 'literal' : 'literals'} back${work.adds?.length ? ` and takes ${work.adds.some((a) => (a.header ?? 'a new token') === 'a new token') ? 'the new token' : 'what it added'} out` : ''}. The lint will report ${n === 1 ? 'it' : 'them'} again, and the agent won’t redo it.`
                 : `Reverted. Restoring applies ${work.commit} again.`}
             </p>
             <Button

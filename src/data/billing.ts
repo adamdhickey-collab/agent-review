@@ -1,4 +1,4 @@
-import { cleanChecks, RULE_EXCLUDES, type Boundary, type DelegationState, type Option, type Pattern, type Question, type RuleDraft, type Twin, type Work } from './delegation';
+import { cleanChecks, RULE_EXCLUDES, type Addition, type Boundary, type Check, type DelegationState, type Gathered, type Option, type Pattern, type Question, type RuleDraft, type Twin, type Work } from './delegation';
 
 /* The delegated run the product opens on: Claude Code moving Relay's billing
    screens onto the token layer. SIMULATED THROUGHOUT. Unlike rv-2041 and
@@ -9,7 +9,11 @@ import { cleanChecks, RULE_EXCLUDES, type Boundary, type DelegationState, type O
    and so are the two facts the scenario turns on: --color-danger and
    --color-diff-remove-ink are both #b42318, and --color-success and
    --color-diff-add-ink are both #1f7a3f, so a swap to either name moves no
-   pixel and every check passes whichever is chosen.
+   pixel and every check passes whichever is chosen. That is why the agent
+   cannot settle the red by its checks; what it proposes once it has
+   stopped (THE TRADE-OFF, below) is a visible change either way. What
+   people who use the billing screens rely on is scenario context the agent
+   says it cannot know; nothing here claims research or usage data.
 
    The arithmetic, which the stories assert: the lint reported 36 literals.
    Seven changes the agent made on its own hold 26 of them; two questions
@@ -253,142 +257,324 @@ const settingsRoutine: Work = {
    Where it stopped
    ------------------------------------------------------------------------ */
 
-/* The answers to "what does this red mean". The same two for every
-   struck-through value, so a rule can choose one for all of them. */
-function struck(pattern: Struck): Option[] {
-  if (pattern === 'removed') {
-    return [
-      { id: 'diff', label: 'Use the diff remove ink', after: ['var(--color-diff-remove-ink)'], effect: 'The struck value takes --color-diff-remove-ink.', recommended: true, rule: KEEP_APART },
-      { id: 'danger', label: 'Use danger', after: ['var(--color-danger)'], effect: 'The struck value takes --color-danger.', rule: KEEP_LINKED },
-    ];
-  }
-  return [
+/* THE TRADE-OFF (2026-10-09). Until today the answers to "what does this red
+   mean" were two token names that drew the same pixels, one recommended,
+   and nothing a person could weigh: the right answer was obvious, so the
+   stop proved nothing about judgment. Now the agent finds the same thing
+   (one red, a failure's and a replaced value's) and proposes two fixes that
+   are both defensible and both cost something:
+
+   - Separate the meanings. Failures keep the red. A replaced or removed
+     value turns neutral, with an icon and a label that say what happened.
+     Red means one thing, and a familiar signal changes.
+   - Keep the red for now. Both stay red, and the value gains the same icon
+     and label, so it reads differently from a failure without changing
+     color. Nothing changes under anyone's habits, and the design system
+     carries a written exception until a neutral style has been tested.
+
+   The agent recommends the first and says what it can't determine: whether
+   the people who use these screens rely on the red to catch a change when
+   it matters. That is scenario context the agent cannot check, so it is a
+   question, never a finding, and nothing here claims research. Asked for
+   evidence, it gathers what a repository can tell (where the red is used,
+   what each fix would change, what depends on it) and says plainly what it
+   can't, with a way to find out that nobody has run.
+
+   Either direction is real work: a mapping, a label, a task left open, and
+   a decision record with the person's reason. Neither is an error state. */
+
+/** Each case of a struck value, in the words its card and its record use. */
+const STRUCK_MEANS: Record<Struck, { means: string; says: string; noun: string; label: string }> = {
+  replaced: { means: 'Replaced value', says: 'Red means this value was replaced.', noun: 'Replacement', label: 'Replaced' },
+  removed: { means: 'Removed value', says: 'Red means this value was removed.', noun: 'Removal', label: 'Removed' },
+};
+
+/** Where a struck value is, and what a person watching that screen would be noticing: "a plan change". */
+interface Case {
+  pattern: Struck;
+  file: string;
+  screen: string;
+  noticing: string;
+  frames: number;
+  stories: number;
+}
+
+/* What the agent gathers when a person asks for evidence. The same for every
+   struck value, because it is the same red. Counted from the scenario: the
+   five struck values are on four screens whose frames and stories add to
+   ten and ten. */
+const GATHERED: Gathered = {
+  uses: [
+    { what: 'The failure red, --color-danger', places: '1 place: “Payment failed” in the payment history.' },
     {
-      id: 'diff',
-      label: 'Use the diff pair',
-      after: ['var(--color-diff-remove-ink)', 'var(--color-diff-add-ink)'],
-      effect: 'The old value takes --color-diff-remove-ink and the new one --color-diff-add-ink.',
-      recommended: true,
-      rule: KEEP_APART,
+      what: 'The same red, hard-coded as #b42318',
+      places:
+        '5 places on 4 screens: the old plan in billing activity, the old amount and a removed line item in the invoice detail, the old seat count on the plan card, and the old billing email in billing settings.',
     },
-    { id: 'danger', label: 'Use danger and success', after: ['var(--color-danger)', 'var(--color-success)'], effect: 'The old value takes --color-danger and the new one --color-success.', rule: KEEP_LINKED },
+  ],
+  changes: [
+    { direction: 'Separate the meanings', text: 'All 5 turn neutral and gain a label. 10 visual baselines move.' },
+    { direction: 'Keep the red for now', text: 'All 5 gain a label and stay red. 10 visual baselines move, by the label only.' },
+  ],
+  depends: ['Nothing outside the billing screens uses #b42318 as a literal.', '10 stories cover the five values, and every one would be re-run.'],
+  unverified: [
+    'Whether anyone relies on the red to spot a change. There is no usage data or research about it in the repository.',
+    'Whether a plan change ever needs someone to act on it quickly.',
+  ],
+  validation:
+    'Show both styles to five people who use billing activity, in a feed of 20 rows. Ask them to find every plan change, and note any they take for a failure.',
+};
+
+const markup = (c: Case) => c.file.replace(/\.css$/, '.tsx');
+const EXCEPTIONS = 'docs/design-system/exceptions.md';
+
+/* The checks, run with each direction in place in turn. Both change what the
+   value looks like, on purpose, so the visual check says it moved rather
+   than calling that a pass; the lint and axe pass with either. */
+function tradeoffChecks(c: Case): Check[] {
+  return [
+    { name: 'Token lint', state: 'passed', label: 'Passed with both', established: 'Either direction names tokens, and every token it names exists.' },
+    { name: 'Stories with axe', state: 'passed', label: `${c.stories} of ${c.stories} passed with both`, established: 'The neutral ink, the red and the label each clear 4.5:1.' },
+    {
+      name: 'Visual baselines',
+      state: 'changed',
+      label: `${c.frames} of ${c.frames} frames moved with both`,
+      established: 'Only this value moves, as each direction intends. Nothing else on the screen does.',
+    },
   ];
 }
 
-/* What either answer becomes if a person keeps it: where it applies, what
+/* The two directions, and asking for evidence first. */
+function directions(c: Case, gathered: boolean): Option[] {
+  const m = STRUCK_MEANS[c.pattern];
+  const replaced = c.pattern === 'replaced';
+  const label: Addition = { file: markup(c), header: 'a label', text: `<Badge icon="swap">${m.label}</Badge>` };
+  const ran = (what: string) =>
+    `Ran the checks: the token lint passed, ${c.frames} of ${c.frames} frames moved (${what}, as you decided, re-recorded), ${c.stories} of ${c.stories} stories passed.`;
+  const checks = (moved: string): Check[] => [
+    { name: 'Token lint', state: 'passed', label: 'Passed', established: 'These lines name tokens now, and every token they name exists.' },
+    { name: 'Visual baselines', state: 'changed', label: `${c.frames} of ${c.frames} frames moved`, established: `${moved} Re-recorded, as you decided.` },
+    { name: 'Stories with axe', state: 'passed', label: `${c.stories} of ${c.stories} passed`, established: 'Every story renders, and axe found no violation. The label and its ink clear 4.5:1.' },
+  ];
+
+  const separate: Option = {
+    id: 'separate',
+    title: 'Separate the meanings',
+    label: 'Separate the meanings',
+    recommended: true,
+    outcome: `Failures stay red. The ${m.label.toLowerCase()} value turns neutral, with an icon and a “${m.label}” label.`,
+    effect: replaced
+      ? `Failures keep --color-danger. The struck value takes --color-text-muted, the new one --color-text, and a “${m.label}” label goes before them.`
+      : `Failures keep --color-danger. The struck value takes --color-text-muted, and a “${m.label}” label goes before it.`,
+    after: replaced ? ['var(--color-text-muted)', 'var(--color-text)'] : ['var(--color-text-muted)'],
+    adds: [label],
+    benefits: ['Red means one thing: a failure.', `A ${replaced ? 'change' : 'removal'} no longer looks like something went wrong.`, 'A clear rule the design system can keep.'],
+    risks: ['Changes a signal people may rely on.', `A ${c.noticing} may be missed at first.`, 'Needs checking with the people who use it.'],
+    plan: [
+      'Keep --color-danger for failures only.',
+      `Map the ${m.label.toLowerCase()} value to a neutral style: --color-text-muted, struck through.`,
+      `Add a “${m.label}” label and icon, so it says what happened in words.`,
+      `Open a task to check the new style with people who use the ${c.screen.toLowerCase()} screen.`,
+      'Record your decision and your reason.',
+    ],
+    done: [
+      'Kept --color-danger for failures only.',
+      `Mapped the ${m.label.toLowerCase()} value to a neutral style: --color-text-muted, struck through.`,
+      `Added a “${m.label}” label and icon.`,
+      `Opened a task: check the new style with people who use the ${c.screen.toLowerCase()} screen.`,
+      'Recorded your decision and your reason.',
+    ],
+    decision: {
+      tradeoff: 'One meaning for red, over a signal people already know.',
+      risk: `People who look for red may miss a ${c.noticing} until they learn the new style.`,
+      followUp: `Check the neutral style with people who use the ${c.screen.toLowerCase()} screen, before it reaches more screens.`,
+      reason: `Red should mean something went wrong. A ${c.noticing} is routine, and the label says what it is.`,
+    },
+    then: {
+      checks: checks(`Only the ${m.label.toLowerCase()} value moved: neutral now, with its label.`),
+      unchecked: `Whether people who use the ${c.screen.toLowerCase()} screen still notice a ${c.noticing} in its neutral style. No check can tell; the follow-up asks them.`,
+      history: [
+        'Kept --color-danger for failures only.',
+        `Mapped the struck value to the neutral style: --color-text-muted${replaced ? ', and --color-text for the new one' : ''}.`,
+        `Added the “${m.label}” label and its icon.`,
+        ran('the value, now neutral'),
+        `Opened a follow-up: check the neutral style with people who use the ${c.screen.toLowerCase()} screen.`,
+        'Recorded your decision and your reason.',
+      ],
+      ruled: [`Mapped the struck value to the neutral style, and added the “${m.label}” label.`, ran('the value, now neutral')],
+    },
+    rule: KEEP_APART,
+  };
+
+  const keep: Option = {
+    id: 'keep',
+    title: 'Keep the red for now',
+    label: 'Keep the red for now',
+    outcome: `Both stay red. The ${m.label.toLowerCase()} value gains the same icon and “${m.label}” label, so it doesn’t read as a failure.`,
+    effect: replaced
+      ? `The struck value takes --color-danger and the new one --color-success, as they draw today, a “${m.label}” label goes before them, and the exception is written down.`
+      : `The struck value takes --color-danger, as it draws today, a “${m.label}” label goes before it, and the exception is written down.`,
+    after: replaced ? ['var(--color-danger)', 'var(--color-success)'] : ['var(--color-danger)'],
+    adds: [label, { file: EXCEPTIONS, header: 'an exception', text: `- Billing: a ${m.label.toLowerCase()} value may stay red, with a “${m.label}” label, until a neutral style is tested.` }],
+    benefits: ['Keeps the signal people know.', 'No sudden change in the middle of someone’s work.', 'The label says what happened without relying on color.'],
+    risks: ['Red still means two things.', 'Needs a written exception to the design system.', 'The real fix is postponed, not made.'],
+    plan: [
+      'Keep the red for now, on --color-danger, as it draws today.',
+      `Add a “${m.label}” label and icon, so it doesn’t read as a failure.`,
+      'Write the exception into the design system’s list of exceptions.',
+      'Open a task to review the exception once a neutral style is tested.',
+      'Record your decision and your reason.',
+    ],
+    done: [
+      'Kept the red for now, on --color-danger, as it draws today.',
+      `Added a “${m.label}” label and icon.`,
+      'Wrote the exception into the design system’s list of exceptions.',
+      'Opened a task: review the exception once a neutral style is tested.',
+      'Recorded your decision and your reason.',
+    ],
+    decision: {
+      tradeoff: 'A familiar signal now, over one meaning for red.',
+      risk: `Red still means two things, so a ${c.noticing} can still be read as a failure.`,
+      followUp: `Review this exception once a neutral style has been tested with people who use the ${c.screen.toLowerCase()} screen.`,
+      reason: 'Familiarity matters more right now. Keep the red until a neutral style has been tested with the people who use it.',
+    },
+    then: {
+      checks: checks(`Only the label moved in; the ${m.label.toLowerCase()} value is the red it was.`),
+      unchecked: `Whether the label is enough to tell a ${c.noticing} from a failure at a glance. No check can tell; the review task asks.`,
+      history: [
+        'Kept the struck value on --color-danger, as it draws today.',
+        `Added the “${m.label}” label and its icon.`,
+        `Wrote the exception into ${EXCEPTIONS}.`,
+        ran('the label'),
+        'Opened a follow-up: review the exception once a neutral style is tested.',
+        'Recorded your decision and your reason.',
+      ],
+      ruled: [`Kept the struck value red, and added the “${m.label}” label, under the exception you wrote.`, ran('the label')],
+    },
+    rule: KEEP_RED,
+  };
+
+  if (gathered) return [separate, keep];
+  return [
+    separate,
+    keep,
+    {
+      id: 'evidence',
+      title: 'Request evidence',
+      label: 'Request evidence',
+      effect: 'It looks up where this red is used, what each direction would change and what it can’t verify, and asks again. Nothing changes in the code.',
+      after: [],
+      asks: struckQuestion(c, true),
+      then: {
+        history: [
+          'Searched the billing screens for #b42318 and --color-danger, and listed what each direction would change.',
+          'Looked for usage data or research about the red. Found none in the repository.',
+        ],
+        notice: 'Nothing decided yet. The evidence doesn’t settle it: nothing in the repository says whether people rely on the red. It’s asking again, with what it found.',
+      },
+    },
+  ];
+}
+
+/* What either direction becomes if a person keeps it: where it applies, what
    it leaves out, and why, so the rule can be read, and revoked, by someone
-   who wasn't there when it was made. The text is built from what it covers
-   (ruleText), because a person can widen or narrow that. */
+   who wasn't there. Its why is the person's reason once they decide
+   (delegation.ts); these are what it says when a story makes one without. */
 const KEEP_APART: RuleDraft = {
   scope: 'Struck-through values on the billing screens',
   excludes: RULE_EXCLUDES,
-  why: 'A struck value shows what was replaced or removed, not a failure, so it shouldn’t follow danger’s red if that changes.',
+  why: 'Red should mean something went wrong, and a struck value is a change, not a failure.',
 };
-const KEEP_LINKED: RuleDraft = {
+const KEEP_RED: RuleDraft = {
   scope: 'Struck-through values on the billing screens',
   excludes: RULE_EXCLUDES,
-  why: 'You chose to keep a struck value and a failure in one red, so they change together.',
+  why: 'People may depend on the red today. Keep it, labelled, until a neutral style has been tested.',
 };
 
-const EVIDENCE_TOKENS = 'tokens.css says the diff pair is for “a line added and a line removed”.';
-
-/* The red every struck-through value shares, where its meaning was never in
-   doubt: the status “Payment failed”, which the agent gave --color-danger on
-   its own (paymentFailed, above). A question about what a struck value means
-   shows it beside the value, so the person sees two reds that look the same,
-   and what each one means, before reading the name of a token. */
+/* The red every struck value shares, where its meaning was never in doubt:
+   the status “Payment failed”, which the agent gave --color-danger on its
+   own (paymentFailed, above). */
 const FAILED: Twin = {
   text: 'Payment failed',
   means: 'Failure',
+  screen: 'Payment history',
   says: 'Red means something went wrong.',
   token: '--color-danger',
   role: 'danger',
 };
 
-/* What a struck value's red means, by pattern, in the words the card uses. */
-const STRUCK_MEANS: Record<Struck, { means: string; says: string; noun: string; word: string }> = {
-  replaced: { means: 'Replaced value', says: 'Red means this value was replaced.', noun: 'Replacement', word: 'replaced' },
-  removed: { means: 'Removed value', says: 'Red means this value was removed.', noun: 'Removal', word: 'removed' },
-};
-
-/* Every struck-through value was tried with both names before it was held or
-   asked about: the two names are one red, so the checks come back the same
-   with each, which is the whole reason it cannot choose. Every one asks the
-   same question, because it is the same two reds: the struck value and the
-   failure. */
-function struckQuestion(pattern: Struck, found: string, recommendation: string, frames: number, stories: number): Question {
-  const m = STRUCK_MEANS[pattern];
+/* Every struck value asks the same question, because it is the same red,
+   and every one was tried with both directions in place before it asked. */
+function struckQuestion(c: Case, gathered = false): Question {
+  const m = STRUCK_MEANS[c.pattern];
   return {
     kind: 'intent',
-    ask: 'These two reds look the same. Should they mean the same thing?',
-    found,
-    gap: `The interface can be stable and accessible either way. The checks can’t decide whether “${m.word}” and “failed” should share the same meaning.`,
+    ask: 'Separate the two meanings of red, or keep the familiar signal?',
+    found: FOUND[c.pattern],
+    gap: `The checks pass either way. Which trade-off is acceptable depends on how people use the ${c.screen.toLowerCase()}, which no check can see.`,
     means: m.means,
     says: m.says,
     noun: m.noun,
-    evidence:
-      pattern === 'replaced'
-        ? [
-            { for: 'A replaced value', says: `The old value is struck through beside the one that replaced it, and ${EVIDENCE_TOKENS}` },
-            { for: 'A failure', says: 'It is the red of “Payment failed” in the payment history, which the agent made --color-danger under boundary 2.' },
-          ]
-        : [
-            { for: 'A removed value', says: `The line is struck through and nothing took its place, and ${EVIDENCE_TOKENS}` },
-            { for: 'A failure', says: 'It is the red of “Payment failed”, which is --color-danger.' },
-          ],
-    recommendation,
+    evidence: [
+      { for: `A ${m.label.toLowerCase()} value`, says: `It is struck through${c.pattern === 'replaced' ? ' beside the value that replaced it' : ', and nothing took its place'}. Nothing failed.` },
+      { for: 'A failure', says: 'It is the exact red of “Payment failed”, which the design system names --color-danger, for a failure.' },
+      { for: 'A familiar signal', says: 'It came over from the old billing app with these screens, as a literal. That is all the repository says about who looks for it.' },
+    ],
+    recommendation: `The same red stands for a failure and a ${m.label.toLowerCase()} value. Separating them would make red mean one thing across the billing screens.`,
+    unknown: `Whether people who use the ${c.screen.toLowerCase()} screen rely on the red to notice a ${c.noticing} during time-sensitive work. That could change this recommendation.`,
+    inferred: 'The red came over from the old billing app, so the people who use these screens may be used to it.',
+    gathered: gathered ? GATHERED : undefined,
     paused: [5],
-    options: struck(pattern),
-    pattern,
+    options: directions(c, gathered),
+    pattern: c.pattern,
     twin: FAILED,
-    tried: cleanChecks(frames, stories),
+    tried: tradeoffChecks(c),
   };
 }
 
+const FOUND: Record<Struck, string> = {
+  replaced: 'The lint reported this red as a literal, #b42318. Two tokens have that value: --color-danger, which the design system keeps for a failure, and --color-diff-remove-ink. Here it marks a value that was replaced, so either name would say something the other doesn’t.',
+  removed: 'The lint reported this red as a literal, #b42318. Two tokens have that value: --color-danger, which the design system keeps for a failure, and --color-diff-remove-ink. Here it marks a line that was removed, so either name would say something the other doesn’t.',
+};
+
+const ACTIVITY: Case = { pattern: 'replaced', file: file('BillingActivity.css'), screen: 'Billing activity', noticing: 'plan change', frames: 2, stories: 2 };
+
 const activityRed: Work = {
   id: 'activity-red',
-  file: file('BillingActivity.css'),
-  screen: 'Billing activity',
-  title: 'The plan change in the billing activity takes the diff pair',
+  file: ACTIVITY.file,
+  screen: ACTIVITY.screen,
+  title: 'The plan change in the billing activity, and what its red means',
   status: 'asking',
   sample: { label: 'Plan', old: 'Starter', replacement: 'Growth' },
   lines: [
     { selector: '.activity__old', property: 'color', before: '#b42318' },
     { selector: '.activity__new', property: 'color', before: '#1f7a3f' },
   ],
-  question: struckQuestion(
-    'replaced',
-    'A plan change shows the old plan in red with a line through it, and the new plan in green.',
-    'A plan change isn’t a failure; it shows the value that was replaced. If danger’s red is ever made louder, a past plan change shouldn’t follow it.',
-    2,
-    2,
-  ),
+  question: struckQuestion(ACTIVITY),
   frames: 2,
   stories: 2,
   history: [
-    { at: '13:09', who: 'agent', text: 'Tried both names in turn. With each, the token lint passed, 0 of 2 frames moved and 2 of 2 stories passed.' },
-    { at: '13:09', who: 'agent', text: 'Asked: two tokens are this red, and the evidence for which one it means conflicts (boundary 5).' },
+    { at: '13:09', who: 'agent', text: 'Two tokens are this red. Tried both, and a neutral style with a label: the lint and axe pass with each. Only the plan change moves.' },
+    { at: '13:09', who: 'agent', text: 'Asked: the red means a failure elsewhere, and here a plan that was replaced (boundary 5).' },
   ],
 };
 
-/* Held behind the first question, because the same answer may settle them:
-   three are the same case on other screens, and one is close but not the
-   same, a line struck through with nothing beside it. */
+/* Held behind the first question, because the same decision may settle
+   them: three are the same case on other screens, and one is close but not
+   the same, a line struck through with nothing beside it. */
 function held(
   w: Pick<Work, 'id' | 'file' | 'screen' | 'title' | 'sample' | 'lines' | 'frames' | 'stories'>,
-  pattern: Struck,
-  found: string,
+  c: Pick<Case, 'pattern' | 'noticing'>,
   at: string,
-  recommendation: string,
 ): Work {
   return {
     ...w,
     status: 'waiting',
     waitsOn: 'activity-red',
-    question: struckQuestion(pattern, found, recommendation, w.frames, w.stories),
+    question: struckQuestion({ ...c, file: w.file, screen: w.screen, frames: w.frames, stories: w.stories }),
     history: [
-      { at, who: 'agent', text: `Tried both names in turn. With each, the token lint passed, 0 of ${w.frames} frames moved and ${w.stories} of ${w.stories} stories passed.` },
-      { at, who: 'agent', text: 'Held: the same two tokens as the billing activity’s question. The answer to that one may settle it.' },
+      { at, who: 'agent', text: 'Tried both directions: the lint and axe pass with each. Only this value moves.' },
+      { at, who: 'agent', text: 'Held: the same red as the billing activity’s question. The decision there may settle it.' },
     ],
   };
 }
@@ -398,7 +584,7 @@ const invoiceAmount = held(
     id: 'invoice-amount',
     file: file('InvoiceDetail.css'),
     screen: 'Invoice detail',
-    title: 'The changed amount on an invoice takes the diff pair',
+    title: 'The changed amount on an invoice, and what its red means',
     sample: { label: 'Amount', old: '$1,200.00', replacement: '$1,450.00' },
     lines: [
       { selector: '.invoice__amount-old', property: 'color', before: '#b42318' },
@@ -407,10 +593,8 @@ const invoiceAmount = held(
     frames: 4,
     stories: 4,
   },
-  'replaced',
-  'An edited invoice shows the old amount in red with a line through it, and the new amount in green.',
+  { pattern: 'replaced', noticing: 'changed amount' },
   '13:12',
-  'An edited amount isn’t a failure; it is the same case as the plan change.',
 );
 
 const invoiceRemoved = held(
@@ -418,16 +602,14 @@ const invoiceRemoved = held(
     id: 'invoice-removed',
     file: file('InvoiceDetail.css'),
     screen: 'Invoice detail',
-    title: 'The removed line item on an invoice takes the diff remove ink',
+    title: 'The removed line item on an invoice, and what its red means',
     sample: { label: 'Onboarding fee', old: '$200.00' },
     lines: [{ selector: '.invoice__line--removed', property: 'color', before: '#b42318' }],
     frames: 4,
     stories: 4,
   },
-  'removed',
-  'An edited invoice shows a removed line item in red with a line through it. Nothing replaced it.',
+  { pattern: 'removed', noticing: 'removed line item' },
   '13:12',
-  'A line taken off an invoice is what the diff’s remove ink is for, and removing a fee isn’t a failure.',
 );
 
 const planSeats = held(
@@ -435,7 +617,7 @@ const planSeats = held(
     id: 'plan-seats',
     file: file('PlanCard.css'),
     screen: 'Plan card',
-    title: 'The changed seat count on the plan card takes the diff pair',
+    title: 'The changed seat count on the plan card, and what its red means',
     sample: { label: 'Seats', old: '50', replacement: '45' },
     lines: [
       { selector: '.plan__seats-old', property: 'color', before: '#b42318' },
@@ -444,10 +626,8 @@ const planSeats = held(
     frames: 2,
     stories: 2,
   },
-  'replaced',
-  'After a seat change, the plan card shows the old count in red with a line through it, and the new one in green.',
+  { pattern: 'replaced', noticing: 'seat change' },
   '13:20',
-  'A seat change isn’t a failure; it is the same case as the plan change.',
 );
 
 const settingsEmail = held(
@@ -455,7 +635,7 @@ const settingsEmail = held(
     id: 'settings-email',
     file: file('BillingSettings.css'),
     screen: 'Billing settings',
-    title: 'The changed billing email takes the diff pair',
+    title: 'The changed billing email, and what its red means',
     sample: { label: 'Billing email', old: 'ap@northwind.example', replacement: 'billing@northwind.example' },
     lines: [
       { selector: '.settings__email-old', property: 'color', before: '#b42318' },
@@ -464,10 +644,8 @@ const settingsEmail = held(
     frames: 2,
     stories: 2,
   },
-  'replaced',
-  'The settings history shows the old billing email in red with a line through it, and the new one in green.',
+  { pattern: 'replaced', noticing: 'changed email' },
   '13:31',
-  'A changed email isn’t a failure; it is the same case as the plan change.',
 );
 
 /* Outside the delegation: the agent knows exactly what to do, and may not.
@@ -541,6 +719,7 @@ export function initialDelegation(): DelegationState {
       settingsEmail,
     ],
     rules: [],
+    decisions: [],
     clock: 0,
   };
 }
