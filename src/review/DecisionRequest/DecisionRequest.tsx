@@ -47,6 +47,20 @@ import { Inline } from '../Inline';
    it would render if --color-danger were made louder later, which is the
    whole difference between the two answers and was a sentence before: one
    stays as it is, one follows. The recommended answer carries the badge.
+
+   THE ACCENT, SPENT ONCE (2026-10-09). The recommended answer was blue
+   three times over: its edge, its badge and its button, and choosing it
+   turned the answers into a blue-tinted panel with a blue Apply. Every
+   product the visual research looked at that asks a person to approve an
+   agent's work (Cofounder, Replit, Klaviyo, Linear) spends its one colour
+   on the act and nothing else. So the blue is the act alone: the
+   recommended answer's button, then Apply. Both answers are the same card,
+   and "Recommended" is a quiet label; which one the agent recommends is
+   still said, in words and by which button is solid. The confirmation is
+   a step of ground, not a tint, and its Cancel and Apply sit in a bar at
+   its foot that stays in view while the rule's preview is longer than the
+   window, with what Apply will do beside them, so the act is never
+   scrolled away from the words that say what it is.
    Above them, the question and the one paragraph that says why a person is
    needed (for a scope question, the line of code it would change); under
    them, the boundary that stopped it, on one line. What was found, the
@@ -552,13 +566,19 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
               <Inline text={option.note ?? q.note ?? ''} />
             </p>
           ) : null}
-          <div className="ask__actions">
-            <Button variant="ghost" onClick={cancel}>
-              Cancel
-            </Button>
-            <Button ref={apply} variant="primary" type="submit">
-              Apply
-            </Button>
+          <div className="ask__bar">
+            <p className="ask__bar-what">
+              <Inline text={option.label} />
+              {makeRule && (p.offer === 'make' || p.offer === 'widen') ? ', kept as a rule' : ''}
+            </p>
+            <div className="ask__actions">
+              <Button variant="ghost" onClick={cancel}>
+                Cancel
+              </Button>
+              <Button ref={apply} variant="primary" type="submit">
+                Apply
+              </Button>
+            </div>
           </div>
         </form>
       ) : (
@@ -592,7 +612,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                       </p>
                     ) : null}
                     {o.recommended ? (
-                      <Badge tone="accent" className="ask__recommended">
+                      <Badge variant="quiet" className="ask__recommended">
                         Recommended
                       </Badge>
                     ) : null}

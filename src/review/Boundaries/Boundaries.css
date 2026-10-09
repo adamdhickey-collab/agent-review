@@ -135,10 +135,6 @@
   border-radius: var(--radius-sm);
 }
 
-.rule[data-status='active'] {
-  border-color: var(--color-accent);
-}
-
 .rule__head {
   display: flex;
   flex-wrap: wrap;
@@ -183,7 +179,7 @@
   gap: var(--space-2);
   padding: var(--space-3);
   border-radius: var(--radius-sm);
-  background: var(--color-accent-subtle);
+  background: var(--color-surface-sunken); /* a step of ground, as a decision's confirmation is; the blue is the submit button's */
   line-height: var(--leading-body);
 }
 
