@@ -44,8 +44,11 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* A flex box, not an inline-flex one: inside a group's summary, inline, it
+   sat on a line box whose descender room under it put the chevron 2.84px
+   below the mark and the words (2026-10-09). */
 .bounds__head {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: var(--space-2);
 }
