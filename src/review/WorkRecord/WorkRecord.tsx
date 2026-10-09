@@ -151,15 +151,19 @@ export function WorkRecord({ work, boundaries, rule, line = 'value', onRevert, o
           }
         />
       }
+      /* Only when there is a badge to show: an empty meta still took a
+         line of its own under the title on a phone. */
       meta={
-        <span className="record__meta">
-          {work.status === 'reverted' ? (
-            <Badge tone="neutral" icon="undo">
-              Reverted
-            </Badge>
-          ) : null}
-          {badge ? <Badge tone={badge.tone}>{badge.label}</Badge> : null}
-        </span>
+        work.status === 'reverted' || badge ? (
+          <span className="record__meta">
+            {work.status === 'reverted' ? (
+              <Badge tone="neutral" icon="undo">
+                Reverted
+              </Badge>
+            ) : null}
+            {badge ? <Badge tone={badge.tone}>{badge.label}</Badge> : null}
+          </span>
+        ) : undefined
       }
     >
       <div className="record__body">

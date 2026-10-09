@@ -220,6 +220,10 @@
     padding: var(--space-2);
   }
 
+  .delegation__routine > .disclosure__summary {
+    padding: var(--space-3); /* the records' own padding on a phone, so the routine row's chevron and mark line up with theirs */
+  }
+
 }
 
 @media (pointer: coarse) {

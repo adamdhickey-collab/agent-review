@@ -34,7 +34,14 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const NoRules: Story = {};
+export const NoRules: Story = {
+  parameters: { docs: { description: { story: 'No rules yet. Since 2026-10-09 the place a rule will go is the system’s compact EmptyState in a dashed frame, rather than a sentence; the count beside the heading still says 0.' } } },
+  play: async ({ canvasElement }) => {
+    const empty = canvasElement.querySelector('.bounds__empty')!;
+    await expect(within(empty as HTMLElement).getByText('No rules yet')).toBeInTheDocument();
+    await expect(getComputedStyle(empty).borderTopStyle).toBe('dashed');
+  },
+};
 
 export const AGroupOpen: Story = {
   parameters: {

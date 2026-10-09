@@ -22,19 +22,25 @@
    sits on a line box with a strut and makes the title taller than its
    text, and the chevron centres on the taller box (agent-review#25). */
 .record__summary {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-1) var(--space-2);
 }
 
+/* The mark and the title are the grid's first row; the grey line is the
+   second, in the title's column, so it starts where the title does
+   whatever size the review draws the mark at. */
 .record__line {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
+  display: contents;
 }
 
 .record__mark {
-  flex: none;
+  align-self: start; /* a grid item stretches to a two-line title, and the status centres its icon in what it is given */
+}
+
+/* --icon-size is set on the icon itself (Icon.tsx), so the centring is
+   written on it, not on the mark's wrapper. */
+.record__mark .icon {
   margin-top: calc((var(--text-md) * var(--leading-tight) - var(--icon-size)) / 2);
 }
 
@@ -43,7 +49,7 @@
 }
 
 .record__where {
-  padding-left: calc(var(--icon-size) + var(--space-2));
+  grid-column: 2;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   font-weight: var(--weight-regular);

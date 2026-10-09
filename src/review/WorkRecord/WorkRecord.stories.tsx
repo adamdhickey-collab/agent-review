@@ -44,7 +44,13 @@ export const OnItsOwn: Story = {
 
 export const Closed: Story = {
   args: { open: false },
-  parameters: { docs: { description: { story: 'The record as a row in the completed work.' } } },
+  parameters: { docs: { description: { story: 'The record as a row in the completed work: one mark, its worst check, beside the title, and a grey line under the title with where, how many and the commit. Since 2026-10-09 the three checks are not three marks in columns; a check that did not plainly pass is said in the grey line instead.' } } },
+  play: async ({ canvasElement }) => {
+    const summary = canvasElement.querySelector('summary')!;
+    await expect(summary.querySelectorAll('.record__mark')).toHaveLength(1);
+    await expect(summary.querySelector('.record__mark [data-icon="status-passed"]')).toBeTruthy();
+    await expect(summary.querySelector('.record__note')).toBeNull();
+  },
 };
 
 export const ChosenByMeaning: Story = {
@@ -54,14 +60,21 @@ export const ChosenByMeaning: Story = {
 
 export const FixedAfterAFailure: Story = {
   args: { work: work('plan-routine') },
-  parameters: { docs: { description: { story: 'A problem the agent caused and fixed inside its boundaries: it named a token that does not exist, the lint and the visual check both failed, it looked the value up and corrected the name. Each check shows its first run beside its last, and the history has every step.' } } },
+  parameters: { docs: { description: { story: 'A problem the agent caused and fixed inside its boundaries: it named a token that does not exist, the lint and the visual check both failed, it looked the value up and corrected the name. Closed, the row says so in its grey line. Open, each check shows its first run beside its last, and the history is a timeline with every step: a dot per event, the event, and when and who.' } } },
+  play: async ({ canvasElement }) => {
+    await expect(canvasElement.querySelector('.record__note')).toHaveTextContent('Fixed after a failed first try');
+    const history = canvasElement.querySelector('.record__history')!;
+    await expect(history.querySelectorAll('li')).toHaveLength(5);
+    await expect(history.querySelector('li')).toHaveTextContent('Replaced 4 values with their tokens.13:20 · Claude Code');
+  },
 };
 
 export const Inconclusive: Story = {
   args: { work: work('meter-routine') },
   parameters: { docs: { description: { story: 'A check that ran and could not answer: axe cannot measure a label that crosses the meter’s fill. It is shown as inconclusive, never as passed, and the record says what is still unknown.' } } },
   play: async ({ canvasElement }) => {
-    await expect(canvasElement.querySelector('.record__marks [data-icon="status-inconclusive"]')).toBeTruthy();
+    await expect(canvasElement.querySelector('.record__mark [data-icon="status-inconclusive"]')).toBeTruthy();
+    await expect(canvasElement.querySelector('.record__note')).toHaveTextContent('Axe inconclusive');
   },
 };
 
