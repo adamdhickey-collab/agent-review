@@ -29,8 +29,18 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Open: Story = {
+  args: { change: change('rv-2043') },
   parameters: {
-    docs: { description: { story: 'The bulk-actions change has two blocking findings, so Accept is disabled and the bar says "2 blocking findings: cannot accept as is". Return and Reject stay available.' } },
+    docs: {
+      description: {
+        story:
+          'The seeded-drift bulk-actions change (rv-2043) has two blocking findings, so Accept is disabled and the bar says "2 blocking findings: cannot accept as is". Those words are the disabled button\'s description too, so a screen reader that finds it hears why. Return and Reject stay available.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Accept' })).toHaveAccessibleDescription(/2 blocking findings: cannot accept as is/);
   },
 };
 
@@ -58,7 +68,12 @@ export const ConfirmAccept: Story = {
 
 export const ConfirmReject: Story = {
   parameters: {
-    docs: { description: { story: 'Presses Reject. A reason field appears with focus, and the Reject that sends stays disabled until the reason has words in it.' } },
+    docs: {
+      description: {
+        story:
+          'Presses Reject. A reason field appears with focus, under its question, which stays on screen as a label rather than going with the placeholder at the first letter. The Reject that sends can be pressed; without a reason it says why it will not go (the next story).',
+      },
+    },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -66,7 +81,48 @@ export const ConfirmReject: Story = {
     const reason = canvas.getByRole('textbox', { name: 'Why this change is rejected' });
     await expect(reason).toBeInTheDocument();
     await expect(reason).toHaveFocus();
-    await expect(canvas.getByRole('button', { name: 'Reject' })).toBeDisabled();
+    await expect(canvas.getByText('Why this change is rejected')).toBeVisible();
+  },
+};
+
+export const RejectWithoutReason: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Presses the confirming Reject with the field empty. Nothing is sent: the field is marked invalid, the reason it needs is said under it and announced, and focus stays in the field. Typing a reason takes the message away.',
+      },
+    },
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Reject' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Reject' }));
+    const reason = canvas.getByRole('textbox', { name: 'Why this change is rejected' });
+    await expect(args.onReject).not.toHaveBeenCalled();
+    await expect(reason).toHaveAttribute('aria-invalid', 'true');
+    await expect(reason).toHaveAccessibleDescription(/Write the reason first/);
+    await expect(reason).toHaveFocus();
+    await expect(canvas.getByRole('alert')).toBeInTheDocument();
+  },
+};
+
+export const EscapeBacksOut: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Presses Reject, then Escape. The question closes, nothing is sent, and focus goes back to the Reject that asked it, as Cancel does. The shortcut sheet lists Escape for this.',
+      },
+    },
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Reject' }));
+    await userEvent.keyboard('{Escape}');
+    await expect(canvas.queryByRole('textbox')).not.toBeInTheDocument();
+    await expect(args.onReject).not.toHaveBeenCalled();
+    await expect(canvas.getByRole('button', { name: 'Reject' })).toHaveFocus();
   },
 };
 

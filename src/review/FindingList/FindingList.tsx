@@ -10,7 +10,9 @@ import './FindingList.css';
    how the reviewer composes the message by choosing rather than typing.
 
    The list is a list, the items are buttons, and the open item's
-   evidence is a region named by the finding's title. A line above it says
+   evidence is a region named by the finding's title. Each button sits in
+   an h3, as a disclosure's does, so a screen reader moving by heading
+   goes finding to finding under the screen's "Findings and details". A line above it says
    what the boxes are for and how many are checked, because nothing else on
    the screen does until the return dialog opens. */
 
@@ -61,30 +63,32 @@ export function FindingList({ findings, selectedId, onSelect, included, onInclud
                 ) : (
                   <span className="finding__include finding__include--none" aria-hidden="true" />
                 )}
-                <button
-                  type="button"
-                  className="finding__button"
-                  aria-expanded={open}
-                  aria-controls={`finding-${f.id}`}
-                  onClick={() => onSelect(open ? undefined : f.id)}
-                >
-                  <span className="finding__marker" aria-hidden="true">
-                    <Icon name={f.severity === 'blocking' ? 'status-failed' : f.severity === 'decision' ? 'status-changed' : 'status-note'} size={16} />
-                  </span>
-                  <span className="finding__text">
-                    <span className="finding__title">{f.title}</span>
-                    <span className="finding__meta">
-                      <span className="finding__severity">{SEVERITY_LABEL[f.severity]}</span>
-                      <span className="finding__kind">{FINDING_KIND_LABEL[f.kind]}</span>
-                      {f.rules.length ? (
-                        <span className="finding__rules">
-                          {f.rules.map((r) => `rule ${r}`).join(', ')}
-                        </span>
-                      ) : null}
+                <h3 className="finding__heading">
+                  <button
+                    type="button"
+                    className="finding__button"
+                    aria-expanded={open}
+                    aria-controls={`finding-${f.id}`}
+                    onClick={() => onSelect(open ? undefined : f.id)}
+                  >
+                    <span className="finding__marker" aria-hidden="true">
+                      <Icon name={f.severity === 'blocking' ? 'status-failed' : f.severity === 'decision' ? 'status-changed' : 'status-note'} size={16} />
                     </span>
-                  </span>
-                  <Icon name="chevron-right" size={14} className="finding__chevron" />
-                </button>
+                    <span className="finding__text">
+                      <span className="finding__title">{f.title}</span>
+                      <span className="finding__meta">
+                        <span className="finding__severity">{SEVERITY_LABEL[f.severity]}</span>
+                        <span className="finding__kind">{FINDING_KIND_LABEL[f.kind]}</span>
+                        {f.rules.length ? (
+                          <span className="finding__rules">
+                            {f.rules.map((r) => `rule ${r}`).join(', ')}
+                          </span>
+                        ) : null}
+                      </span>
+                    </span>
+                    <Icon name="chevron-right" size={14} className="finding__chevron" />
+                  </button>
+                </h3>
               </div>
               <div id={`finding-${f.id}`} className="finding__body" hidden={!open} role="region" aria-label={f.title}>
                 <p className="finding__summary">{f.summary}</p>

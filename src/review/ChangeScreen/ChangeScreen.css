@@ -13,6 +13,16 @@
   }
 }
 
+/* The same below 64rem, at the other edge: the decision bar is fixed to the
+   bottom there, and a control tabbed to on the way down scrolled to the
+   bottom edge and under it, with 2px of its ring showing. The room is the
+   room the page already leaves under its content for the bar. */
+@media (max-width: 64rem) {
+  :root:has(.change) {
+    scroll-padding-bottom: calc(var(--control-height-touch) * 2 + var(--space-6));
+  }
+}
+
 /* The decision stays in reach however far down the evidence the reviewer has
    read: the header, with Accept, Reject and Return in it, is sticky. Below
    64rem it would cover too much of a screen, so the decision bar leaves the

@@ -205,5 +205,13 @@
   --motion-fast: 120ms;
   --motion-base: 200ms;
   --motion-ambient: 1000ms; /* a spinner's turn, a live dot's pulse */
+  /* How many turns a status's motion takes before it stops: a running
+     check's spinner, a live dot's pulse. Four turns of the ambient
+     duration is four seconds, inside the five WCAG 2.2.2 allows motion to
+     run beside other content without a way to stop it. The words beside the
+     mark carry the state, so a mark that has stopped still says it. A
+     loading spinner keeps turning: it is the only thing in its region, and
+     stopping it would read as a hang. */
+  --motion-ambient-repeat: 4;
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }

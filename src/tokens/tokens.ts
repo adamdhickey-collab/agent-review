@@ -32,7 +32,7 @@ export const TOKEN_GROUPS = {
   diff: ['--color-diff-add', '--color-diff-add-ink', '--color-diff-remove', '--color-diff-remove-ink'],
   elevation: ['--shadow-menu', '--shadow-raised', '--color-scrim'],
   focus: ['--focus-ring-color', '--focus-ring-width', '--focus-ring-offset'],
-  motion: ['--motion-fast', '--motion-base', '--motion-ambient', '--ease'],
+  motion: ['--motion-fast', '--motion-base', '--motion-ambient', '--motion-ambient-repeat', '--ease'],
 } as const;
 
 export type TokenGroup = keyof typeof TOKEN_GROUPS;

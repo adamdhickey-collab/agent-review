@@ -23,8 +23,12 @@ export interface ValidationSummaryProps {
 }
 
 export function ValidationSummary({ summary, active, onSelect }: ValidationSummaryProps) {
+  /* When the lanes are buttons, the group's name says what pressing one
+     does: a lane announces itself as "pressed" and nothing else, so without
+     this a screen reader has no way to know the list below it changed. The
+     screen says what it now shows (ChangeScreen's status line). */
   return (
-    <div className="validation" role="group" aria-label="Validation summary">
+    <div className="validation" role="group" aria-label={onSelect ? 'Validation summary: each check filters the findings' : 'Validation summary'}>
       {LANES.map((lane) => {
         const v = summary[lane.key];
         const selected = active === lane.key;
@@ -57,4 +61,8 @@ export function ValidationSummary({ summary, active, onSelect }: ValidationSumma
 
 export function kindsForLane(lane: keyof Summary): FindingKind[] {
   return LANES.find((l) => l.key === lane)!.kinds;
+}
+
+export function laneLabel(lane: keyof Summary): string {
+  return LANES.find((l) => l.key === lane)!.label;
 }

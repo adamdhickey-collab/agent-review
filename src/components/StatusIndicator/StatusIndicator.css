@@ -38,7 +38,9 @@
   inset: calc(var(--space-1) * -1);
   border-radius: 50%;
   border: 1.5px solid var(--status-ink);
-  animation: status-pulse var(--motion-ambient) var(--ease) infinite;
+  /* A few pulses, then still (--motion-ambient-repeat says why). Forwards,
+     so the ring ends at its last frame, faded out, and not back at full. */
+  animation: status-pulse var(--motion-ambient) var(--ease) var(--motion-ambient-repeat) forwards;
 }
 
 @keyframes status-pulse {

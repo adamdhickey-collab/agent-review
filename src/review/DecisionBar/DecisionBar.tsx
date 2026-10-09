@@ -1,13 +1,21 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { Button, Icon } from '../../components';
 import { REVIEW_STATE_LABEL, type Change } from '../../data/types';
 import './DecisionBar.css';
 
 /* The three decisions. Accept is refused while a blocking finding stands,
-   and the bar says why in words next to the button rather than greying
-   it out silently. Reject asks for a reason, because a rejection with no
-   reason teaches the agent nothing. Return opens the composer. A decision
-   already made shows as a record, with Undo. */
+   and the bar says why in words next to the button rather than greying it
+   out silently; the words are also the button's description, because a
+   disabled button is out of the Tab order and a screen reader that finds it
+   should hear why. Reject asks for a reason, because a rejection with no
+   reason teaches the agent nothing, and says so if it is pressed without
+   one: the field has a visible label, so the question is still on screen
+   once a placeholder would have gone (WCAG 3.3.2). Return opens the
+   composer. A decision already made shows as a record, with Undo.
+
+   Either question backs out with Cancel or Escape, as the shortcut sheet
+   says, and focus goes back to the button that asked it rather than to
+   the top of the page. */
 
 export interface DecisionBarProps {
   change: Change;
@@ -23,11 +31,29 @@ export function DecisionBar({ change, onAccept, onReject, onReturn, onUndo, canU
   const decided = change.decision && ['accepted', 'rejected', 'returned'].includes(change.state);
   const [confirm, setConfirm] = useState<'accept' | 'reject' | null>(null);
   const [reason, setReason] = useState('');
+  const [missing, setMissing] = useState(false);
   const id = useId();
   const firstField = useRef<HTMLElement>(null);
+  const acceptButton = useRef<HTMLButtonElement>(null);
+  const rejectButton = useRef<HTMLButtonElement>(null);
+  const backTo = useRef<'accept' | 'reject' | null>(null);
   useEffect(() => {
     if (confirm) firstField.current?.focus();
+    else if (backTo.current) {
+      (backTo.current === 'accept' ? acceptButton : rejectButton).current?.focus();
+      backTo.current = null;
+    }
   }, [confirm]);
+  const cancel = () => {
+    backTo.current = confirm;
+    setConfirm(null);
+    setMissing(false);
+  };
+  const onEscape = (e: KeyboardEvent) => {
+    if (e.key !== 'Escape') return;
+    e.preventDefault();
+    cancel();
+  };
 
   if (decided && change.decision) {
     const d = change.decision;
@@ -52,6 +78,7 @@ export function DecisionBar({ change, onAccept, onReject, onReturn, onUndo, canU
       {confirm === 'accept' ? (
         <form
           className="decision__confirm"
+          onKeyDown={onEscape}
           onSubmit={(e) => {
             e.preventDefault();
             onAccept();
@@ -61,7 +88,7 @@ export function DecisionBar({ change, onAccept, onReject, onReturn, onUndo, canU
           <span>
             Accept <strong>{change.title}</strong>? It merges <code>{change.branch}</code> into <code>{change.base}</code>.
           </span>
-          <Button variant="ghost" size="compact" onClick={() => setConfirm(null)}>
+          <Button variant="ghost" size="compact" onClick={cancel}>
             Cancel
           </Button>
           <Button ref={firstField as never} variant="primary" size="compact" type="submit">
@@ -71,35 +98,53 @@ export function DecisionBar({ change, onAccept, onReject, onReturn, onUndo, canU
       ) : confirm === 'reject' ? (
         <form
           className="decision__confirm"
+          noValidate
+          onKeyDown={onEscape}
           onSubmit={(e) => {
             e.preventDefault();
+            if (reason.trim().length === 0) {
+              setMissing(true);
+              firstField.current?.focus();
+              return;
+            }
             onReject(reason.trim());
             setConfirm(null);
           }}
         >
-          <label htmlFor={`${id}-reason`} className="visually-hidden">
+          <label htmlFor={`${id}-reason`} className="decision__label">
             Why this change is rejected
           </label>
           <input
             ref={firstField as never}
             id={`${id}-reason`}
             className="decision__reason"
-            placeholder="Why, in a sentence the agent can learn from"
+            placeholder="In a sentence the agent can learn from"
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            onChange={(e) => {
+              setReason(e.target.value);
+              if (e.target.value.trim()) setMissing(false);
+            }}
             required
+            aria-invalid={missing || undefined}
+            aria-describedby={missing ? `${id}-missing` : undefined}
           />
-          <Button variant="ghost" size="compact" onClick={() => setConfirm(null)}>
+          <Button variant="ghost" size="compact" onClick={cancel}>
             Cancel
           </Button>
-          <Button variant="danger" size="compact" type="submit" disabled={reason.trim().length === 0}>
+          <Button variant="danger" size="compact" type="submit">
             Reject
           </Button>
+          {missing ? (
+            <span id={`${id}-missing`} className="decision__missing" role="alert">
+              <Icon name="status-failed" size={14} />
+              Write the reason first: a rejection without one teaches the agent nothing.
+            </span>
+          ) : null}
         </form>
       ) : (
         <>
           {blocking ? (
-            <span className="decision__reason-text">
+            <span id={`${id}-blocked`} className="decision__reason-text">
               <Icon name="status-failed" size={14} />
               {blocking} blocking finding{blocking === 1 ? '' : 's'}: cannot accept as is
             </span>
@@ -107,10 +152,17 @@ export function DecisionBar({ change, onAccept, onReject, onReturn, onUndo, canU
           <Button variant="secondary" leadingIcon="corner-up-left" onClick={onReturn}>
             Return to agent
           </Button>
-          <Button variant="danger" onClick={() => setConfirm('reject')}>
+          <Button ref={rejectButton} variant="danger" onClick={() => setConfirm('reject')}>
             Reject
           </Button>
-          <Button variant="primary" leadingIcon="check" disabled={blocking > 0} onClick={() => setConfirm('accept')}>
+          <Button
+            ref={acceptButton}
+            variant="primary"
+            leadingIcon="check"
+            disabled={blocking > 0}
+            aria-describedby={blocking ? `${id}-blocked` : undefined}
+            onClick={() => setConfirm('accept')}
+          >
             Accept
           </Button>
         </>

@@ -16,7 +16,18 @@ import './ComponentPreview.css';
    and select rows. That is a lot of tab stops between the findings and
    the diff, so a screen that has somewhere to go next can name it
    (skipTo, an element id) and the frame gets a skip link, which shows
-   when it has focus. */
+   when it has focus.
+
+   Fitting is the default, and Actual size is the way out of it. A frame
+   fitted to its column is smaller than the product: at 1280 in a desktop
+   column, 73%, so Relay's table text is about 9px and its 24px controls
+   about 17. Browser zoom does not undo that, because zooming narrows the
+   column and the frame shrinks to fit again: at 200% the text had reached
+   only 150% (WCAG 1.4.4), and the controls stayed under 24px (2.5.8).
+   Actual size draws the frame at 100% and lets the column pan, so the
+   product's text grows with zoom like the rest of the page and its
+   controls are their real size. The choice shows only where fitting
+   shrinks the frame, and it stays when the finding changes. */
 
 /* How small the frame is allowed to get. A 1280px screen fitted to a 343px
    phone column would be a quarter of its size, and its text a few pixels
@@ -32,6 +43,13 @@ export const VIEWPORTS: SegmentedOption<`${Viewport}`>[] = [
 const SIDES: SegmentedOption<Side>[] = [
   { value: 'before', label: 'Before' },
   { value: 'after', label: 'After' },
+];
+
+type Size = 'fit' | 'actual';
+
+const SIZES: SegmentedOption<Size>[] = [
+  { value: 'fit', label: 'Fit' },
+  { value: 'actual', label: 'Actual size' },
 ];
 
 const SCREENS: SegmentedOption<Screen>[] = [
@@ -61,6 +79,7 @@ export function ComponentPreview({ changeId, reproduce, screens = ['customers', 
   const [side, setSide] = useState<Side>(reproduce?.side ?? 'after');
   const [viewport, setViewport] = useState<Viewport>(reproduce?.viewport ?? 1280);
   const [selection, setSelection] = useState(reproduce?.withSelection ?? false);
+  const [size, setSize] = useState<Size>('fit');
 
   /* When the finding changes, the controls follow it. Done during render
      (the React pattern for state that depends on a prop) so there is no
@@ -84,6 +103,7 @@ export function ComponentPreview({ changeId, reproduce, screens = ['customers', 
   const column = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [pans, setPans] = useState(false);
+  const [shrinks, setShrinks] = useState(false);
   const ready = status?.kind;
   useLayoutEffect(() => {
     const el = column.current;
@@ -91,15 +111,16 @@ export function ComponentPreview({ changeId, reproduce, screens = ['customers', 
     const fit = () => {
       const pad = getComputedStyle(el);
       const room = el.clientWidth - parseFloat(pad.paddingLeft) - parseFloat(pad.paddingRight);
-      const next = Math.min(1, Math.max(MIN_SCALE, room / viewport));
+      const next = size === 'actual' ? 1 : Math.min(1, Math.max(MIN_SCALE, room / viewport));
       setScale(next);
+      setShrinks(room < viewport - 0.5);
       setPans(viewport * next > room + 0.5);
     };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [viewport, ready]);
+  }, [viewport, ready, size]);
 
   const [height, setHeight] = useState(400);
   const frame = useRef<HTMLDivElement>(null);
@@ -153,6 +174,7 @@ export function ComponentPreview({ changeId, reproduce, screens = ['customers', 
         ) : null}
         <SegmentedControl label="Version" options={SIDES} value={side} onChange={setSide} size="compact" />
         <SegmentedControl label="Viewport width" options={VIEWPORTS} value={`${viewport}`} onChange={(v) => setViewport(Number(v) as Viewport)} size="compact" />
+        {shrinks && !status ? <SegmentedControl label="Preview size" options={SIZES} value={size} onChange={setSize} size="compact" /> : null}
         <span className="preview__dims">
           <code>{viewport}px</code>
           {scale < 1 ? <span className="preview__scale">at {Math.round(scale * 100)}%</span> : null}

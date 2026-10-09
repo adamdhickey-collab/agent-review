@@ -32,6 +32,15 @@
   width: 1rem;
 }
 
+/* The heading around the button takes the button's place in the row and
+   adds nothing to see. */
+.finding__heading {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  font: inherit;
+}
+
 .finding__button {
   display: flex;
   flex: 1 1 auto;
