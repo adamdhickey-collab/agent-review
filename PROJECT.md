@@ -216,6 +216,40 @@ Decisions:
   "Replacement stays the same"), with "Only the failure gets louder" and
   "Both get louder" last, as the summary. The lesson is not which variable
   to use: the agent found a semantic decision no check could safely make.
+- **A trade-off, not a riddle (2026-10-09).** Every version above still had
+  an obvious answer: two token names that drew the same pixels, one of them
+  recommended, and nothing on the other side. A stop only a careless person
+  could get wrong shows an agent asking permission, not a decision that
+  needs a person. Now the agent proposes two defensible directions and both
+  cost something. **Separate the meanings**: failures keep the red, and a
+  replaced or removed value turns neutral with an icon and a "Replaced" (or
+  "Removed") label. **Keep the red for now**: both stay red, the value gains
+  the same label, and the design system carries a written exception until a
+  neutral style has been tested. The agent recommends the first and says
+  what it can't determine: whether the people who use the screen rely on the
+  red to notice a change when it matters. That is scenario context it cannot
+  check, so it is a question and never a finding; it also says what it
+  inferred rather than checked (the red came over from the old billing
+  app). Each direction is a card of one shape, what it does, how it would
+  look, three benefits and three risks, and "Recommended" is a quiet label,
+  not a louder card. Choosing marks a card and opens what the agent will do
+  if it is applied, the person's reason (the agent's draft until they change
+  it) and the rule box, with the other card still there to switch to;
+  switching keeps what was typed for each and clears the rule box. **Request
+  evidence** decides nothing: the agent lists where the red is used, what
+  each direction would change, what depends on it, what it could not verify
+  (there is no usage data or research in the repository, and it says so),
+  and a way to find out, marked proposed and not run.
+- **A decision leaves a record (2026-10-09).** Applying a direction is real
+  work either way (a token mapping or an exception written down, a label,
+  the checks re-run, a follow-up opened) and leaves a record where the card
+  was: what the agent did, the person's reason and whether it is their words
+  or the agent's draft, the trade-off they accepted, the risk that remains,
+  the follow-up, and whether it became guidance. Nothing reads the record on
+  its own: a later change follows a decision only through a rule the person
+  made from it, the rule's "why" is the person's reason, and each change it
+  settles names the decision in its history. The follow-up stays in the
+  account's Unresolved until someone does it.
 - **Three reasons to stop, not three tabs.** A problem the agent can solve
   with the evidence and permission it has (it named a token that does not
   exist; the lint and the visual check failed; it corrected the name) is
@@ -376,7 +410,7 @@ tests/               Playwright: visual baselines and the viewport check
 
 ## Component inventory
 
-The system, `src/components/` (13):
+The system, `src/components/` (14):
 
 | Component | For | Stories |
 | --- | --- | --- |
@@ -387,6 +421,7 @@ The system, `src/components/` (13):
 | StatusIndicator | A dot and a word; live pulses | 4 |
 | TestStatus | A check's result: passed, changed, failed, running, skipped, inconclusive, each its own shape | 9 |
 | Checkbox | A native checkbox with a drawn box; indeterminate is real | 7 |
+| TextArea | A few lines of a person's own words: a visible label, the field, a hint read with it | 4 |
 | SegmentedControl | One choice among a few, all visible; a radiogroup with arrow keys | 4 |
 | Tabs | The WAI tabs pattern, with counts | 4 |
 | Disclosure | A native details/summary, styled | 4 |
@@ -398,16 +433,19 @@ The product under review, `src/product/` (2 screens): CustomerTable (the
 live one is Run 1's, with bulk actions; the baseline and all three
 branch versions are frozen under `history/`), InvoiceList.
 
-Agent Review, `src/review/` (20): Shell, DelegationScreen, OutcomeSummary,
-DecisionRequest, WorkRecord, Boundaries, QueueScreen, ReviewRow,
+Agent Review, `src/review/` (21): Shell, DelegationScreen, OutcomeSummary,
+DecisionRequest, DecisionRecord, WorkRecord, Boundaries, QueueScreen, ReviewRow,
 ReviewCard (the queue's row on a phone), ChangeScreen, ValidationSummary,
 FindingList, FindingEvidence (eight evidence kinds), ComponentPreview (the
 frame, with loading and error), DiffViewer, AgentRationale, DecisionBar,
 ReturnPanel, StoryList, FileList. 111 stories.
 
-Every story runs through axe, with WCAG 2.2's target size on. 241 as of
-2026-10-07: 88 for the system and its tokens, 14 for the product, 139 for
-the review; it was 233 before the shared-table run added eight, 207 on
+Every story runs through axe, with WCAG 2.2's target size on. 258 as of
+2026-10-09: 92 for the system and its tokens, 14 for the product, 152 for
+the review; it was 246 before the trade-off and its decision record added
+twelve (TextArea's four, DecisionRecord's four, and four more for the
+decision card and the screen), 241 on 2026-10-07 (88, 14, 139), 233 before
+the shared-table run added eight, 207 on
 2026-10-04 (82, 14, 111), 203 (79, 14, 110) before the glanceable pass added four, and 173 (78,
 14, 81) before the delegated work added thirty. (The
 case study on adamhickey.com said 161 when it was written; the number moves

@@ -9,6 +9,7 @@ export { Badge, type BadgeProps, type BadgeTone } from './Badge/Badge';
 export { StatusIndicator, type StatusIndicatorProps, type StatusTone } from './StatusIndicator/StatusIndicator';
 export { TestStatus, type TestStatusProps, type TestState } from './TestStatus/TestStatus';
 export { Checkbox, type CheckboxProps } from './Checkbox/Checkbox';
+export { TextArea, type TextAreaProps } from './TextArea/TextArea';
 export { SegmentedControl, type SegmentedControlProps, type SegmentedOption } from './SegmentedControl/SegmentedControl';
 export { Tabs, type TabsProps, type Tab } from './Tabs/Tabs';
 export { Disclosure, type DisclosureProps } from './Disclosure/Disclosure';

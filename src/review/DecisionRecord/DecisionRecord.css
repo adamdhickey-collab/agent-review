@@ -1,0 +1,143 @@
+/* A record, not an act: the surface with a hairline round it, no shadow.
+   The decision cards above are the screen's only raised surfaces. */
+.decided {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.decided__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+
+.decided__when {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.decided__title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.decided__question {
+  margin-top: calc(var(--space-2) * -1);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+.decided__part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.decided__label,
+.decided__facts dt {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+/* What the agent did: the plan the person read before Apply, now a
+   checklist, each line led by the pass mark centred on its first line. */
+.decided__did {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.decided__did li,
+.decided__follow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-text);
+  line-height: var(--leading-body);
+}
+
+.decided__did .icon,
+.decided__follow .icon {
+  flex: none;
+  margin-top: calc((var(--text-md) * var(--leading-body) - var(--icon-size)) / 2);
+}
+
+.decided__did .icon {
+  color: var(--color-success);
+}
+
+.decided__follow .icon {
+  color: var(--color-warning);
+}
+
+.decided__follow .decided__open {
+  flex: none;
+}
+
+/* The six things a reader asks of a decision they were not there for: the
+   label in the margin and the answer beside it, one row each, on a
+   hairline under the checklist. Under 40rem the label goes over its
+   answer. */
+.decided__facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-2) var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.decided__facts > div {
+  display: contents;
+}
+
+.decided__facts dt {
+  line-height: calc(var(--text-md) * var(--leading-body));
+}
+
+.decided__facts dd {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-text);
+  line-height: var(--leading-body);
+}
+
+.decided__facts dd.decided__follow {
+  flex-direction: row;
+}
+
+.decided__by,
+.decided__used {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.decided__rule {
+  font-weight: var(--weight-medium);
+}
+
+@media (max-width: 40rem) {
+  .decision {
+    padding: var(--space-3);
+  }
+
+  .decided__facts {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-1);
+  }
+
+  .decided__facts dd + dt,
+  .decided__facts > div + div dt {
+    margin-top: var(--space-2);
+  }
+}

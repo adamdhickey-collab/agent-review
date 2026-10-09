@@ -20,7 +20,8 @@ Before writing any element with a border, a background, a padding or an
 interaction, look in `src/components/index.ts`. If a component there does
 the job, use it, with its props. The system has: Button (four variants,
 two sizes, loading), IconButton, Badge, StatusIndicator, TestStatus,
-Checkbox (with indeterminate), SegmentedControl, Tabs, Disclosure, the
+Checkbox (with indeterminate), TextArea (a label, the field, a hint),
+SegmentedControl, Tabs, Disclosure, the
 Table primitives (Table, HeaderCell, Cell, Row), Toolbar, and the three
 region states (EmptyState, LoadingState, ErrorState).
 

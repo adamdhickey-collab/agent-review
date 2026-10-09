@@ -355,6 +355,7 @@ export function initialTableRun(): DelegationState {
     boundaries: tableBoundaries,
     work: [sharedRows, emailRoutine, toolbarRoutine],
     rules: [],
+    decisions: [],
     clock: 0,
   };
 }
