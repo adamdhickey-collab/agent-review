@@ -62,7 +62,7 @@ html {
 body {
   margin: 0;
   font-size: var(--text-md);
-  min-height: 100vh;
+  min-height: calc(100vh / var(--zoom, 1)); /* the window, at the reading size (app/scale.css) */
 }
 
 h1,

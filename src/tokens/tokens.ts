@@ -33,6 +33,7 @@ export const TOKEN_GROUPS = {
   elevation: ['--shadow-menu', '--shadow-raised', '--color-scrim'],
   focus: ['--focus-ring-color', '--focus-ring-width', '--focus-ring-offset'],
   motion: ['--motion-fast', '--motion-base', '--motion-ambient', '--motion-ambient-repeat', '--ease'],
+  scale: ['--zoom-desktop', '--zoom-wide'],
 } as const;
 
 export type TokenGroup = keyof typeof TOKEN_GROUPS;
