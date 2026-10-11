@@ -273,8 +273,21 @@
   }
 }
 
-/* On a phone, "Delegated work" is "Work". */
+/* On a phone, "Delegated work" is "Work", and the links out of the product
+   take the small size, as quieter than the places as they are on a wider
+   bar. With the review's 14px body the second row had 6px to spare at 320
+   on a Mac and none on Linux, whose glyphs run wider (324px, in CI); the
+   small links give it room, and the row wraps rather than overflowing if a
+   font ever runs wider still. */
 @media (max-width: 40rem) {
+  .shell__where {
+    flex-wrap: wrap;
+  }
+
+  .shell__links a {
+    font-size: var(--text-sm);
+  }
+
   .shell__long {
     position: absolute;
     width: 1px;
