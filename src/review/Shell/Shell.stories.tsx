@@ -15,7 +15,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The chrome: one quiet bar on the page’s own ground. The place you are in is said by its ink and by the line under it, the line a selected tab carries, with no filled shape, so the first thing with weight on a screen is the screen’s heading. The theme toggle shows where a press takes you: a sun while the review is dark, a moon while it is light. The review is dark until a person chooses light, and a choice is remembered. These stories are the app’s chrome, so they are dark by default too, whatever the toolbar says.',
+          'The chrome: one bar on the chrome’s ground over the page, with the product’s mark on a tile of the accent. The place you are in is said in the accent, the word and the line under it, the line a selected tab carries, with no filled shape, so the first thing with weight on a screen is the screen’s heading. The appearance control is three choices, Light, Dark and System, as the system’s segmented control. The review follows the system until a person chooses, and a choice is remembered.',
       },
     },
   },
@@ -38,35 +38,66 @@ export const OnTheReviews: Story = {
   },
 };
 
-export const ThemeToggle: Story = {
+export const Appearance: Story = {
   parameters: {
-    docs: { description: { story: 'The review is dark until a person chooses otherwise. The toggle shows where a press takes you: a sun while it is dark, named "Switch to light theme", and a moon while it is light, named "Switch to dark theme". Each press writes the choice to the root as data-theme, and with it the color-scheme every token reads. The remembered choice is cleared at the end so the next story starts as a first visit does.' } },
+    docs: {
+      description: {
+        story:
+          'Light, Dark and System, one tab stop with arrow keys between them, each an icon named by its tooltip. A first visit is System: nothing on the root, so its color-scheme is "light dark" and every token follows the operating system, live. Choosing Light or Dark puts data-theme on the root and remembers it; choosing System takes it off and remembers that. Since Preview Studio (2026-10-11, later); it was a light/dark toggle before. The remembered choice is cleared at the end, and the Storybook’s own theme put back, so the next story starts as it should.',
+      },
+    },
   },
   play: async ({ canvasElement }) => {
     const root = canvasElement.ownerDocument.documentElement;
     const canvas = within(canvasElement);
-    /* A first visit: dark, with a sun to press. */
-    const toLight = await canvas.findByRole('button', { name: 'Switch to light theme' });
-    await expect(root.dataset.theme).toBe('dark');
-    await expect(getComputedStyle(root).colorScheme).toBe('dark');
-    await expect(toLight.querySelector('svg')).toHaveAttribute('data-icon', 'sun');
+    const before = root.dataset.theme;
+    try {
+      const group = await canvas.findByRole('radiogroup', { name: 'Appearance' });
+      /* A first visit follows the system. */
+      await expect(within(group).getByRole('radio', { name: 'System' })).toHaveAttribute('aria-checked', 'true');
+      await expect(root.dataset.theme).toBeUndefined();
+      await expect(getComputedStyle(root).colorScheme).toBe('light dark');
 
-    await userEvent.click(toLight);
-    const toDark = await canvas.findByRole('button', { name: 'Switch to dark theme' });
-    await expect(root.dataset.theme).toBe('light');
-    await expect(getComputedStyle(root).colorScheme).toBe('light');
-    await expect(toDark.querySelector('svg')).toHaveAttribute('data-icon', 'moon');
+      await userEvent.click(within(group).getByRole('radio', { name: 'Dark' }));
+      await expect(root.dataset.theme).toBe('dark');
+      await expect(getComputedStyle(root).colorScheme).toBe('dark');
+      await expect(localStorage.getItem('agent-review:theme')).toBe('dark');
 
-    await userEvent.click(toDark);
+      /* Arrow keys move the choice, as in any radio group. */
+      await userEvent.keyboard('{ArrowLeft}');
+      await expect(within(group).getByRole('radio', { name: 'Light' })).toHaveFocus();
+      await expect(root.dataset.theme).toBe('light');
+      await expect(getComputedStyle(root).colorScheme).toBe('light');
+
+      await userEvent.click(within(group).getByRole('radio', { name: 'System' }));
+      await expect(root.dataset.theme).toBeUndefined();
+      await expect(localStorage.getItem('agent-review:theme')).toBe('system');
+    } finally {
+      localStorage.removeItem('agent-review:theme');
+      if (before) root.dataset.theme = before;
+    }
+  },
+};
+
+export const AppearanceRemembered: Story = {
+  parameters: {
+    docs: { description: { story: 'A choice made before System existed is read as it was written: "dark" in storage is Dark, with nothing to migrate.' } },
+  },
+  beforeEach: () => {
+    localStorage.setItem('agent-review:theme', 'dark');
+    return () => localStorage.removeItem('agent-review:theme');
+  },
+  play: async ({ canvasElement }) => {
+    const root = canvasElement.ownerDocument.documentElement;
+    const group = await within(canvasElement).findByRole('radiogroup', { name: 'Appearance' });
+    await expect(within(group).getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true');
     await expect(root.dataset.theme).toBe('dark');
-    await expect(canvas.getByRole('button', { name: 'Switch to light theme' })).toBeInTheDocument();
-    localStorage.removeItem('agent-review:theme');
   },
 };
 
 export const LinksOutAreQuieter: Story = {
   parameters: {
-    docs: { description: { story: 'The Storybook and the source are not places in the product, so they are their own nav, on the right, in regular weight and muted ink with no line. The places are the two on the left. Nothing in the bar carries the accent: it asks nothing.' } },
+    docs: { description: { story: 'The Storybook and the source are not places in the product, so they are their own nav, on the right, in regular weight and muted ink with no line. The places are the two on the left, and the one you are in is the accent.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -85,9 +116,8 @@ export const LinksOutAreQuieter: Story = {
       probe.remove();
       return c;
     };
-    const avatar = canvasElement.querySelector('.shell__avatar') as HTMLElement;
-    await expect(getComputedStyle(avatar).color).not.toBe(resolve('--color-accent'));
-    await expect(getComputedStyle(avatar).color).toBe(resolve('--color-text-secondary'));
+    await expect(getComputedStyle(within(places).getByRole('link', { name: 'Delegated work' })).color).toBe(resolve('--color-accent'));
+    for (const a of within(links).getAllByRole('link')) await expect(getComputedStyle(a).color).toBe(resolve('--color-text-muted'));
   },
 };
 

@@ -52,21 +52,35 @@
 }
 
 .badge--accent {
+  --badge-edge: var(--color-accent-border);
   --badge-ink: var(--color-accent);
   --badge-ground: var(--color-accent-subtle);
 }
 
 .badge--success {
+  --badge-edge: var(--color-success-border);
   --badge-ink: var(--color-success);
   --badge-ground: var(--color-success-subtle);
 }
 
 .badge--warning {
+  --badge-edge: var(--color-warning-border);
   --badge-ink: var(--color-warning);
   --badge-ground: var(--color-warning-subtle);
 }
 
 .badge--danger {
+  --badge-edge: var(--color-danger-border);
   --badge-ink: var(--color-danger);
   --badge-ground: var(--color-danger-subtle);
+}
+
+/* On the review's surface a tinted badge is drawn as Stripe draws a status:
+   the ground, an edge a step darker than it in the same hue, and the word
+   in semibold. The product's badges, inside the preview frame, are the
+   product's (a review rule names the surface and stops at the product's;
+   app/global.css). */
+:where([data-surface='review']) .badge--tint:not(:where([data-surface='product'] *)) {
+  border-color: var(--badge-edge, var(--color-border));
+  font-weight: var(--weight-semibold);
 }

@@ -1,52 +1,62 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-/* The review's theme. Dark, unless a person chose light in the bar; a choice
-   is remembered. Dark is the default by decision (2026-10-05), and the
-   review does not follow the system setting: every first visit sees the
-   same thing, which is also what the review's pictures show. The choice is one
-   attribute on the root, data-theme, which the base stylesheet turns into a
-   color-scheme; every color is light-dark(light, dark) in tokens.css, so
-   nothing else has to know.
+/* The review's appearance: Light, Dark, or System, chosen in the bar
+   (Shell) and remembered. Until a person chooses, it is System, which
+   follows the operating system's setting and keeps following it: the root's
+   color-scheme is "light dark" (app/global.css), so every light-dark() token
+   in tokens.css resolves to whichever the system says, live, with nothing
+   listening in script. Choosing Light or Dark puts data-theme on the root,
+   which fixes the color-scheme; choosing System takes it off again, so a
+   change of the system's setting is followed only while System is chosen.
+
+   The choice is kept where the earlier light/dark toggle kept it
+   (localStorage 'agent-review:theme'), so a choice made before System
+   existed is read as it was written: 'light' and 'dark' mean what they
+   meant, and 'system' is the one new value. Nothing to migrate.
+
+   Since Preview Studio (2026-10-11, later). Before it, the review had a
+   default of its own instead of the system's: light from earlier that day,
+   dark from 2026-10-05.
+
+   index.html applies a remembered Light or Dark before the first paint, so a
+   person who chose dark never sees a light page first; this hook keeps the
+   attribute and the storage in step after that. Storage can throw (a
+   private window, a blocked site), and then the choice lasts for the visit.
 
    The product in the preview frame does not follow it. Its surface is
    always light (app/global.css), because the frame shows Relay as the
-   checks measured it.
+   checks measured it, and Relay has one scheme. */
 
-   index.html applies a remembered choice before the first paint, so a
-   person who chose light does not see a dark page first; this hook keeps
-   the attribute and the storage in step after that. Storage can throw (a
-   private window, a blocked site), and then the choice lasts for the visit. */
+export type Appearance = 'light' | 'dark' | 'system';
 
-export type Theme = 'light' | 'dark';
+export const APPEARANCE_KEY = 'agent-review:theme';
 
-const KEY = 'agent-review:theme';
-
-function remembered(): Theme | null {
+function remembered(): Appearance {
   try {
-    const v = localStorage.getItem(KEY);
-    return v === 'light' || v === 'dark' ? v : null;
+    const v = localStorage.getItem(APPEARANCE_KEY);
+    return v === 'light' || v === 'dark' || v === 'system' ? v : 'system';
   } catch {
-    return null;
+    return 'system';
   }
 }
 
-export function useTheme(): { theme: Theme; toggle: () => void } {
-  const [choice, setChoice] = useState<Theme | null>(remembered);
-  const theme: Theme = choice ?? 'dark';
+export function useTheme(): { appearance: Appearance; setAppearance: (next: Appearance) => void } {
+  const [appearance, setChoice] = useState<Appearance>(remembered);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
+    const root = document.documentElement;
+    if (appearance === 'system') delete root.dataset.theme;
+    else root.dataset.theme = appearance;
+  }, [appearance]);
 
-  const toggle = () => {
-    const next: Theme = theme === 'dark' ? 'light' : 'dark';
+  const setAppearance = useCallback((next: Appearance) => {
     try {
-      localStorage.setItem(KEY, next);
+      localStorage.setItem(APPEARANCE_KEY, next);
     } catch {
       /* the choice still holds for this visit */
     }
     setChoice(next);
-  };
+  }, []);
 
-  return { theme, toggle };
+  return { appearance, setAppearance };
 }

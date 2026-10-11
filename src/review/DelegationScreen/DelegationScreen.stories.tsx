@@ -38,7 +38,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The front door: work an agent was handed, and what came of it. It opens on an account of the run, not a queue: what was done, how it was checked, what is unresolved, and whether the agent stayed inside its boundaries. Then the decisions that need the person, each saying why it stopped, and the completed work, each open to what changed, why, on what authority, what the checks did and did not establish, and a revert. Beside it, the boundaries and the rules the person has made. When nothing needs the person, the account says so and the decisions section is not there. The run is simulated: sample data played back through one reducer (data/delegation.ts), the same way every time.',
+          'The front door: work an agent was handed, and what came of it. It opens on an account of the run, not a queue: what was done, how it was checked, what is unresolved, and whether the agent stayed inside its boundaries. Then, since Preview Studio, a workspace for what needs the person: the screen the decision changes, rendered large on the left with the element marked and what the agent read under it, and the decision on the right in an inspector, one at a time with a way to the others. Then the decisions made and the completed work, each open to what changed, why, on what authority, what the checks did and did not establish, and a revert. Beside it, the boundaries and the rules the person has made. When nothing needs the person, the account says so and the decisions section is not there. The run is simulated: sample data played back through one reducer (data/delegation.ts), the same way every time.',
       },
     },
   },
@@ -88,6 +88,8 @@ export const AfterARule: Story = {
     await expect(record).toHaveTextContent(/Follow-up.*Check the neutral style with people who use the billing activity screen.*Open/);
     await expect(record).toHaveTextContent(/Kept as your rule\. 3 later changes followed it/);
     await expect(canvas.getByText(/Follow-up from your decision at 14:26: check the neutral style/)).toBeInTheDocument();
+    /* The case outside the rule is the second decision. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
     await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
     await expect(canvas.getAllByText('Your rule')).toHaveLength(3);
     await expect(canvas.getByText('Active')).toBeInTheDocument();
@@ -103,7 +105,16 @@ export const AnsweredOnce: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('8 changes made and checked. 5 decisions need you.')).toBeInTheDocument();
     await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('28 merged8 waiting on your 5 decisions');
-    await expect(canvas.getAllByText(/A one-time decision doesn’t carry over to another change/)).toHaveLength(4);
+    /* One decision at a time: the four that were waiting are the second to
+       the fifth, and each says why it asks. */
+    await expect(canvas.getByText('Decision 1 of 5')).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: 'Previous decision' })).toBeDisabled();
+    for (let n = 2; n <= 5; n++) {
+      await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
+      await expect(canvas.getByText(`Decision ${n} of 5`)).toBeInTheDocument();
+      await expect(canvas.getByText(/A one-time decision doesn’t carry over to another change/)).toBeInTheDocument();
+    }
+    await expect(canvas.getByRole('button', { name: 'Next decision' })).toBeDisabled();
     await expect(canvas.getByRole('article', { name: 'Separate the meanings' })).toHaveTextContent(/Not kept for similar cases\./);
     await expect(canvas.getByText('No rules yet')).toBeInTheDocument();
   },
@@ -147,8 +158,11 @@ export const TheWholeLoop: Story = {
     });
 
     await step('Answer, and make the answer a rule', async () => {
-      await userEvent.click(canvas.getByRole('button', { name: /^Choose\s+Separate the meanings$/ }));
+      await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Separate the meanings$/ }));
       await expect(canvas.getByText('If you apply “Separate the meanings”, the agent will:')).toHaveFocus();
+      /* Selecting it previews it, and says so. */
+      await expect(canvas.getByText(/Proposed:/)).toHaveTextContent('Proposed: Separate the meanings');
+      await expect(canvas.getByText('Not applied')).toBeInTheDocument();
       const apply = canvas.getByRole('button', { name: 'Apply' });
       await userEvent.click(canvas.getByText('Use this decision for similar cases'));
       await expect(canvas.getByText(/It settles now:/).closest('p')).toHaveTextContent('3 changes that match');
@@ -159,8 +173,10 @@ export const TheWholeLoop: Story = {
     });
 
     await step('The case outside the rule pauses, and says why', async () => {
+      await expect(canvas.getByText('Decision 1 of 2')).toBeInTheDocument();
+      await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
       await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
-      await expect(canvas.getByRole('list', { name: 'The two reds' })).toHaveTextContent(/^Removed value · Invoice detail\s*Onboarding fee/);
+      await expect(canvas.getByRole('list', { name: 'The two reds' })).toHaveTextContent(/^Removed value · Invoice detail\s*Red means this value was removed\./);
     });
 
     await step('Widen the rule, and it settles that case', async () => {
@@ -261,24 +277,29 @@ export const Dark: Story = {
 export const DecisionFirst: Story = {
   decorators: [inStore(start)],
   parameters: {
-    docs: { description: { story: 'The order a person who has something to decide wants: the account in one sentence and a bar, then the decisions, and only then the evidence for the sentence (the checks, what is unresolved, the scope), then the completed work. The decisions are the only cards on the screen, and the accent is theirs: the strip’s “Simulated” and the boundaries rail are in the ink, not blue.' } },
+    docs: { description: { story: 'The order a person who has something to decide wants: the account in one sentence, the tiles and a bar, then the workspace, the decision’s screen first and the inspector beside it, and only then the evidence for the sentence (the checks, what is unresolved, the scope) and the completed work. The inspector is the one raised surface on the screen: the preview, the read, the completed work and the boundaries are flat panels, an edge and no shadow, and the strip’s “Simulated” is in the ink, not the accent.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const before = (a: Element, b: Element) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
     const lead = canvas.getByText('7 changes made and checked. 2 decisions need you.');
+    const preview = canvas.getByRole('region', { name: 'Preview of Billing activity BillingActivity.tsx' });
     const needs = canvas.getByRole('heading', { name: /Needs you/ });
     const checks = canvas.getByRole('list', { name: 'Checks run on every change' });
     const done = canvas.getByRole('heading', { name: /Completed work/ });
-    await expect(before(lead, needs)).toBe(true);
+    await expect(before(lead, preview)).toBe(true);
+    await expect(before(preview, needs)).toBe(true);
     await expect(before(needs, checks)).toBe(true);
     await expect(before(checks, done)).toBe(true);
+    await expect(canvas.getByText('Decision 1 of 2')).toBeInTheDocument();
     /* Unresolved is below the decisions, not gone. */
     await expect(canvas.getByText(/Axe couldn’t measure/)).toBeInTheDocument();
-    /* The only bordered cards are the decisions. */
-    await expect(canvasElement.querySelectorAll('.ask').length).toBe(2);
-    await expect(getComputedStyle(canvasElement.querySelector('.delegation__records') as Element).borderTopWidth).toBe('0px');
-    await expect(getComputedStyle(canvasElement.querySelector('.bounds') as Element).borderTopWidth).toBe('0px');
+    /* One decision at a time, in the one raised panel. */
+    await expect(canvasElement.querySelectorAll('.studio__inspector .ask').length).toBe(1);
+    await expect(getComputedStyle(canvasElement.querySelector('.studio__inspector') as Element).boxShadow).not.toBe('none');
+    for (const flat of ['.studio-preview', '.delegation__records', '.bounds']) {
+      await expect(getComputedStyle(canvasElement.querySelector(flat) as Element).boxShadow).toBe('none');
+    }
     /* Simulated is ink, not the accent. */
     const probe = canvasElement.ownerDocument.createElement('i');
     canvasElement.appendChild(probe);
@@ -286,6 +307,60 @@ export const DecisionFirst: Story = {
     const accent = getComputedStyle(probe).color;
     probe.remove();
     await expect(getComputedStyle(canvas.getByText('Simulated')).color).not.toBe(accent);
+  },
+};
+
+/* PREVIEW STUDIO: each direction selected, in each theme. Selecting a
+   direction previews it on the left, labelled as proposed and not applied,
+   and opens the plan on the right; nothing changes until Apply. */
+const selectThen = (title: string) => async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+  const canvas = within(canvasElement);
+  await expect(canvas.getByText('Current interface')).toBeInTheDocument();
+  await userEvent.click(canvas.getByRole('button', { name: new RegExp(`^Select and preview\\s+${title}$`) }));
+  await expect(canvas.getByRole('button', { name: new RegExp(`^Selected\\s+${title}$`) })).toHaveAttribute('aria-pressed', 'true');
+  await expect(canvas.getByText(/Proposed:/)).toHaveTextContent(`Proposed: ${title}`);
+  await expect(canvas.getByText('Not applied')).toBeInTheDocument();
+  await expect(canvas.getByRole('radio', { name: 'Proposed' })).toHaveAttribute('aria-checked', 'true');
+  await expect(canvas.getByText(`If you apply “${title}”, the agent will:`)).toHaveFocus();
+  /* Proposed is not applied: the account has not moved. */
+  await expect(canvas.getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
+};
+
+export const SeparateSelected: Story = {
+  decorators: [inStore(start)],
+  parameters: { docs: { description: { story: 'The recommended direction selected: the old plan neutral in the preview with its label, the failure still red, and the plan, the reason and Apply in the inspector.' } } },
+  play: selectThen('Separate the meanings'),
+};
+
+export const KeepSelected: Story = {
+  decorators: [inStore(start)],
+  parameters: { docs: { description: { story: 'The other direction selected: the old plan still red in the preview, with the same label, and its own plan and reason.' } } },
+  play: selectThen('Keep the red for now'),
+};
+
+export const KeepSelectedDark: Story = {
+  decorators: [inStore(start)],
+  globals: { theme: 'dark' },
+  parameters: { docs: { description: { story: 'The same, in the dark theme. The product in the preview stays light, as Relay does.' } } },
+  play: selectThen('Keep the red for now'),
+};
+
+export const SwitchingKeepsTheWork: Story = {
+  decorators: [inStore(start)],
+  parameters: {
+    docs: { description: { story: 'Going to the other decision and back finds the direction as it was left selected, and the preview with it; and the view a person flipped to (current or proposed) is kept per decision.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Keep the red for now$/ }));
+    await userEvent.click(canvas.getByRole('radio', { name: 'Current' }));
+    await expect(canvas.getByText('Current interface')).toBeInTheDocument();
+    await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
+    await expect(canvas.getByRole('heading', { name: 'Add a token for a fully round corner?' })).toBeInTheDocument();
+    await expect(canvas.getByText('Current interface')).toBeInTheDocument();
+    await userEvent.click(canvas.getByRole('button', { name: 'Previous decision' }));
+    await expect(canvas.getByRole('button', { name: /^Selected\s+Keep the red for now$/ })).toHaveAttribute('aria-pressed', 'true');
+    await expect(canvas.getByRole('radio', { name: 'Current' })).toHaveAttribute('aria-checked', 'true');
   },
 };
 
@@ -396,5 +471,38 @@ export const SharedTableApproved: Story = {
     await expect(canvas.getByText('Visual baselines: 2 of 3 passed, 1 changed')).toBeInTheDocument();
     await expect(canvas.getByText(/28 screens draw the taller rows and have no visual baseline\. Nobody has looked at them\./)).toBeInTheDocument();
     await expect(canvas.getByText(/One went past them because you allowed it, once\./)).toBeInTheDocument();
+  },
+};
+
+export const SharedTableApproveSelected: Story = {
+  args: { run: 'shared-table' },
+  decorators: [inStore(table)],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The shared change selected, before Apply: the preview’s taller rows on the customer list and all forty screens marked as changing, the 28 without a visual baseline among them; the inspector’s confirmation, with no rule to make and whose permission a standing one would need.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Approve, this once' }));
+    await expect(canvas.getByText(/Proposed:/, { selector: '.studio-preview__proposed' })).toHaveTextContent('Proposed: All 40 screens');
+    await expect(canvas.getByText('Proposed: all 40 screens get the change. 28 of them have no visual baseline.')).toBeInTheDocument();
+    await expect(canvas.getByText(/only its owner, Priya Raman \(Design systems\), can give/)).toBeInTheDocument();
+    await expect(canvas.queryByRole('checkbox', { name: /similar cases/ })).toBeNull();
+    await expect(canvas.getByText('2 changes made and checked. 1 decision needs you.')).toBeInTheDocument();
+  },
+};
+
+export const SharedTableDark: Story = {
+  args: { run: 'shared-table' },
+  decorators: [inStore(table)],
+  globals: { theme: 'dark' },
+  parameters: { docs: { description: { story: 'The permission decision in the dark theme.' } } },
+  play: async ({ canvasElement }) => {
+    await expect(getComputedStyle(canvasElement.ownerDocument.documentElement).colorScheme).toBe('dark');
+    await expect(within(canvasElement).getByText('Needs approval')).toBeInTheDocument();
   },
 };

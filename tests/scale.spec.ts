@@ -19,10 +19,10 @@ import { expect, test, type Page } from '@playwright/test';
 const STEPS: [number, string][] = [
   [1280, '1'],
   [1295, '1'],
-  [1296, '1.125'],
-  [1439, '1.125'],
-  [1440, '1.25'],
-  [1920, '1.25'],
+  [1296, '1.0625'],
+  [1439, '1.0625'],
+  [1440, '1.125'],
+  [1920, '1.125'],
 ];
 
 async function open(page: Page, hash: string) {

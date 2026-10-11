@@ -13,8 +13,9 @@ import { devices, expect, test, type Page } from '@playwright/test';
       320px screen reports 353 against 353 and passes. (This test did exactly
       that until a seeded overflow found it.)
    2. The chrome's controls are a fingertip tall, on the delegated work as
-      on the review. The preview frame is left
-      out: it shows the product as the checks measured it. Three things are
+      on the review. The preview frames (the change's, and the delegated
+      work's decision preview) are left out: they show the product as the
+      checks measured it. Three things are
       allowed under 44px, and each is written here rather than skipped: a
       segmented control's options, which are 38px inside a 44px track; the
       skip links, which are only there while they have focus; and a queue
@@ -66,7 +67,7 @@ for (const width of WIDTHS) {
               /* Inside a closed disclosure is not on the screen: Chrome hides it with
                  content-visibility rather than display: none, so it still has a box,
                  but it cannot be reached or pressed until the disclosure opens. */
-              if (el.closest('.preview__frame, .visually-hidden, .diff__finding, details:not([open]) > :not(summary)') || el.matches(allowed)) continue;
+              if (el.closest('.preview__frame, .studio-preview__frame, .visually-hidden, .diff__finding, details:not([open]) > :not(summary)') || el.matches(allowed)) continue;
               /* a checkbox input is a transparent box over its label, and the label is the target */
               const target = el.matches('input[type="checkbox"]') ? (el.closest('label') ?? el) : el;
               const r = target.getBoundingClientRect();
@@ -115,7 +116,7 @@ test.describe('the delegated work on a phone, answering', () => {
 
   test('the confirmation and the rule fit, and their controls are a fingertip', async ({ page }) => {
     await open(page, '#/');
-    await page.getByRole('button', { name: /^Choose\s+Separate the meanings$/ }).click();
+    await page.getByRole('button', { name: /^Select and preview\s+Separate the meanings$/ }).click();
     await page.getByText('Use this decision for similar cases').click();
     await expect(page.getByText('The rule, as it will read')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
@@ -123,7 +124,7 @@ test.describe('the delegated work on a phone, answering', () => {
       const box = await page.getByRole('button', { name, exact: true }).boundingBox();
       expect(box!.height, name).toBeGreaterThanOrEqual(FLOOR);
     }
-    const label = await page.locator('.ask .checkbox').boundingBox();
+    const label = await page.locator('.studio__inspector .ask .checkbox').boundingBox();
     expect(label!.height, 'the rule box').toBeGreaterThanOrEqual(FLOOR);
   });
 });
@@ -139,10 +140,10 @@ test.describe('the delegated work on a phone, the other direction', () => {
     await page.getByRole('button', { name: 'Request evidence' }).click();
     await expect(page.getByText('What the agent found when you asked')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
-    await page.getByRole('button', { name: /^Choose\s+Keep the red for now$/ }).click();
+    await page.getByRole('button', { name: /^Select and preview\s+Keep the red for now$/ }).click();
     await expect(page.getByRole('textbox', { name: 'Your reason' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
-    for (const name of [/^Chosen\s+Keep the red for now$/, /^Choose\s+Separate the meanings$/]) {
+    for (const name of [/^Selected\s+Keep the red for now$/, /^Select and preview\s+Separate the meanings$/]) {
       const box = await page.getByRole('button', { name }).boundingBox();
       expect(box!.height, String(name)).toBeGreaterThanOrEqual(FLOOR);
     }

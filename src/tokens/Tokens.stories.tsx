@@ -19,7 +19,7 @@ const value: CSSProperties = { fontSize: 'var(--text-xs)', color: 'var(--color-t
 const heading: CSSProperties = { fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-medium)', color: 'var(--color-text-muted)', marginBottom: 'var(--space-2)' };
 const section: CSSProperties = { display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' };
 
-const COLOR_GROUPS: TokenGroup[] = ['ground', 'line', 'ink', 'accent', 'meaning', 'diff'];
+const COLOR_GROUPS: TokenGroup[] = ['ground', 'line', 'ink', 'accent', 'meaning', 'diff', 'product'];
 const COLOR_NAMES: TokenName[] = COLOR_GROUPS.flatMap((g) => [...TOKEN_GROUPS[g]]);
 
 function Swatches() {
@@ -176,7 +176,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The token layer, read back from the browser: every value shown here is getComputedStyle on the root, not a second copy of tokens.css. One light canvas, one accent, color for meaning only; a 4px spacing grid; four text sizes with 13 as the body because the product is read at arm\'s length for hours; two radii; one shadow, for a menu; one focus ring every control inherits. This page is what Agent Review names a deviation against, so a token that is not here is a token the system does not have.',
+          'The token layer, read back from the browser: every value shown here is getComputedStyle on the root, not a second copy of tokens.css. Two palettes: the review\'s, taken from Stripe\'s dashboard (cool slate neutrals, one blurple accent, statuses as a tint, an ink and an edge), in a light and a dark scheme; and the product\'s, frozen under -product names, which its surface hands back so Relay renders as it always has. One light canvas, one accent, color for meaning only; a 4px spacing grid; four text sizes with 13 as the body because the product is read at arm\'s length for hours; two radii; one shadow, for a menu; one focus ring every control inherits. This page is what Agent Review names a deviation against, so a token that is not here is a token the system does not have.',
       },
     },
   },

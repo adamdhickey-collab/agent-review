@@ -1,4 +1,4 @@
-import { cleanChecks, RULE_EXCLUDES, type Addition, type Boundary, type Check, type DelegationState, type Gathered, type Option, type Pattern, type Question, type RuleDraft, type Twin, type Work } from './delegation';
+import { cleanChecks, RULE_EXCLUDES, type Addition, type Boundary, type Check, type DelegationState, type Gathered, type Option, type Pattern, type Question, type RuleDraft, type Sketch, type Twin, type Work } from './delegation';
 
 /* The delegated run the product opens on: Claude Code moving Relay's billing
    screens onto the token layer. SIMULATED THROUGHOUT. Unlike rv-2041 and
@@ -491,6 +491,84 @@ const KEEP_RED: RuleDraft = {
   why: 'People may depend on the red today. Keep it, labelled, until a neutral style has been tested.',
 };
 
+/* The screens as the preview draws them (delegation.ts, WHAT THE PREVIEW
+   DRAWS). Northwind Traders is one of Relay's customers, made up with the
+   run, and the rows agree with the run's own figures: the plan went from
+   Starter to Growth on Sep 29 and the seats from 50 to 45, at $30 a seat,
+   so October's invoice is $1,350 for the seats and $100 for support,
+   $1,450, where September's was $1,200; it was sent on Sep 30, and its
+   payment failed on Oct 1. The element each change asks about is not in
+   these rows: the row marked `focus` is where the preview puts the change's
+   own sample, drawn with the change's own declarations. */
+const NORTHWIND = 'Northwind Traders';
+
+const SKETCHES = {
+  activity: {
+    kind: 'rows',
+    title: 'Billing activity',
+    subtitle: `${NORTHWIND} · this week`,
+    rows: [
+      { label: 'Plan', meta: 'Changed by Maya Ortiz · Sep 29', focus: true },
+      { label: 'Invoice INV-2041', value: 'Sent to the billing email', meta: 'Automatic · Sep 30' },
+      { label: 'Billing contact', value: 'Ana Lima added', meta: 'By Maya Ortiz · Sep 29' },
+      { label: 'Payment method', value: 'Visa ending 4242', meta: 'By Ana Lima · Sep 28' },
+    ],
+  },
+  invoiceAmount: {
+    kind: 'rows',
+    title: 'Invoice INV-2041',
+    subtitle: `${NORTHWIND} · due Oct 1`,
+    rows: [
+      { label: 'Growth plan', value: '$1,350.00', meta: '45 seats at $30' },
+      { label: 'Support add-on', value: '$100.00' },
+      { label: 'Amount', meta: 'Updated after the plan change', focus: true },
+    ],
+  },
+  invoiceRemoved: {
+    kind: 'rows',
+    title: 'Invoice INV-2041',
+    subtitle: `${NORTHWIND} · due Oct 1`,
+    rows: [
+      { label: 'Growth plan', value: '$1,350.00', meta: '45 seats at $30' },
+      { label: 'Support add-on', value: '$100.00' },
+      { label: 'Onboarding fee', meta: 'Waived with the plan change', focus: true },
+      { label: 'Amount', value: '$1,450.00' },
+    ],
+  },
+  plan: {
+    kind: 'rows',
+    title: 'Plan',
+    subtitle: 'Growth · billed monthly',
+    rows: [
+      { label: 'Price', value: '$30 per seat' },
+      { label: 'Seats', meta: 'Changed by Maya Ortiz · Sep 29', focus: true },
+      { label: 'Renews', value: 'Nov 1' },
+    ],
+  },
+  settings: {
+    kind: 'rows',
+    title: 'Billing settings',
+    subtitle: NORTHWIND,
+    rows: [
+      { label: 'Company', value: NORTHWIND },
+      { label: 'Billing email', meta: 'Invoices and receipts go here', focus: true },
+      { label: 'Currency', value: 'US dollar' },
+    ],
+  },
+  payments: {
+    kind: 'rows',
+    title: 'Payment history',
+    subtitle: NORTHWIND,
+    rows: [
+      { label: 'INV-2041', meta: 'Oct 1 · Visa ending 4242', value: '$1,450.00', focus: true },
+      { label: 'INV-1987', meta: 'Sep 1 · Visa ending 4242', value: '$1,200.00', status: 'Paid' },
+      { label: 'INV-1932', meta: 'Aug 1 · Visa ending 4242', value: '$1,200.00', status: 'Paid' },
+    ],
+  },
+  /* The seat count the meter routine's axe result is about, "47 of 50 seats". */
+  meter: { kind: 'meter', title: 'Usage', subtitle: 'Growth plan · October', label: 'Seats', used: 47, of: 50, unit: 'seats' },
+} satisfies Record<string, Sketch>;
+
 /* The red every struck value shares, where its meaning was never in doubt:
    the status “Payment failed”, which the agent gave --color-danger on its
    own (paymentFailed, above). */
@@ -501,6 +579,7 @@ const FAILED: Twin = {
   says: 'Red means something went wrong.',
   token: '--color-danger',
   role: 'danger',
+  sketch: SKETCHES.payments,
 };
 
 /* Every struck value asks the same question, because it is the same red,
@@ -546,6 +625,7 @@ const activityRed: Work = {
   title: 'The plan change in the billing activity, and what its red means',
   status: 'asking',
   sample: { label: 'Plan', old: 'Starter', replacement: 'Growth' },
+  sketch: SKETCHES.activity,
   lines: [
     { selector: '.activity__old', property: 'color', before: '#b42318' },
     { selector: '.activity__new', property: 'color', before: '#1f7a3f' },
@@ -563,7 +643,7 @@ const activityRed: Work = {
    them: three are the same case on other screens, and one is close but not
    the same, a line struck through with nothing beside it. */
 function held(
-  w: Pick<Work, 'id' | 'file' | 'screen' | 'title' | 'sample' | 'lines' | 'frames' | 'stories'>,
+  w: Pick<Work, 'id' | 'file' | 'screen' | 'title' | 'sample' | 'sketch' | 'lines' | 'frames' | 'stories'>,
   c: Pick<Case, 'pattern' | 'noticing'>,
   at: string,
 ): Work {
@@ -586,6 +666,7 @@ const invoiceAmount = held(
     screen: 'Invoice detail',
     title: 'The changed amount on an invoice, and what its red means',
     sample: { label: 'Amount', old: '$1,200.00', replacement: '$1,450.00' },
+    sketch: SKETCHES.invoiceAmount,
     lines: [
       { selector: '.invoice__amount-old', property: 'color', before: '#b42318' },
       { selector: '.invoice__amount-new', property: 'color', before: '#1f7a3f' },
@@ -604,6 +685,7 @@ const invoiceRemoved = held(
     screen: 'Invoice detail',
     title: 'The removed line item on an invoice, and what its red means',
     sample: { label: 'Onboarding fee', old: '$200.00' },
+    sketch: SKETCHES.invoiceRemoved,
     lines: [{ selector: '.invoice__line--removed', property: 'color', before: '#b42318' }],
     frames: 4,
     stories: 4,
@@ -619,6 +701,7 @@ const planSeats = held(
     screen: 'Plan card',
     title: 'The changed seat count on the plan card, and what its red means',
     sample: { label: 'Seats', old: '50', replacement: '45' },
+    sketch: SKETCHES.plan,
     lines: [
       { selector: '.plan__seats-old', property: 'color', before: '#b42318' },
       { selector: '.plan__seats-new', property: 'color', before: '#1f7a3f' },
@@ -637,6 +720,7 @@ const settingsEmail = held(
     screen: 'Billing settings',
     title: 'The changed billing email, and what its red means',
     sample: { label: 'Billing email', old: 'ap@northwind.example', replacement: 'billing@northwind.example' },
+    sketch: SKETCHES.settings,
     lines: [
       { selector: '.settings__email-old', property: 'color', before: '#b42318' },
       { selector: '.settings__email-new', property: 'color', before: '#1f7a3f' },
@@ -657,6 +741,7 @@ const meterRadius: Work = {
   title: 'The meter’s round ends use a new token, --radius-full',
   status: 'asking',
   lines: [{ selector: '.meter__track', property: 'border-radius', before: '999px' }],
+  sketch: SKETCHES.meter,
   question: {
     kind: 'scope',
     ask: 'Add a token for a fully round corner?',

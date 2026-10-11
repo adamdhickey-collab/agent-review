@@ -53,19 +53,22 @@ const preview: Preview = {
   },
   initialGlobals: { theme: 'light' },
   decorators: [
-    /* Each story on the surface it belongs to (app/global.css): the review's
-       stories on the review's, the product's on the product's. The wrapper
-       draws nothing, so a story's layout is the one it had. The theme goes
-       on the root, where the app puts it, so the page behind the story
-       takes it too; the product's stories are always light, as the product
-       is in the review's frame. */
+    /* Each story on the surface it belongs to (app/global.css): the
+       product's stories (Product/*) on the product's, and every other on the
+       review's, the system's components included, because the review is
+       where they are drawn in its own palette and Relay's own stories show
+       them as the product draws them. Until 2026-10-11 the system's stories
+       were on neither. The wrapper draws nothing, so a story's layout is the
+       one it had. The theme goes on the root, where the app puts it, so the
+       page behind the story takes it too; the product's stories are always
+       light, as the product is in the review's frame. */
     (Story, context) => {
       const product = context.title.startsWith('Product/');
       document.documentElement.dataset.theme = product ? 'light' : context.globals.theme === 'dark' ? 'dark' : 'light';
       return (
         <>
-          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Inter:opsz,wght@14..32,400..600&display=swap" />
-          <div style={{ display: 'contents' }} data-surface={context.title.startsWith('Review/') ? 'review' : product ? 'product' : undefined}>
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&family=Inter:opsz,wght@14..32,400..700&display=swap" />
+          <div style={{ display: 'contents' }} data-surface={product ? 'product' : 'review'}>
             <IconSetContext.Provider value={product ? 'product' : 'review'}>
               <Story />
             </IconSetContext.Provider>

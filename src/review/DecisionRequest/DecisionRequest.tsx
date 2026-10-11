@@ -12,7 +12,6 @@ import {
   type Option,
   type Reach,
   type Sample,
-  type Twin,
   type Work,
 } from '../../data/delegation';
 import { DiffViewer } from '../DiffViewer/DiffViewer';
@@ -70,7 +69,11 @@ import { Inline } from '../Inline';
    on the act and nothing else. So the blue is the act alone: the
    recommended answer's button, then Apply. Both answers are the same card,
    and "Recommended" is a quiet label; which one the agent recommends is
-   still said, in words and by which button is solid. The confirmation is
+   still said, in words and by which button is solid.
+   SINCE 2026-10-11, with Stripe's palette, the accent also marks a choice
+   as Stripe marks one: "Recommended" is a small accent badge, and a chosen
+   direction's edge is the accent, twice the hairline. The act is still the
+   only accent FILL on the card (the recommended button, then Apply). The confirmation is
    a step of ground, not a tint, and its Cancel and Apply sit in a bar at
    its foot that stays in view while the rule's preview is longer than the
    window, with what Apply will do beside them, so the act is never
@@ -190,8 +193,9 @@ import { Inline } from '../Inline';
    - The two directions as two cards of one shape: the direction, what it
      does in a sentence, both elements as they would look, then three
      benefits and three risks, so neither card is the longer argument.
-     "Recommended" is a quiet label on one of them and nothing else: both
-     buttons are the same, and the accent stays the act's (Apply).
+     "Recommended" is a small accent badge on one of them and nothing else:
+     both buttons are the same, and the accent's fill stays the act's
+     (Apply).
    - Choosing is not deciding. A card's button marks it chosen
      (aria-pressed) and opens, under the cards, what the agent will do if
      it is applied, in order, the person's reason, and the rule box; the
@@ -204,16 +208,33 @@ import { Inline } from '../Inline';
      person's words that the record and any rule carry.
 
    The other questions (a new token, a shared component) keep the shape
-   above: choosing an answer turns the answers into its confirmation. */
+   above: choosing an answer turns the answers into its confirmation.
 
-/* The twin as it renders: the status text in the red both names draw. */
-function TwinSpecimen({ twin }: { twin: Twin }) {
-  return (
-    <p className="ask__sample">
-      <span className="ask__sample-status">{twin.text}</span>
-    </p>
-  );
-}
+   THE INSPECTOR, SINCE PREVIEW STUDIO (2026-10-11, later). The card was
+   the whole argument in one column, the two reds drawn as tiles inside it.
+   Now the delegated work is a workspace: the interface the decision changes
+   is rendered large on the left (DecisionPreview), and this card is the
+   inspector beside it, narrow, holding the decision and nothing it does not
+   need: the kind of stop, where it is, the question, what the checks can
+   and can't say, the directions, and, once one is selected, the plan, the
+   reason, the rule box and Apply. What the agent read and found moved under
+   the preview, where it is read beside the picture it is about: its
+   recommendation and what it can't determine, the evidence it gathered, a
+   shared component's reach, and the folded evidence and code
+   (DecisionRead, below). The two reds are the preview's now, drawn in
+   place, each named in its key.
+
+   Selecting a direction is what previews it: the button reads "Select and
+   preview", the screen's preview switches to the direction as proposed and
+   says it is not applied, and the plan opens here. Nothing changes until
+   Apply. The selection is the screen's (it is also the preview's), passed
+   in as `choice` and reported by `onChoiceChange`; a story that gives
+   neither gets the card's own, as before.
+
+   The checks line keeps the checks apart from the decision: under it, one
+   sentence says that passing them is not evidence either trade-off works
+   for the people who use the screen, because "both pass" is easy to read as
+   "both are fine". */
 
 /* What an answer means for the system beyond this change, read from what
    the option does rather than from its words: gathering evidence decides
@@ -227,14 +248,15 @@ function consequence(o: Option): { icon: IconName; text: string } | undefined {
   return undefined;
 }
 
-/* A check's result as a badge: a pass is quiet, anything else is said. */
+/* A check's result as a badge, as Stripe shows a payment's: a pass is the
+   success tint with its mark, anything else the neutral one with its own. */
 function CheckBadge({ check }: { check: Check }) {
   const passed = check.state === 'passed';
   return (
     <Badge
       size="large"
       tone={passed ? 'success' : 'neutral'}
-      variant={passed ? 'quiet' : 'tint'}
+      variant="tint"
       icon={passed ? 'status-passed' : check.state === 'changed' ? 'status-changed' : 'status-inconclusive'}
     >
       {check.name}: {check.label}
@@ -264,32 +286,6 @@ function Specimen({ sample, unlabelled }: { sample: Sample; unlabelled?: boolean
       ) : (
         <span className="visually-hidden">, removed</span>
       )}
-    </p>
-  );
-}
-
-/* The element as a direction would draw it: the label that says what
-   happened, then the value, neutral or in the red it has today. The label
-   is the system's Badge with the swap mark, the same in both directions;
-   the color is the whole difference between them. */
-function Labelled({ sample, label, neutral }: { sample: Sample; label: string; neutral: boolean }) {
-  return (
-    <p className="ask__sample ask__sample--labelled" data-look={neutral ? 'neutral' : 'red'}>
-      <Badge icon="swap">{label}</Badge>
-      <span className="ask__sample-label">{sample.label}</span>
-      <s className="ask__sample-old">
-        <span className="visually-hidden">was </span>
-        {sample.old}
-      </s>
-      {sample.replacement ? (
-        <>
-          <Icon name="arrow-right" size={12} className="ask__sample-arrow" />
-          <span className="ask__sample-new">
-            <span className="visually-hidden">, now </span>
-            {sample.replacement}
-          </span>
-        </>
-      ) : null}
     </p>
   );
 }
@@ -473,13 +469,6 @@ function ReachCase({ work, reach, id }: { work: Work; reach: Reach; id: string }
           </ul>
         </li>
       </ul>
-
-      <div className="ask__why-person">
-        {q.verdict ? <p className="ask__verdict">{q.verdict}</p> : null}
-        <p className="ask__gap">
-          <Inline text={q.gap} />
-        </p>
-      </div>
     </>
   );
 }
@@ -513,14 +502,20 @@ export interface DecisionRequestProps {
   onAnswer: (optionId: string, makeRule: boolean, reason?: string) => void;
   /** Open with an answer already chosen, for a story. */
   initialChoice?: string;
+  /** The selected direction or answer, when the screen holds it so its preview can read it too. */
+  choice?: string;
+  onChoiceChange?: (optionId: string | undefined) => void;
 }
 
 const basename = (path: string) => path.split('/').pop();
 
-export function DecisionRequest({ work, why, boundaries, waiting = [], preview, onAnswer, initialChoice }: DecisionRequestProps) {
+export function DecisionRequest({ work, why, boundaries, waiting = [], preview, onAnswer, initialChoice, choice: held, onChoiceChange }: DecisionRequestProps) {
   const q = work.question!;
   const id = useId();
-  const [choice, setChoice] = useState<string | undefined>(initialChoice);
+  const [own, setOwn] = useState<string | undefined>(initialChoice);
+  const controlled = onChoiceChange !== undefined;
+  const choice = controlled ? held : own;
+  const setChoice = (next: string | undefined) => (controlled ? onChoiceChange(next) : setOwn(next));
   const [makeRule, setMakeRule] = useState(false);
   /* What the person has typed for each direction, so switching between
      them and back loses nothing. Untouched, a direction's reason is the
@@ -541,7 +536,6 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
   }, [choice, tradeoff]);
 
   const option = q.options.find((o) => o.id === choice);
-  const recommended = q.options.find((o) => o.recommended);
   const p = choice ? preview(choice) : undefined;
   const ruleOn = makeRule && (p?.offer === 'make' || p?.offer === 'widen');
 
@@ -561,16 +555,10 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
     setMakeRule(false);
   };
 
-  const sample = work.sample;
-  const twin = q.kind === 'intent' ? q.twin : undefined;
   const directions = q.options.filter((o) => o.benefits);
-  const evidence = q.options.find((o) => o.asks);
-  const moreLabel = q.kind === 'intent' ? (q.evidence ? 'The evidence and the code' : 'The code') : q.reach ? 'What it found' : 'Why it stopped';
   /* Whether the answers differ in what they mean for the system, which is
      when each says so. */
   const differ = q.options.some((o) => o.asks || o.grants || o.leaves);
-  /* The value's label in a direction ("Replaced"), from its means. */
-  const said = q.means?.split(' ')[0] ?? '';
   const reasonOf = (o: Option) => reasons[o.id] ?? o.decision?.reason ?? '';
 
   const rulePart = p ? (
@@ -668,103 +656,42 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
 
       {why ? <p className="ask__why">{why}</p> : null}
 
-      {twin && sample ? (
-        <ul className="ask__pair" aria-label="The two reds">
-          <li className="ask__tile" data-current>
-            <p className="ask__label">
-              {q.means} <span className="ask__tile-where">· {work.screen}</span>
-            </p>
-            <Specimen sample={sample} />
-            <p className="ask__tile-means">{q.says}</p>
-            <p className="ask__tile-token">
-              <Inline text={`Hard-coded ${work.lines[0]?.before ?? ''}, from the old billing app`} />
-            </p>
-          </li>
-          <li className="ask__tile">
-            <p className="ask__label">
-              {twin.means} <span className="ask__tile-where">· {twin.screen}</span>
-            </p>
-            <TwinSpecimen twin={twin} />
-            <p className="ask__tile-means">{twin.says}</p>
-            <p className="ask__tile-token">
-              <Inline text={twin.token} />
-            </p>
-          </li>
-        </ul>
-      ) : null}
-
       {q.kind === 'intent' && q.tried ? (
-        <Disclosure
-          className="ask__tried"
-          summary={
-            <span className="ask__tried-sum">
-              <Icon name="status-passed" size={16} />
-              {tradeoff ? 'Lint and accessibility pass with either direction. Only this value moves.' : `All ${q.tried.length} automated checks passed, with either token.`}
-            </span>
-          }
-        >
-          <ul className="ask__checks" aria-label={tradeoff ? 'The checks, with each direction in place' : 'The checks, with either token in place'}>
-            {q.tried.map((c) => (
-              <li key={c.name}>
-                <CheckBadge check={c} />
-                <span className="ask__check-says">{c.established}</span>
-              </li>
-            ))}
-          </ul>
-        </Disclosure>
+        <div className="ask__checked">
+          <Disclosure
+            className="ask__tried"
+            summary={
+              <span className="ask__tried-sum">
+                <Icon name="status-passed" size={16} />
+                {tradeoff ? 'Lint and accessibility pass with either direction. Only this value moves.' : `All ${q.tried.length} automated checks passed, with either token.`}
+              </span>
+            }
+          >
+            <ul className="ask__checks" aria-label={tradeoff ? 'The checks, with each direction in place' : 'The checks, with either token in place'}>
+              {q.tried.map((c) => (
+                <li key={c.name}>
+                  <CheckBadge check={c} />
+                  <span className="ask__check-says">{c.established}</span>
+                </li>
+              ))}
+            </ul>
+          </Disclosure>
+          {tradeoff ? (
+            <p className="ask__not-validated">
+              <Icon name="info" size={16} />
+              <span>Passing checks means the code is sound either way. It doesn’t mean either trade-off works for the people who use this screen.</span>
+            </p>
+          ) : null}
+        </div>
       ) : null}
 
       {tradeoff ? (
         <>
-          {/* THE AGENT'S READ: what it recommends, and what it can't
-              determine that could change it. */}
-          <ul className="ask__pair ask__read" aria-label="The agent’s read">
-            {recommended ? (
-              <li className="ask__tile">
-                <p className="ask__label">Recommended</p>
-                <p className="ask__read-head">{recommended.title}</p>
-                <p className="ask__tile-means">
-                  <Inline text={q.recommendation} />
-                </p>
-              </li>
-            ) : null}
-            <li className="ask__tile ask__unknown">
-              <p className="ask__label">
-                <Icon name="message-question" size={16} />
-                What I can’t determine
-              </p>
-              <p className="ask__tile-means">{q.unknown}</p>
-              {q.inferred ? (
-                <p className="ask__tile-token">
-                  <strong>Inferred, not checked:</strong> {q.inferred}
-                </p>
-              ) : null}
-              {evidence ? (
-                <Button
-                  className="ask__evidence"
-                  size="compact"
-                  variant="secondary"
-                  leadingIcon="search"
-                  ref={(el) => {
-                    optionRefs.current[evidence.id] = el;
-                  }}
-                  /* Asking for evidence decides nothing, so it needs no
-                     second step: the question comes back with more. */
-                  onClick={() => onAnswer(evidence.id, false)}
-                >
-                  {evidence.label}
-                </Button>
-              ) : null}
-            </li>
-          </ul>
-
-          {q.gathered ? <GatheredEvidence g={q.gathered} id={id} /> : null}
-
           <div className="ask__options" role="group" aria-labelledby={`${id}-if`}>
             <p className="ask__if" id={`${id}-if`}>
               Which trade-off is acceptable?
             </p>
-            <p className="ask__later">Both directions are defensible, and the agent can apply either. Choosing one shows what it will do.</p>
+            <p className="ask__later">Both directions are defensible, and the agent can apply either. Selecting one shows it in the preview and what the agent will do. Nothing changes until you apply it.</p>
             <ul className="ask__choices ask__choices--tradeoff" data-count={directions.length}>
               {directions.map((o) => {
                 const chosen = choice === o.id;
@@ -773,18 +700,12 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                     <div className="ask__choice-head">
                       <p className="ask__choice-title">{o.title}</p>
                       {o.recommended ? (
-                        <Badge variant="quiet" className="ask__recommended">
+                        <Badge tone="accent" className="ask__recommended">
                           Recommended
                         </Badge>
                       ) : null}
                     </div>
                     <p className="ask__choice-says">{o.outcome}</p>
-                    {twin && sample ? (
-                      <div className="ask__looks" aria-label={`How it looks: ${o.title}`} role="group">
-                        <TwinSpecimen twin={twin} />
-                        <Labelled sample={sample} label={said} neutral={o.id === 'separate'} />
-                      </div>
-                    ) : null}
                     <div className="ask__weigh">
                       <p className="ask__weigh-label" id={`${id}-${o.id}-good`}>
                         Benefits
@@ -816,10 +737,10 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                       className="ask__pick"
                       variant="secondary"
                       aria-pressed={chosen}
-                      leadingIcon={chosen ? 'check' : undefined}
+                      leadingIcon={chosen ? 'check' : 'eye'}
                       onClick={() => pick(o)}
                     >
-                      {chosen ? 'Chosen' : 'Choose'}
+                      {chosen ? 'Selected' : 'Select and preview'}
                       <span className="visually-hidden"> {o.title}</span>
                     </Button>
                   </li>
@@ -849,7 +770,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                       ? 'Drafted by the agent from the direction you chose. Change it to what you know; the decision record keeps your words.'
                       : 'In your words. The decision record keeps them.'
                   }
-                  rows={2}
+                  rows={3}
                   value={reasonOf(option)}
                   onChange={(e) => setReasons((r) => ({ ...r, [option.id]: e.target.value }))}
                 />
@@ -861,20 +782,20 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
         </>
       ) : (
         <>
-          {q.kind === 'scope' && q.reach ? (
-            <ReachCase work={work} reach={q.reach} id={id} />
-          ) : q.kind === 'intent' ? (
-            <div className="ask__why-person">
-              {q.verdict ? <p className="ask__verdict">{q.verdict}</p> : null}
-              <p className="ask__gap">
-                <Inline text={q.gap} />
+          <div className="ask__why-person">
+            {q.verdict ? <p className="ask__verdict">{q.verdict}</p> : null}
+            <p className="ask__gap">
+              <Inline text={q.gap} />
+            </p>
+            {q.reach ? (
+              <p className="ask__owner">
+                <Icon name="lock" size={16} />
+                <span>
+                  The shared {q.reach.component} is {q.reach.owner.name}’s to change ({q.reach.owner.role}).
+                </span>
               </p>
-            </div>
-          ) : (
-            <pre className="ask__code">
-              <code>{work.lines.map((l) => `${l.selector} { ${l.property}: ${l.before}; }`).join('\n')}</code>
-            </pre>
-          )}
+            ) : null}
+          </div>
 
           {option && p ? (
             <form className="ask__confirm" aria-label={`Apply: ${option.label}`} onSubmit={submit} onKeyDown={escape}>
@@ -900,7 +821,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                     <div className="ask__choice-head">
                       {o.title ? <p className="ask__choice-title">{o.title}</p> : null}
                       {o.recommended ? (
-                        <Badge variant="quiet" className="ask__recommended">
+                        <Badge tone="accent" className="ask__recommended">
                           Recommended
                         </Badge>
                       ) : null}
@@ -948,7 +869,107 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
           </li>
         ))}
       </ul>
+    </article>
+  );
+}
 
+export interface DecisionReadProps {
+  work: Work;
+  /** Changes held until this is answered, for the folded evidence. */
+  waiting?: Work[];
+  /** Asking for more evidence, which decides nothing: the same answer the inspector's would give. */
+  onAnswer: (optionId: string, makeRule: boolean) => void;
+}
+
+/* WHAT THE AGENT READ, under the preview (Preview Studio, 2026-10-11,
+   later). The half of a decision that is evidence rather than choice, read
+   beside the picture it is about: the agent's recommendation and what it
+   can't determine, side by side, the way to ask it for more, and what it
+   found when asked; for a fix in a shared component, the change itself and
+   who else it reaches, with what has been checked beside what hasn't; and,
+   folded, what it found, the code and the evidence for each reading. It
+   was the middle of the decision card until then, and every word of it is
+   the card's. */
+export function DecisionRead({ work, waiting = [], onAnswer }: DecisionReadProps) {
+  const q = work.question!;
+  const id = useId();
+  const sample = work.sample;
+  const twin = q.kind === 'intent' ? q.twin : undefined;
+  const tradeoff = q.options.some((o) => o.benefits);
+  const recommended = q.options.find((o) => o.recommended);
+  const evidence = q.options.find((o) => o.asks);
+  const moreLabel = q.kind === 'intent' ? (q.evidence ? 'The evidence and the code' : 'The code') : q.reach ? 'What it found' : 'Why it stopped';
+
+  return (
+    <section className="ask ask--read" aria-label="What the agent read">
+      {/* THE AGENT'S READ: what it recommends, and what it can't
+          determine that could change it, or for a permission question
+          what is outside its authority. */}
+      <ul className="ask__pair ask__read" aria-label="The agent’s read">
+        {recommended ? (
+          <li className="ask__tile ask__recommends">
+            <p className="ask__label">Recommended</p>
+            <p className="ask__read-head">
+              <Inline text={recommended.title ?? recommended.label} />
+            </p>
+            <p className="ask__tile-means">
+              <Inline text={q.recommendation} />
+            </p>
+          </li>
+        ) : null}
+        {q.unknown ? (
+          <li className="ask__tile ask__unknown">
+            <p className="ask__label">
+              <Icon name="message-question" size={16} />
+              What I can’t determine
+            </p>
+            <p className="ask__tile-means">{q.unknown}</p>
+            {q.inferred ? (
+              <p className="ask__tile-token">
+                <strong>Inferred, not checked:</strong> {q.inferred}
+              </p>
+            ) : null}
+            {evidence && tradeoff ? (
+              <Button
+                className="ask__evidence"
+                size="compact"
+                variant="secondary"
+                leadingIcon="search"
+                /* Asking for evidence decides nothing, so it needs no
+                   second step: the question comes back with more. */
+                onClick={() => onAnswer(evidence.id, false)}
+              >
+                {evidence.label}
+              </Button>
+            ) : null}
+          </li>
+        ) : q.kind === 'scope' && !q.reach ? (
+          <li className="ask__tile ask__unknown">
+            <p className="ask__label">
+              <Icon name="lock" size={16} />
+              Outside what it may do
+            </p>
+            <p className="ask__tile-means">
+              <Inline text={q.found} />
+            </p>
+            <pre className="ask__code">
+              <code>{work.lines.map((l) => `${l.selector} { ${l.property}: ${l.before}; }`).join('\n')}</code>
+            </pre>
+          </li>
+        ) : null}
+      </ul>
+
+      {q.gathered ? <GatheredEvidence g={q.gathered} id={id} /> : null}
+
+      {q.kind === 'scope' && q.reach ? (
+        <div className="ask__case">
+          <ReachCase work={work} reach={q.reach} id={id} />
+        </div>
+      ) : null}
+
+      {/* A permission question with no reach has said all it found in the
+          tile above, and its gap is the inspector's; nothing is left to fold. */}
+      {q.kind === 'scope' && !q.reach ? null : (
       <Disclosure className="ask__more" summary={moreLabel}>
         <div className="ask__more-body">
           {q.kind === 'intent' ? (
@@ -993,17 +1014,6 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                 </dd>
               </div>
             ) : null}
-            {recommended && !tradeoff ? (
-              <div>
-                <dt>Why it recommends one</dt>
-                <dd>
-                  <strong>
-                    <Inline text={recommended.label} />.
-                  </strong>{' '}
-                  <Inline text={q.recommendation} />
-                </dd>
-              </div>
-            ) : null}
             {waiting.length ? (
               <div>
                 <dt>Also waiting</dt>
@@ -1023,6 +1033,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
           </dl>
         </div>
       </Disclosure>
-    </article>
+      )}
+    </section>
   );
 }

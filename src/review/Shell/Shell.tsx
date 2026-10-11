@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Icon, IconButton } from '../../components';
+import { Icon, IconButton, SegmentedControl, type SegmentedOption } from '../../components';
 import type { Route } from '../../app/router';
-import { useTheme } from '../../app/useTheme';
+import { useTheme, type Appearance } from '../../app/useTheme';
 import { opensSheet, useSingleKeys } from '../../app/shortcuts';
 import { ShortcutSheet } from '../ShortcutSheet/ShortcutSheet';
 import './Shell.css';
@@ -23,10 +23,15 @@ import './Shell.css';
    weight on a screen is the screen's own heading. Two places, and two
    links out of the product (the Storybook and the source), which are not
    places in it and so are a second, quieter nav on the right, before the
-   theme toggle. The toggle shows where a press takes you: a sun while the
-   review is dark, a moon while it is light, and its name says the same
-   ("Switch to light theme"). The review is dark until a person chooses
-   otherwise (app/useTheme.ts).
+   appearance control.
+
+   The appearance control is three choices, Light, Dark and System, as the
+   system's segmented control: one tab stop, arrow keys between them, each
+   an icon with its name as the tooltip and the accessible name. It was a
+   single toggle until Preview Studio (2026-10-11, later), when following
+   the operating system became the default and a third choice; a toggle
+   cannot say "follow the system". The review follows the system until a
+   person chooses (app/useTheme.ts).
 
    The keyboard button opens the list of shortcuts, and so does a question
    mark pressed anywhere a person is not typing (app/shortcuts.ts has the
@@ -34,8 +39,14 @@ import './Shell.css';
    switched off, and a pointer has no question mark. It is not on a phone's
    bar, where there is no keyboard to have shortcuts for. */
 
+const APPEARANCES: SegmentedOption<Appearance>[] = [
+  { value: 'light', label: 'Light', icon: 'sun', iconOnly: true },
+  { value: 'dark', label: 'Dark', icon: 'moon', iconOnly: true },
+  { value: 'system', label: 'System', icon: 'monitor', iconOnly: true },
+];
+
 export function Shell({ route, children }: { route: Route; children: ReactNode }) {
-  const { theme, toggle } = useTheme();
+  const { appearance, setAppearance } = useTheme();
   const singleKeys = useSingleKeys();
   const [sheet, setSheet] = useState(false);
 
@@ -101,7 +112,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
             aria-haspopup="dialog"
             onClick={() => setSheet(true)}
           />
-          <IconButton icon={theme === 'dark' ? 'sun' : 'moon'} label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} onClick={toggle} />
+          <SegmentedControl className="shell__appearance" label="Appearance" options={APPEARANCES} value={appearance} onChange={setAppearance} size="compact" />
           <span className="shell__repo">
             <Icon name="git-branch" size={14} />
             <code>relay/web</code>

@@ -13,6 +13,13 @@ type Box = { left: number; top: number; right: number; bottom: number };
    has since changed the screen away from). */
 export function drawMark(frame: HTMLElement, mark: HTMLElement, target: string | undefined) {
   const el = target ? frame.querySelector<HTMLElement>(`[data-finding="${CSS.escape(target)}"]`) : null;
+  drawMarkOn(frame, mark, el);
+}
+
+/* The same, over an element already found: the delegated work's preview
+   marks the element a decision is about, which it finds by selector rather
+   than by a finding's name (DecisionPreview). */
+export function drawMarkOn(frame: HTMLElement, mark: HTMLElement, el: HTMLElement | null) {
   const seen = el ? visibleRect(el, frame) : null;
   if (!seen) {
     mark.hidden = true;

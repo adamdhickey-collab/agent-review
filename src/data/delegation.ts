@@ -356,7 +356,44 @@ export interface Twin {
   token: string;
   /** What that token is for, in a word, as an answer names it: "danger". */
   role: string;
+  /** Its screen as the preview draws it, beside the one in question. */
+  sketch?: Sketch;
 }
+
+/* WHAT THE PREVIEW DRAWS (Preview Studio, 2026-10-11). A decision is made
+   looking at the interface it changes, so each change that asks carries its
+   screen as a sketch: the rows around the element in question, which the
+   preview renders on the product's surface in the product's own tokens and
+   components. The element itself is never drawn from the sketch: it is the
+   change's own sample, and the preview applies the change's declarations to
+   it (its lines, `before` for the screen as it is, a direction's `after`
+   for the screen as proposed), selector by selector, so what the preview
+   shows is what the agent would write. Simulated with the run: Relay's
+   billing screens are not in this repository (data/billing.ts), and these
+   rows are written to agree with the run's figures. The customer list is
+   real (src/product/customers) and is drawn as itself. */
+
+/** A row of a sketched screen. The one with `focus` is where the change's sample goes. */
+export interface SketchRow {
+  /** What the row is: "Payment method", "INV-2041". */
+  label: string;
+  /** Its value as the screen shows it. */
+  value?: string;
+  /** A time, a person, a date under the label. */
+  meta?: string;
+  /** A status word, at the row's end, as the screen sets one. */
+  status?: string;
+  /** The row the change is on, or (on a twin's screen) the twin itself. */
+  focus?: true;
+}
+
+export type Sketch =
+  /** A screen of rows: a feed, an invoice, a settings page. */
+  | { kind: 'rows'; title: string; subtitle?: string; rows: SketchRow[] }
+  /** A usage meter: a label, a count of a total, and its track. */
+  | { kind: 'meter'; title: string; subtitle?: string; label: string; used: number; of: number; unit: string }
+  /** A real screen of the product, drawn as itself, at the narrowest width it is laid out for. */
+  | { kind: 'screen'; screen: 'customers'; minWidth: number; focus: string };
 
 /** A rendered specimen of the element in question, so a designer sees it as well as reads it. */
 export interface Sample {
@@ -389,6 +426,8 @@ export interface Work {
   /** A change held because another question's answer may settle it. */
   waitsOn?: string;
   sample?: Sample;
+  /** The screen it is on, as the preview draws it, for a change that asks. */
+  sketch?: Sketch;
   /** How many frames and stories the checks cover on this screen. */
   frames: number;
   stories: number;

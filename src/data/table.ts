@@ -325,6 +325,9 @@ const sharedRows: Work = {
   title: 'Rows 8px taller, in the shared Table',
   status: 'asking',
   lines: [{ selector: '.table', property: '--table-pad-y', before: 'var(--space-2)' }],
+  /* The one screen of the forty that is in this repository, drawn as itself,
+     with the whole table marked: the change is to every row of it. */
+  sketch: { kind: 'screen', screen: 'customers', minWidth: 768, focus: '.table' },
   question: firstQuestion,
   frames: 2,
   stories: 9,

@@ -20,16 +20,17 @@
   translate: 0 0;
 }
 
-/* On the page's ground, with a hairline under it: a bar the eye passes
-   over on the way to the screen. */
+/* The chrome's own ground, a step off the page, with a hairline under it:
+   the bar is one surface and the screen under it another, and neither is
+   louder than the screen's own heading. */
 .shell__bar {
   display: flex;
   align-items: stretch;
   gap: var(--space-6);
-  height: 2.75rem;
+  height: 3rem;
   padding: 0 var(--space-4);
   border-bottom: var(--border-width) solid var(--color-border);
-  background: var(--color-canvas);
+  background: var(--color-surface-chrome);
 }
 
 .shell__bar > * {
@@ -41,29 +42,32 @@
   align-items: center;
   gap: var(--space-2);
   color: var(--color-text);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
 }
 
 .shell__brand:hover {
   text-decoration: none;
 }
 
+/* The product's mark is a tile of the accent, as an app's icon is. */
 .shell__mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: var(--radius-sm);
-  background: var(--color-text);
-  color: var(--color-surface);
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  box-shadow: var(--shadow-control);
 }
 
 /* The places. Each is the bar's full height, so the line under the one you
    are in sits on the bar's own hairline, as a selected tab's does on its
-   list's. Quiet ink until it is the place you are in or the one under the
-   pointer. No pill: a filled shape in the bar was the heaviest thing above
-   the screen's heading. */
+   list's. Quiet ink until it is the place you are in, which is the accent,
+   the word and the line under it, as Stripe marks where you are; or the one
+   under the pointer, which is ink. No pill: a filled shape in the bar was
+   the heaviest thing above the screen's heading. */
 /* The places and the links out are one group, so that on a phone they can be
    one row together; on a wider bar the group is not a box at all, and its two
    navs sit in the bar as if it were not there. */
@@ -109,8 +113,8 @@
 }
 
 .shell__nav a[aria-current='page'] {
-  color: var(--color-text);
-  box-shadow: inset 0 calc(var(--border-width) * -2) 0 var(--color-text);
+  color: var(--color-accent);
+  box-shadow: inset 0 calc(var(--border-width) * -2) 0 var(--color-accent);
 }
 
 /* Links out of the product: the Storybook and the source. Not places in it,
@@ -146,11 +150,10 @@
   font-size: var(--text-sm);
 }
 
-/* The bar carries no accent: who you are is a neutral disc, and its two
-   buttons are plain icon buttons. Blue in the chrome is for the one thing a
-   screen asks you to do, and the bar asks nothing. */
-.shell__context .icon-btn + .icon-btn {
-  margin-left: calc(var(--space-3) * -1); /* the two buttons are a pair, closer than the bar's gap */
+/* Who you are is a disc of the accent's tint; the keyboard button and the
+   appearance control are a pair, closer than the bar's gap. */
+.shell__context .icon-btn + .shell__appearance {
+  margin-left: calc(var(--space-2) * -1);
 }
 
 
@@ -171,11 +174,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: 50%;
-  background: var(--color-surface-sunken);
-  color: var(--color-text-secondary);
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
 }
@@ -196,15 +199,17 @@
    reader, hidden the way .visually-hidden hides it, because a name that is
    display: none is a name nobody hears. "Delegated work" narrows to "Work"
    on a phone the same way: four places do not fit a 320px row with the
-   long name, and a screen reader still hears it. This starts at 56rem, not
-   48: with the keyboard button in the bar the full bar needs about 860px,
-   and between 769 and 860 its labels ("Agent Review", "Delegated work", the
-   name) broke onto two lines instead of fitting. 896 leaves it room. */
-@media (max-width: 56rem) {
-  .shell__repo {
-    display: none;
-  }
+   long name, and a screen reader still hears it.
 
+   Where each step starts was measured by sweeping the bar's width 4px at a
+   time for a label broken onto two lines (sweep widths when anything is
+   added to the bar). Since Preview Studio (2026-10-11, later) the bar holds
+   the appearance control, three choices where the theme toggle was one, and
+   every step moved: the name goes first, from 62rem (it broke from 904 to
+   976px); the project's branch from 56rem; the keyboard button from 44rem;
+   and the bar becomes two rows from 50rem rather than 40 (the brand and
+   "Delegated work" broke from 656 to 784px). */
+@media (max-width: 62rem) {
   .shell__user-name {
     position: absolute;
     width: 1px;
@@ -218,22 +223,26 @@
   }
 }
 
+@media (max-width: 56rem) {
+  .shell__repo {
+    display: none;
+  }
+}
+
 /* The keyboard button is for a keyboard, and the bar has no room for it
-   below 44rem: from 690px the whole bar fits with it, under that the brand
-   and "Delegated work" break onto two lines. The shortcuts themselves are
-   still there to a keyboard, on the question mark; only the button goes. On
-   a phone there is no keyboard to list them for in any case. */
+   below 44rem. The shortcuts themselves are still there to a keyboard, on
+   the question mark; only the button goes. On a phone there is no keyboard
+   to list them for in any case. */
 @media (max-width: 44rem) {
   .shell__shortcuts {
     display: none;
   }
 }
 
-/* On a phone the bar is two rows: the name and who you are, then the places
-   to go, each a full-width share of the row so they are easy to hit. One row
-   would have cut a word or a name off, and a name that is cut is not the
-   name. */
-@media (max-width: 40rem) {
+/* Two rows: the name and who you are, then the places to go, each a
+   full-width share of the row so they are easy to hit. One row would have
+   cut a word or a name off, and a name that is cut is not the name. */
+@media (max-width: 50rem) {
   .shell__bar {
     flex-wrap: wrap;
     height: auto;
@@ -261,6 +270,22 @@
   .shell__nav {
     flex: 1 1 auto;
     gap: var(--space-1);
+  }
+}
+
+/* On a phone, "Delegated work" is "Work", and the links out of the product
+   take the small size, as quieter than the places as they are on a wider
+   bar. With the review's 14px body the second row had 6px to spare at 320
+   on a Mac and none on Linux, whose glyphs run wider (324px, in CI); the
+   small links give it room, and the row wraps rather than overflowing if a
+   font ever runs wider still. */
+@media (max-width: 40rem) {
+  .shell__where {
+    flex-wrap: wrap;
+  }
+
+  .shell__links a {
+    font-size: var(--text-sm);
   }
 
   .shell__long {

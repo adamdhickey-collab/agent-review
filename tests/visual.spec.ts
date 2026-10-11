@@ -7,10 +7,11 @@ import { devices, expect, test, type Page } from '@playwright/test';
 
 const WIDTHS = [1280, 768] as const;
 
-/* The review is dark until a person chooses light (app/useTheme.ts). The
-   baselines that are not named -dark are of the light theme, so those tests
-   make that choice first, the way the bar's toggle does: by remembering it. */
-const chooseLight = () => localStorage.setItem('agent-review:theme', 'light');
+/* The review is light until a person chooses dark (app/useTheme.ts, since
+   2026-10-11). The baselines that are not named -dark are of the light theme,
+   what a first visit sees, so they make no choice; the -dark ones make it
+   first, the way the bar's toggle does: by remembering it. */
+const chooseDark = () => localStorage.setItem('agent-review:theme', 'dark');
 
 async function settle(page: Page) {
   await page.evaluate(() => document.fonts.ready);
@@ -20,10 +21,6 @@ async function settle(page: Page) {
 for (const width of WIDTHS) {
   test.describe(`at ${width}`, () => {
     test.use({ viewport: { width, height: 900 } });
-    test.beforeEach(async ({ page }) => {
-      await page.addInitScript(chooseLight);
-    });
-
     test('the delegated work', async ({ page }) => {
       await page.goto('#/');
       await settle(page);
@@ -40,6 +37,20 @@ for (const width of WIDTHS) {
       await page.goto('#/queue');
       await settle(page);
       await expect(page).toHaveScreenshot(`queue-${width}.png`, { fullPage: true });
+    });
+
+    /* Preview Studio: a direction selected, previewed and not applied. The
+       first screen, from the top: the preview proposing it, and the card
+       selected in the inspector. Selecting sends focus to the plan, which
+       scrolls; the capture goes back to the top so it is the same picture
+       at every width. */
+    test('the delegated work, a direction selected', async ({ page }) => {
+      await page.goto('#/');
+      await settle(page);
+      await page.getByRole('button', { name: /^Select and preview\s+Separate the meanings$/ }).click();
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await settle(page);
+      await expect(page).toHaveScreenshot(`delegation-selected-${width}.png`);
     });
 
     test('the change, with the first finding open', async ({ page }) => {
@@ -59,10 +70,6 @@ for (const width of WIDTHS) {
 test.describe('on a phone, 375', () => {
   const { defaultBrowserType: _ignored, ...phone } = devices['iPhone 13'];
   test.use({ ...phone, viewport: { width: 375, height: 812 }, deviceScaleFactor: 1 });
-  test.beforeEach(async ({ page }) => {
-    await page.addInitScript(chooseLight);
-  });
-
   async function open(page: Page, hash: string) {
     await page.goto('about:blank');
     await page.goto(hash);
@@ -98,13 +105,14 @@ test.describe('on a phone, 375', () => {
   });
 });
 
-/* The dark theme, at one width: what a first visit sees, with no choice
-   made. The change is the one to look at: the review is dark and the product
-   in its frame is not, because the frame is the product's surface and that
-   surface is always light. */
-test.describe('in the dark theme, the default, at 1280', () => {
+/* The dark theme, at one width, chosen. The change is the one to look at:
+   the review is dark and the product in its frame is not, because the frame
+   is the product's surface and that surface is always light. */
+test.describe('in the dark theme, chosen, at 1280', () => {
   test.use({ viewport: { width: 1280, height: 900 } });
-
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(chooseDark);
+  });
   test('the delegated work', async ({ page }) => {
     await page.goto('#/');
     await settle(page);
@@ -126,12 +134,10 @@ test.describe('in the dark theme, the default, at 1280', () => {
 
 test.describe('the product screens', () => {
   /* The product is light whatever the review is, so the theme makes no
-     difference to it; the choice is made so the page behind the frame is
-     light too, because the frame is a fraction of a pixel taller than a
-     whole number and the capture's last row shows what is behind it. */
-  test.beforeEach(async ({ page }) => {
-    await page.addInitScript(chooseLight);
-  });
+     difference to it. The page behind the frame matters, because the frame
+     is a fraction of a pixel taller than a whole number and the capture's
+     last row shows what is behind it, so the lift below puts the product's
+     own ground behind it too. */
   for (const width of WIDTHS) {
     test(`customers, before, at ${width}`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
@@ -158,6 +164,11 @@ test.describe('the product screens', () => {
         const lifted = el.cloneNode(true) as HTMLElement;
         document.body.replaceChildren(lifted);
         document.body.style.margin = '0';
+        /* Behind it, the product's ground and not the review's: since the
+           review took its own palette (2026-10-11) the page is a different
+           grey from the product's, and a Relay baseline moves only when
+           Relay does. */
+        document.documentElement.dataset.surface = 'product';
       });
       await expect(frame).toHaveScreenshot(`customers-before-${width}.png`);
     });

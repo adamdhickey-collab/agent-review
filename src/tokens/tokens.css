@@ -11,12 +11,14 @@
    answer card), and the states carry the color.
 
    The review is drawn a step further than the product it reviews: its own
-   type, a wider radius scale, a fill and an edge step per meaning, a raised
-   card, and a dark theme. Every one of those is added here, and no value
-   the product renders in is changed: a new token, a second value under a
-   review-only name, or the dark half of a light-dark() whose light half is
-   the old value to the digit. So Relay in the preview frame and in its own
-   stories reads exactly what it read before. */
+   type (Geist, at a 14px body), a wider radius scale, its own palette
+   (Preview Studio's, since 2026-10-11) with a dark scheme, a fill and an
+   edge step per meaning, and a raised card. Every one of those is added
+   here, and no value the product renders in is changed: the product's
+   colors are frozen under -product names and its surface hands them back
+   (app/global.css), its radii, its typeface and its body size the same
+   way. So Relay in the preview frame and in its own stories reads exactly
+   what it read before. */
 :root {
   /* Type. Inter for the interface, a system monospace for anything a
      machine wrote: hashes, paths, tokens, values. Four sizes. 13 is the
@@ -24,35 +26,47 @@
      floor and is only ever labels or badges. Labels are sentence case,
      written that way in the source: nothing is transformed to capitals,
      so there is no tracking token for them. */
-  --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-ui-product: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-ui: var(--font-ui-product);
   --font-mono: var(--font-mono-system);
   --font-mono-system: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
 
   /* The review's own type, on its surface only ([data-surface='review'] in
      app/global.css); the product keeps the type above, so Relay renders in
-     the preview frame exactly as it did. Geist Mono's x-height is 0.53 of
-     the em against Inter's 0.516, as Chrome renders them, where the system
-     mono's was 0.45: a token name in a sentence now reads as the sentence's
-     size by its letters as well as by its number (one size per line), with
-     no adjustment. font-size-adjust was tried and is not used: Chrome reads
-     Inter's x-height as 0.546 for from-font and 0.516 when it scales, so
-     any adjustment on the surface rescaled Inter itself by 6%. Inter's
-     cv05 is the lowercase l with a tail, so l, I and 1 differ in an
-     identifier, and its optical sizes give the 16 and 20px heads the
-     display cut. */
+     the preview frame exactly as it did. Since Preview Studio (2026-10-11)
+     the review is set in Geist, and its monospace is Geist Mono, the same
+     family's: a token name in a sentence reads as the sentence's size by its
+     letters as well as by its number (one size per line), with no
+     adjustment. font-size-adjust was tried with Inter and is not used:
+     Chrome read Inter's x-height as 0.546 for from-font and 0.516 when it
+     scaled, so any adjustment on the surface rescaled the type itself. Geist
+     has no optical sizes and no character variant the review needs, so the
+     feature setting is the default. */
+  --font-ui-review: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono-review: 'Geist Mono', var(--font-mono-system);
-  --font-features-review: 'cv05' 1;
+  --font-features-review: normal;
   --text-xs: 0.6875rem; /* 11 */
   --text-sm: 0.75rem;   /* 12 */
-  --text-md: 0.8125rem; /* 13 */
+  --text-md-product: 0.8125rem; /* 13 */
+  /* The review's body is a step larger than the product's, 14 rather than
+     13, on its surface only, as its radii are: the review is read, the
+     product is scanned. The product's surface hands 13 back. */
+  --text-md-review: 0.875rem; /* 14 */
+  --text-md: var(--text-md-product);
   --text-lg: 1rem;      /* 16 */
   --text-xl: 1.25rem;   /* 20 */
+  /* The review's one display size: a screen's title and a count a person
+     reads at a glance (the account's figures), the workspace's heading. The
+     product never uses it; the sizes above are still the product's whole
+     scale. */
+  --text-2xl: 1.5rem;   /* 24 */
   --leading-tight: 1.25;
   --leading-ui: 1.45;
   --leading-body: 1.55;
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
+  --weight-bold: 700; /* the review's titles and figures, with --text-2xl */
 
   /* Space. A 4px grid. Components use the scale; nothing writes a pixel
      value for padding, gap or margin. */
@@ -74,128 +88,73 @@
 
   /* Shape. The product's two radii: the small one for anything inside a
      row (badges, inputs, buttons), the medium one for panels and menus.
-     The review's scale is a step wider, 4, 8 and 12, set on its own surface
+     The review's scale is a step wider, 6, 8 and 12, set on its own surface
      (app/global.css), where --radius-sm and --radius-md take the review's
      values; the product's surface hands them back. The large radius is the
      review's alone, for a page-level panel (the queue, the boundaries, a
      decision), so an outer curve stays wider than the curves inside it. */
   --radius-sm-product: 3px;
   --radius-md-product: 6px;
-  --radius-sm-review: 4px;
+  --radius-sm-review: 6px;
   --radius-md-review: 8px;
   --radius-sm: var(--radius-sm-product);
   --radius-md: var(--radius-md-product);
   --radius-lg: 12px;
   --border-width: 1px;
 
-  /* COLOR HAS TWO SCHEMES, AND THE PRODUCT HAS ONE. Every color below is
-     light-dark(light, dark). The first value is the one this file has
-     always held, to the digit: it is what the product renders in, and what
-     the review quotes when it names a token's value. The second is the
-     review's dark theme. Which one an element gets is its color-scheme
-     (app/global.css): the review follows the reader's choice, and the
-     product's surface is always light, so Relay in the preview frame is the
-     product as the checks measured it whatever the review around it is
-     wearing. The dark values are written in OKLCH on the light ones' hues,
-     and every ink clears 4.5:1 on every ground it sits on (the stories run
-     axe on the dark screens). */
-
-  /* Grounds. Canvas is the page, surface is a panel or a table, sunken is a
-     head row or a code block, hover is a row under the pointer. In the dark
-     the page is the darkest and each step up is lighter, so a panel still
-     rises off the page and a head row still reads as a band. */
-  --color-canvas: light-dark(#f7f7f8, oklch(0.17 0.006 285));
-  --color-surface: light-dark(#ffffff, oklch(0.205 0.006 285));
-  --color-surface-sunken: light-dark(#f2f2f4, oklch(0.255 0.007 285));
-  --color-surface-hover: light-dark(#f4f4f6, oklch(0.235 0.007 285));
-  /* A row under the pointer in a list a reviewer scans (the review's queue):
-     one step further than hover, so the row you are on is the one you can
-     see. As far as muted text allows: 4.57:1 on it in the light (L 0.947), 5.48:1
-     in the dark; one step more and the muted columns fail 4.5:1. */
-  --color-surface-hover-strong: light-dark(oklch(0.947 0.006 285), oklch(0.29 0.008 285));
-
-  /* Lines. The hairline divides; the control border is the one boundary a
-     reader has to find (3.1:1 on white, for WCAG 1.4.11; 4.3:1 on the dark
-     surface). */
-  --color-border: light-dark(#e4e4e8, oklch(0.31 0.008 285));
-  /* A line inside a panel: between the rows of a list, between a panel's
-     parts. The border above is for a panel's edge and a region's band; a
-     divider is the same line one step fainter (1.15:1 on white where the
-     border is 1.30), so a list of rows is read as rows and not as a stack of
-     rules. Decorative, like the border: nothing depends on seeing it. */
-  --color-divider: light-dark(oklch(0.945 0.004 286), oklch(0.27 0.006 285));
-  --color-border-control: light-dark(#8c8c96, oklch(0.56 0.014 285));
-
-  /* Ink. Three steps. Muted is the quietest text allowed, and it clears
-     4.5:1 on every ground above. On-accent is the ink on a filled accent:
-     white on the light theme's blue, near-black on the dark theme's, which
-     is a lighter blue so that it also reads as a link on a dark ground. */
-  --color-text: light-dark(#1b1b1f, oklch(0.95 0.004 285));
-  --color-text-secondary: light-dark(#4a4a55, oklch(0.82 0.008 285));
-  --color-text-muted: light-dark(#6a6a76, oklch(0.71 0.012 285));
-  --color-text-on-accent: light-dark(#ffffff, oklch(0.17 0.02 264));
-
-  /* The accent is for the one thing the reader is being asked to look at or
-     press: the selected row, the primary action, a link. One blue, two
-     steps, and a subtle ground for selection. */
-  --color-accent: light-dark(#2f5fd6, oklch(0.76 0.12 264));
-  --color-accent-hover: light-dark(#244bb0, oklch(0.82 0.085 264));
-  --color-accent-subtle: light-dark(#e9effc, oklch(0.29 0.06 264));
-
-  /* Meaning. Each has an ink that reads on white and a subtle ground the ink
-     also reads on. Success is a pass, warning is a change that needs a look,
-     danger is a failure. Nothing is ever only a color: every use carries a
-     word or an icon with a name. */
-  --color-success: light-dark(#1f7a3f, oklch(0.78 0.15 150));
-  --color-success-subtle: light-dark(#e6f4ea, oklch(0.27 0.05 150));
-  --color-warning: light-dark(#8a5a00, oklch(0.82 0.13 82));
-  --color-warning-subtle: light-dark(#fbf1dc, oklch(0.29 0.05 80));
-  --color-danger: light-dark(#b42318, oklch(0.74 0.15 25));
-  --color-danger-subtle: light-dark(#fdeceb, oklch(0.28 0.06 25));
-
-  /* Each meaning's two missing steps: a SOLID for a fill (a bar, a dot, a
-     mark) and a BORDER for an edge on its subtle ground. The inks above
-     are text colors, and a text color used as a fill is what made the
-     account's bar muddy. Written in OKLCH so the solids weigh the same:
-     green, red, blue and gray at one lightness (0.62, each at least 3.4:1
-     on white, for a mark that has to be found), and amber at 0.80, because
-     amber only looks amber when it is bright; its edge does the finding.
-     The inks and grounds above are untouched: the product reads them, and
-     the review's evidence is the product as it is. */
-  --color-success-solid: light-dark(oklch(0.62 0.15 150), oklch(0.68 0.16 150));
-  --color-success-border: light-dark(oklch(0.86 0.07 150), oklch(0.42 0.09 150));
-  --color-warning-solid: light-dark(oklch(0.8 0.155 78), oklch(0.8 0.155 78));
-  --color-warning-border: light-dark(oklch(0.72 0.12 75), oklch(0.62 0.12 75));
-  --color-danger-solid: light-dark(oklch(0.62 0.19 28), oklch(0.64 0.19 28));
-  --color-danger-border: light-dark(oklch(0.86 0.07 25), oklch(0.44 0.1 25));
-  --color-accent-border: light-dark(oklch(0.86 0.06 264), oklch(0.44 0.1 264));
-  --color-neutral-solid: light-dark(oklch(0.62 0.012 285), oklch(0.62 0.012 285));
-
-  /* Diff. The same two grounds a code review uses, with the meaning inks
-     above, so a line added and a line removed read the same here as in
-     the pull request. In the dark as in the light, each ink is its
-     meaning's ink to the digit: danger and a removed line are one red under
-     two names, which is the question the delegated work turns on. */
-  --color-diff-add: light-dark(#e6f4ea, oklch(0.27 0.05 150));
-  --color-diff-add-ink: light-dark(#1f7a3f, oklch(0.78 0.15 150));
-  --color-diff-remove: light-dark(#fdeceb, oklch(0.28 0.06 25));
-  --color-diff-remove-ink: light-dark(#b42318, oklch(0.74 0.15 25));
-
-  /* Elevation. One shadow for a menu or a popover floating over content.
-     Panels are flat and divided by hairlines. The raised step is the
-     review's, for a card a person presses inside a flat panel (an answer
-     to a decision): the hairline stays, and a short shadow lifts it one
-     step, so what can be chosen is not one more nested box. A shadow on a
-     dark ground has to be nearly black to be seen at all. */
-  --shadow-menu: 0 4px 12px light-dark(rgba(20, 20, 30, 0.12), rgba(0, 0, 0, 0.5)), 0 0 0 1px var(--color-border);
-  --shadow-raised:
-    0 1px 2px light-dark(rgba(20, 20, 30, 0.06), rgba(0, 0, 0, 0.4)), 0 2px 6px -2px light-dark(rgba(20, 20, 30, 0.08), rgba(0, 0, 0, 0.5));
-  --color-scrim: light-dark(rgba(27, 27, 31, 0.32), rgba(0, 0, 0, 0.6)); /* behind a dialog */
+  /* COLOR: TWO PALETTES, ONE FOR EACH SURFACE. The product's is first, and
+     it is frozen: every value below is the one this file held for the
+     product before the review took a palette of its own (2026-10-11), to
+     the digit, under a -product name. The product's surface hands each one
+     back under its plain name (app/global.css), so Relay in the preview
+     frame and in its own stories renders exactly as the checks measured it,
+     and a value the review quotes when it names a deviation (#b42318 is
+     --color-danger) is still the value Relay has. The product has one
+     scheme, light. The review's palette, with both of its schemes, is the
+     block after this one. */
+  --color-canvas-product: #f7f7f8;
+  --color-surface-product: #ffffff;
+  --color-surface-sunken-product: #f2f2f4;
+  --color-surface-hover-product: #f4f4f6;
+  --color-surface-hover-strong-product: oklch(0.947 0.006 285);
+  --color-border-product: #e4e4e8;
+  --color-divider-product: oklch(0.945 0.004 286);
+  --color-border-control-product: #8c8c96;
+  --color-text-product: #1b1b1f;
+  --color-text-secondary-product: #4a4a55;
+  --color-text-muted-product: #6a6a76;
+  --color-text-on-accent-product: #ffffff;
+  --color-accent-product: #2f5fd6;
+  --color-accent-hover-product: #244bb0;
+  --color-accent-subtle-product: #e9effc;
+  --color-success-product: #1f7a3f;
+  --color-success-subtle-product: #e6f4ea;
+  --color-warning-product: #8a5a00;
+  --color-warning-subtle-product: #fbf1dc;
+  --color-danger-product: #b42318;
+  --color-danger-subtle-product: #fdeceb;
+  --color-success-solid-product: oklch(0.62 0.15 150);
+  --color-success-border-product: oklch(0.86 0.07 150);
+  --color-warning-solid-product: oklch(0.8 0.155 78);
+  --color-warning-border-product: oklch(0.72 0.12 75);
+  --color-danger-solid-product: oklch(0.62 0.19 28);
+  --color-danger-border-product: oklch(0.86 0.07 25);
+  --color-accent-border-product: oklch(0.86 0.06 264);
+  --color-neutral-solid-product: oklch(0.62 0.012 285);
+  --color-diff-add-product: #e6f4ea;
+  --color-diff-add-ink-product: #1f7a3f;
+  --color-diff-remove-product: #fdeceb;
+  --color-diff-remove-ink-product: #b42318;
+  --shadow-menu-product: 0 4px 12px rgba(20, 20, 30, 0.12), 0 0 0 1px #e4e4e8;
+  --shadow-raised-product: 0 1px 2px rgba(20, 20, 30, 0.06), 0 2px 6px -2px rgba(20, 20, 30, 0.08);
+  --shadow-control-product: 0 0 transparent; /* the product's controls draw no shadow */
+  --color-scrim-product: rgba(27, 27, 31, 0.32);
 
   /* Focus. One ring, drawn with outline so it follows any shape, offset so
      it never touches the control's own border. Every interactive element
-     gets it through the base stylesheet, and no component removes it. */
-  --focus-ring-color: var(--color-accent);
+     gets it through the base stylesheet, and no component removes it. Its
+     color is the accent's, set with each palette (below, and the product's
+     hand-back in app/global.css). */
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
 
@@ -226,7 +185,135 @@
      of room after it, the width its widest screen is laid out in, so the
      first starts at 1296px and the second at 1440px. The app takes them
      (app/scale.css); the Storybook does not, because it shows components at
-     their real size. */
-  --zoom-desktop: 1.125;
-  --zoom-wide: 1.25;
+     their real size.
+
+     They were 1.125 and 1.25 while the review's body was 13px (2026-10-09),
+     which drew it at 14.6 and 16.25px. With Preview Studio the body is 14px
+     (--text-md-review), so the same reading size takes less zoom: 1.0625
+     and 1.125 draw it at 14.9 and 15.75px, within a hair of what was chosen,
+     and a 24px heading at 27. */
+  --zoom-desktop: 1.0625;
+  --zoom-wide: 1.125;
+}
+
+/* THE REVIEW'S PALETTE, since 2026-10-11 (later): Preview Studio. A product
+   workspace with the affected interface large on the left and the decision
+   beside it, so the palette's job is to stay out of the preview's way: a
+   cool, pale slate page, white panels on it, thin slate hairlines, ink with
+   a little blue in it, and one restrained teal for what the review asks a
+   person to do and for the marks it draws on the preview. The dark scheme is
+   a deep blue-grey with the panels a step lighter, soft pale ink and a muted
+   cyan-teal; it leans on edges rather than shadows, because a shadow on a
+   dark ground is barely seen.
+
+   The starting values are the brief's, to the digit, for the fifteen roles
+   it names (page, panel, chrome, subtle fill, two inks, hairline, accent,
+   its tint and the ink on it, and the three meanings' inks and tints but the
+   warning's). The rest are derived from them and measured the same way:
+   the third ink between the two, the hover and pressed steps, the control's
+   edge, the warning's tint, each meaning's solid and edge, and the diff's
+   grounds. Every ink clears 4.5:1 on every ground it sits on and every mark
+   and control edge 3:1, in both schemes (computed before writing a value;
+   the stories run axe on the light screens and the dark ones).
+
+   Teal is the review's colour, never the product's: the reds and greens in
+   the preview are Relay's own (the frozen palette above), so a mark the
+   review draws on the preview cannot be mistaken for, or quietly settle,
+   the meaning of a colour the product is asking about.
+
+   It is declared on the root, so the page and anything outside a surface
+   take it, and again on the review's surface, so a piece of the review drawn
+   inside the product's frame (a finding's mark, a decision's annotation)
+   takes it back. The product's surface hands back the frozen palette
+   (app/global.css). Every color is light-dark(light, dark). */
+:root,
+[data-surface='review'] {
+  /* Grounds. Canvas is the page, surface a panel or the inspector, chrome
+     the app's bars and a panel's toolbar (a step under white in the light, a
+     step under the panel in the dark), sunken a tile, a head row or a code
+     block inside a panel (the subtle fill: a step under white in the light
+     and a step over the panel in the dark, so it reads as a fill in both),
+     hover a row under the pointer. */
+  --color-canvas: light-dark(#edf1f5, #101820);
+  --color-surface: light-dark(#ffffff, #1a242e);
+  --color-surface-chrome: light-dark(#f8fafc, #15202a);
+  --color-surface-sunken: light-dark(#f2f5f8, #25313d);
+  --color-surface-hover: light-dark(#eef2f6, #222d38);
+  /* A row under the pointer in a list a reviewer scans (the queue): one step
+     further than hover, as far as muted text allows (4.64:1 on it in the
+     light, 5.8:1 in the dark). */
+  --color-surface-hover-strong: light-dark(#e5ebf0, #2b3743);
+
+  /* Lines. The border is a panel's edge; the divider is the line between the
+     rows inside one, a step fainter. Neither is enough to find a control by:
+     the control border is the one boundary a reader has to find, an input,
+     a checkbox, a secondary button, and it clears 3:1 on every ground (3.2:1
+     on the page and 3.6:1 on white; 3.4:1 on the dark fill), WCAG 1.4.11. */
+  --color-border: light-dark(#dce3e9, #33424f);
+  --color-divider: light-dark(#e6ebf0, #29353f);
+  --color-border-control: light-dark(#7a8896, #6f8394);
+
+  /* Ink. The brief's two, and one between them: text for headings and
+     anything read first, secondary for running text inside a card, muted for
+     a label, a time, a path. Muted clears 4.5:1 on every ground above,
+     hover-strong included (4.64:1). */
+  --color-text: light-dark(#202c37, #e6eef3);
+  --color-text-secondary: light-dark(#3d4c59, #c3d0da);
+  --color-text-muted: light-dark(#596a79, #a4b5c3);
+  --color-text-on-accent: light-dark(#ffffff, #14323c);
+
+  /* The accent: a restrained teal, for what a screen asks a person to do
+     (the act, the direction they have selected), the place they are in, a
+     link, the focus ring, and the annotation the preview draws around the
+     element a decision is about. Hover and pressed are a step and two
+     darker in the light and lighter in the dark; the ink on each clears
+     8:1. */
+  --color-accent: light-dark(#1b6780, #8dc7d4);
+  --color-accent-hover: light-dark(#155669, #a7d6e0);
+  --color-accent-active: light-dark(#114656, #bfe2e9);
+  --color-accent-subtle: light-dark(#e6f2f5, #243d46);
+  --color-accent-border: light-dark(#a3cdd8, #3d6976);
+
+  /* Meaning: an ink, a tint for its ground (the ink clears 4.7:1 on it or
+     better), a solid for a mark or a bar (3:1 on the panel, but for the
+     warning's in the light, a bright amber that is the waiting segment's
+     hatch and always has the legend's words beside it), and an edge for the
+     tint. Nothing is ever only a color: every use carries a word or an icon
+     with a name. */
+  --color-success: light-dark(#236f52, #8dccb0);
+  --color-success-subtle: light-dark(#e9f5ef, #23382f);
+  --color-success-solid: light-dark(#2f8f68, #5db38e);
+  --color-success-border: light-dark(#b3dcc7, #3b5f4f);
+  --color-warning: light-dark(#91610e, #e2bf7b);
+  --color-warning-subtle: light-dark(#fbf1de, #3a3122);
+  --color-warning-solid: light-dark(#e0a945, #d9a84e);
+  --color-warning-border: light-dark(#ebcb8c, #6b5532);
+  --color-danger: light-dark(#b42340, #f5a0b2);
+  --color-danger-subtle: light-dark(#fcebef, #42252f);
+  --color-danger-solid: light-dark(#d43b5a, #e87a92);
+  --color-danger-border: light-dark(#f0b8c4, #6f3a48);
+  --color-neutral-solid: light-dark(#8796a4, #6f8292);
+
+  /* Diff. A line added and a line removed, on the meanings' hues, a step
+     lighter than a status's tint so a page of them stays readable. */
+  --color-diff-add: light-dark(#eef8f2, #1f3129);
+  --color-diff-add-ink: light-dark(#236f52, #8dccb0);
+  --color-diff-remove: light-dark(#fdf1f4, #3a2229);
+  --color-diff-remove-ink: light-dark(#b42340, #f5a0b2);
+
+  /* Elevation, kept subtle: a hairline of shadow under a control you press,
+     and a soft one under the one card that asks for the person and under a
+     menu. In the dark a control casts none and a card almost none; the
+     panels are told apart by their grounds and their edges instead. */
+  --shadow-control: 0 1px 1px light-dark(rgba(16, 24, 32, 0.06), rgba(0, 0, 0, 0));
+  --shadow-raised:
+    0 1px 2px light-dark(rgba(16, 24, 32, 0.06), rgba(0, 0, 0, 0.2)),
+    0 4px 12px -4px light-dark(rgba(16, 24, 32, 0.1), rgba(0, 0, 0, 0));
+  --shadow-menu:
+    0 0 0 1px var(--color-border),
+    0 4px 8px light-dark(rgba(16, 24, 32, 0.08), rgba(0, 0, 0, 0.36)),
+    0 12px 24px -6px light-dark(rgba(16, 24, 32, 0.14), rgba(0, 0, 0, 0.44));
+  --color-scrim: light-dark(rgba(16, 24, 32, 0.36), rgba(0, 0, 0, 0.6)); /* behind a dialog */
+
+  --focus-ring-color: var(--color-accent);
 }

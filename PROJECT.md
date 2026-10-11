@@ -125,6 +125,17 @@ should open well in it, and Claude Code stays the agent).
   viewport check and the visual baselines run in this repository and their
   output is what the scenario data reports. Where a number in the product
   is invented, this file says so.
+- **A decision is made looking at what it changes (Preview Studio,
+  2026-10-11).** The delegated work's decisions are a workspace: the
+  interface the decision changes, rendered large on the left with the
+  element marked, and the decision in an inspector on the right, one at a
+  time. Selecting a direction previews it, labelled proposed and not
+  applied; Apply goes through the reducer as every answer always has. The
+  preview draws the element with the change's own declarations (its
+  `before` values, or a direction's `after`), so the red it shows is the
+  red the code draws, and the review's teal is only ever the annotation
+  around it. The palette, the appearance control (Light, Dark, System) and
+  the layout's rules are in [docs/preview-studio](docs/preview-studio/).
 
 ## The second iteration: delegation (2026-10-03)
 
@@ -455,12 +466,15 @@ the Storybook's `index.json`, not carried by hand.)
 ## Tokens
 
 The layer is `src/tokens/tokens.css`. Spacing is a numeric scale on a 4px
-grid (`--space-1` through `--space-8`), type sizes are 11, 12, 14 and 16px
-(the four smallest steps of the site's own scale, chosen so the two bodies
-of work share a ladder), color is semantic (canvas, surface, border, text,
-muted, accent, selected, success, warning, danger, and the diff pair), radii
-are 3 and 6, the shadow exists for menus and popovers only, and focus is one
-ring token. The full list with values is in the file; the names in
+grid (`--space-1` through `--space-8`), color is semantic (canvas, surface,
+chrome, sunken, border, text, muted, accent, success, warning, danger, the
+diff pair, and a solid, a tint and an edge per meaning), and focus is one
+ring token. It serves two surfaces: Relay, the product under review, at a
+13px body in Inter, radii 3 and 6, and a palette frozen under `-product`
+names, always light; and the review, since Preview Studio (2026-10-11), at
+a 14px body in Geist, radii 6, 8 and 12, and its own palette in a light and
+a dark scheme. [docs/preview-studio](docs/preview-studio/) is the guide to
+the review's half. The full list with values is in the file; the names in
 `tokens.ts` are what the token lint checks declarations against.
 
 ## Open questions
@@ -506,8 +520,10 @@ ring token. The full list with values is in the file; the names in
 - Real repository integration (reading a PR from GitHub). The product reads
   a static scenario; the shape of the data is what a real integration would
   produce, and the README says what it would take.
-- Dark mode. The product has a light canvas by decision; the tokens are
-  semantic so a dark set is a second block, not a rewrite.
+- A dark scheme for the product. The review has had one since 2026-10-05
+  (Light, Dark or the system's since Preview Studio); Relay has a light
+  canvas by decision and stays light inside the review's preview, as it
+  would in a real one.
 - An Archived view and undo for the bulk archive. Both runs listed it;
   the inline question is the guard until there is a view to restore from.
 - A proper CSS parser for the token lint (see Open questions).

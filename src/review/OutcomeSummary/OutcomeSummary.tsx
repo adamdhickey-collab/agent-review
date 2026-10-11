@@ -81,10 +81,12 @@ function factsOf(a: ReturnType<typeof account>, decisions: Decision[] = []) {
        failure either. It is said, with the caution mark the check uses. */
     const changed = results.filter((c) => c!.state === 'changed').length;
     const tone: BadgeTone = failed ? 'danger' : unsure || changed ? 'neutral' : 'success';
-    /* A check that passed asks nothing of the reader, so its badge is quiet:
-       the mark keeps the green and the ground stays neutral. A failure keeps
-       its tint, and so the one that needs a look is the one that has color. */
-    const variant = tone === 'success' ? ('quiet' as const) : ('tint' as const);
+    /* Every result is a tinted badge, as Stripe shows a payment's status: a
+       pass in the success tint, a failure in the danger one, anything
+       unsettled in the neutral one. Until 2026-10-11 a pass was quiet, a
+       neutral ground with a green mark; the tone now says it, and the word
+       still does. */
+    const variant = 'tint' as const;
     const icon: IconName = failed ? 'status-failed' : unsure ? 'status-inconclusive' : changed ? 'status-changed' : 'status-passed';
     const extra = [failed ? `${failed} failed` : '', unsure ? `${unsure} inconclusive` : '', changed ? `${changed} changed` : ''].filter(Boolean).join(', ');
     return { name, text: `${short}: ${passed} of ${results.length} passed${extra ? `, ${extra}` : ''}`, tone, variant, icon };
@@ -194,6 +196,7 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
         </p>
       ) : null}
 
+      <div className="outcome__row">
       <ul className="outcome__modes" aria-label="How the work was handled">
         <li data-mode="own" data-zero={a.own.length === 0 || undefined}>
           <Mode icon={BOUNDARY_GROUP_ICON.own} n={a.own.length} words="proceeded on its own" />
@@ -235,6 +238,7 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
             </li>
           ))}
         </ul>
+      </div>
       </div>
     </section>
   );
