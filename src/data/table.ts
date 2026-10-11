@@ -326,8 +326,12 @@ const sharedRows: Work = {
   status: 'asking',
   lines: [{ selector: '.table', property: '--table-pad-y', before: 'var(--space-2)' }],
   /* The one screen of the forty that is in this repository, drawn as itself,
-     with the whole table marked: the change is to every row of it. */
-  sketch: { kind: 'screen', screen: 'customers', minWidth: 768, focus: '.table' },
+     with the customer list marked: the change is to every row of its table.
+     The list, not the table: over the table is its own toolbar, and on the
+     table's top edge are its column heads, so the annotation's tag covered
+     the title or a head wherever it went; over the list is the frame's empty
+     margin. */
+  sketch: { kind: 'screen', screen: 'customers', minWidth: 768, focus: '.customers' },
   question: firstQuestion,
   frames: 2,
   stories: 9,
