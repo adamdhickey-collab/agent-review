@@ -167,10 +167,13 @@ export function RuleCard({ rule, work, onEdit, onRevoke, initialMode }: RuleCard
   return (
     <article className="rule" data-status={rule.status} aria-labelledby={`${id}-text`}>
       <p className="rule__head">
-        {/* Neutral, both: a rule in force is a record, not an act, and the
-            accent is the act's alone (DecisionRequest.tsx). Revoked is the
-            outline, the lighter of the two. */}
-        <Badge variant={active ? 'tint' : 'outline'}>{active ? 'Active' : 'Revoked'}</Badge>
+        {/* A rule in force is Stripe's "Active": the success tint, as a
+            live subscription or a payment link is (since 2026-10-11; it was
+            neutral). Revoked is the neutral outline, the lighter of the
+            two. Neither is the accent, which is for what to do. */}
+        <Badge tone={active ? 'success' : 'neutral'} variant={active ? 'tint' : 'outline'}>
+          {active ? 'Active' : 'Revoked'}
+        </Badge>
         <span>Made by you at {made?.at}</span>
       </p>
       <p className="rule__text" id={`${id}-text`}>

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 
-/* The review's theme. Dark, unless a person chose light in the bar; a choice
-   is remembered. Dark is the default by decision (2026-10-05), and the
-   review does not follow the system setting: every first visit sees the
-   same thing, which is also what the review's pictures show. The choice is one
+/* The review's theme. Light, unless a person chose dark in the bar; a choice
+   is remembered. Light is the default by decision (2026-10-11, with the
+   review's own palette; it was dark from 2026-10-05), and the review does
+   not follow the system setting: every first visit sees the same thing,
+   which is also what the review's pictures show first. The choice is one
    attribute on the root, data-theme, which the base stylesheet turns into a
    color-scheme; every color is light-dark(light, dark) in tokens.css, so
    nothing else has to know.
@@ -32,7 +33,7 @@ function remembered(): Theme | null {
 
 export function useTheme(): { theme: Theme; toggle: () => void } {
   const [choice, setChoice] = useState<Theme | null>(remembered);
-  const theme: Theme = choice ?? 'dark';
+  const theme: Theme = choice ?? 'light';
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;

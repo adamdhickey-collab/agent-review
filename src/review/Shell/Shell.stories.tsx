@@ -15,7 +15,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The chrome: one quiet bar on the page’s own ground. The place you are in is said by its ink and by the line under it, the line a selected tab carries, with no filled shape, so the first thing with weight on a screen is the screen’s heading. The theme toggle shows where a press takes you: a sun while the review is dark, a moon while it is light. The review is dark until a person chooses light, and a choice is remembered. These stories are the app’s chrome, so they are dark by default too, whatever the toolbar says.',
+          'The chrome: one white bar over the page’s grey, with the product’s mark on a tile of the accent. The place you are in is said in the accent, the word and the line under it, the line a selected tab carries, as Stripe marks where you are, with no filled shape, so the first thing with weight on a screen is the screen’s heading. The theme toggle shows where a press takes you: a moon while the review is light, a sun while it is dark. The review is light until a person chooses dark, and a choice is remembered.',
       },
     },
   },
@@ -40,33 +40,33 @@ export const OnTheReviews: Story = {
 
 export const ThemeToggle: Story = {
   parameters: {
-    docs: { description: { story: 'The review is dark until a person chooses otherwise. The toggle shows where a press takes you: a sun while it is dark, named "Switch to light theme", and a moon while it is light, named "Switch to dark theme". Each press writes the choice to the root as data-theme, and with it the color-scheme every token reads. The remembered choice is cleared at the end so the next story starts as a first visit does.' } },
+    docs: { description: { story: 'The review is light until a person chooses otherwise (since 2026-10-11; it was dark from 2026-10-05). The toggle shows where a press takes you: a moon while it is light, named "Switch to dark theme", and a sun while it is dark, named "Switch to light theme". Each press writes the choice to the root as data-theme, and with it the color-scheme every token reads. The remembered choice is cleared at the end so the next story starts as a first visit does.' } },
   },
   play: async ({ canvasElement }) => {
     const root = canvasElement.ownerDocument.documentElement;
     const canvas = within(canvasElement);
-    /* A first visit: dark, with a sun to press. */
-    const toLight = await canvas.findByRole('button', { name: 'Switch to light theme' });
-    await expect(root.dataset.theme).toBe('dark');
-    await expect(getComputedStyle(root).colorScheme).toBe('dark');
-    await expect(toLight.querySelector('svg')).toHaveAttribute('data-icon', 'sun');
-
-    await userEvent.click(toLight);
+    /* A first visit: light, with a moon to press. */
     const toDark = await canvas.findByRole('button', { name: 'Switch to dark theme' });
     await expect(root.dataset.theme).toBe('light');
     await expect(getComputedStyle(root).colorScheme).toBe('light');
     await expect(toDark.querySelector('svg')).toHaveAttribute('data-icon', 'moon');
 
     await userEvent.click(toDark);
+    const toLight = await canvas.findByRole('button', { name: 'Switch to light theme' });
     await expect(root.dataset.theme).toBe('dark');
-    await expect(canvas.getByRole('button', { name: 'Switch to light theme' })).toBeInTheDocument();
+    await expect(getComputedStyle(root).colorScheme).toBe('dark');
+    await expect(toLight.querySelector('svg')).toHaveAttribute('data-icon', 'sun');
+
+    await userEvent.click(toLight);
+    await expect(root.dataset.theme).toBe('light');
+    await expect(canvas.getByRole('button', { name: 'Switch to dark theme' })).toBeInTheDocument();
     localStorage.removeItem('agent-review:theme');
   },
 };
 
 export const LinksOutAreQuieter: Story = {
   parameters: {
-    docs: { description: { story: 'The Storybook and the source are not places in the product, so they are their own nav, on the right, in regular weight and muted ink with no line. The places are the two on the left. Nothing in the bar carries the accent: it asks nothing.' } },
+    docs: { description: { story: 'The Storybook and the source are not places in the product, so they are their own nav, on the right, in regular weight and muted ink with no line. The places are the two on the left, and the one you are in is the accent.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -85,9 +85,8 @@ export const LinksOutAreQuieter: Story = {
       probe.remove();
       return c;
     };
-    const avatar = canvasElement.querySelector('.shell__avatar') as HTMLElement;
-    await expect(getComputedStyle(avatar).color).not.toBe(resolve('--color-accent'));
-    await expect(getComputedStyle(avatar).color).toBe(resolve('--color-text-secondary'));
+    await expect(getComputedStyle(within(places).getByRole('link', { name: 'Delegated work' })).color).toBe(resolve('--color-accent'));
+    for (const a of within(links).getAllByRole('link')) await expect(getComputedStyle(a).color).toBe(resolve('--color-text-muted'));
   },
 };
 

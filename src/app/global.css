@@ -17,15 +17,16 @@ html {
   -webkit-font-smoothing: antialiased;
   text-size-adjust: 100%;
   font-optical-sizing: none; /* the product's type: Inter's text cut at every size, as it always was */
-  color-scheme: dark; /* the review's default; see the theme, below */
+  color-scheme: light; /* the review's default; see the theme, below */
 }
 
 /* The theme. Every color token is light-dark(light, dark) (tokens.css), so
-   a theme is nothing but a color-scheme. The review is dark unless a person
-   chose light (data-theme on the root, set by the bar's toggle and
+   a theme is nothing but a color-scheme. The review is light unless a person
+   chose dark (data-theme on the root, set by the bar's toggle and
    remembered); it does not follow the system setting. data-theme works on
    any element, which is how a story renders one screen in the other theme
-   without the rest of the Storybook following it. */
+   without the rest of the Storybook following it. Light has been the
+   default since 2026-10-11, with the palette; it was dark from 2026-10-05. */
 [data-theme='dark'] {
   color-scheme: dark;
 }
@@ -38,9 +39,10 @@ html {
    reviews (tokens.css says how), and the step is taken here, on the
    review's own surface, so that the product inside the preview frame, a
    surface of its own, reads exactly what it read before: its own type,
-   its own radii, and always the light scheme, whatever theme the review
-   around it is in. The shell marks the review, the frame marks the
-   product, and the Storybook marks each story by where it lives. */
+   its own radii, its own colors, and always the light scheme, whatever
+   theme the review around it is in. The shell marks the review, the frame
+   marks the product, and the Storybook marks each story by where it
+   lives. */
 [data-surface='review'] {
   --font-mono: var(--font-mono-review);
   --radius-sm: var(--radius-sm-review);
@@ -49,10 +51,57 @@ html {
   font-feature-settings: var(--font-features-review);
 }
 
+/* A rule for the review alone, in a component the product also draws (a
+   Button, a Badge), names the review's surface and stops at the product's:
+   :where([data-surface='review']) .x:not(:where([data-surface='product'] *)).
+   The frame sits inside the review, so a rule that named only the review
+   would reach Relay's badges too. :where keeps it at the component's own
+   weight, so it is written after the rule it adds to. */
+
 [data-surface='product'] {
   --font-mono: var(--font-mono-system);
   --radius-sm: var(--radius-sm-product);
   --radius-md: var(--radius-md-product);
+  /* The product's palette, frozen (tokens.css), under the plain names the
+     product's stylesheets read; and its ring, which is its own accent. */
+  --color-canvas: var(--color-canvas-product);
+  --color-surface: var(--color-surface-product);
+  --color-surface-sunken: var(--color-surface-sunken-product);
+  --color-surface-hover: var(--color-surface-hover-product);
+  --color-surface-hover-strong: var(--color-surface-hover-strong-product);
+  --color-border: var(--color-border-product);
+  --color-divider: var(--color-divider-product);
+  --color-border-control: var(--color-border-control-product);
+  --color-text: var(--color-text-product);
+  --color-text-secondary: var(--color-text-secondary-product);
+  --color-text-muted: var(--color-text-muted-product);
+  --color-text-on-accent: var(--color-text-on-accent-product);
+  --color-accent: var(--color-accent-product);
+  --color-accent-hover: var(--color-accent-hover-product);
+  --color-accent-subtle: var(--color-accent-subtle-product);
+  --color-success: var(--color-success-product);
+  --color-success-subtle: var(--color-success-subtle-product);
+  --color-warning: var(--color-warning-product);
+  --color-warning-subtle: var(--color-warning-subtle-product);
+  --color-danger: var(--color-danger-product);
+  --color-danger-subtle: var(--color-danger-subtle-product);
+  --color-success-solid: var(--color-success-solid-product);
+  --color-success-border: var(--color-success-border-product);
+  --color-warning-solid: var(--color-warning-solid-product);
+  --color-warning-border: var(--color-warning-border-product);
+  --color-danger-solid: var(--color-danger-solid-product);
+  --color-danger-border: var(--color-danger-border-product);
+  --color-accent-border: var(--color-accent-border-product);
+  --color-neutral-solid: var(--color-neutral-solid-product);
+  --color-diff-add: var(--color-diff-add-product);
+  --color-diff-add-ink: var(--color-diff-add-ink-product);
+  --color-diff-remove: var(--color-diff-remove-product);
+  --color-diff-remove-ink: var(--color-diff-remove-ink-product);
+  --shadow-menu: var(--shadow-menu-product);
+  --shadow-raised: var(--shadow-raised-product);
+  --shadow-control: var(--shadow-control-product);
+  --color-scrim: var(--color-scrim-product);
+  --focus-ring-color: var(--color-accent-product);
   font-optical-sizing: none;
   font-feature-settings: normal;
   color-scheme: light;

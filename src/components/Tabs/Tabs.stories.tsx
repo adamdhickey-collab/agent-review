@@ -100,9 +100,9 @@ export const KeyboardArrows: Story = {
   },
 };
 
-/* The review's surface, on a wrapper: the Storybook marks a story's surface
-   by where it lives (System stories have none), so a story about a surface
-   says so itself. */
+/* The review's surface, on a wrapper of its own, so the story says what it
+   is about whatever surface the Storybook gives the System stories (the
+   review's, since 2026-10-11). */
 export const OnTheReviewSurface: Story = {
   args: {
     tabs: [
@@ -113,15 +113,16 @@ export const OnTheReviewSurface: Story = {
   },
   decorators: [(Story) => <div data-surface="review"><Story /></div>],
   parameters: {
-    docs: { description: { story: 'On the review’s surface the current tab is ink, with an ink line and a neutral count, as the bar’s current place is. Where you are is not something you are being asked to do, and the accent is kept for that. The product’s tabs keep the accent (Default, above).' } },
+    docs: { description: { story: 'On the review’s surface the current tab says itself in the accent, the word and the line under it, as Stripe’s tabs do and as the bar’s current place does. Until 2026-10-11 it was ink.' } },
   },
   play: async ({ canvasElement }) => {
     const probe = canvasElement.ownerDocument.createElement('i');
-    probe.style.color = 'var(--color-text)';
+    probe.style.color = 'var(--color-accent)';
     canvasElement.appendChild(probe);
-    const ink = getComputedStyle(probe).color;
+    const accent = getComputedStyle(probe).color;
     probe.remove();
     const selected = within(canvasElement).getByRole('tab', { selected: true });
-    await expect(getComputedStyle(selected).borderBottomColor).toBe(ink);
+    await expect(getComputedStyle(selected).borderBottomColor).toBe(accent);
+    await expect(getComputedStyle(selected).color).toBe(accent);
   },
 };

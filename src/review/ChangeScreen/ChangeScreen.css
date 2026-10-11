@@ -74,7 +74,7 @@
 
 .change__title {
   font-size: var(--text-xl);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   line-height: var(--leading-tight);
 }
 

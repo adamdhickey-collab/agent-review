@@ -20,16 +20,16 @@
   translate: 0 0;
 }
 
-/* On the page's ground, with a hairline under it: a bar the eye passes
-   over on the way to the screen. */
+/* A white bar with a hairline under it, over the grey page, as Stripe's is:
+   the chrome is one surface, and the screen under it is another. */
 .shell__bar {
   display: flex;
   align-items: stretch;
   gap: var(--space-6);
-  height: 2.75rem;
+  height: 3rem;
   padding: 0 var(--space-4);
   border-bottom: var(--border-width) solid var(--color-border);
-  background: var(--color-canvas);
+  background: var(--color-surface);
 }
 
 .shell__bar > * {
@@ -41,29 +41,32 @@
   align-items: center;
   gap: var(--space-2);
   color: var(--color-text);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
 }
 
 .shell__brand:hover {
   text-decoration: none;
 }
 
+/* The product's mark is a tile of the accent, as an app's icon is. */
 .shell__mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: var(--radius-sm);
-  background: var(--color-text);
-  color: var(--color-surface);
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  box-shadow: var(--shadow-control);
 }
 
 /* The places. Each is the bar's full height, so the line under the one you
    are in sits on the bar's own hairline, as a selected tab's does on its
-   list's. Quiet ink until it is the place you are in or the one under the
-   pointer. No pill: a filled shape in the bar was the heaviest thing above
-   the screen's heading. */
+   list's. Quiet ink until it is the place you are in, which is the accent,
+   the word and the line under it, as Stripe marks where you are; or the one
+   under the pointer, which is ink. No pill: a filled shape in the bar was
+   the heaviest thing above the screen's heading. */
 /* The places and the links out are one group, so that on a phone they can be
    one row together; on a wider bar the group is not a box at all, and its two
    navs sit in the bar as if it were not there. */
@@ -109,8 +112,8 @@
 }
 
 .shell__nav a[aria-current='page'] {
-  color: var(--color-text);
-  box-shadow: inset 0 calc(var(--border-width) * -2) 0 var(--color-text);
+  color: var(--color-accent);
+  box-shadow: inset 0 calc(var(--border-width) * -2) 0 var(--color-accent);
 }
 
 /* Links out of the product: the Storybook and the source. Not places in it,
@@ -146,9 +149,8 @@
   font-size: var(--text-sm);
 }
 
-/* The bar carries no accent: who you are is a neutral disc, and its two
-   buttons are plain icon buttons. Blue in the chrome is for the one thing a
-   screen asks you to do, and the bar asks nothing. */
+/* Who you are is a disc of the accent's tint; the two buttons are plain
+   icon buttons. */
 .shell__context .icon-btn + .icon-btn {
   margin-left: calc(var(--space-3) * -1); /* the two buttons are a pair, closer than the bar's gap */
 }
@@ -171,11 +173,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: 50%;
-  background: var(--color-surface-sunken);
-  color: var(--color-text-secondary);
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
 }

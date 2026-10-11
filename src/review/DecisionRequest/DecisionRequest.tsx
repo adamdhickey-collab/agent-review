@@ -70,7 +70,11 @@ import { Inline } from '../Inline';
    on the act and nothing else. So the blue is the act alone: the
    recommended answer's button, then Apply. Both answers are the same card,
    and "Recommended" is a quiet label; which one the agent recommends is
-   still said, in words and by which button is solid. The confirmation is
+   still said, in words and by which button is solid.
+   SINCE 2026-10-11, with Stripe's palette, the accent also marks a choice
+   as Stripe marks one: "Recommended" is a small accent badge, and a chosen
+   direction's edge is the accent, twice the hairline. The act is still the
+   only accent FILL on the card (the recommended button, then Apply). The confirmation is
    a step of ground, not a tint, and its Cancel and Apply sit in a bar at
    its foot that stays in view while the rule's preview is longer than the
    window, with what Apply will do beside them, so the act is never
@@ -190,8 +194,9 @@ import { Inline } from '../Inline';
    - The two directions as two cards of one shape: the direction, what it
      does in a sentence, both elements as they would look, then three
      benefits and three risks, so neither card is the longer argument.
-     "Recommended" is a quiet label on one of them and nothing else: both
-     buttons are the same, and the accent stays the act's (Apply).
+     "Recommended" is a small accent badge on one of them and nothing else:
+     both buttons are the same, and the accent's fill stays the act's
+     (Apply).
    - Choosing is not deciding. A card's button marks it chosen
      (aria-pressed) and opens, under the cards, what the agent will do if
      it is applied, in order, the person's reason, and the rule box; the
@@ -227,14 +232,15 @@ function consequence(o: Option): { icon: IconName; text: string } | undefined {
   return undefined;
 }
 
-/* A check's result as a badge: a pass is quiet, anything else is said. */
+/* A check's result as a badge, as Stripe shows a payment's: a pass is the
+   success tint with its mark, anything else the neutral one with its own. */
 function CheckBadge({ check }: { check: Check }) {
   const passed = check.state === 'passed';
   return (
     <Badge
       size="large"
       tone={passed ? 'success' : 'neutral'}
-      variant={passed ? 'quiet' : 'tint'}
+      variant="tint"
       icon={passed ? 'status-passed' : check.state === 'changed' ? 'status-changed' : 'status-inconclusive'}
     >
       {check.name}: {check.label}
@@ -720,7 +726,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
               determine that could change it. */}
           <ul className="ask__pair ask__read" aria-label="The agent’s read">
             {recommended ? (
-              <li className="ask__tile">
+              <li className="ask__tile ask__recommends">
                 <p className="ask__label">Recommended</p>
                 <p className="ask__read-head">{recommended.title}</p>
                 <p className="ask__tile-means">
@@ -773,7 +779,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                     <div className="ask__choice-head">
                       <p className="ask__choice-title">{o.title}</p>
                       {o.recommended ? (
-                        <Badge variant="quiet" className="ask__recommended">
+                        <Badge tone="accent" className="ask__recommended">
                           Recommended
                         </Badge>
                       ) : null}
@@ -900,7 +906,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                     <div className="ask__choice-head">
                       {o.title ? <p className="ask__choice-title">{o.title}</p> : null}
                       {o.recommended ? (
-                        <Badge variant="quiet" className="ask__recommended">
+                        <Badge tone="accent" className="ask__recommended">
                           Recommended
                         </Badge>
                       ) : null}

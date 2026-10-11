@@ -11,12 +11,13 @@
    answer card), and the states carry the color.
 
    The review is drawn a step further than the product it reviews: its own
-   type, a wider radius scale, a fill and an edge step per meaning, a raised
-   card, and a dark theme. Every one of those is added here, and no value
-   the product renders in is changed: a new token, a second value under a
-   review-only name, or the dark half of a light-dark() whose light half is
-   the old value to the digit. So Relay in the preview frame and in its own
-   stories reads exactly what it read before. */
+   type, a wider radius scale, its own palette (Stripe's, since 2026-10-11)
+   with a dark scheme, a fill and an edge step per meaning, and a raised
+   card. Every one of those is added here, and no value the product renders
+   in is changed: the product's colors are frozen under -product names and
+   its surface hands them back (app/global.css), its radii the same way. So
+   Relay in the preview frame and in its own stories reads exactly what it
+   read before. */
 :root {
   /* Type. Inter for the interface, a system monospace for anything a
      machine wrote: hashes, paths, tokens, values. Four sizes. 13 is the
@@ -47,12 +48,18 @@
   --text-md: 0.8125rem; /* 13 */
   --text-lg: 1rem;      /* 16 */
   --text-xl: 1.25rem;   /* 20 */
+  /* The review's one display size, since 2026-10-11: a screen's title and a
+     count a person reads at a glance (the account's tiles), set large and
+     bold as Stripe sets a page's title and a figure. The product never uses
+     it; the sizes above are still the product's whole scale. */
+  --text-2xl: 1.5rem;   /* 24 */
   --leading-tight: 1.25;
   --leading-ui: 1.45;
   --leading-body: 1.55;
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
+  --weight-bold: 700; /* the review's titles and figures, with --text-2xl */
 
   /* Space. A 4px grid. Components use the scale; nothing writes a pixel
      value for padding, gap or margin. */
@@ -88,114 +95,59 @@
   --radius-lg: 12px;
   --border-width: 1px;
 
-  /* COLOR HAS TWO SCHEMES, AND THE PRODUCT HAS ONE. Every color below is
-     light-dark(light, dark). The first value is the one this file has
-     always held, to the digit: it is what the product renders in, and what
-     the review quotes when it names a token's value. The second is the
-     review's dark theme. Which one an element gets is its color-scheme
-     (app/global.css): the review follows the reader's choice, and the
-     product's surface is always light, so Relay in the preview frame is the
-     product as the checks measured it whatever the review around it is
-     wearing. The dark values are written in OKLCH on the light ones' hues,
-     and every ink clears 4.5:1 on every ground it sits on (the stories run
-     axe on the dark screens). */
-
-  /* Grounds. Canvas is the page, surface is a panel or a table, sunken is a
-     head row or a code block, hover is a row under the pointer. In the dark
-     the page is the darkest and each step up is lighter, so a panel still
-     rises off the page and a head row still reads as a band. */
-  --color-canvas: light-dark(#f7f7f8, oklch(0.17 0.006 285));
-  --color-surface: light-dark(#ffffff, oklch(0.205 0.006 285));
-  --color-surface-sunken: light-dark(#f2f2f4, oklch(0.255 0.007 285));
-  --color-surface-hover: light-dark(#f4f4f6, oklch(0.235 0.007 285));
-  /* A row under the pointer in a list a reviewer scans (the review's queue):
-     one step further than hover, so the row you are on is the one you can
-     see. As far as muted text allows: 4.57:1 on it in the light (L 0.947), 5.48:1
-     in the dark; one step more and the muted columns fail 4.5:1. */
-  --color-surface-hover-strong: light-dark(oklch(0.947 0.006 285), oklch(0.29 0.008 285));
-
-  /* Lines. The hairline divides; the control border is the one boundary a
-     reader has to find (3.1:1 on white, for WCAG 1.4.11; 4.3:1 on the dark
-     surface). */
-  --color-border: light-dark(#e4e4e8, oklch(0.31 0.008 285));
-  /* A line inside a panel: between the rows of a list, between a panel's
-     parts. The border above is for a panel's edge and a region's band; a
-     divider is the same line one step fainter (1.15:1 on white where the
-     border is 1.30), so a list of rows is read as rows and not as a stack of
-     rules. Decorative, like the border: nothing depends on seeing it. */
-  --color-divider: light-dark(oklch(0.945 0.004 286), oklch(0.27 0.006 285));
-  --color-border-control: light-dark(#8c8c96, oklch(0.56 0.014 285));
-
-  /* Ink. Three steps. Muted is the quietest text allowed, and it clears
-     4.5:1 on every ground above. On-accent is the ink on a filled accent:
-     white on the light theme's blue, near-black on the dark theme's, which
-     is a lighter blue so that it also reads as a link on a dark ground. */
-  --color-text: light-dark(#1b1b1f, oklch(0.95 0.004 285));
-  --color-text-secondary: light-dark(#4a4a55, oklch(0.82 0.008 285));
-  --color-text-muted: light-dark(#6a6a76, oklch(0.71 0.012 285));
-  --color-text-on-accent: light-dark(#ffffff, oklch(0.17 0.02 264));
-
-  /* The accent is for the one thing the reader is being asked to look at or
-     press: the selected row, the primary action, a link. One blue, two
-     steps, and a subtle ground for selection. */
-  --color-accent: light-dark(#2f5fd6, oklch(0.76 0.12 264));
-  --color-accent-hover: light-dark(#244bb0, oklch(0.82 0.085 264));
-  --color-accent-subtle: light-dark(#e9effc, oklch(0.29 0.06 264));
-
-  /* Meaning. Each has an ink that reads on white and a subtle ground the ink
-     also reads on. Success is a pass, warning is a change that needs a look,
-     danger is a failure. Nothing is ever only a color: every use carries a
-     word or an icon with a name. */
-  --color-success: light-dark(#1f7a3f, oklch(0.78 0.15 150));
-  --color-success-subtle: light-dark(#e6f4ea, oklch(0.27 0.05 150));
-  --color-warning: light-dark(#8a5a00, oklch(0.82 0.13 82));
-  --color-warning-subtle: light-dark(#fbf1dc, oklch(0.29 0.05 80));
-  --color-danger: light-dark(#b42318, oklch(0.74 0.15 25));
-  --color-danger-subtle: light-dark(#fdeceb, oklch(0.28 0.06 25));
-
-  /* Each meaning's two missing steps: a SOLID for a fill (a bar, a dot, a
-     mark) and a BORDER for an edge on its subtle ground. The inks above
-     are text colors, and a text color used as a fill is what made the
-     account's bar muddy. Written in OKLCH so the solids weigh the same:
-     green, red, blue and gray at one lightness (0.62, each at least 3.4:1
-     on white, for a mark that has to be found), and amber at 0.80, because
-     amber only looks amber when it is bright; its edge does the finding.
-     The inks and grounds above are untouched: the product reads them, and
-     the review's evidence is the product as it is. */
-  --color-success-solid: light-dark(oklch(0.62 0.15 150), oklch(0.68 0.16 150));
-  --color-success-border: light-dark(oklch(0.86 0.07 150), oklch(0.42 0.09 150));
-  --color-warning-solid: light-dark(oklch(0.8 0.155 78), oklch(0.8 0.155 78));
-  --color-warning-border: light-dark(oklch(0.72 0.12 75), oklch(0.62 0.12 75));
-  --color-danger-solid: light-dark(oklch(0.62 0.19 28), oklch(0.64 0.19 28));
-  --color-danger-border: light-dark(oklch(0.86 0.07 25), oklch(0.44 0.1 25));
-  --color-accent-border: light-dark(oklch(0.86 0.06 264), oklch(0.44 0.1 264));
-  --color-neutral-solid: light-dark(oklch(0.62 0.012 285), oklch(0.62 0.012 285));
-
-  /* Diff. The same two grounds a code review uses, with the meaning inks
-     above, so a line added and a line removed read the same here as in
-     the pull request. In the dark as in the light, each ink is its
-     meaning's ink to the digit: danger and a removed line are one red under
-     two names, which is the question the delegated work turns on. */
-  --color-diff-add: light-dark(#e6f4ea, oklch(0.27 0.05 150));
-  --color-diff-add-ink: light-dark(#1f7a3f, oklch(0.78 0.15 150));
-  --color-diff-remove: light-dark(#fdeceb, oklch(0.28 0.06 25));
-  --color-diff-remove-ink: light-dark(#b42318, oklch(0.74 0.15 25));
-
-  /* Elevation. One shadow for a menu or a popover floating over content.
-     Panels are flat and divided by hairlines. The raised step is the
-     review's, for a card a person presses inside a flat panel (an answer
-     to a decision): the hairline stays, and a short shadow lifts it one
-     step, so what can be chosen is not one more nested box. A shadow on a
-     dark ground has to be nearly black to be seen at all. */
-  --shadow-menu: 0 4px 12px light-dark(rgba(20, 20, 30, 0.12), rgba(0, 0, 0, 0.5)), 0 0 0 1px var(--color-border);
-  --shadow-raised:
-    0 1px 2px light-dark(rgba(20, 20, 30, 0.06), rgba(0, 0, 0, 0.4)), 0 2px 6px -2px light-dark(rgba(20, 20, 30, 0.08), rgba(0, 0, 0, 0.5));
-  --color-scrim: light-dark(rgba(27, 27, 31, 0.32), rgba(0, 0, 0, 0.6)); /* behind a dialog */
+  /* COLOR: TWO PALETTES, ONE FOR EACH SURFACE. The product's is first, and
+     it is frozen: every value below is the one this file held for the
+     product before the review took a palette of its own (2026-10-11), to
+     the digit, under a -product name. The product's surface hands each one
+     back under its plain name (app/global.css), so Relay in the preview
+     frame and in its own stories renders exactly as the checks measured it,
+     and a value the review quotes when it names a deviation (#b42318 is
+     --color-danger) is still the value Relay has. The product has one
+     scheme, light. The review's palette, with both of its schemes, is the
+     block after this one. */
+  --color-canvas-product: #f7f7f8;
+  --color-surface-product: #ffffff;
+  --color-surface-sunken-product: #f2f2f4;
+  --color-surface-hover-product: #f4f4f6;
+  --color-surface-hover-strong-product: oklch(0.947 0.006 285);
+  --color-border-product: #e4e4e8;
+  --color-divider-product: oklch(0.945 0.004 286);
+  --color-border-control-product: #8c8c96;
+  --color-text-product: #1b1b1f;
+  --color-text-secondary-product: #4a4a55;
+  --color-text-muted-product: #6a6a76;
+  --color-text-on-accent-product: #ffffff;
+  --color-accent-product: #2f5fd6;
+  --color-accent-hover-product: #244bb0;
+  --color-accent-subtle-product: #e9effc;
+  --color-success-product: #1f7a3f;
+  --color-success-subtle-product: #e6f4ea;
+  --color-warning-product: #8a5a00;
+  --color-warning-subtle-product: #fbf1dc;
+  --color-danger-product: #b42318;
+  --color-danger-subtle-product: #fdeceb;
+  --color-success-solid-product: oklch(0.62 0.15 150);
+  --color-success-border-product: oklch(0.86 0.07 150);
+  --color-warning-solid-product: oklch(0.8 0.155 78);
+  --color-warning-border-product: oklch(0.72 0.12 75);
+  --color-danger-solid-product: oklch(0.62 0.19 28);
+  --color-danger-border-product: oklch(0.86 0.07 25);
+  --color-accent-border-product: oklch(0.86 0.06 264);
+  --color-neutral-solid-product: oklch(0.62 0.012 285);
+  --color-diff-add-product: #e6f4ea;
+  --color-diff-add-ink-product: #1f7a3f;
+  --color-diff-remove-product: #fdeceb;
+  --color-diff-remove-ink-product: #b42318;
+  --shadow-menu-product: 0 4px 12px rgba(20, 20, 30, 0.12), 0 0 0 1px #e4e4e8;
+  --shadow-raised-product: 0 1px 2px rgba(20, 20, 30, 0.06), 0 2px 6px -2px rgba(20, 20, 30, 0.08);
+  --shadow-control-product: 0 0 transparent; /* the product's controls draw no shadow */
+  --color-scrim-product: rgba(27, 27, 31, 0.32);
 
   /* Focus. One ring, drawn with outline so it follows any shape, offset so
      it never touches the control's own border. Every interactive element
-     gets it through the base stylesheet, and no component removes it. */
-  --focus-ring-color: var(--color-accent);
+     gets it through the base stylesheet, and no component removes it. Its
+     color is the accent's, set with each palette (below, and the product's
+     hand-back in app/global.css). */
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
 
@@ -229,4 +181,103 @@
      their real size. */
   --zoom-desktop: 1.125;
   --zoom-wide: 1.25;
+}
+
+/* THE REVIEW'S PALETTE, since 2026-10-11, taken from Stripe's dashboard:
+   cool blue-grey neutrals, near-white grounds with white panels on them,
+   hairlines in #e3e8ee, one violet-blue accent (Stripe's blurple, a shade
+   deeper so it reads as a link on the grey ground), and meanings drawn as
+   Stripe draws a status: a tinted ground, the word in a deep ink of the
+   same hue, and an edge one step darker than the ground. Light is the
+   review's default and its first scheme; the dark one is a deep navy rather
+   than a neutral black, the same hues carried down.
+
+   It is declared on the root, so the page and anything outside a surface
+   take it, and again on the review's surface, so a piece of the review drawn
+   inside the product's frame (the finding's mark) takes it back. The
+   product's surface hands back the frozen palette above (app/global.css).
+   Every color is light-dark(light, dark); every ink clears 4.5:1 on every
+   ground it sits on and every mark 3:1, in both schemes (the stories run axe
+   on the light screens and on the dark ones). */
+:root,
+[data-surface='review'] {
+  /* Grounds. Canvas is the page, surface is a panel or a table, sunken is a
+     head row, a code block or a tile inside a panel, hover is a row under the
+     pointer. In the dark each step up is lighter, so a panel still rises off
+     the page. */
+  --color-canvas: light-dark(#f6f8fa, oklch(0.165 0.014 262));
+  --color-surface: light-dark(#ffffff, oklch(0.205 0.016 262));
+  --color-surface-sunken: light-dark(#f2f4f7, oklch(0.245 0.017 262));
+  --color-surface-hover: light-dark(#f6f8fa, oklch(0.235 0.017 262));
+  /* A row under the pointer in a list a reviewer scans (the queue): one step
+     further than hover, as far as muted text allows (4.68:1 on it in the
+     light, 6.0:1 in the dark). */
+  --color-surface-hover-strong: light-dark(#eceff3, oklch(0.285 0.018 262));
+
+  /* Lines. The border is a panel's edge; the divider is the line between the
+     rows inside one, a step fainter; the control border is the one boundary a
+     reader has to find (3.0:1 on the page and 3.3:1 on white, WCAG 1.4.11). */
+  --color-border: light-dark(#e3e8ee, oklch(0.32 0.018 262));
+  --color-divider: light-dark(#ebeef1, oklch(0.27 0.016 262));
+  --color-border-control: light-dark(#828d9d, oklch(0.58 0.022 262));
+
+  /* Ink. Three steps, Stripe's: a near-black with a little blue in it, a
+     slate for running text, and a muted slate that clears 4.5:1 on every
+     ground above. */
+  --color-text: light-dark(#1a1b25, oklch(0.96 0.005 262));
+  --color-text-secondary: light-dark(#414552, oklch(0.84 0.013 262));
+  --color-text-muted: light-dark(#5f6b7e, oklch(0.73 0.02 262));
+  --color-text-on-accent: light-dark(#ffffff, oklch(0.18 0.04 282));
+
+  /* The accent: Stripe's blurple, for what a screen asks a person to do, the
+     place they are in, a link, and the focus ring. #5b52f6 is #635bff a shade
+     deeper, so it clears 4.5:1 as text on the grey ground (4.95:1) and white
+     on it clears 5.27:1. In the dark it is a light lavender with dark ink on
+     it. */
+  --color-accent: light-dark(#5b52f6, oklch(0.75 0.13 282));
+  --color-accent-hover: light-dark(#4a3fe3, oklch(0.81 0.1 282));
+  --color-accent-subtle: light-dark(#f0efff, oklch(0.29 0.07 282));
+  --color-accent-border: light-dark(#c9c5ff, oklch(0.45 0.12 282));
+
+  /* Meaning, as Stripe draws a status: a tinted ground, a deep ink of the
+     same hue on it (6:1 or better), a solid for a mark or a bar, and an edge
+     for the ground. Nothing is ever only a color: every use carries a word
+     or an icon with a name. */
+  --color-success: light-dark(#006908, oklch(0.8 0.15 145));
+  --color-success-subtle: light-dark(#e3f9d7, oklch(0.28 0.055 145));
+  --color-success-solid: light-dark(#2f9e1f, oklch(0.7 0.16 145));
+  --color-success-border: light-dark(#a8e38c, oklch(0.44 0.09 145));
+  --color-warning: light-dark(#a03d00, oklch(0.83 0.13 72));
+  --color-warning-subtle: light-dark(#fcf2d2, oklch(0.29 0.05 68));
+  --color-warning-solid: light-dark(oklch(0.8 0.155 78), oklch(0.8 0.155 78));
+  --color-warning-border: light-dark(#f1c55b, oklch(0.55 0.1 68));
+  --color-danger: light-dark(#b3093c, oklch(0.77 0.14 12));
+  --color-danger-subtle: light-dark(#ffe9f1, oklch(0.29 0.065 10));
+  --color-danger-solid: light-dark(#df1b41, oklch(0.68 0.19 18));
+  --color-danger-border: light-dark(#ffc2d6, oklch(0.46 0.11 10));
+  --color-neutral-solid: light-dark(#8792a2, oklch(0.62 0.02 262));
+
+  /* Diff. A line added and a line removed, on the meanings' hues, a step
+     lighter than a status's ground so a page of them stays readable. */
+  --color-diff-add: light-dark(#ecfbe3, oklch(0.27 0.05 145));
+  --color-diff-add-ink: light-dark(#006908, oklch(0.8 0.15 145));
+  --color-diff-remove: light-dark(#fff0f5, oklch(0.28 0.06 10));
+  --color-diff-remove-ink: light-dark(#b3093c, oklch(0.77 0.14 12));
+
+  /* Elevation, in Stripe's two shadows: a short, tight one under a control
+     (a button you press, a tile you choose), and a wider soft one under a
+     card that asks for the person (a decision) and under a menu. A shadow in
+     the dark has to be nearly black to be seen at all. */
+  --shadow-control: 0 1px 1px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.5));
+  --shadow-raised:
+    0 0 0 1px light-dark(rgba(60, 66, 87, 0.06), rgba(0, 0, 0, 0)),
+    0 2px 5px light-dark(rgba(60, 66, 87, 0.08), rgba(0, 0, 0, 0.45)),
+    0 1px 1px light-dark(rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.4));
+  --shadow-menu:
+    0 0 0 1px var(--color-border),
+    0 3px 6px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.5)),
+    0 7px 14px light-dark(rgba(60, 66, 87, 0.12), rgba(0, 0, 0, 0.5));
+  --color-scrim: light-dark(rgba(26, 27, 37, 0.4), rgba(0, 0, 0, 0.6)); /* behind a dialog */
+
+  --focus-ring-color: var(--color-accent);
 }

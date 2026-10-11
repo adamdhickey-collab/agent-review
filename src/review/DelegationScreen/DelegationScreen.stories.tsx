@@ -261,7 +261,7 @@ export const Dark: Story = {
 export const DecisionFirst: Story = {
   decorators: [inStore(start)],
   parameters: {
-    docs: { description: { story: 'The order a person who has something to decide wants: the account in one sentence and a bar, then the decisions, and only then the evidence for the sentence (the checks, what is unresolved, the scope), then the completed work. The decisions are the only cards on the screen, and the accent is theirs: the strip’s “Simulated” and the boundaries rail are in the ink, not blue.' } },
+    docs: { description: { story: 'The order a person who has something to decide wants: the account in one sentence and a bar, then the decisions, and only then the evidence for the sentence (the checks, what is unresolved, the scope), then the completed work. The decisions are the only raised cards on the screen: the completed work and the boundaries are flat white panels, an edge and no shadow, and the strip’s “Simulated” is in the ink, not the accent.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -275,10 +275,13 @@ export const DecisionFirst: Story = {
     await expect(before(checks, done)).toBe(true);
     /* Unresolved is below the decisions, not gone. */
     await expect(canvas.getByText(/Axe couldn’t measure/)).toBeInTheDocument();
-    /* The only bordered cards are the decisions. */
+    /* The only raised cards are the decisions: the panels have an edge and
+       no shadow. */
     await expect(canvasElement.querySelectorAll('.ask').length).toBe(2);
-    await expect(getComputedStyle(canvasElement.querySelector('.delegation__records') as Element).borderTopWidth).toBe('0px');
-    await expect(getComputedStyle(canvasElement.querySelector('.bounds') as Element).borderTopWidth).toBe('0px');
+    await expect(getComputedStyle(canvasElement.querySelector('.ask') as Element).boxShadow).not.toBe('none');
+    for (const flat of ['.delegation__records', '.bounds']) {
+      await expect(getComputedStyle(canvasElement.querySelector(flat) as Element).boxShadow).toBe('none');
+    }
     /* Simulated is ink, not the accent. */
     const probe = canvasElement.ownerDocument.createElement('i');
     canvasElement.appendChild(probe);

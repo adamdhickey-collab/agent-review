@@ -33,11 +33,15 @@
   margin-inline: 0 calc(var(--space-1) * -1);
 }
 
-/* Variants */
+/* Variants. The three with a ground sit on a short shadow, so a button
+   reads as a thing to press and not as a box; it is the review's (Stripe's
+   control shadow) and the product's surface sets it to nothing, so a
+   product button is the flat one it always was. */
 .btn--primary {
   background: var(--color-accent);
   border-color: var(--color-accent);
   color: var(--color-text-on-accent);
+  box-shadow: var(--shadow-control);
 }
 
 .btn--primary:hover:not(:disabled):not(.is-loading) {
@@ -48,6 +52,7 @@
 .btn--secondary {
   background: var(--color-surface);
   border-color: var(--color-border-control);
+  box-shadow: var(--shadow-control);
 }
 
 .btn--secondary:hover:not(:disabled):not(.is-loading) {
@@ -58,6 +63,7 @@
   background: var(--color-surface);
   border-color: var(--color-danger);
   color: var(--color-danger);
+  box-shadow: var(--shadow-control);
 }
 
 .btn--danger:hover:not(:disabled):not(.is-loading) {
