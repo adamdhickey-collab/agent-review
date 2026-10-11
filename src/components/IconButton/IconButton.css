@@ -62,3 +62,11 @@
 .icon-btn:focus-visible::after {
   opacity: 1;
 }
+
+/* At the end of a row: lined up with the button's end edge, so it never runs
+   past the window's (IconButton.tsx). */
+.icon-btn--tip-end::after {
+  left: auto;
+  right: 0;
+  translate: none;
+}

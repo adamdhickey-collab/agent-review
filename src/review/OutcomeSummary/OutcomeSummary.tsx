@@ -196,6 +196,7 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
         </p>
       ) : null}
 
+      <div className="outcome__row">
       <ul className="outcome__modes" aria-label="How the work was handled">
         <li data-mode="own" data-zero={a.own.length === 0 || undefined}>
           <Mode icon={BOUNDARY_GROUP_ICON.own} n={a.own.length} words="proceeded on its own" />
@@ -237,6 +238,7 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
             </li>
           ))}
         </ul>
+      </div>
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState, type CSSProperties } from 'react';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { ICON_NAMES } from '../Icon/Icon';
 import { IconButton } from './IconButton';
 
@@ -91,5 +91,27 @@ export const WithShortcut: Story = {
   play: async ({ canvasElement }) => {
     const button = within(canvasElement).getByRole('button', { name: 'Keyboard shortcuts' });
     await expect(button).toHaveAttribute('data-tooltip', 'Keyboard shortcuts (?)');
+  },
+};
+
+export const TooltipAtTheEnd: Story = {
+  args: { icon: 'chevron-right', label: 'Next decision', tooltip: 'end' },
+  decorators: [
+    (Story) => (
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Story />
+      </div>
+    ),
+  ],
+  parameters: {
+    docs: { description: { story: 'For a button at the end of a row: the tooltip lines up with the button’s end edge rather than centring under it, so it stays inside the row, and the page, even at the window’s edge.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Next decision' });
+    await userEvent.tab();
+    await expect(button).toHaveFocus();
+    await waitFor(() => expect(getComputedStyle(button, '::after').opacity).toBe('1'));
+    await expect(getComputedStyle(button, '::after').right).toBe('0px');
+    await expect(canvasElement.ownerDocument.documentElement.scrollWidth).toBeLessThanOrEqual(canvasElement.ownerDocument.documentElement.clientWidth);
   },
 };

@@ -20,8 +20,9 @@
   translate: 0 0;
 }
 
-/* A white bar with a hairline under it, over the grey page, as Stripe's is:
-   the chrome is one surface, and the screen under it is another. */
+/* The chrome's own ground, a step off the page, with a hairline under it:
+   the bar is one surface and the screen under it another, and neither is
+   louder than the screen's own heading. */
 .shell__bar {
   display: flex;
   align-items: stretch;
@@ -29,7 +30,7 @@
   height: 3rem;
   padding: 0 var(--space-4);
   border-bottom: var(--border-width) solid var(--color-border);
-  background: var(--color-surface);
+  background: var(--color-surface-chrome);
 }
 
 .shell__bar > * {
@@ -149,10 +150,10 @@
   font-size: var(--text-sm);
 }
 
-/* Who you are is a disc of the accent's tint; the two buttons are plain
-   icon buttons. */
-.shell__context .icon-btn + .icon-btn {
-  margin-left: calc(var(--space-3) * -1); /* the two buttons are a pair, closer than the bar's gap */
+/* Who you are is a disc of the accent's tint; the keyboard button and the
+   appearance control are a pair, closer than the bar's gap. */
+.shell__context .icon-btn + .shell__appearance {
+  margin-left: calc(var(--space-2) * -1);
 }
 
 
@@ -198,15 +199,17 @@
    reader, hidden the way .visually-hidden hides it, because a name that is
    display: none is a name nobody hears. "Delegated work" narrows to "Work"
    on a phone the same way: four places do not fit a 320px row with the
-   long name, and a screen reader still hears it. This starts at 56rem, not
-   48: with the keyboard button in the bar the full bar needs about 860px,
-   and between 769 and 860 its labels ("Agent Review", "Delegated work", the
-   name) broke onto two lines instead of fitting. 896 leaves it room. */
-@media (max-width: 56rem) {
-  .shell__repo {
-    display: none;
-  }
+   long name, and a screen reader still hears it.
 
+   Where each step starts was measured by sweeping the bar's width 4px at a
+   time for a label broken onto two lines (sweep widths when anything is
+   added to the bar). Since Preview Studio (2026-10-11, later) the bar holds
+   the appearance control, three choices where the theme toggle was one, and
+   every step moved: the name goes first, from 62rem (it broke from 904 to
+   976px); the project's branch from 56rem; the keyboard button from 44rem;
+   and the bar becomes two rows from 50rem rather than 40 (the brand and
+   "Delegated work" broke from 656 to 784px). */
+@media (max-width: 62rem) {
   .shell__user-name {
     position: absolute;
     width: 1px;
@@ -220,22 +223,26 @@
   }
 }
 
+@media (max-width: 56rem) {
+  .shell__repo {
+    display: none;
+  }
+}
+
 /* The keyboard button is for a keyboard, and the bar has no room for it
-   below 44rem: from 690px the whole bar fits with it, under that the brand
-   and "Delegated work" break onto two lines. The shortcuts themselves are
-   still there to a keyboard, on the question mark; only the button goes. On
-   a phone there is no keyboard to list them for in any case. */
+   below 44rem. The shortcuts themselves are still there to a keyboard, on
+   the question mark; only the button goes. On a phone there is no keyboard
+   to list them for in any case. */
 @media (max-width: 44rem) {
   .shell__shortcuts {
     display: none;
   }
 }
 
-/* On a phone the bar is two rows: the name and who you are, then the places
-   to go, each a full-width share of the row so they are easy to hit. One row
-   would have cut a word or a name off, and a name that is cut is not the
-   name. */
-@media (max-width: 40rem) {
+/* Two rows: the name and who you are, then the places to go, each a
+   full-width share of the row so they are easy to hit. One row would have
+   cut a word or a name off, and a name that is cut is not the name. */
+@media (max-width: 50rem) {
   .shell__bar {
     flex-wrap: wrap;
     height: auto;
@@ -264,7 +271,10 @@
     flex: 1 1 auto;
     gap: var(--space-1);
   }
+}
 
+/* On a phone, "Delegated work" is "Work". */
+@media (max-width: 40rem) {
   .shell__long {
     position: absolute;
     width: 1px;

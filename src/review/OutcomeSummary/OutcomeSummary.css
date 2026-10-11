@@ -346,3 +346,52 @@
     margin-top: var(--space-3);
   }
 }
+
+/* THE ACCOUNT IN THE HEADER, SINCE PREVIEW STUDIO (2026-10-11, later). The
+   account sits under the job's title, above the workspace, so it is a band
+   rather than a block: where the header is wide enough, the modes' tiles
+   and the progress share one row, the tiles the larger part; in a narrower
+   header they stack as they always did. */
+.outcome__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@container outcome (min-width: 56rem) {
+  .outcome__row {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  /* A tile is one line tall here: the mark on its square, the count and
+     what it counts beside it, and the note under the words. */
+  .outcome__modes li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--space-3);
+    padding: var(--space-3);
+  }
+
+  .outcome__mode-head {
+    grid-row: span 2;
+    gap: var(--space-2);
+    margin-bottom: 0;
+  }
+
+  .outcome__modes strong {
+    font-size: var(--text-xl);
+  }
+
+  .outcome__mode-words,
+  .outcome__mode-note {
+    grid-column: 2;
+  }
+
+  .outcome__modes li:not(:has(.outcome__mode-note)) .outcome__mode-words {
+    grid-row: span 2;
+  }
+}

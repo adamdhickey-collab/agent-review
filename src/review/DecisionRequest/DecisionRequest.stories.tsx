@@ -36,7 +36,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'A change the agent stopped on, asking for one decision, and saying which kind as its status: Needs judgment or Needs approval. Needs judgment, in the billing run, is a trade-off: the agent found one red with two meanings and proposes two defensible directions, recommends one, and says what it can’t determine that could change that. Each direction is a card of the same shape (what it does, how it looks, three benefits, three risks); choosing one marks it and opens what the agent will do, the person’s reason and the rule box under the cards, with the other still there to switch to. Needs approval: the agent knows what to do and may not, so the card shows the line it would change and what each answer does, and, for a fix in a shared component, who else it reaches and what has and hasn’t been checked; choosing an answer turns the answers into its confirmation. Both cite the boundary that stopped them on one line, and fold what was found, the code and the evidence. A rule is never made by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
+          'The inspector of the delegated work’s workspace (Preview Studio): a change the agent stopped on, asking for one decision, and saying which kind as its status: Needs judgment or Needs approval. What the agent read and found is beside the preview, not here (Review/DecisionRead). Needs judgment, in the billing run, is a trade-off: the agent found one red with two meanings and proposes two defensible directions. The checks are folded to one line, with the sentence that keeps them apart from the decision under it. Each direction is a card of the same shape (what it does, three benefits, three risks, and Select and preview); selecting one marks it, shows it in the screen’s preview as proposed, and opens what the agent will do, the person’s reason and the rule box under the cards, with the other still there to switch to. Needs approval: the agent knows what to do and may not, so the card shows the line it would change and what each answer does, and, for a fix in a shared component, who else it reaches and what has and hasn’t been checked; choosing an answer turns the answers into its confirmation. Both cite the boundary that stopped them on one line, and fold what was found, the code and the evidence. A rule is never made by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
       },
     },
   },
@@ -45,15 +45,15 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const choose = (title: string) => ({ name: new RegExp(`^Choose\\s+${title}$`) });
-const chosen = (title: string) => ({ name: new RegExp(`^Chosen\\s+${title}$`) });
+const choose = (title: string) => ({ name: new RegExp(`^Select and preview\\s+${title}$`) });
+const chosen = (title: string) => ({ name: new RegExp(`^Selected\\s+${title}$`) });
 
 export const TradeOff: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          'The first question of the billing run, as a trade-off. The two reds as tiles, each headed by its meaning and its screen: the replaced plan, hard-coded from the old billing app, and “Payment failed”, which the agent made --color-danger on its own. The checks, folded: lint and accessibility pass with either direction, and only this value moves. Then the agent’s read: it recommends separating the meanings, and says what it can’t determine (whether people rely on the red to notice a plan change) and what it inferred rather than checked, beside a way to ask for evidence. Then the two directions, two cards of one shape, each with how it would look and three benefits and three risks; “Recommended” is a quiet label, and both buttons are the same.',
+          'The first question of the billing run, as a trade-off, as the inspector holds it. Its kind, where it is and the four changes held behind it; the question; the checks, folded (lint and accessibility pass with either direction, and only this value moves), and under them that passing is not evidence either trade-off works for the people who use the screen. Then the two directions, two cards of one shape, three benefits and three risks each; “Recommended” is a small badge, and both buttons are the same. Neither is selected.',
       },
     },
   },
@@ -61,38 +61,28 @@ export const TradeOff: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('4 changes wait on this')).toBeInTheDocument();
     await expect(canvas.getByRole('heading', { name: 'Separate the two meanings of red, or keep the familiar signal?' })).toBeInTheDocument();
-    const tiles = within(canvas.getByRole('list', { name: 'The two reds' })).getAllByRole('listitem');
-    await expect(tiles).toHaveLength(2);
-    await expect(tiles[0]).toHaveTextContent(/^Replaced value · Billing activity/);
-    await expect(tiles[0]).toHaveTextContent('Red means this value was replaced.');
-    await expect(tiles[0]).toHaveTextContent(/Hard-coded #b42318, from the old billing app$/);
-    await expect(tiles[1]).toHaveTextContent(/^Failure · Payment history/);
-    await expect(tiles[1]).toHaveTextContent(/--color-danger$/);
     const tried = canvas.getByText('Lint and accessibility pass with either direction. Only this value moves.').closest('details')!;
     await expect(tried).not.toHaveAttribute('open');
     await userEvent.click(canvas.getByText('Lint and accessibility pass with either direction. Only this value moves.'));
     const checks = within(tried).getByRole('list', { name: 'The checks, with each direction in place' });
     await expect(checks).toHaveTextContent('Visual baselines: 2 of 2 frames moved with both');
-    const read = canvas.getByRole('list', { name: 'The agent’s read' });
-    await expect(read).toHaveTextContent(/^Recommended\s*Separate the meanings/);
-    await expect(read).toHaveTextContent(/What I can’t determine\s*Whether people who use the billing activity screen rely on the red/);
-    await expect(read).toHaveTextContent('That could change this recommendation.');
-    await expect(read).toHaveTextContent(/Inferred, not checked:/);
+    /* The checks are not the decision. */
+    await expect(canvas.getByText(/It doesn’t mean either trade-off works for the people who use this screen\./)).toBeInTheDocument();
     const answers = canvas.getByRole('group', { name: 'Which trade-off is acceptable?' });
-    const cards = answers.querySelectorAll<HTMLElement>('.ask__choice');
+    const cards = within(answers).getAllByRole('listitem').filter((li) => li.classList.contains('ask__choice'));
     await expect(cards).toHaveLength(2);
     await expect(cards[0]).toHaveTextContent(/^Separate the meanings\s*Recommended/);
     await expect(cards[1]).toHaveTextContent(/^Keep the red for now/);
     for (const card of cards) {
       await expect(within(card).getByRole('list', { name: 'Benefits' }).children).toHaveLength(3);
       await expect(within(card).getByRole('list', { name: 'Risks' }).children).toHaveLength(3);
-      await expect(within(card).getByRole('button', { name: /^Choose/ })).toHaveAttribute('aria-pressed', 'false');
-      await expect(within(card).getByRole('button', { name: /^Choose/ })).toHaveClass('btn--secondary');
+      await expect(within(card).getByRole('button', { name: /^Select and preview/ })).toHaveAttribute('aria-pressed', 'false');
+      await expect(within(card).getByRole('button', { name: /^Select and preview/ })).toHaveClass('btn--secondary');
     }
-    await expect(cards[0].querySelector('[data-look]')).toHaveAttribute('data-look', 'neutral');
-    await expect(cards[1].querySelector('[data-look]')).toHaveAttribute('data-look', 'red');
     await expect(canvas.queryByRole('button', { name: 'Apply' })).toBeNull();
-    await expect(canvas.getByText(/4 changes are held until you decide/)).not.toBeVisible();
+    /* What the agent read is the preview's side of the workspace now. */
+    await expect(canvas.queryByRole('list', { name: 'The two reds' })).toBeNull();
+    await expect(canvas.queryByRole('list', { name: 'The agent’s read' })).toBeNull();
   },
 };
 
@@ -166,35 +156,21 @@ export const CancelWithEscape: Story = {
   },
 };
 
-export const RequestEvidence: Story = {
-  parameters: {
-    docs: { description: { story: 'Asking for evidence decides nothing, so it needs no second step: the answer goes straight to the run, which gathers it and asks again.' } },
-  },
-  play: async ({ canvasElement, args }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Request evidence' }));
-    await expect(args.onAnswer).toHaveBeenCalledWith('evidence', false);
-  },
-};
-
 export const AfterEvidence: Story = {
   args: props(play(start, { type: 'answer', id: 'activity-red', option: 'evidence', makeRule: false }), 'activity-red', makeRule),
   parameters: {
     docs: {
       description: {
         story:
-          'After the agent gathered the evidence it was asked for: where this red is used, what each direction would change, what depends on it, what it could not verify (nobody’s usage, because the repository has none), and a way to find out, marked proposed and not run. The two directions are unchanged, and the way to ask for more is gone.',
+          'After the agent gathered the evidence it was asked for (shown beside the preview, Review/DecisionRead), the question is the same and so are the two directions; nothing was decided.',
       },
     },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const found = canvas.getByRole('region', { name: 'What the agent found when you asked' });
-    await expect(found).toHaveTextContent(/5 places on 4 screens/);
-    await expect(found).toHaveTextContent(/There is no usage data or research about it in the repository\./);
-    await expect(found).toHaveTextContent(/Proposed, not run\./);
-    await expect(canvas.queryByRole('button', { name: 'Request evidence' })).toBeNull();
     await expect(canvas.getByRole('button', choose('Keep the red for now'))).toBeInTheDocument();
+    await expect(canvas.getByRole('button', choose('Separate the meanings'))).toBeInTheDocument();
+    await expect(canvas.queryByRole('button', { name: 'Request evidence' })).toBeNull();
   },
 };
 
@@ -226,7 +202,6 @@ export const OutsideYourRule: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
-    await expect(canvas.getByRole('list', { name: 'The two reds' })).toHaveTextContent(/^Removed value · Invoice detail.*Red means this value was removed\./);
     await userEvent.click(canvas.getByRole('button', choose('Separate the meanings')));
     await expect(canvas.getByText('Add this case to your rule')).toBeInTheDocument();
   },
@@ -261,21 +236,15 @@ export const SharedComponent: Story = {
     docs: {
       description: {
         story:
-          'A permission boundary: the agent knows the fix, the checks it could run pass, and the fix is in the shared Table forty screens draw. The card says what it was asked and what it proposes, shows the change, who else it reaches (the screens by area, every one under a fold, and the owner), what has been checked beside what has not, and that this is a permission decision rather than a technical one. Three answers, each saying what happens after: keep it to the screen asked about, approve the shared change once, or have the agent gather more evidence first.',
+          'A permission boundary: the agent knows the fix, the checks it could run pass, and the fix is in the shared Table forty screens draw. The inspector says that this is a permission decision rather than a technical one, and whose component it is; the case for it (what was asked and proposed, the change, who else it reaches, what has been checked beside what has not) is beside the preview (Review/DecisionRead). Three answers, each saying what happens after: keep it to the screen asked about, approve the shared change once, or have the agent gather more evidence first.',
       },
     },
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('Needs approval')).toBeInTheDocument();
-    await expect(canvas.getByText('Asked')).toBeInTheDocument();
-    await expect(canvas.getByText('Proposes')).toBeInTheDocument();
-    await expect(canvas.getByRole('group', { name: 'Who else it reaches' })).toHaveTextContent(/40 screens draw the shared Table, which Priya Raman \(Design systems\) owns\./);
-    await expect(canvas.getByRole('list', { name: 'Screens by area' }).children).toHaveLength(6);
-    const known = canvas.getByRole('list', { name: 'What is known' });
-    await expect(known).toHaveTextContent(/Checked.*12 of the 40 screens have one/);
-    await expect(known).toHaveTextContent(/Not checked.*28 screens have no visual baseline/);
     await expect(canvas.getByText('So this isn’t a technical problem. It’s a permission decision.')).toBeInTheDocument();
+    await expect(canvas.getByText(/The shared Table is Priya Raman’s to change \(Design systems\)\./)).toBeInTheDocument();
     for (const name of ['Fix this screen only', 'Approve, this once', 'Show me the 40 screens']) await expect(canvas.getByRole('button', { name })).toBeInTheDocument();
     /* Gathering evidence decides nothing, so it asks no second question. */
     await userEvent.click(canvas.getByRole('button', { name: 'Show me the 40 screens' }));
@@ -326,13 +295,12 @@ export const SharedComponentAfterEvidence: Story = {
     docs: {
       description: {
         story:
-          'After the agent gathered the evidence it was asked for: the same question, with what it found. All forty rendered, five cut off their last row, and what is still not known. Two answers now; the one that asked for more is gone.',
+          'After the agent gathered the evidence it was asked for (beside the preview, Review/DecisionRead): the same question, and two answers now; the one that asked for more is gone.',
       },
     },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('list', { name: 'What is known' })).toHaveTextContent(/On 5, a panel of fixed height now cuts off the last row/);
     await expect(canvas.queryByRole('button', { name: 'Show me the 40 screens' })).toBeNull();
     await expect(canvas.getByRole('button', { name: 'Approve, this once' })).toBeInTheDocument();
   },

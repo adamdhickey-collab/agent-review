@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { Badge, Button, Disclosure, Icon } from '../../components';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { Badge, Button, Disclosure, Icon, IconButton } from '../../components';
 import { useStore } from '../../app/store';
 import { href } from '../../app/router';
 import { account, activeRule, ruleText, waitingOn, whyAsking, wordsOf, wouldSettle, type Action, type Pattern, type RunId, type Work } from '../../data/delegation';
 import { plural, relativeTime } from '../format';
 import { OutcomeFacts, OutcomeSummary } from '../OutcomeSummary/OutcomeSummary';
-import { DecisionRequest, type RulePreview } from '../DecisionRequest/DecisionRequest';
+import { DecisionRead, DecisionRequest, type RulePreview } from '../DecisionRequest/DecisionRequest';
+import { DecisionPreview, type PreviewView } from '../DecisionPreview/DecisionPreview';
 import { DecisionRecord } from '../DecisionRecord/DecisionRecord';
 import { RecordHead, WorkRecord } from '../WorkRecord/WorkRecord';
 import { Boundaries } from '../Boundaries/Boundaries';
@@ -74,13 +75,73 @@ import { Inline } from '../Inline';
    follow-up it opened and whether it became a rule. The records are a
    section of their own under the decisions still asking, newest first,
    so the card that asked turns into what it decided a few lines down, and
-   the notice points at it. */
+   the notice points at it.
+
+   PREVIEW STUDIO, SINCE 2026-10-11 (LATER). The screen was a document: the
+   decisions were cards in a column, each drawing its two reds as tiles, and
+   a person weighed a change to an interface without ever seeing the
+   interface. It is a workspace now, in three bands:
+
+   - The chrome: a bar under the app's, on the same ground, holding which
+     sample run this is (the links that switch between them), that it is
+     simulated, in one quiet line, and the reset. Then the job: who
+     delegated it, its title, the request, and the account, counted from
+     the fixtures as before, as a band rather than a block.
+   - The workspace, for whatever needs the person. On the left, about two
+     thirds of it, the interface the decision changes (DecisionPreview),
+     with the element marked; under it, what the agent read and found
+     (DecisionRead). On the right, the inspector (DecisionRequest): which
+     decision this is and of how many, with a way to the others, then the
+     decision itself. Selecting a direction there previews it on the left,
+     labelled as proposed and not applied; Apply goes through the reducer,
+     as every answer always has. One decision at a time, so the preview is
+     always of the decision being read; the account and the pager say how
+     many others there are.
+   - The rest of the run, under the workspace, as it was: the decisions
+     made, what the checks established, the completed work, and beside them
+     the boundaries and the rules.
+
+   Under 56rem the workspace is one column, the preview first, then the
+   read, then the inspector, and nothing is dropped. Nothing is fixed to the
+   window's height and nothing scrolls inside anything else: the page grows. */
 
 /* The runs, as the switch names them: what each is about, in two words. */
 const RUNS: { id: RunId; label: string; kind: string }[] = [
   { id: 'billing', label: 'Two reds', kind: 'missing intent' },
   { id: 'shared-table', label: 'Shared table', kind: 'a permission boundary' },
 ];
+
+/* The shorter of the workspace's two columns follows the page while the
+   longer one is read, so the interface stays beside the reasoning about it
+   (or the decision beside a long read): but only when the whole of it fits
+   the window, so following never holds any of it out of view, and only
+   while there are two columns (the stylesheet says when). Measured rather
+   than assumed, because which is shorter depends on the decision and on
+   what is open in it; re-measured whenever either changes size. */
+function useFollow(a: RefObject<HTMLElement | null>, b: RefObject<HTMLElement | null>, key: string) {
+  useLayoutEffect(() => {
+    const one = a.current;
+    const two = b.current;
+    if (!one || !two) return;
+    const decide = () => {
+      const zoom = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+      const room = window.innerHeight - 2 * 16 * zoom; /* --space-4 above and below, at the page's zoom */
+      const h1 = one.getBoundingClientRect().height;
+      const h2 = two.getBoundingClientRect().height;
+      one.toggleAttribute('data-follows', h1 < h2 && h1 <= room);
+      two.toggleAttribute('data-follows', h2 < h1 && h2 <= room);
+    };
+    decide();
+    const ro = new ResizeObserver(decide);
+    ro.observe(one);
+    ro.observe(two);
+    window.addEventListener('resize', decide);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', decide);
+    };
+  }, [a, b, key]);
+}
 
 /* Work with nothing to look at: made on its own, every check passed on the
    first run, nothing chosen by meaning. Folded into one row. */
@@ -109,6 +170,16 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
   const bounds = useRef<HTMLElement>(null);
   const records = useRef<Record<string, HTMLElement | null>>({});
   const focusNext = useRef(false);
+
+  /* Which decision the workspace shows, and what is selected in each. The
+     decision is kept by id, so an answer elsewhere doesn't move it, and by
+     position, so that once it is answered the workspace shows the one that
+     took its place. A selection is kept per decision, so the preview and
+     the inspector read the same one, and going to another decision and
+     back finds it as it was left. */
+  const [at, setAt] = useState<{ id?: string; index: number }>({ index: 0 });
+  const [chosen, setChosen] = useState<Record<string, string | undefined>>({});
+  const [views, setViews] = useState<Record<string, PreviewView>>({});
 
   useEffect(() => {
     if (!focusNext.current) return;
@@ -140,6 +211,25 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
   const notable = done.filter((w) => !routine(w));
   const easy = done.filter(routine);
   const asking = a.asking;
+  const found = asking.findIndex((w) => w.id === at.id);
+  const index = found >= 0 ? found : Math.min(at.index, Math.max(asking.length - 1, 0));
+  const current = asking[index];
+  const go = (i: number) => setAt({ id: asking[i]?.id, index: i });
+  const choice = current ? chosen[current.id] : undefined;
+  /* What the preview can show of a selection: a direction or an answer, but
+     not more evidence, which decides nothing and changes nothing. */
+  const previewing = current?.question?.options.find((o) => o.id === choice && !o.asks);
+  const view: PreviewView = current && previewing ? (views[current.id] ?? 'proposed') : 'current';
+
+  const stage = useRef<HTMLDivElement>(null);
+  const inspector = useRef<HTMLDivElement>(null);
+  useFollow(stage, inspector, current?.id ?? '');
+
+  const answer = (w: Work, option: string, makeRule: boolean, reason?: string) => {
+    focusNext.current = true;
+    setAt({ index });
+    delegate({ type: 'answer', id: w.id, option, makeRule, reason });
+  };
 
   const record = (w: Work) => (
     <WorkRecord
@@ -154,35 +244,44 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
 
   return (
     <div className="delegation">
-      <div className="delegation__sim" role="note" aria-label="About this screen">
-        <Badge variant="quiet" icon="play" className="delegation__sim-label">
-          Simulated
-        </Badge>
-        <p>A sample run, played back the same way every time. No model runs, and no real repository is touched.</p>
-        <nav className="delegation__runs" aria-label="Sample runs">
-          {RUNS.map((r) => (
-            <a key={r.id} className="delegation__run" href={href({ name: 'delegation', run: r.id })} aria-current={r.id === run ? 'page' : undefined}>
-              {r.label}
-              <span className="visually-hidden">, {r.kind}</span>
-            </a>
-          ))}
-        </nav>
-        <Button
-          size="compact"
-          variant="secondary"
-          leadingIcon="undo"
-          onClick={() => {
-            resetDelegation(run);
-            top.current?.focus();
-          }}
-        >
-          Reset the demo
-        </Button>
+      {/* The run's own bar, in the chrome under the app's: which sample run
+          this is, that it is one, and the way back to its start. */}
+      <div className="delegation__runbar">
+        <div className="delegation__runbar-inner">
+          <nav className="delegation__runs" aria-label="Sample runs">
+            {RUNS.map((r) => (
+              <a key={r.id} className="delegation__run" href={href({ name: 'delegation', run: r.id })} aria-current={r.id === run ? 'page' : undefined}>
+                {r.label}
+                <span className="visually-hidden">, {r.kind}</span>
+              </a>
+            ))}
+          </nav>
+          <div className="delegation__sim" role="note" aria-label="About this screen">
+            <Badge variant="quiet" icon="play" className="delegation__sim-label">
+              Simulated
+            </Badge>
+            <p>A sample run, played back the same way every time. No model runs, and no real repository is touched.</p>
+          </div>
+          <Button
+            size="compact"
+            variant="secondary"
+            leadingIcon="undo"
+            onClick={() => {
+              resetDelegation(run);
+              setAt({ index: 0 });
+              setChosen({});
+              setViews({});
+              top.current?.focus();
+            }}
+          >
+            Reset the demo
+          </Button>
+        </div>
       </div>
 
-      <div className="delegation__layout">
-        <div className="delegation__main">
-          <header className="delegation__header">
+      <div className="delegation__body">
+        <header className="delegation__header">
+          <div className="delegation__heading">
             <p className="delegation__by">
               <Icon name="bot" size={16} />
               <span>
@@ -197,135 +296,165 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
                 {s.brief.request} <span className="delegation__request-meta">Last active {s.brief.lastActive}, in <code>{s.brief.repo}</code>.</span>
               </p>
             </Disclosure>
-          </header>
-
-          <OutcomeSummary ref={lead} state={s} />
-
-          <div className="delegation__notice" data-kind={s.noticeKind} aria-live="polite">
-            {s.notice ? (
-              <>
-                <Icon name={s.noticeKind === 'back' ? 'undo' : s.noticeKind === 'open' ? 'status-inconclusive' : 'status-passed'} size={16} />
-                <p>
-                  <Inline text={s.notice} />
-                </p>
-                {s.noticeDecision && s.decisions.some((d) => d.id === s.noticeDecision) ? (
-                  <Button
-                    size="compact"
-                    variant="secondary"
-                    onClick={() => {
-                      const el = records.current[s.noticeDecision!];
-                      el?.scrollIntoView({ block: 'nearest' });
-                      el?.focus();
-                    }}
-                  >
-                    See the decision record
-                  </Button>
-                ) : s.noticeRule && s.rules.some((r) => r.id === s.noticeRule && r.status === 'active') ? (
-                  <Button
-                    size="compact"
-                    variant="secondary"
-                    onClick={() => {
-                      bounds.current?.scrollIntoView({ block: 'nearest' });
-                      bounds.current?.focus();
-                    }}
-                  >
-                    See your rule
-                  </Button>
-                ) : null}
-              </>
-            ) : null}
           </div>
 
-          {asking.length ? (
-            <section className="delegation__section" aria-labelledby="needs-title">
-              <h2 ref={needs} id="needs-title" className="delegation__h2" tabIndex={-1}>
-                Needs you <span className="delegation__count">{asking.length}</span>
-              </h2>
-              {asking.map((w) => (
-                <DecisionRequest
-                  key={w.id}
-                  work={w}
-                  why={w.waitsOn ? whyAsking(s, w) : undefined}
-                  boundaries={s.boundaries.filter((b) => w.question!.paused.includes(b.n))}
-                  waiting={waitingOn(s, w.id)}
-                  preview={preview(w)}
-                  onAnswer={(option, makeRule, reason) => {
-                    focusNext.current = true;
-                    delegate({ type: 'answer', id: w.id, option, makeRule, reason });
+          <OutcomeSummary ref={lead} state={s} />
+        </header>
+
+        <div className="delegation__notice" data-kind={s.noticeKind} aria-live="polite">
+          {s.notice ? (
+            <>
+              <Icon name={s.noticeKind === 'back' ? 'undo' : s.noticeKind === 'open' ? 'status-inconclusive' : 'status-passed'} size={16} />
+              <p>
+                <Inline text={s.notice} />
+              </p>
+              {s.noticeDecision && s.decisions.some((d) => d.id === s.noticeDecision) ? (
+                <Button
+                  size="compact"
+                  variant="secondary"
+                  onClick={() => {
+                    const el = records.current[s.noticeDecision!];
+                    el?.scrollIntoView({ block: 'nearest' });
+                    el?.focus();
                   }}
-                />
-              ))}
-            </section>
-          ) : null}
-
-          {s.decisions.length ? (
-            <section className="delegation__section" aria-labelledby="decided-title">
-              <h2 id="decided-title" className="delegation__h2">
-                Your decisions <span className="delegation__count">{s.decisions.length}</span>
-              </h2>
-              <p className="delegation__hint">What you decided, why, and what it left to do. A later change follows one only through a rule you made from it.</p>
-              <ul className="delegation__decisions">
-                {[...s.decisions].reverse().map((d) => (
-                  <li key={d.id}>
-                    <DecisionRecord
-                      ref={(el) => {
-                        records.current[d.id] = el;
-                      }}
-                      decision={d}
-                      work={s.work.find((w) => w.id === d.from)}
-                      rule={d.rule ? s.rules.find((r) => r.id === d.rule) : undefined}
-                      all={s.work}
-                      onSeeRule={() => {
-                        bounds.current?.scrollIntoView({ block: 'nearest' });
-                        bounds.current?.focus();
-                      }}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          <OutcomeFacts state={s} />
-
-          <section className="delegation__section delegation__done" aria-labelledby="done-title">
-            <h2 id="done-title" className="delegation__h2">
-              Completed work <span className="delegation__count">{done.length}</span>
-            </h2>
-            <p className="delegation__hint">Done on its own unless marked. Open one for what changed, why, and what the checks established.</p>
-            <ul className="delegation__records">
-              {notable.map((w) => (
-                <li key={w.id}>{record(w)}</li>
-              ))}
-              {easy.length ? (
-                <li>
-                  <Disclosure
-                    className="delegation__routine"
-                    summary={<RecordHead state="passed" label="Every check passed" title={plural(easy.length, ...words.routine)} where="Every check passed, on the first try" />}
-                  >
-                    <ul>
-                      {easy.map((w) => (
-                        <li key={w.id}>{record(w)}</li>
-                      ))}
-                    </ul>
-                  </Disclosure>
-                </li>
+                >
+                  See the decision record
+                </Button>
+              ) : s.noticeRule && s.rules.some((r) => r.id === s.noticeRule && r.status === 'active') ? (
+                <Button
+                  size="compact"
+                  variant="secondary"
+                  onClick={() => {
+                    bounds.current?.scrollIntoView({ block: 'nearest' });
+                    bounds.current?.focus();
+                  }}
+                >
+                  See your rule
+                </Button>
               ) : null}
-            </ul>
-          </section>
+            </>
+          ) : null}
         </div>
 
-        <aside className="delegation__aside" aria-label="Boundaries and your rules">
-          <Boundaries
-            ref={bounds}
-            boundaries={s.boundaries}
-            by={s.brief.by}
-            rules={s.rules}
-            work={s.work}
-            onEditRule={(id, covers) => delegate({ type: 'edit-rule', id, covers })}
-            onRevokeRule={(id) => delegate({ type: 'revoke-rule', id })}
-          />
-        </aside>
+        {current ? (
+          <section className="studio" aria-labelledby="needs-title">
+            <div ref={stage} className="studio__stage">
+              <DecisionPreview
+                work={current}
+                option={previewing}
+                view={view}
+                onViewChange={(v) => setViews((m) => ({ ...m, [current.id]: v }))}
+                position={index + 1}
+              />
+              <DecisionRead work={current} waiting={waitingOn(s, current.id)} onAnswer={(option, makeRule) => answer(current, option, makeRule)} />
+            </div>
+
+            <div ref={inspector} className="studio__inspector">
+              <div className="studio__head">
+                <h2 ref={needs} id="needs-title" className="delegation__h2" tabIndex={-1}>
+                  Needs you <span className="delegation__count">{asking.length}</span>
+                </h2>
+                <div className="studio__pager">
+                  <p className="studio__position" aria-live="polite">
+                    Decision {index + 1} of {asking.length}
+                  </p>
+                  {asking.length > 1 ? (
+                    <>
+                      <IconButton icon="chevron-left" label="Previous decision" disabled={index === 0} onClick={() => go(index - 1)} />
+                      <IconButton icon="chevron-right" label="Next decision" tooltip="end" disabled={index === asking.length - 1} onClick={() => go(index + 1)} />
+                    </>
+                  ) : null}
+                </div>
+              </div>
+              <DecisionRequest
+                key={current.id}
+                work={current}
+                why={current.waitsOn ? whyAsking(s, current) : undefined}
+                boundaries={s.boundaries.filter((b) => current.question!.paused.includes(b.n))}
+                waiting={waitingOn(s, current.id)}
+                preview={preview(current)}
+                choice={choice}
+                onChoiceChange={(next) => {
+                  setChosen((m) => ({ ...m, [current.id]: next }));
+                  setViews((m) => ({ ...m, [current.id]: 'proposed' }));
+                }}
+                onAnswer={(option, makeRule, reason) => answer(current, option, makeRule, reason)}
+              />
+            </div>
+          </section>
+        ) : null}
+
+        <div className="delegation__layout">
+          <div className="delegation__main">
+            {s.decisions.length ? (
+              <section className="delegation__section" aria-labelledby="decided-title">
+                <h2 id="decided-title" className="delegation__h2">
+                  Your decisions <span className="delegation__count">{s.decisions.length}</span>
+                </h2>
+                <p className="delegation__hint">What you decided, why, and what it left to do. A later change follows one only through a rule you made from it.</p>
+                <ul className="delegation__decisions">
+                  {[...s.decisions].reverse().map((d) => (
+                    <li key={d.id}>
+                      <DecisionRecord
+                        ref={(el) => {
+                          records.current[d.id] = el;
+                        }}
+                        decision={d}
+                        work={s.work.find((w) => w.id === d.from)}
+                        rule={d.rule ? s.rules.find((r) => r.id === d.rule) : undefined}
+                        all={s.work}
+                        onSeeRule={() => {
+                          bounds.current?.scrollIntoView({ block: 'nearest' });
+                          bounds.current?.focus();
+                        }}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            <OutcomeFacts state={s} />
+
+            <section className="delegation__section delegation__done" aria-labelledby="done-title">
+              <h2 id="done-title" className="delegation__h2">
+                Completed work <span className="delegation__count">{done.length}</span>
+              </h2>
+              <p className="delegation__hint">Done on its own unless marked. Open one for what changed, why, and what the checks established.</p>
+              <ul className="delegation__records">
+                {notable.map((w) => (
+                  <li key={w.id}>{record(w)}</li>
+                ))}
+                {easy.length ? (
+                  <li>
+                    <Disclosure
+                      className="delegation__routine"
+                      summary={<RecordHead state="passed" label="Every check passed" title={plural(easy.length, ...words.routine)} where="Every check passed, on the first try" />}
+                    >
+                      <ul>
+                        {easy.map((w) => (
+                          <li key={w.id}>{record(w)}</li>
+                        ))}
+                      </ul>
+                    </Disclosure>
+                  </li>
+                ) : null}
+              </ul>
+            </section>
+          </div>
+
+          <aside className="delegation__aside" aria-label="Boundaries and your rules">
+            <Boundaries
+              ref={bounds}
+              boundaries={s.boundaries}
+              by={s.brief.by}
+              rules={s.rules}
+              work={s.work}
+              onEditRule={(id, covers) => delegate({ type: 'edit-rule', id, covers })}
+              onRevokeRule={(id) => delegate({ type: 'revoke-rule', id })}
+            />
+          </aside>
+        </div>
       </div>
     </div>
   );

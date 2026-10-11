@@ -921,3 +921,85 @@
     flex: 1 1 auto;
   }
 }
+
+/* PREVIEW STUDIO (2026-10-11, later). The checks, and under them the line
+   that keeps them apart from the decision: passing is about the code, not
+   about whether a trade-off works for the people who use the screen. */
+.ask__checked {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ask__not-validated,
+.ask__owner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+.ask__not-validated {
+  font-size: var(--text-sm);
+}
+
+.ask__not-validated .icon,
+.ask__owner .icon {
+  flex: none;
+  margin-top: calc((1em * var(--leading-body) - var(--icon-size)) / 2); /* the icon, centred on the first line */
+  color: var(--color-text-muted);
+}
+
+/* The read, under the preview: what the agent recommends, what it can't
+   determine, and what it found, in the flow of the page rather than in a
+   card of its own, since the preview above it is the panel it belongs to. */
+.ask.ask--read {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.ask--read > .ask__read > .ask__tile {
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+/* A shared component's case, one panel: what was asked and proposed, the
+   change, who else it reaches, and what is known, its tiles sunken in it. */
+.ask__case {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.ask--read .ask__more {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.ask--read .ask__more > .disclosure__summary {
+  padding-inline: var(--space-4);
+}
+
+.ask--read .ask__more > .disclosure__body {
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.ask--read .ask__recommends {
+  box-shadow: none;
+}
+
+.ask--read .ask__unknown {
+  border-color: var(--color-warning-border);
+  box-shadow: none;
+}

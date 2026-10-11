@@ -23,12 +23,16 @@ fix it two defensible ways and can't tell which trade-off the people who
 use those screens can live with, and the shared
 table (`#/runs/shared-table`), where the fix that fits is in a component
 forty screens share and is not the agent's to make. Both are simulated,
-and say so; the experiment's review queue is at `#/queue`.
+and say so; the experiment's review queue is at `#/queue`. Each decision
+is made in a workspace (Preview Studio): the interface it changes rendered
+large, with the element marked, beside an inspector holding the decision;
+selecting a direction previews it, proposed and not applied.
 
 - The product: https://adamdhickey-collab.github.io/agent-review/
 - The Storybook: https://adamdhickey-collab.github.io/agent-review/storybook/
 - The case study: https://adamhickey.com/lab/agent-review.html
 - The decisions and the record: [PROJECT.md](PROJECT.md), [docs/experiment](docs/experiment/), [docs/exploration](docs/exploration/)
+- The theme guidance and the workspace's screens: [docs/preview-studio](docs/preview-studio/)
 
 ## What is here
 

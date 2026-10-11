@@ -39,6 +39,20 @@ for (const width of WIDTHS) {
       await expect(page).toHaveScreenshot(`queue-${width}.png`, { fullPage: true });
     });
 
+    /* Preview Studio: a direction selected, previewed and not applied. The
+       first screen, from the top: the preview proposing it, and the card
+       selected in the inspector. Selecting sends focus to the plan, which
+       scrolls; the capture goes back to the top so it is the same picture
+       at every width. */
+    test('the delegated work, a direction selected', async ({ page }) => {
+      await page.goto('#/');
+      await settle(page);
+      await page.getByRole('button', { name: /^Select and preview\s+Separate the meanings$/ }).click();
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await settle(page);
+      await expect(page).toHaveScreenshot(`delegation-selected-${width}.png`);
+    });
+
     test('the change, with the first finding open', async ({ page }) => {
       await page.goto('#/changes/rv-2041/findings/f1-shared-table');
       await settle(page);
