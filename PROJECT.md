@@ -416,7 +416,7 @@ skills/ui-quality/   the rules an agent reads before touching UI
 docs/exploration/    the three directions
 docs/experiment/     the controlled experiment, as it happened
 scripts/             the token lint and the findings collector
-tests/               Playwright: visual baselines and the viewport check
+tests/               Playwright: visual baselines, the viewport check and where a screen arrives
 ```
 
 ## Component inventory

@@ -10,8 +10,8 @@ import { EmptyState } from '../components';
 /* The store has to be above anything that reads it, and the route effects
    read it for the screen's title, so the screens sit one level down. */
 function Screens() {
-  const route = useRoute();
-  useRouteEffects(route);
+  const { route, arrival } = useRoute();
+  useRouteEffects(route, arrival);
   return (
     <Shell route={route}>
       {route.name === 'delegation' ? <DelegationScreen run={route.run ?? 'billing'} /> : null}

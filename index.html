@@ -17,6 +17,10 @@
         var t = localStorage.getItem('agent-review:theme');
         if (t === 'light' || t === 'system') document.documentElement.dataset.theme = t;
       } catch (e) {}
+      /* The router puts a reloaded or revisited page back where it was,
+         once the screen is there to scroll (src/app/router.ts); the browser
+         would try before that, against an empty page. */
+      history.scrollRestoration = 'manual';
     </script>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
