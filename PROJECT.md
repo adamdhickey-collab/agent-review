@@ -520,10 +520,10 @@ the review's half. The full list with values is in the file; the names in
 - Real repository integration (reading a PR from GitHub). The product reads
   a static scenario; the shape of the data is what a real integration would
   produce, and the README says what it would take.
-- A dark scheme for the product. The review has had one since 2026-10-05
-  (Light, Dark or the system's since Preview Studio); Relay has a light
-  canvas by decision and stays light inside the review's preview, as it
-  would in a real one.
+- A dark scheme for the product. The review has had one since 2026-10-05,
+  and is dark by default, with Light and the system's on request; Relay has
+  a light canvas by decision and stays light inside the review's preview,
+  as it would in a real one.
 - An Archived view and undo for the bulk archive. Both runs listed it;
   the inline question is the guard until there is a view to restore from.
 - A proper CSS parser for the token lint (see Open questions).

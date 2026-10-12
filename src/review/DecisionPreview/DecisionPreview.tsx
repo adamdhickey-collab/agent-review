@@ -47,10 +47,11 @@ import './DecisionPreview.css';
    review's theme, because the product under it always is. A twin, the same
    red elsewhere whose meaning was settled, gets a dashed neutral one.
 
-   Under the frame, what the picture can't say: for two reds, what each one
-   means and where it comes from; for a shared component, every screen it
-   reaches, which of them have a visual baseline, and which move under the
-   answer being previewed. */
+   What the picture can't say: for two reds, what each one means and where
+   it comes from, as a caption under each screen in the screens' own grid,
+   led by the tag its mark carries; under the frame, for a shared component,
+   every screen it reaches, which of them have a visual baseline, and which
+   move under the answer being previewed. */
 
 export type PreviewView = 'current' | 'proposed';
 
@@ -188,6 +189,10 @@ export function DecisionPreview({ work, option, view, onViewChange, position = 1
 
   const title = option ? (option.title ?? option.label) : undefined;
   const twin = q.kind === 'intent' ? q.twin : undefined;
+  /* The tags the marks carry, which their captions repeat, so the caption
+     under a screen is found by the words on the mark above it. */
+  const decisionTag = `Decision ${position}`;
+  const twinTag = twin ? `Same red: ${twin.means.toLowerCase()}` : '';
 
   return (
     <section className="studio-preview" aria-labelledby={`${id}-screen`}>
@@ -237,39 +242,51 @@ export function DecisionPreview({ work, option, view, onViewChange, position = 1
             style={scaled ? { width: `${minWidth}px`, transform: `scale(${fit.scale})` } : undefined}
           >
             <IconSetContext.Provider value="product">
-              <SketchScreen work={work} option={shown === 'proposed' ? option : undefined} />
+              <SketchScreen
+                work={work}
+                option={shown === 'proposed' ? option : undefined}
+                captions={
+                  twin && work.sample
+                    ? [
+                        <Caption key="decision" tone="decision" tag={decisionTag} means={q.means ?? ''} where={work.screen} says={q.says ?? ''} token={`Hard-coded ${work.lines[0]?.before ?? ''}, from the old billing app`} />,
+                        <Caption key="twin" tone="twin" tag={twinTag} means={twin.means} where={twin.screen} says={twin.says} token={twin.token} />,
+                      ]
+                    : undefined
+                }
+              />
             </IconSetContext.Provider>
-            <div ref={mark} className="studio-mark" data-surface="review" data-label={`Decision ${position}`} aria-hidden="true" hidden />
-            {twin ? <div ref={twinMark} className="studio-mark studio-mark--twin" data-surface="review" data-label={`Same red: ${twin.means.toLowerCase()}`} aria-hidden="true" hidden /> : null}
+            <div ref={mark} className="studio-mark" data-surface="review" data-label={decisionTag} aria-hidden="true" hidden />
+            {twin ? <div ref={twinMark} className="studio-mark studio-mark--twin" data-surface="review" data-label={twinTag} aria-hidden="true" hidden /> : null}
           </div>
         </div>
       </div>
 
-      {twin && work.sample ? (
-        <ul className="studio-preview__key" aria-label="The two reds">
-          <li data-mark="decision">
-            <p className="studio-preview__key-head">
-              {q.means} <span className="studio-preview__key-where">· {work.screen}</span>
-            </p>
-            <p>{q.says}</p>
-            <p className="studio-preview__key-token">
-              <Inline text={`Hard-coded ${work.lines[0]?.before ?? ''}, from the old billing app`} />
-            </p>
-          </li>
-          <li data-mark="twin">
-            <p className="studio-preview__key-head">
-              {twin.means} <span className="studio-preview__key-where">· {twin.screen}</span>
-            </p>
-            <p>{twin.says}</p>
-            <p className="studio-preview__key-token">
-              <Inline text={twin.token} />
-            </p>
-          </li>
-        </ul>
-      ) : null}
-
       {reach ? <ReachMap reach={reach} option={shown === 'proposed' ? option : undefined} /> : null}
     </section>
+  );
+}
+
+/* What a red means, under the screen it is on (Sketch.tsx places it in the
+   screens' own grid): the mark's tag, repeated, so the caption is found by
+   the words on the mark; the meaning and the screen; the sentence; and the
+   token or literal, quietly. Until 2026-10-11 (later still) this was a key
+   under the whole frame, two columns of its own width led by small drawn
+   swatches of the two marks, and a reader could not tell which column was
+   about which screen. */
+function Caption({ tone, tag, means, where, says, token }: { tone: 'decision' | 'twin'; tag: string; means: string; where: string; says: string; token: string }) {
+  return (
+    <>
+      <span className="studio-tag" data-tone={tone}>
+        {tag}
+      </span>
+      <p className="studio-caption__head">
+        {means} <span className="studio-caption__where">· {where}</span>
+      </p>
+      <p>{says}</p>
+      <p className="studio-caption__token">
+        <Inline text={token} />
+      </p>
+    </>
   );
 }
 

@@ -7,11 +7,13 @@ import { devices, expect, test, type Page } from '@playwright/test';
 
 const WIDTHS = [1280, 768] as const;
 
-/* The review is light until a person chooses dark (app/useTheme.ts, since
-   2026-10-11). The baselines that are not named -dark are of the light theme,
-   what a first visit sees, so they make no choice; the -dark ones make it
-   first, the way the bar's toggle does: by remembering it. */
+/* The review is dark until a person chooses otherwise (app/useTheme.ts,
+   since 2026-10-11, later still). The baselines predate that: the ones not
+   named -dark are of the light theme and the -dark ones of the dark, so each
+   set now makes its choice first, the way the bar's control does, by
+   remembering it, and a first visit is checked on its own below. */
 const chooseDark = () => localStorage.setItem('agent-review:theme', 'dark');
+const chooseLight = () => localStorage.setItem('agent-review:theme', 'light');
 
 async function settle(page: Page) {
   await page.evaluate(() => document.fonts.ready);
@@ -21,6 +23,9 @@ async function settle(page: Page) {
 for (const width of WIDTHS) {
   test.describe(`at ${width}`, () => {
     test.use({ viewport: { width, height: 900 } });
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript(chooseLight);
+    });
     test('the delegated work', async ({ page }) => {
       await page.goto('#/');
       await settle(page);
@@ -70,6 +75,9 @@ for (const width of WIDTHS) {
 test.describe('on a phone, 375', () => {
   const { defaultBrowserType: _ignored, ...phone } = devices['iPhone 13'];
   test.use({ ...phone, viewport: { width: 375, height: 812 }, deviceScaleFactor: 1 });
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(chooseLight);
+  });
   async function open(page: Page, hash: string) {
     await page.goto('about:blank');
     await page.goto(hash);
@@ -132,7 +140,20 @@ test.describe('in the dark theme, chosen, at 1280', () => {
   });
 });
 
+/* A first visit, with nothing remembered: dark, with the root's own
+   color-scheme and nothing on it. Not a screenshot; the -dark baselines are
+   the picture of it. */
+test('a first visit is dark', async ({ page }) => {
+  await page.goto('#/');
+  await settle(page);
+  expect(await page.evaluate(() => [document.documentElement.dataset.theme ?? null, getComputedStyle(document.documentElement).colorScheme])).toEqual([null, 'dark']);
+  await expect(page.getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true');
+});
+
 test.describe('the product screens', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(chooseLight);
+  });
   /* The product is light whatever the review is, so the theme makes no
      difference to it. The page behind the frame matters, because the frame
      is a fraction of a pixel taller than a whole number and the capture's

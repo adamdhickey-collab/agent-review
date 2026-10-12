@@ -50,7 +50,7 @@ const MUTED = 'rgb(106, 106, 118)'; /* #6a6a76, the product's muted ink */
 
 export const Current: Story = {
   parameters: {
-    docs: { description: { story: 'Nothing selected: the billing activity as it is, beside the payment history. The old plan and “Payment failed” are the same red, which is the question; teal is only the annotation. No view control yet, because there is nothing to compare.' } },
+    docs: { description: { story: 'Nothing selected: the billing activity as it is, beside the payment history. The old plan and “Payment failed” are the same red, which is the question; teal is only the annotation. Under each screen, in its own column, a caption led by the tag its mark carries says what that red means. No view control yet, because there is nothing to compare.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -60,9 +60,13 @@ export const Current: Story = {
     await expect(ink(old)).toBe(RED);
     await expect(ink(canvasElement.querySelector('.sketch__status--failed'))).toBe(RED);
     await expect(canvasElement.querySelector('.sketch__added')).toBeNull();
+    /* The captions, under their screens, each led by its mark's own tag. */
     const reds = canvas.getByRole('list', { name: 'The two reds' });
-    await expect(reds).toHaveTextContent(/^Replaced value · Billing activity\s*Red means this value was replaced\.\s*Hard-coded #b42318, from the old billing app/);
-    await expect(reds).toHaveTextContent(/Failure · Payment history\s*Red means something went wrong\.\s*--color-danger$/);
+    await expect(reds).toHaveTextContent(/^Decision 1\s*Replaced value · Billing activity\s*Red means this value was replaced\.\s*Hard-coded #b42318, from the old billing app/);
+    await expect(reds).toHaveTextContent(/Same red: failure\s*Failure · Payment history\s*Red means something went wrong\.\s*--color-danger$/);
+    const [decision, twinCap] = within(reds).getAllByRole('listitem');
+    await expect(within(decision).getByText('Decision 1')).toHaveClass('studio-tag');
+    await expect(within(twinCap).getByText('Same red: failure')).toHaveAttribute('data-tone', 'twin');
     await waitFor(() => expect(canvasElement.querySelector('.studio-mark')).not.toHaveAttribute('hidden'));
     await expect(canvasElement.querySelector('.studio-mark')).toHaveAttribute('data-label', 'Decision 1');
     await expect(getComputedStyle(canvasElement.querySelector('.studio-preview__frame')!).colorScheme).toBe('light');

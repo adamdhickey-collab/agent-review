@@ -119,10 +119,12 @@ export interface SketchScreenProps {
   work: Work;
   /** The direction being previewed, for the label it adds; the colors come from its lines, applied by the preview. */
   option?: Option;
+  /** What each screen's red means, from the review: a caption under the screen in question and one under its twin's, in the same columns. */
+  captions?: [ReactNode, ReactNode];
 }
 
 /** The screen a change is on, with the element in question in place, and its twin's screen beside it when it has one. */
-export function SketchScreen({ work, option }: SketchScreenProps) {
+export function SketchScreen({ work, option, captions }: SketchScreenProps) {
   const sketch = work.sketch;
   if (!sketch) return null;
   if (sketch.kind === 'screen') {
@@ -155,6 +157,21 @@ export function SketchScreen({ work, option }: SketchScreenProps) {
         focus={work.sample ? <Struck sample={work.sample} lines={work.lines} label={label} /> : null}
       />
       {twin?.sketch?.kind === 'rows' ? <Rows title={twin.sketch.title} subtitle={twin.sketch.subtitle} rows={twin.sketch.rows} twin={twin} /> : null}
+      {/* The captions are the review's, drawn in the grid the screens are
+          drawn in, each under its own screen (Sketch.css places them), so
+          what a red means is read where the red is. The list is display:
+          contents so its items take the grid's cells; the roles say what
+          the box no longer does. */}
+      {captions && twin?.sketch ? (
+        <ul className="sketch__captions" aria-label="The two reds" role="list">
+          <li className="sketch__caption" data-for="decision" data-surface="review" role="listitem">
+            {captions[0]}
+          </li>
+          <li className="sketch__caption" data-for="twin" data-surface="review" role="listitem">
+            {captions[1]}
+          </li>
+        </ul>
+      ) : null}
     </div>
     </div>
   );

@@ -120,7 +120,11 @@ only ever adds tokens or re-values them on its own surface:
 - The decision preview's annotation is the review's (it is drawn over the
   product), in the light scheme whatever the theme, because the product
   under it always is: the light accent is 6.4:1 on Relay's white, where the
-  dark scheme's pale teal would be under 2:1.
+  dark scheme's pale teal would be under 2:1. What each red means is a
+  caption under its screen, in the screens' own columns, led by the same tag
+  the mark carries (since later on 2026-10-11; it was a key under the whole
+  frame, in columns of its own, led by drawn swatches a reader could not
+  match to the marks).
 
 `tests/visual.spec.ts` holds Relay's own baselines (`customers-before-*`)
 to the pixel; they did not change.
@@ -148,20 +152,21 @@ A Light / Dark / System control in the bar, built from the system's
 SegmentedControl: one tab stop, arrow keys between the three, each an icon
 named by its tooltip.
 
-- With no saved choice, the review follows the operating system, and keeps
-  following it: the root's `color-scheme` is `light dark`, so every
-  `light-dark()` token resolves to whichever the system says, live.
-- Choosing Light or Dark puts `data-theme` on the root, which fixes the
-  `color-scheme`, and remembers it; choosing System takes it off and
-  remembers that. A change of the system's setting is followed only while
-  System is chosen.
+- With no saved choice, the review is dark (since later on 2026-10-11, by
+  decision; Preview Studio opened following the system): the root's own
+  `color-scheme` is `dark`, so every `light-dark()` token resolves to its
+  dark half, and every first visit, and every picture of the review, is the
+  same.
+- Choosing Light or System puts `data-theme` on the root and remembers it:
+  `light` fixes the scheme, `system` sets it to `light dark`, which follows
+  the operating system live. Choosing Dark takes the attribute off and
+  remembers that.
 - The choice is stored where the earlier toggle stored it,
   `localStorage['agent-review:theme']`, so a choice made before System
   existed reads as it was written (`light`, `dark`); `system` is the one
   new value. Nothing to migrate.
-- `index.html` applies a remembered Light or Dark before the first paint.
-  System needs nothing before it: the stylesheet follows the system on its
-  own.
+- `index.html` applies a remembered Light or System before the first paint.
+  Dark needs nothing before it: it is the stylesheet's own default.
 - `color-scheme` is set on the root in every case, so native controls (a
   scrollbar, a text field) follow the theme.
 - Changing it changes one attribute; nothing remounts, so the run, the
