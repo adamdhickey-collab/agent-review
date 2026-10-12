@@ -15,7 +15,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The chrome: one bar on the chrome’s ground over the page, with the product’s mark on a tile of the accent. The place you are in is said in the accent, the word and the line under it, the line a selected tab carries, with no filled shape, so the first thing with weight on a screen is the screen’s heading. The appearance control is three choices, Light, Dark and System, as the system’s segmented control. The review follows the system until a person chooses, and a choice is remembered.',
+          'The chrome: one bar on the chrome’s ground over the page, with the product’s mark on a tile of the accent. The place you are in is said in the accent, the word and the line under it, the line a selected tab carries, with no filled shape, so the first thing with weight on a screen is the screen’s heading. The appearance control is three choices, Light, Dark and System, as the system’s segmented control. The review is dark until a person chooses, and a choice is remembered.',
       },
     },
   },
@@ -43,7 +43,7 @@ export const Appearance: Story = {
     docs: {
       description: {
         story:
-          'Light, Dark and System, one tab stop with arrow keys between them, each an icon named by its tooltip. A first visit is System: nothing on the root, so its color-scheme is "light dark" and every token follows the operating system, live. Choosing Light or Dark puts data-theme on the root and remembers it; choosing System takes it off and remembers that. Since Preview Studio (2026-10-11, later); it was a light/dark toggle before. The remembered choice is cleared at the end, and the Storybook’s own theme put back, so the next story starts as it should.',
+          'Light, Dark and System, one tab stop with arrow keys between them, each an icon named by its tooltip. A first visit is Dark: nothing on the root, whose own color-scheme is dark. Choosing Light or System puts data-theme on the root and remembers it; System is "light dark", every token following the operating system live; choosing Dark takes the attribute off and remembers that. Dark by default since 2026-10-11 (later still); Preview Studio opened following the system, and it was a light/dark toggle before. The remembered choice is cleared at the end, and the Storybook’s own theme put back, so the next story starts as it should.',
       },
     },
   },
@@ -52,26 +52,30 @@ export const Appearance: Story = {
     const canvas = within(canvasElement);
     const before = root.dataset.theme;
     try {
+      /* The Storybook's decorator puts its own theme on the root; a first
+         visit has nothing there, and the app's root is dark on its own. */
+      delete root.dataset.theme;
       const group = await canvas.findByRole('radiogroup', { name: 'Appearance' });
-      /* A first visit follows the system. */
-      await expect(within(group).getByRole('radio', { name: 'System' })).toHaveAttribute('aria-checked', 'true');
+      /* A first visit is dark. */
+      await expect(within(group).getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true');
       await expect(root.dataset.theme).toBeUndefined();
-      await expect(getComputedStyle(root).colorScheme).toBe('light dark');
-
-      await userEvent.click(within(group).getByRole('radio', { name: 'Dark' }));
-      await expect(root.dataset.theme).toBe('dark');
       await expect(getComputedStyle(root).colorScheme).toBe('dark');
-      await expect(localStorage.getItem('agent-review:theme')).toBe('dark');
+
+      await userEvent.click(within(group).getByRole('radio', { name: 'System' }));
+      await expect(root.dataset.theme).toBe('system');
+      await expect(getComputedStyle(root).colorScheme).toBe('light dark');
+      await expect(localStorage.getItem('agent-review:theme')).toBe('system');
 
       /* Arrow keys move the choice, as in any radio group. */
       await userEvent.keyboard('{ArrowLeft}');
-      await expect(within(group).getByRole('radio', { name: 'Light' })).toHaveFocus();
+      await expect(within(group).getByRole('radio', { name: 'Dark' })).toHaveFocus();
+      await expect(root.dataset.theme).toBeUndefined();
+      await expect(getComputedStyle(root).colorScheme).toBe('dark');
+
+      await userEvent.click(within(group).getByRole('radio', { name: 'Light' }));
       await expect(root.dataset.theme).toBe('light');
       await expect(getComputedStyle(root).colorScheme).toBe('light');
-
-      await userEvent.click(within(group).getByRole('radio', { name: 'System' }));
-      await expect(root.dataset.theme).toBeUndefined();
-      await expect(localStorage.getItem('agent-review:theme')).toBe('system');
+      await expect(localStorage.getItem('agent-review:theme')).toBe('light');
     } finally {
       localStorage.removeItem('agent-review:theme');
       if (before) root.dataset.theme = before;
@@ -81,17 +85,17 @@ export const Appearance: Story = {
 
 export const AppearanceRemembered: Story = {
   parameters: {
-    docs: { description: { story: 'A choice made before System existed is read as it was written: "dark" in storage is Dark, with nothing to migrate.' } },
+    docs: { description: { story: 'A choice made before System existed is read as it was written: "light" in storage is Light, with nothing to migrate.' } },
   },
   beforeEach: () => {
-    localStorage.setItem('agent-review:theme', 'dark');
+    localStorage.setItem('agent-review:theme', 'light');
     return () => localStorage.removeItem('agent-review:theme');
   },
   play: async ({ canvasElement }) => {
     const root = canvasElement.ownerDocument.documentElement;
     const group = await within(canvasElement).findByRole('radiogroup', { name: 'Appearance' });
-    await expect(within(group).getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true');
-    await expect(root.dataset.theme).toBe('dark');
+    await expect(within(group).getByRole('radio', { name: 'Light' })).toHaveAttribute('aria-checked', 'true');
+    await expect(root.dataset.theme).toBe('light');
   },
 };
 

@@ -14,10 +14,50 @@
 }
 
 /* A screen and its twin's, side by side where both fit, the screen in
-   question the wider; one over the other where they don't. */
+   question the wider; one over the other where they don't. The review's
+   captions (DecisionPreview) sit in the same grid, each under its own
+   screen: a second row in the same columns side by side, and in one column
+   each straight under the screen it is about, by order. */
+.sketch__captions {
+  display: contents;
+}
+
+.sketch-screen[data-pair] > .sketch:nth-of-type(1) {
+  order: 0;
+}
+
+.sketch__caption[data-for='decision'] {
+  order: 1;
+}
+
+.sketch-screen[data-pair] > .sketch:nth-of-type(2) {
+  order: 2;
+}
+
+.sketch__caption[data-for='twin'] {
+  order: 3;
+}
+
 @container (min-width: 40rem) {
   .sketch-screen[data-pair] {
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    grid-template-rows: auto auto;
+  }
+
+  .sketch-screen[data-pair] > .sketch:nth-of-type(1) {
+    grid-area: 1 / 1;
+  }
+
+  .sketch-screen[data-pair] > .sketch:nth-of-type(2) {
+    grid-area: 1 / 2;
+  }
+
+  .sketch__caption[data-for='decision'] {
+    grid-area: 2 / 1;
+  }
+
+  .sketch__caption[data-for='twin'] {
+    grid-area: 2 / 2;
   }
 }
 

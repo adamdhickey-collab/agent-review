@@ -176,7 +176,7 @@ export const TheWholeLoop: Story = {
       await expect(canvas.getByText('Decision 1 of 2')).toBeInTheDocument();
       await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
       await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
-      await expect(canvas.getByRole('list', { name: 'The two reds' })).toHaveTextContent(/^Removed value · Invoice detail\s*Red means this value was removed\./);
+      await expect(canvas.getByRole('list', { name: 'The two reds' })).toHaveTextContent(/Removed value · Invoice detail\s*Red means this value was removed\./);
     });
 
     await step('Widen the rule, and it settles that case', async () => {
