@@ -143,6 +143,46 @@ function useFollow(a: RefObject<HTMLElement | null>, b: RefObject<HTMLElement | 
   }, [a, b, key]);
 }
 
+/* START HERE, SINCE 2026-10-12. A first-time reader met the workspace with
+   no word on what to do in it: the preview on the left, a question and two
+   cards on the right, and an account above both. One line now names the
+   immediate task in the order the screen asks for it, and follows the
+   person through it: the steps before the current one are marked done, the
+   current one is the list's current step, so a screen reader hears the same
+   progress the line shows. It names the task; it does not repeat the card's
+   explanation, which it replaces (DecisionRequest's "Which trade-off is
+   acceptable?" lost the paragraph that said the same thing). The label is
+   "Start here" until the person has settled something in the run, and
+   "Next" after that. */
+function StartHere({ work, chosen, first }: { work: Work; chosen: boolean; first: boolean }) {
+  const q = work.question!;
+  const tradeoff = q.options.some((o) => o.benefits);
+  const steps = tradeoff
+    ? ['Compare the two meanings', 'Choose a direction', 'Preview it', 'Apply it']
+    : q.kind === 'scope'
+      ? [q.reach ? 'See what the fix reaches' : 'See what it would change', 'Choose an answer', 'Apply it']
+      : ['Compare the readings', 'Choose an answer', 'Apply it'];
+  const at = chosen ? steps.length - 1 : 0;
+  return (
+    <section className="studio__start" aria-labelledby="start-label">
+      <p className="studio__start-label" id="start-label">
+        {first ? 'Start here' : 'Next'}
+      </p>
+      <ol className="studio__start-steps">
+        {steps.map((step, i) => (
+          <li key={step} aria-current={i === at ? 'step' : undefined} data-done={i < at || undefined}>
+            <span className="studio__start-num" aria-hidden="true">
+              {i < at ? <Icon name="check" size={14} /> : i + 1}
+            </span>
+            {step}
+            {i < at ? <span className="visually-hidden"> (done)</span> : null}
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 /* Work with nothing to look at: made on its own, every check passed on the
    first run, nothing chosen by meaning. Folded into one row. */
 function routine(w: Work): boolean {
@@ -338,6 +378,7 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
 
         {current ? (
           <section className="studio" aria-labelledby="needs-title">
+            <StartHere work={current} chosen={Boolean(choice)} first={a.settled.length === 0} />
             <div ref={stage} className="studio__stage">
               <DecisionPreview
                 work={current}

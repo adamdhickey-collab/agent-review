@@ -630,6 +630,36 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
     }
   };
 
+  const checksPart =
+    q.kind === 'intent' && q.tried ? (
+        <div className="ask__checked">
+          <Disclosure
+            className="ask__tried"
+            summary={
+              <span className="ask__tried-sum">
+                <Icon name="status-passed" size={16} />
+                {tradeoff ? 'Lint and accessibility pass with either direction. Only this value moves.' : `All ${q.tried.length} automated checks passed, with either token.`}
+              </span>
+            }
+          >
+            <ul className="ask__checks" aria-label={tradeoff ? 'The checks, with each direction in place' : 'The checks, with either token in place'}>
+              {q.tried.map((c) => (
+                <li key={c.name}>
+                  <CheckBadge check={c} />
+                  <span className="ask__check-says">{c.established}</span>
+                </li>
+              ))}
+            </ul>
+          </Disclosure>
+          {tradeoff ? (
+            <p className="ask__not-validated">
+              <Icon name="info" size={16} />
+              <span>Passing doesn’t mean either trade-off works for the people who use this screen.</span>
+            </p>
+          ) : null}
+        </div>
+      ) : null;
+
   return (
     <article className="ask" data-kind={q.kind} data-tradeoff={tradeoff || undefined} aria-labelledby={`${id}-title`}>
       <header className="ask__head">
@@ -656,42 +686,12 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
 
       {why ? <p className="ask__why">{why}</p> : null}
 
-      {q.kind === 'intent' && q.tried ? (
-        <div className="ask__checked">
-          <Disclosure
-            className="ask__tried"
-            summary={
-              <span className="ask__tried-sum">
-                <Icon name="status-passed" size={16} />
-                {tradeoff ? 'Lint and accessibility pass with either direction. Only this value moves.' : `All ${q.tried.length} automated checks passed, with either token.`}
-              </span>
-            }
-          >
-            <ul className="ask__checks" aria-label={tradeoff ? 'The checks, with each direction in place' : 'The checks, with either token in place'}>
-              {q.tried.map((c) => (
-                <li key={c.name}>
-                  <CheckBadge check={c} />
-                  <span className="ask__check-says">{c.established}</span>
-                </li>
-              ))}
-            </ul>
-          </Disclosure>
-          {tradeoff ? (
-            <p className="ask__not-validated">
-              <Icon name="info" size={16} />
-              <span>Passing checks means the code is sound either way. It doesn’t mean either trade-off works for the people who use this screen.</span>
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
       {tradeoff ? (
         <>
           <div className="ask__options" role="group" aria-labelledby={`${id}-if`}>
             <p className="ask__if" id={`${id}-if`}>
               Which trade-off is acceptable?
             </p>
-            <p className="ask__later">Both directions are defensible, and the agent can apply either. Selecting one shows it in the preview and what the agent will do. Nothing changes until you apply it.</p>
             <ul className="ask__choices ask__choices--tradeoff" data-count={directions.length}>
               {directions.map((o) => {
                 const chosen = choice === o.id;
@@ -706,6 +706,17 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                       ) : null}
                     </div>
                     <p className="ask__choice-says">{o.outcome}</p>
+                    {/* The risk a person most needs before choosing stays in
+                        view; the whole case for and against is one press
+                        away (since 2026-10-12, when the two full cards put
+                        the buttons below the fold of a laptop). */}
+                    <p className="ask__key-risk">
+                      <Icon name="minus" size={14} />
+                      <span>
+                        <strong>Main risk:</strong> {(o.risks ?? [])[0]}
+                      </span>
+                    </p>
+                    <Disclosure className="ask__weigh-more" summary={`${plural(o.benefits!.length, 'benefit')} and ${plural((o.risks ?? []).length, 'risk')}`}>
                     <div className="ask__weigh">
                       <p className="ask__weigh-label" id={`${id}-${o.id}-good`}>
                         Benefits
@@ -730,6 +741,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                         ))}
                       </ul>
                     </div>
+                    </Disclosure>
                     <Button
                       ref={(el) => {
                         optionRefs.current[o.id] = el;
@@ -748,6 +760,11 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
               })}
             </ul>
           </div>
+
+          {/* THE CHECKS, UNDER THE DIRECTIONS since 2026-10-12: they say the
+              code is sound either way, which matters once the choice is in
+              view, and read first they were the first obstacle to it. */}
+          {checksPart}
 
           {option && p ? (
             <form className="ask__confirm ask__decide" aria-labelledby={`${id}-plan`} onSubmit={submit} onKeyDown={escape}>
@@ -782,6 +799,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
         </>
       ) : (
         <>
+          {checksPart}
           <div className="ask__why-person">
             {q.verdict ? <p className="ask__verdict">{q.verdict}</p> : null}
             <p className="ask__gap">

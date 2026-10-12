@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { initialDelegation } from '../../data/billing';
-import { play } from '../../data/delegation';
+import { account, pixelsOf, play, type DelegationState } from '../../data/delegation';
 import { OutcomeFacts, OutcomeSummary } from './OutcomeSummary';
 
 const start = initialDelegation();
@@ -59,6 +59,63 @@ export const Settled: Story = {
     const modes = within(canvasElement).getByRole('list', { name: 'How the work was handled' });
     await expect(modes).toHaveTextContent('7 proceeded on its own1 needs your judgment1 needs your approval4 settled by you');
     await expect(within(modes).getAllByRole('listitem')).toHaveLength(4);
+  },
+};
+
+/* WHAT THE SCREEN SHOWS, A REGRESSION (2026-10-12). After "Keep the red for
+   now" was applied with a rule, the account said the merged changes "moved
+   no pixel" while the visual baselines badge under it said 4 changed. The
+   sentence is counted from the same results now, and this holds the two to
+   each other on every path a person can take through the first decision,
+   with and without a rule, rather than to any wording: whatever the badge
+   counts as changed, the sentence counts as changing the screen, and it
+   only says none moved when the badge says none changed. */
+const paths: [string, DelegationState][] = [
+  ['as found', start],
+  ['keep, with a rule', play(start, { type: 'answer', id: 'activity-red', option: 'keep', makeRule: true })],
+  ['keep, once', play(start, { type: 'answer', id: 'activity-red', option: 'keep', makeRule: false })],
+  ['separate, with a rule', withRule],
+  ['separate, once', play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: false })],
+  ['every decision made', quiet],
+  ['a change reverted', mixed],
+];
+
+export const WhatTheScreenShows: Story = {
+  render: () => (
+    <div>
+      {paths.map(([name, state]) => (
+        <section key={name} aria-label={name} data-path>
+          <OutcomeSummary state={state} />
+          <OutcomeFacts state={state} />
+        </section>
+      ))}
+    </div>
+  ),
+  parameters: {
+    /* Seven accounts on one page, on purpose: each is the same named
+       section, which axe reads as a duplicate landmark. The app shows one. */
+    a11y: { test: 'error', config: { rules: [{ id: 'landmark-unique', enabled: false }] } },
+    docs: { description: { story: 'The account after each way through the first decision, with and without a rule, and after every decision and a revert. The sentence about pixels agrees with the visual baselines badge on each: the same count changed, and “none moved a pixel” only where nothing did.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const sections = Array.from(canvasElement.querySelectorAll<HTMLElement>('[data-path]'));
+    await expect(sections).toHaveLength(paths.length);
+    for (const [i, section] of sections.entries()) {
+      const name = section.getAttribute('aria-label');
+      /* The badge counts every change the checks ran on, a reverted one
+         too; the sentence is about what is merged. A reverted change whose
+         baselines moved is the one difference allowed, and it is counted
+         from the state rather than assumed. */
+      const reverted = pixelsOf(account(paths[i][1]).reverted).moved.length;
+      const share = section.querySelector('.outcome__share')!.textContent ?? '';
+      const visual = within(section).getByText(/^Visual baselines:/).textContent ?? '';
+      const changed = Number(/(\d+) changed/.exec(visual)?.[1] ?? 0);
+      const passed = Number(/(\d+) of \d+ passed/.exec(visual)?.[1] ?? 0);
+      const moved = Number(/(\d+) changed what the screen shows/.exec(share)?.[1] ?? 0);
+      await expect({ name, moved }).toEqual({ name, moved: changed - reverted });
+      await expect({ name, none: share.includes('none moved a pixel') }).toEqual({ name, none: changed - reverted === 0 });
+      if (changed) await expect({ name, still: share.includes(`${passed} change${passed === 1 ? '' : 's'} moved no pixel`) }).toEqual({ name, still: true });
+    }
   },
 };
 

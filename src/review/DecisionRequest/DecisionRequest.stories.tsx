@@ -36,7 +36,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The inspector of the delegated work’s workspace (Preview Studio): a change the agent stopped on, asking for one decision, and saying which kind as its status: Needs judgment or Needs approval. What the agent read and found is beside the preview, not here (Review/DecisionRead). Needs judgment, in the billing run, is a trade-off: the agent found one red with two meanings and proposes two defensible directions. The checks are folded to one line, with the sentence that keeps them apart from the decision under it. Each direction is a card of the same shape (what it does, three benefits, three risks, and Select and preview); selecting one marks it, shows it in the screen’s preview as proposed, and opens what the agent will do, the person’s reason and the rule box under the cards, with the other still there to switch to. Needs approval: the agent knows what to do and may not, so the card shows the line it would change and what each answer does, and, for a fix in a shared component, who else it reaches and what has and hasn’t been checked; choosing an answer turns the answers into its confirmation. Both cite the boundary that stopped them on one line, and fold what was found, the code and the evidence. A rule is never made by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
+          'The inspector of the delegated work’s workspace (Preview Studio): a change the agent stopped on, asking for one decision, and saying which kind as its status: Needs judgment or Needs approval. What the agent read and found is beside the preview, not here (Review/DecisionRead). Needs judgment, in the billing run, is a trade-off: the agent found one red with two meanings and proposes two defensible directions. Each direction is a card of the same shape (what it does, its main risk, its three benefits and three risks folded, and Select and preview), and the checks, folded to one line with the sentence that keeps them apart from the decision, come after the directions; selecting one marks it, shows it in the screen’s preview as proposed, and opens what the agent will do, the person’s reason and the rule box under the cards, with the other still there to switch to. Needs approval: the agent knows what to do and may not, so the card shows the line it would change and what each answer does, and, for a fix in a shared component, who else it reaches and what has and hasn’t been checked; choosing an answer turns the answers into its confirmation. Both cite the boundary that stopped them on one line, and fold what was found, the code and the evidence. A rule is never made by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
       },
     },
   },
@@ -53,7 +53,7 @@ export const TradeOff: Story = {
     docs: {
       description: {
         story:
-          'The first question of the billing run, as a trade-off, as the inspector holds it. Its kind, where it is and the four changes held behind it; the question; the checks, folded (lint and accessibility pass with either direction, and only this value moves), and under them that passing is not evidence either trade-off works for the people who use the screen. Then the two directions, two cards of one shape, three benefits and three risks each; “Recommended” is a small badge, and both buttons are the same. Neither is selected.',
+          'The first question of the billing run, as a trade-off, as the inspector holds it. Its kind, where it is and the four changes held behind it; the question; the checks, folded (lint and accessibility pass with either direction, and only this value moves), and under them that passing is not evidence either trade-off works for the people who use the screen. Then the two directions, two cards of one shape, each with its main risk in view and its three benefits and three risks folded under it; “Recommended” is a small badge, and both buttons are the same. Neither is selected.',
       },
     },
   },
@@ -67,13 +67,21 @@ export const TradeOff: Story = {
     const checks = within(tried).getByRole('list', { name: 'The checks, with each direction in place' });
     await expect(checks).toHaveTextContent('Visual baselines: 2 of 2 frames moved with both');
     /* The checks are not the decision. */
-    await expect(canvas.getByText(/It doesn’t mean either trade-off works for the people who use this screen\./)).toBeInTheDocument();
+    await expect(canvas.getByText(/Passing doesn’t mean either trade-off works for the people who use this screen\./)).toBeInTheDocument();
     const answers = canvas.getByRole('group', { name: 'Which trade-off is acceptable?' });
     const cards = within(answers).getAllByRole('listitem').filter((li) => li.classList.contains('ask__choice'));
     await expect(cards).toHaveLength(2);
     await expect(cards[0]).toHaveTextContent(/^Separate the meanings\s*Recommended/);
     await expect(cards[1]).toHaveTextContent(/^Keep the red for now/);
+    /* The main risk is in view before anything is chosen; the whole case
+       for and against is folded under it, one press away. */
+    await expect(cards[0]).toHaveTextContent('Main risk: Changes a signal people may rely on.');
+    await expect(cards[1]).toHaveTextContent('Main risk: Red still means two things.');
     for (const card of cards) {
+      const more = within(card).getByText('3 benefits and 3 risks').closest('details')!;
+      await expect(more).not.toHaveAttribute('open');
+      await userEvent.click(within(card).getByText('3 benefits and 3 risks'));
+      await expect(more).toHaveAttribute('open');
       await expect(within(card).getByRole('list', { name: 'Benefits' }).children).toHaveLength(3);
       await expect(within(card).getByRole('list', { name: 'Risks' }).children).toHaveLength(3);
       await expect(within(card).getByRole('button', { name: /^Select and preview/ })).toHaveAttribute('aria-pressed', 'false');
