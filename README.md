@@ -45,7 +45,7 @@ src/review/        Agent Review: the delegated work, the queue, the change, the 
 src/data/          the review scenario, filled from the experiment; the two delegated runs, simulated
 skills/ui-quality/ the twelve rules an agent works inside, each with its check
 scripts/           the token lint
-tests/             Playwright: visual baselines, the 768 overflow check and the phone check
+tests/             Playwright: visual baselines, the 768 overflow check, the phone check and where a screen arrives
 docs/exploration/  three information architectures, drawn before the build
 docs/experiment/   the controlled experiment, as it happened
 ```
@@ -71,8 +71,10 @@ story in headless Chromium and fails on an axe violation. `npm run
 test:visual` compares the review and product screens, at two widths and
 on a phone, against `tests/__screenshots__/`, and `tests/phone.spec.ts`
 measures that nothing overflows a 320 to 414px screen and that the chrome's
-controls are a fingertip tall. CI runs all of them on every push and
-deploys `main` to GitHub Pages.
+controls are a fingertip tall. `tests/scroll.spec.ts` holds a screen, on a
+phone, to arriving at the top, and a reload or a step back to where the
+reader left it. CI runs all of them on every push and deploys `main` to
+GitHub Pages.
 
 ## The agent's context
 
