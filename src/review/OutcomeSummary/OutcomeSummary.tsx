@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { Badge, Icon, type BadgeTone, type IconName } from '../../components';
-import { account, BOUNDARY_GROUP_ICON, valuesIn, wordsOf, type CheckName, type Decision, type DelegationState } from '../../data/delegation';
+import { account, BOUNDARY_GROUP_ICON, pixelSentence, valuesIn, wordsOf, type CheckName, type Decision, type DelegationState } from '../../data/delegation';
 import { plural } from '../format';
 import './OutcomeSummary.css';
 
@@ -175,6 +175,7 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
     { kind: 'back' as const, n: valuesIn(back), label: 'reverted or left by you' },
   ];
   const segments = kinds.filter((s) => s.n > 0);
+  const pixels = pixelSentence(a.made, words);
 
   return (
     <section className="outcome" aria-label="What happened">
@@ -221,7 +222,8 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
 
       <div className="outcome__progress">
         <p className="outcome__share">
-          <strong>{a.valuesMade === a.total ? `All ${a.total}` : `${a.valuesMade} of ${a.total}`}</strong> {words.unit[1]} {words.done}.
+          <strong>{a.valuesMade === a.total ? `All ${a.total}` : `${a.valuesMade} of ${a.total}`}</strong> {words.unit[1]} {words.done}
+          {pixels.joined ? `, ${pixels.joined}` : ''}.{pixels.after ? <span className="outcome__pixels"> {pixels.after}</span> : null}
         </p>
         <div className="outcome__bar" aria-hidden="true">
           {kinds.map((s) => (

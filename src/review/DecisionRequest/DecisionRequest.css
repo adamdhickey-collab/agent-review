@@ -494,6 +494,36 @@
   color: var(--color-text);
 }
 
+/* The main risk, in view before a direction is chosen: the risk list's
+   own minus in its tone, on one line with the words. The full lists are
+   folded under it (.ask__weigh-more), a quiet disclosure at the card's
+   width. */
+.ask__key-risk {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-text);
+  line-height: var(--leading-body);
+}
+
+.ask__key-risk .icon {
+  flex: none;
+  margin-top: calc((var(--text-md) * var(--leading-body) - var(--icon-size)) / 2);
+  color: var(--color-warning);
+}
+
+.ask__key-risk strong {
+  font-weight: var(--weight-semibold);
+}
+
+.ask__weigh-more {
+  align-self: stretch;
+}
+
+.ask__weigh-more > .disclosure__body {
+  padding-top: var(--space-2);
+}
+
 /* Benefits and risks: a label over each list, a plus or a minus at the
    head of each line in its tone, the words in the card's own ink. */
 .ask__weigh {

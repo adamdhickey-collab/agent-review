@@ -364,6 +364,31 @@ export const SwitchingKeepsTheWork: Story = {
   },
 };
 
+/* START HERE: the one line over the workspace that names the task, and
+   follows the person through it. The current step is the list's current
+   step, and the ones before it are marked done in words a screen reader
+   hears, not only by their check. */
+export const StartHere: Story = {
+  decorators: [inStore(start)],
+  parameters: {
+    docs: { description: { story: 'The first decision, before anything is chosen: “Start here”, then compare the two meanings, choose a direction, preview it, and apply it, the first current. Selecting a direction marks the first three done and makes Apply current. After the first decision is applied, the line over the next one says “Next”.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const cue = canvas.getByRole('region', { name: 'Start here' });
+    const current = () => cue.querySelector('[aria-current="step"]');
+    await expect(within(cue).getAllByRole('listitem').map((li) => li.textContent)).toEqual(['1Compare the two meanings', '2Choose a direction', '3Preview it', '4Apply it']);
+    await expect(current()).toHaveTextContent('Compare the two meanings');
+    await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Keep the red for now$/ }));
+    await expect(current()).toHaveTextContent('Apply it');
+    await expect(cue.querySelectorAll('[data-done]')).toHaveLength(3);
+    await expect(cue).toHaveTextContent('Choose a direction (done)');
+    await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
+    await waitFor(() => expect(canvas.getByRole('region', { name: 'Next' })).toBeInTheDocument());
+    await expect(canvas.queryByRole('region', { name: 'Start here' })).toBeNull();
+  },
+};
+
 /* The second run: the shared table. A permission boundary rather than
    missing intent, and three answers that end differently. */
 const table = initialTableRun();

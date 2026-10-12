@@ -376,6 +376,33 @@ What would tell whether this works, none of it tested yet:
 - Can they correct or revoke a standing rule?
 - Does it cut interruptions without hiding a failure?
 
+The sessions that would answer these are planned, not run, in
+`docs/validation/README.md`: four or five people who supervise coding-agent
+work, five tasks, and what result would change the design, decided before
+any session.
+
+THE FIRST MINUTE, 2026-10-12 (a hiring-manager review of the portfolio and
+this prototype). Three changes to the workspace, and one fix:
+
+- A "Start here" line over the workspace names the task in the order the
+  screen asks for it (compare the two meanings, choose a direction, preview
+  it, apply it) and follows the person through it; after the first decision
+  it says "Next". It replaced the paragraph under "Which trade-off is
+  acceptable?" that said the same thing.
+- Each direction shows its main risk before anything is chosen, and folds
+  the three benefits and three risks under it, one press away, so both
+  directions and their buttons reach a laptop's window together once the
+  workspace is at its top.
+- The checks line sits under the directions instead of over them: it says
+  the code is sound either way, which matters once the choice is in view.
+- The account said "and none moved a pixel" after every decision, because
+  the words were the run's: keep the red with a rule and it went on saying
+  so while its own visual-baselines badge said 4 changed. The sentence is
+  counted now from the same visual results the badge counts
+  (`pixelsOf`, `pixelSentence` in data/delegation.ts), and the story
+  OutcomeSummary/WhatTheScreenShows holds the two to each other on every
+  path through the first decision.
+
 ## Exploration: three information architectures
 
 Pencil is not available here (no MCP server, no application), so the

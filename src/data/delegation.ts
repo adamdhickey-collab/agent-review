@@ -58,8 +58,13 @@ export type RunId = 'billing' | 'shared-table';
 export interface Words {
   /** What the job counts, one and many: ['literal', 'literals']. */
   unit: [string, string];
-  /** Said of the merged ones, after "4 of 6 literals": "are tokens now, and none moved a pixel". */
+  /** Said of the merged ones, after "4 of 6 literals": "are tokens now". */
   done: string;
+  /** Whether a change in this run is meant to move no pixel (a token swap),
+      so the account says what the visual check found about each one: none
+      moved, or some did because a person decided they should. A run whose
+      changes are meant to be seen, like the shared table's, says neither. */
+  invisible?: boolean;
   /** A completed change with nothing to look at, one and many, as the folded row counts it: ['routine swap', 'routine swaps']. */
   routine: [string, string];
   /** What a completed change's record counts its lines as: "value". */
@@ -68,7 +73,8 @@ export interface Words {
 
 export const BILLING_WORDS: Words = {
   unit: ['literal', 'literals'],
-  done: 'are tokens now, and none moved a pixel',
+  done: 'are tokens now',
+  invisible: true,
   routine: ['routine swap', 'routine swaps'],
   line: 'value',
 };
@@ -594,6 +600,64 @@ export function account(s: DelegationState) {
     intentAsks: asking.filter((w) => w.question?.kind === 'intent'),
   };
 }
+
+/** What the visual check found on each completed change, counted from the
+    same results the account's badges count, so the account's sentence and
+    its badge can never disagree. Until 2026-10-12 the billing run said "and
+    none moved a pixel" as a fixed phrase, which stayed on the screen after a
+    decision added a label and the badge beside it said 4 baselines changed.
+
+    - still: the visual check passed; nothing on the screen moved.
+    - moved: it reported a change. `byYou` is the part made on a person's
+      authority (an answer, an allowance once, or a rule they made), with
+      the rule's share counted apart; anything else moved is `otherwise`.
+    - unsure: no visual result, or one that couldn't tell (inconclusive,
+      skipped). Never folded into either of the others.
+    - failed: a visual check that failed and stayed failed. */
+export function pixelsOf(made: Work[]) {
+  const visual = (w: Work) => w.checks?.find((c) => c.name === 'Visual baselines');
+  const still = made.filter((w) => visual(w)?.state === 'passed');
+  const moved = made.filter((w) => visual(w)?.state === 'changed');
+  const failed = made.filter((w) => visual(w)?.state === 'failed');
+  const unsure = made.filter((w) => !visual(w) || ['inconclusive', 'skipped', 'running'].includes(visual(w)!.state));
+  const byRule = moved.filter((w) => w.basis?.kind === 'rule');
+  const byDecision = moved.filter((w) => w.basis?.kind === 'answer' || w.basis?.kind === 'allowed-once');
+  const otherwise = moved.filter((w) => !byRule.includes(w) && !byDecision.includes(w));
+  return { still, moved, failed, unsure, byRule, byDecision, otherwise };
+}
+
+/* WHAT THE SCREEN SHOWS, SINCE 2026-10-12. The progress line said "and
+   none moved a pixel" after every decision, because the words were the
+   run's and not the state's: keep the red with a rule and the account went
+   on saying no pixel moved while the visual baselines badge under it said 4
+   changed and a label had been added. The sentence is counted now from the
+   same visual results the badge counts (pixelsOf), and only a run whose
+   changes are meant to be invisible says anything about pixels at all.
+   While every completed change passed the visual check, it reads as it
+   always did; once some moved, it says how many moved nothing, how many
+   changed what the screen shows and on whose authority, and keeps a
+   change with no visual result, or a failed one, apart from both. */
+export function pixelSentence(made: Work[], words: Words): { joined?: string; after?: string } {
+  if (!words.invisible || made.length === 0) return {};
+  const p = pixelsOf(made);
+  if (!p.moved.length && !p.failed.length && !p.unsure.length) return { joined: 'and none moved a pixel' };
+  const parts: string[] = [];
+  if (p.still.length) parts.push(`${pluralOf(p.still.length, 'change')} moved no pixel.`);
+  if (p.moved.length) {
+    const by = [
+      p.byDecision.length ? `${p.byDecision.length} by your decision` : '',
+      p.byRule.length ? `${p.byRule.length} by your rule` : '',
+      p.otherwise.length ? `${p.otherwise.length} without a decision of yours` : '',
+    ].filter(Boolean);
+    const lead = `${p.moved.length} changed what the screen shows`;
+    parts.push(by.length === 1 ? `${lead}, ${by[0].replace(/^\d+ /, '')}.` : `${lead}: ${by.length === 2 ? by.join(' and ') : `${by.slice(0, -1).join(', ')} and ${by[by.length - 1]}`}.`);
+  }
+  if (p.failed.length) parts.push(`${p.failed.length} failed the visual check.`);
+  if (p.unsure.length) parts.push(`${p.unsure.length} ${p.unsure.length === 1 ? 'has' : 'have'} no visual result.`);
+  return { after: parts.join(' ') };
+}
+
+const pluralOf = (n: number, one: string) => `${n} ${n === 1 ? one : `${one}s`}`;
 
 /* ------------------------------------------------------------------------
    Changing it
