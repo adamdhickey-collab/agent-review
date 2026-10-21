@@ -1,39 +1,39 @@
-import { cleanChecks, RULE_EXCLUDES, type Addition, type Boundary, type Check, type DelegationState, type Gathered, type Option, type Pattern, type Question, type RuleDraft, type Sketch, type Twin, type Work } from './delegation';
+import { cleanChecks, type Boundary, type Check, type DelegationState, type Gathered, type Line, type Option, type Pattern, type Question, type RuleDraft, type Sketch, type Twin, type Work } from './delegation';
 
 /* The delegated run the product opens on: Claude Code moving Relay's billing
-   screens onto the token layer. SIMULATED THROUGHOUT. Unlike rv-2041 and
+   screens onto the design system, the values onto tokens and the controls
+   onto the system's components. SIMULATED THROUGHOUT. Unlike rv-2041 and
    rv-2042 in scenario.ts, which are transcribed from real runs, nothing here
    was run: the billing screens, the run, its times, its commits and the
    checks' figures are written to be internally consistent and are played
    back the same way every time. The tokens are real (src/tokens/tokens.css),
-   and so are the two facts the scenario turns on: --color-danger and
-   --color-diff-remove-ink are both #b42318, and --color-success and
-   --color-diff-add-ink are both #1f7a3f, so a swap to either name moves no
-   pixel and every check passes whichever is chosen. That is why the agent
-   cannot settle the red by its checks; what it proposes once it has
-   stopped (THE TRADE-OFF, below) is a visible change either way. What
-   people who use the billing screens rely on is scenario context the agent
-   says it cannot know; nothing here claims research or usage data.
+   and so is the Button the question turns on (src/components/Button), with
+   its four variants and none that draws an action as small grey text. That
+   is why the agent cannot finish the job on "Cancel subscription" by its
+   checks: every value on it is exactly a token's, so the lint, axe and the
+   visual check pass whichever direction is chosen, and what decides it is
+   whether cancelling should be easy to find, which the agent says it
+   cannot know. Nothing here claims research or usage data.
 
    The arithmetic, which the stories assert: the lint reported 36 literals.
    Seven changes the agent made on its own hold 26 of them; two questions
-   hold 3; four changes waiting on the first question hold the other 7. */
+   hold 4; three changes waiting on the first question hold the other 6. */
 
-/** The two cases a struck-through value can be; the shared-table run has the third. */
-type Struck = Exclude<Pattern, 'shared'>;
+/** The two cases an action built by hand can be; the shared-table run has the third. */
+type ByHand = Exclude<Pattern, 'shared'>;
 
 const dana = { name: 'Dana Whitfield', role: 'Product design' };
 const AREA = 'src/product/billing/';
 const file = (name: string) => `${AREA}${name}`;
 
 export const boundaries: Boundary[] = [
-  { n: 1, group: 'own', text: 'Replace a literal with the token of the same value, on the billing screens.' },
+  { n: 1, group: 'own', text: 'Replace a literal with the token of the same value, and a control built by hand with the component that draws it the same way, on the billing screens.' },
   { n: 2, group: 'own', text: 'Where two tokens share a value, choose by what the element is, and say why.' },
   { n: 3, group: 'own', text: 'Run the checks, and fix a check its own change broke.' },
   { n: 4, group: 'own', text: 'Merge to main when the token lint passes and no frame moves a pixel.' },
-  { n: 5, group: 'asks', text: 'When the evidence for what a value means conflicts.' },
-  { n: 6, group: 'asks', text: 'When no token has the value, so a swap would move pixels.' },
-  { n: 7, group: 'outside', text: 'Changing a shared component or the token layer, which every screen reads.' },
+  { n: 5, group: 'asks', text: 'When it’s unclear what an element is for, or the evidence for what it means conflicts.' },
+  { n: 6, group: 'asks', text: 'When no token or component draws it as it is.' },
+  { n: 7, group: 'outside', text: 'Changing the token layer, or how a shared component draws, which every screen reads.' },
 ];
 
 /* ------------------------------------------------------------------------
@@ -257,220 +257,219 @@ const settingsRoutine: Work = {
    Where it stopped
    ------------------------------------------------------------------------ */
 
-/* THE TRADE-OFF (2026-10-09). Until today the answers to "what does this red
-   mean" were two token names that drew the same pixels, one recommended,
-   and nothing a person could weigh: the right answer was obvious, so the
-   stop proved nothing about judgment. Now the agent finds the same thing
-   (one red, a failure's and a replaced value's) and proposes two fixes that
-   are both defensible and both cost something:
+/* THE TRADE-OFF (2026-10-21). Until today the judgment in this run was one
+   red with two meanings, a failure's and a replaced plan's: a real
+   question, and a small one, whose person's reason (support scans the feed
+   for red) was a fact anyone near support could have supplied. Two rounds of
+   cold reads that day preferred this: an action built by hand, small and
+   grey, where every other action on the screen is the system's Button, and
+   the action is "Cancel subscription".
 
-   - Separate the meanings. Failures keep the red. A replaced or removed
-     value turns neutral, with an icon and a label that say what happened.
-     Red means one thing, and a familiar signal changes.
-   - Keep the red for now. Both stay red, and the value gains the same icon
-     and label, so it reads differently from a failure without changing
-     color. Nothing changes under anyone's habits, and the design system
-     carries a written exception until a neutral style has been tested.
+   Every value on it is exactly a token's, so the lint has nothing to say,
+   and the job says nothing should look different. The system's rule 1 says
+   an action is a Button, and a Button would make cancelling as easy to find
+   as changing the plan. So the agent proposes the faithful fix and says
+   what it can't determine:
 
-   The agent recommends the first and says what it can't determine: whether
-   the people who use these screens rely on the red to catch a change when
-   it matters. That is scenario context the agent cannot check, so it is a
-   question, never a finding, and nothing here claims research. Asked for
-   evidence, it gathers what a repository can tell (where the red is used,
-   what each fix would change, what depends on it) and says plainly what it
-   can't, with a way to find out that nobody has run.
+   - Add a quiet variant. The Button gains a fifth variant that draws the
+     grey text exactly, with a story, the other four untouched, which is what
+     rule 9 allows for a local need. Nothing moves, and the job keeps its
+     promise. Any later agent can now make any action this quiet.
+   - Make it a Button in its own change. The link stays as built, its values
+     on tokens, under an exception with an end date, and a separate change
+     owned by product design makes it a Button. Nothing moves in this change.
+     Cancel stays hard to find until that one ships.
 
-   Either direction is real work: a mapping, a label, a task left open, and
-   a decision record with the person's reason. Neither is an error state. */
+   The agent recommends the first, because the job asked for nothing
+   visible, and says it can't tell whether cancel is quiet on purpose or who
+   decides how easy it is to find. That is scenario context the agent cannot
+   check, so it is a question, never a finding. Asked for evidence, it
+   gathers what a repository can tell (every action built by hand on these
+   screens, what each direction would change, the old app's history) and
+   says plainly what it can't.
 
-/** Each case of a struck value, in the words its card and its record use. */
-const STRUCK_MEANS: Record<Struck, { means: string; says: string; noun: string; label: string }> = {
-  replaced: { means: 'Replaced value', says: 'Red means this value was replaced.', noun: 'Replacement', label: 'Replaced' },
-  removed: { means: 'Removed value', says: 'Red means this value was removed.', noun: 'Removal', label: 'Removed' },
-};
+   Either direction is real work: a variant and its story, or an exception,
+   a follow-up and a decision record with the person's reason. Neither is an
+   error state. */
 
-/** Where a struck value is, and what a person watching that screen would be noticing: "a plan change". */
+/** Where an action built by hand is, and the words its card and record use for it. */
 interface Case {
-  pattern: Struck;
+  pattern: ByHand;
   file: string;
   screen: string;
-  noticing: string;
+  /** The words it shows: "Cancel subscription". */
+  action: string;
+  /** What it does when pressed, as a clause: "ends the subscription". */
+  does: string;
+  /** What a person does with it, as a verb: "cancel". */
+  verb: string;
+  /** What growth would count before and after: "cancellations". */
+  measure: string;
+  /** An action on the same screen the system's Button draws: "Change plan". */
+  beside: string;
+  /** Whether it has space above and below it of its own, a third literal. */
+  padded?: boolean;
   frames: number;
   stories: number;
 }
 
-/* What the agent gathers when a person asks for evidence. The same for every
-   struck value, because it is the same red. Counted from the scenario: the
-   five struck values are on four screens whose frames and stories add to
-   ten and ten. */
+const markup = (c: Pick<Case, 'file'>) => c.file.replace(/\.css$/, '.tsx');
+const EXCEPTIONS = 'docs/design-system/exceptions.md';
+const DUE = 'Oct 15';
+
+/* An action built by hand is the same three declarations wherever it is:
+   the grey, the small size, and the space above and below it. Each is
+   exactly a token's value, which is why the lint can't settle it. */
+const AFTER: Record<string, string> = { color: 'var(--color-text-muted)', 'font-size': 'var(--text-sm)', 'padding-block': 'var(--space-1)' };
+const byHand = (selector: string, padded = false): Line[] => [
+  { selector, property: 'color', before: '#6a6a76' },
+  { selector, property: 'font-size', before: '0.75rem' },
+  ...(padded ? [{ selector, property: 'padding-block', before: '4px' }] : []),
+];
+
+/* What the agent gathers when a person asks for evidence: every action built
+   by hand on the billing screens, counted from the scenario (two on the
+   billing settings, two on the plan card), and what a repository can't say. */
 const GATHERED: Gathered = {
   uses: [
-    { what: 'The failure red, --color-danger', places: '1 place: “Payment failed” in the payment history.' },
     {
-      what: 'The same red, hard-coded as #b42318',
-      places:
-        '5 places on 4 screens: the old plan in billing activity, the old amount and a removed line item in the invoice detail, the old seat count on the plan card, and the old billing email in billing settings.',
+      what: 'Actions built by hand, small and grey',
+      places: '4 places on 2 screens: “Cancel subscription” and “Remove card” in billing settings, and “Downgrade plan” and “Remove seats” on the plan card.',
     },
+    { what: 'Actions drawn as the system’s Button', places: 'Every other action on both screens, from “Change plan” to “Add seats”.' },
   ],
   changes: [
-    { direction: 'Separate the meanings', text: 'All 5 turn neutral and gain a label. 10 visual baselines move.' },
-    { direction: 'Keep the red for now', text: 'All 5 gain a label and stay red. 10 visual baselines move, by the label only.' },
+    { direction: 'Add a quiet variant', text: 'All 4 become quiet Buttons, and the Button gains a fifth variant every screen can use. 0 visual baselines move.' },
+    { direction: 'Make it a Button in its own change', text: 'This change moves 0 baselines. Each action’s own change moves the frames of its screen: 4, on 2 screens.' },
   ],
-  depends: ['Nothing outside the billing screens uses #b42318 as a literal.', '10 stories cover the five values, and every one would be re-run.'],
+  depends: ['Nothing outside the billing screens draws an action this way.', 'A fifth Button variant would be there for every screen, and every agent, to use.'],
   unverified: [
-    'Whether anyone relies on the red to spot a change. There is no usage data or research about it in the repository.',
-    'Whether a plan change ever needs someone to act on it quickly.',
+    'Why cancel was made quiet. The old billing app’s history has the style in one commit, with no reason given.',
+    'How many people look for cancel and give up. There is no usage data in the repository.',
   ],
-  validation:
-    'Show both styles to five people who use billing activity, in a feed of 20 rows. Ask them to find every plan change, and note any they take for a failure.',
+  validation: 'Ask whoever owns cancelling why it is quiet, and count how many people open billing settings and then write to support about cancelling.',
 };
 
-const markup = (c: Case) => c.file.replace(/\.css$/, '.tsx');
-const EXCEPTIONS = 'docs/design-system/exceptions.md';
-
-/* The checks, run with each direction in place in turn. Both change what the
-   value looks like, on purpose, so the visual check says it moved rather
-   than calling that a pass; the lint and axe pass with either. */
+/* The checks, run with each direction in place in turn. Neither moves a
+   pixel in this change: a quiet Button draws exactly what the link drew,
+   and the other direction leaves the link as it is. */
 function tradeoffChecks(c: Case): Check[] {
   return [
     { name: 'Token lint', state: 'passed', label: 'Passed with both', established: 'Either direction names tokens, and every token it names exists.' },
-    { name: 'Stories with axe', state: 'passed', label: `${c.stories} of ${c.stories} passed with both`, established: 'The neutral ink, the red and the label each clear 4.5:1.' },
-    {
-      name: 'Visual baselines',
-      state: 'changed',
-      label: `${c.frames} of ${c.frames} frames moved with both`,
-      established: 'Only this value moves, as each direction intends. Nothing else on the screen does.',
-    },
+    { name: 'Stories with axe', state: 'passed', label: `${c.stories} of ${c.stories} passed with both`, established: 'The grey clears 4.5:1 (it measures 5.3:1), as a link or as a quiet Button.' },
+    { name: 'Visual baselines', state: 'passed', label: `0 of ${c.frames} frames moved with both`, established: 'Neither direction moves a pixel in this change.' },
   ];
 }
 
 /* The two directions, and asking for evidence first. */
 function directions(c: Case, gathered: boolean): Option[] {
-  const m = STRUCK_MEANS[c.pattern];
-  const replaced = c.pattern === 'replaced';
-  const label: Addition = { file: markup(c), header: 'a label', text: `<Badge icon="swap">${m.label}</Badge>` };
-  const ran = (what: string) =>
-    `Ran the checks: the token lint passed, ${c.frames} of ${c.frames} frames moved (${what}, as you decided, re-recorded), ${c.stories} of ${c.stories} stories passed.`;
-  const checks = (moved: string): Check[] => [
-    { name: 'Token lint', state: 'passed', label: 'Passed', established: 'These lines name tokens now, and every token they name exists.' },
-    { name: 'Visual baselines', state: 'changed', label: `${c.frames} of ${c.frames} frames moved`, established: `${moved} Re-recorded, as you decided.` },
-    { name: 'Stories with axe', state: 'passed', label: `${c.stories} of ${c.stories} passed`, established: 'Every story renders, and axe found no violation. The label and its ink clear 4.5:1.' },
-  ];
+  const after = (lines: Line[]) => lines.map((l) => AFTER[l.property]);
+  const lines = linesOf(c);
+  const ran = `Ran the checks: the token lint passed, 0 of ${c.frames} frames moved, ${c.stories} of ${c.stories} stories passed.`;
 
-  const separate: Option = {
-    id: 'separate',
-    title: 'Separate the meanings',
-    label: 'Separate the meanings',
+  const quiet: Option = {
+    id: 'quiet',
+    title: 'Add a quiet variant',
+    label: 'Add a quiet variant',
     recommended: true,
-    outcome: `Failures stay red. The ${m.label.toLowerCase()} value turns neutral, with an icon and a “${m.label}” label.`,
-    effect: replaced
-      ? `Failures keep --color-danger. The struck value takes --color-text-muted, the new one --color-text, and a “${m.label}” label goes before them.`
-      : `Failures keep --color-danger. The struck value takes --color-text-muted, and a “${m.label}” label goes before it.`,
-    after: replaced ? ['var(--color-text-muted)', 'var(--color-text)'] : ['var(--color-text-muted)'],
-    adds: [label],
-    benefits: ['Red means one thing: a failure.', `A ${replaced ? 'change' : 'removal'} no longer looks like something went wrong.`, 'A clear rule the design system can keep.'],
-    risks: ['Changes a signal people may rely on.', `A ${c.noticing} may be missed at first.`, 'Needs checking with the people who use it.'],
+    outcome: `The Button gains a quiet variant that matches the grey text. “${c.action}” becomes a Button, and looks exactly as it does now.`,
+    effect: `It adds a quiet variant to the Button, with a story, leaves the other four as they are, and makes “${c.action}” a quiet Button on its tokens. Nothing moves.`,
+    after: after(lines),
+    draws: { as: 'quiet' },
+    adds: [
+      { file: 'src/components/Button/Button.tsx', header: 'a new variant', text: "export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'quiet';" },
+      { file: markup(c), header: 'the markup', text: `<Button variant="quiet">${c.action}</Button>` },
+    ],
+    benefits: ['Nothing visible changes, as the job asked.', 'Every action on the billing screens is the system’s.', 'Rule 9 allows it: a new variant, with a story, and the others untouched.'],
+    risks: ['Any later agent can make any action this quiet.', `“${c.action}” stays hard to find, now as a supported style.`, 'Nobody decides how easy it should be to find.'],
     plan: [
-      'Keep --color-danger for failures only.',
-      `Map the ${m.label.toLowerCase()} value to a neutral style: --color-text-muted, struck through.`,
-      `Add a “${m.label}” label and icon, so it says what happened in words.`,
-      `Open a task to check the new style with people who use the ${c.screen.toLowerCase()} screen.`,
+      'Add a quiet variant to the Button, with a story, and leave the other four as they are.',
+      `Make “${c.action}” a quiet Button, so it looks exactly as it does now.`,
+      'Move its values onto tokens.',
       'Record your decision and your reason.',
     ],
     done: [
-      'Kept --color-danger for failures only.',
-      `Mapped the ${m.label.toLowerCase()} value to a neutral style: --color-text-muted, struck through.`,
-      `Added a “${m.label}” label and icon.`,
-      `Opened a task: check the new style with people who use the ${c.screen.toLowerCase()} screen.`,
+      'Added a quiet variant to the Button, with a story; the other four are as they were.',
+      `Made “${c.action}” a quiet Button; it looks exactly as it did.`,
+      'Moved its values onto tokens.',
       'Recorded your decision and your reason.',
     ],
     decision: {
-      tradeoff: 'One meaning for red, over a signal people already know.',
-      risk: `People who look for red may miss a ${c.noticing} until they learn the new style.`,
-      followUp: `Check the neutral style with people who use the ${c.screen.toLowerCase()} screen, before it reaches more screens.`,
-      reason: `Red should mean something went wrong. A ${c.noticing} is routine, and the label says what it is.`,
+      tradeoff: 'A job that changes nothing visible, over a system with no way to make an action hard to find.',
+      risk: `Any later agent can make an action this quiet, and “${c.action}” stays hard to find.`,
+      followUp: `Decide with whoever owns it how easy “${c.action}” should be to find.`,
+      reason: 'The job was to change nothing visible. A quiet variant keeps that promise, and rule 9 allows it.',
     },
     then: {
-      checks: checks(`Only the ${m.label.toLowerCase()} value moved: neutral now, with its label.`),
-      unchecked: `Whether people who use the ${c.screen.toLowerCase()} screen still notice a ${c.noticing} in its neutral style. No check can tell; the follow-up asks them.`,
-      history: [
-        'Kept --color-danger for failures only.',
-        `Mapped the struck value to the neutral style: --color-text-muted${replaced ? ', and --color-text for the new one' : ''}.`,
-        `Added the “${m.label}” label and its icon.`,
-        ran('the value, now neutral'),
-        `Opened a follow-up: check the neutral style with people who use the ${c.screen.toLowerCase()} screen.`,
-        'Recorded your decision and your reason.',
-      ],
-      ruled: [`Mapped the struck value to the neutral style, and added the “${m.label}” label.`, ran('the value, now neutral')],
+      history: ['Added a quiet variant to the Button, with its story; the other four are as they were.', `Made “${c.action}” a quiet Button on its tokens.`, ran, 'Recorded your decision and your reason.'],
+      ruled: [`Made “${c.action}” a quiet Button on its tokens, under your rule.`, ran],
     },
-    rule: KEEP_APART,
+    rule: QUIET,
   };
 
-  const keep: Option = {
-    id: 'keep',
-    title: 'Keep the red for now',
-    label: 'Keep the red for now',
-    outcome: `Both stay red. The ${m.label.toLowerCase()} value gains the same icon and “${m.label}” label, so it doesn’t read as a failure.`,
-    effect: replaced
-      ? `The struck value takes --color-danger and the new one --color-success, as they draw today, a “${m.label}” label goes before them, and the exception is written down.`
-      : `The struck value takes --color-danger, as it draws today, a “${m.label}” label goes before it, and the exception is written down.`,
-    after: replaced ? ['var(--color-danger)', 'var(--color-success)'] : ['var(--color-danger)'],
-    adds: [label, { file: EXCEPTIONS, header: 'an exception', text: `- Billing: a ${m.label.toLowerCase()} value may stay red, with a “${m.label}” label, until a neutral style is tested.` }],
-    benefits: ['Keeps the signal people know.', 'No sudden change in the middle of someone’s work.', 'The label says what happened without relying on color.'],
-    risks: ['Red still means two things.', 'Needs a written exception to the design system.', 'The real fix is postponed, not made.'],
+  const own: Option = {
+    id: 'own-change',
+    title: 'Make it a Button in its own change',
+    label: 'Make it a Button in its own change',
+    outcome: `“${c.action}” stays as built in this change, under an exception that ends on ${DUE}. A separate change makes it a Button, owned by product design.`,
+    effect: `It moves the link’s values onto tokens, leaves it as built under an exception that ends on ${DUE}, and opens the change that makes it a Button. Nothing moves in this change.`,
+    after: after(lines),
+    draws: { as: 'button', note: 'As its own change will draw it' },
+    adds: [{ file: EXCEPTIONS, header: 'an exception', text: `- Billing: “${c.action}” stays a link built by hand until ${DUE}, when its own change makes it a Button. No quiet variant.` }],
+    benefits: ['No action gets a supported way to be hard to find.', `How easy it is to ${c.verb} becomes a decision someone owns.`, 'This job still changes nothing visible.'],
+    risks: [`“${c.action}” stays hard to find until its own change ships, on ${DUE}.`, 'One action stays outside the system for two weeks.', `Its own change may change how many people ${c.verb}.`],
     plan: [
-      'Keep the red for now, on --color-danger, as it draws today.',
-      `Add a “${m.label}” label and icon, so it doesn’t read as a failure.`,
-      'Write the exception into the design system’s list of exceptions.',
-      'Open a task to review the exception once a neutral style is tested.',
+      'Move the link’s values onto tokens, and leave it as built.',
+      `Write the exception down, ending ${DUE}.`,
+      `Open a follow-up to make “${c.action}” a Button, owned by product design, due ${DUE}.`,
+      `Ask growth to count ${c.measure} before and after, to learn from. The change ships either way.`,
       'Record your decision and your reason.',
     ],
     done: [
-      'Kept the red for now, on --color-danger, as it draws today.',
-      `Added a “${m.label}” label and icon.`,
-      'Wrote the exception into the design system’s list of exceptions.',
-      'Opened a task: review the exception once a neutral style is tested.',
+      'Moved the link’s values onto tokens, and left it as built.',
+      `Wrote the exception down, ending ${DUE}.`,
+      `Opened a follow-up to make “${c.action}” a Button, owned by product design, due ${DUE}.`,
+      `Asked growth to count ${c.measure} before and after. The change ships either way.`,
       'Recorded your decision and your reason.',
     ],
     decision: {
-      tradeoff: 'A familiar signal now, over one meaning for red.',
-      risk: `Red still means two things, so a ${c.noticing} can still be read as a failure.`,
-      followUp: `Review this exception once a neutral style has been tested with people who use the ${c.screen.toLowerCase()} screen.`,
-      reason: 'Familiarity matters more right now. Keep the red until a neutral style has been tested with the people who use it.',
+      tradeoff: 'A system with no way to make an action hard to find, over finishing every control in this job.',
+      risk: `“${c.action}” stays hard to find until its own change ships, on ${DUE}.`,
+      followUp: `Make “${c.action}” a Button in its own change, by ${DUE}. Product design owns it; growth counts ${c.measure} before and after, and it ships either way.`,
+      reason: `How easy it is to ${c.verb} is a product decision, so it gets its own change. A quiet variant would let any agent make any action this hard to find.`,
     },
     then: {
-      checks: checks(`Only the label moved in; the ${m.label.toLowerCase()} value is the red it was.`),
-      unchecked: `Whether the label is enough to tell a ${c.noticing} from a failure at a glance. No check can tell; the review task asks.`,
+      unchecked: `Whether making “${c.action}” a Button changes how many people ${c.verb}. No check can tell; growth counts it in its own change.`,
+      open: `Make “${c.action}” a Button, by ${DUE}.`,
       history: [
-        'Kept the struck value on --color-danger, as it draws today.',
-        `Added the “${m.label}” label and its icon.`,
-        `Wrote the exception into ${EXCEPTIONS}.`,
-        ran('the label'),
-        'Opened a follow-up: review the exception once a neutral style is tested.',
+        'Moved the link’s values onto tokens, and left it as built.',
+        `Wrote the exception into ${EXCEPTIONS}, ending ${DUE}.`,
+        ran,
+        `Opened a follow-up: make “${c.action}” a Button, owned by product design, due ${DUE}. Growth counts ${c.measure} before and after; it ships either way.`,
         'Recorded your decision and your reason.',
       ],
-      ruled: [`Kept the struck value red, and added the “${m.label}” label, under the exception you wrote.`, ran('the label')],
+      ruled: [`Moved the link’s values onto tokens and left it as built, under your rule: an exception ending ${DUE}, and its own change to make it a Button.`, ran],
     },
-    rule: KEEP_RED,
+    rule: OWN_CHANGE,
   };
 
-  if (gathered) return [separate, keep];
+  if (gathered) return [quiet, own];
   return [
-    separate,
-    keep,
+    quiet,
+    own,
     {
       id: 'evidence',
       title: 'Request evidence',
       label: 'Request evidence',
-      effect: 'It looks up where this red is used, what each direction would change and what it can’t verify, and asks again. Nothing changes in the code.',
+      effect: 'It looks up every action built by hand on the billing screens, what each direction would change and what it can’t verify, and asks again. Nothing changes in the code.',
       after: [],
-      asks: struckQuestion(c, true),
+      asks: actionQuestion(c, true),
       then: {
         history: [
-          'Searched the billing screens for #b42318 and --color-danger, and listed what each direction would change.',
-          'Looked for usage data or research about the red. Found none in the repository.',
+          'Searched the billing screens for actions built by hand, and listed what each direction would change.',
+          'Looked for a reason in the old billing app’s history, and for usage data. Found neither in the repository.',
         ],
-        notice: 'Nothing decided yet. The evidence doesn’t settle it: nothing in the repository says whether people rely on the red. It’s asking again, with what it found.',
+        notice: 'Nothing decided yet. The evidence doesn’t settle it: nothing in the repository says why the action is quiet. It’s asking again, with what it found.',
       },
     },
   ];
@@ -480,256 +479,203 @@ function directions(c: Case, gathered: boolean): Option[] {
    it leaves out, and why, so the rule can be read, and revoked, by someone
    who wasn't there. Its why is the person's reason once they decide
    (delegation.ts); these are what it says when a story makes one without. */
-const KEEP_APART: RuleDraft = {
-  scope: 'Struck-through values on the billing screens',
-  excludes: RULE_EXCLUDES,
-  why: 'Red should mean something went wrong, and a struck value is a change, not a failure.',
+const EXCLUDES = 'Actions that add or change something, links that go somewhere, shared components, and every screen outside billing.';
+const SCOPE = 'Actions built by hand that end or reduce a subscription, on the billing screens';
+const QUIET: RuleDraft = {
+  where: 'On the billing screens',
+  does: 'is a quiet Button, drawn as it looks today.',
+  scope: SCOPE,
+  excludes: EXCLUDES,
+  why: 'The job was to change nothing visible, and a quiet variant keeps that promise.',
 };
-const KEEP_RED: RuleDraft = {
-  scope: 'Struck-through values on the billing screens',
-  excludes: RULE_EXCLUDES,
-  why: 'People may depend on the red today. Keep it, labelled, until a neutral style has been tested.',
+const OWN_CHANGE: RuleDraft = {
+  where: 'On the billing screens',
+  does: 'never gets a quiet variant: it stays as built, under an exception with an end date, until its own change makes it a Button.',
+  scope: SCOPE,
+  excludes: EXCLUDES,
+  why: 'How easy it is to leave is a product decision. A quiet variant would let any agent make any action this hard to find.',
 };
 
 /* The screens as the preview draws them (delegation.ts, WHAT THE PREVIEW
    DRAWS). Northwind Traders is one of Relay's customers, made up with the
-   run, and the rows agree with the run's own figures: the plan went from
-   Starter to Growth on Sep 29 and the seats from 50 to 45, at $30 a seat,
-   so October's invoice is $1,350 for the seats and $100 for support,
-   $1,450, where September's was $1,200; it was sent on Sep 30, and its
-   payment failed on Oct 1. The element each change asks about is not in
-   these rows: the row marked `focus` is where the preview puts the change's
-   own sample, drawn with the change's own declarations. */
+   run, and the rows agree with the run's own figures: Growth, 45 seats at
+   $30 a seat, renewing on Nov 1, paid with a Visa ending 4242. The actions
+   the system already draws are its Button; the one each change asks about
+   is not in these rows: the row marked `focus` is where the preview puts
+   the change's own sample, drawn with the change's own declarations. */
 const NORTHWIND = 'Northwind Traders';
 
 const SKETCHES = {
-  activity: {
-    kind: 'rows',
-    title: 'Billing activity',
-    subtitle: `${NORTHWIND} · this week`,
-    rows: [
-      { label: 'Plan', meta: 'Changed by Maya Ortiz · Sep 29', focus: true },
-      { label: 'Invoice INV-2041', value: 'Sent to the billing email', meta: 'Automatic · Sep 30' },
-      { label: 'Billing contact', value: 'Ana Lima added', meta: 'By Maya Ortiz · Sep 29' },
-      { label: 'Payment method', value: 'Visa ending 4242', meta: 'By Ana Lima · Sep 28' },
-    ],
-  },
-  invoiceAmount: {
-    kind: 'rows',
-    title: 'Invoice INV-2041',
-    subtitle: `${NORTHWIND} · due Oct 1`,
-    rows: [
-      { label: 'Growth plan', value: '$1,350.00', meta: '45 seats at $30' },
-      { label: 'Support add-on', value: '$100.00' },
-      { label: 'Amount', meta: 'Updated after the plan change', focus: true },
-    ],
-  },
-  invoiceRemoved: {
-    kind: 'rows',
-    title: 'Invoice INV-2041',
-    subtitle: `${NORTHWIND} · due Oct 1`,
-    rows: [
-      { label: 'Growth plan', value: '$1,350.00', meta: '45 seats at $30' },
-      { label: 'Support add-on', value: '$100.00' },
-      { label: 'Onboarding fee', meta: 'Waived with the plan change', focus: true },
-      { label: 'Amount', value: '$1,450.00' },
-    ],
-  },
-  plan: {
-    kind: 'rows',
-    title: 'Plan',
-    subtitle: 'Growth · billed monthly',
-    rows: [
-      { label: 'Price', value: '$30 per seat' },
-      { label: 'Seats', meta: 'Changed by Maya Ortiz · Sep 29', focus: true },
-      { label: 'Renews', value: 'Nov 1' },
-    ],
-  },
   settings: {
     kind: 'rows',
     title: 'Billing settings',
     subtitle: NORTHWIND,
     rows: [
-      { label: 'Company', value: NORTHWIND },
-      { label: 'Billing email', meta: 'Invoices and receipts go here', focus: true },
-      { label: 'Currency', value: 'US dollar' },
+      { label: 'Plan', value: 'Growth', meta: '45 seats · renews Nov 1', action: 'Change plan' },
+      { label: 'Payment method', value: 'Visa ending 4242', action: 'Update card' },
+      { label: 'Invoices', meta: 'Sent to billing@northwind.example', action: 'Download invoices' },
+      { label: 'Subscription', meta: 'Cancelling ends it on Nov 1', focus: true },
     ],
   },
-  payments: {
+  settingsCard: {
     kind: 'rows',
-    title: 'Payment history',
+    title: 'Billing settings',
     subtitle: NORTHWIND,
     rows: [
-      { label: 'INV-2041', meta: 'Oct 1 · Visa ending 4242', value: '$1,450.00', focus: true },
-      { label: 'INV-1987', meta: 'Sep 1 · Visa ending 4242', value: '$1,200.00', status: 'Paid' },
-      { label: 'INV-1932', meta: 'Aug 1 · Visa ending 4242', value: '$1,200.00', status: 'Paid' },
+      { label: 'Plan', value: 'Growth', meta: '45 seats · renews Nov 1', action: 'Change plan' },
+      { label: 'Payment method', value: 'Visa ending 4242', action: 'Update card' },
+      { label: 'Saved card', meta: 'Removing it leaves no card on file', focus: true },
+      { label: 'Invoices', meta: 'Sent to billing@northwind.example', action: 'Download invoices' },
+    ],
+  },
+  planDowngrade: {
+    kind: 'rows',
+    title: 'Plan',
+    subtitle: 'Growth · billed monthly',
+    rows: [
+      { label: 'Growth', value: '$30 per seat', action: 'Upgrade plan', focus: true },
+      { label: 'Seats', value: '45', action: 'Add seats' },
+      { label: 'Renews', value: 'Nov 1' },
+    ],
+  },
+  planSeats: {
+    kind: 'rows',
+    title: 'Plan',
+    subtitle: 'Growth · billed monthly',
+    rows: [
+      { label: 'Growth', value: '$30 per seat', action: 'Upgrade plan' },
+      { label: 'Seats', value: '45', action: 'Add seats', focus: true },
+      { label: 'Renews', value: 'Nov 1' },
     ],
   },
   /* The seat count the meter routine's axe result is about, "47 of 50 seats". */
   meter: { kind: 'meter', title: 'Usage', subtitle: 'Growth plan · October', label: 'Seats', used: 47, of: 50, unit: 'seats' },
 } satisfies Record<string, Sketch>;
 
-/* The red every struck value shares, where its meaning was never in doubt:
-   the status “Payment failed”, which the agent gave --color-danger on its
-   own (paymentFailed, above). */
-const FAILED: Twin = {
-  text: 'Payment failed',
-  means: 'Failure',
-  screen: 'Payment history',
-  says: 'Red means something went wrong.',
-  token: '--color-danger',
-  role: 'danger',
-  sketch: SKETCHES.payments,
-};
+/* The action beside it that the system's Button already draws, whose
+   meaning was never in question: the preview marks it beside the one asked
+   about, so a person sees the two side by side before reading a line. */
+const besideOf = (c: Case): Twin => ({
+  text: c.beside,
+  means: 'System Button',
+  tag: 'The system’s Button',
+  screen: c.screen,
+  says: `Every other action on the ${c.screen.toLowerCase()} is the system’s Button.`,
+  token: '<Button variant="secondary">',
+});
 
-/* Every struck value asks the same question, because it is the same red,
-   and every one was tried with both directions in place before it asked. */
-function struckQuestion(c: Case, gathered = false): Question {
-  const m = STRUCK_MEANS[c.pattern];
+/* The class each line is written against: the screen's block and the action's words, `.settings__cancel-subscription`. */
+const selectorOf = (c: Case) =>
+  `.${c.file.split('/').pop()!.replace(/\.css$/, '').replace(/^Billing|Card$/g, '').toLowerCase()}__${c.action.toLowerCase().replace(/\s+/g, '-')}`;
+const linesOf = (c: Case) => byHand(selectorOf(c), c.padded);
+
+/* Every action built by hand asks the same question, because it is the same
+   style, and every one was tried with both directions in place before it asked. */
+function actionQuestion(c: Case, gathered = false): Question {
+  const n = linesOf(c).length;
   return {
     kind: 'intent',
-    ask: 'Separate the two meanings of red, or keep the familiar signal?',
-    found: FOUND[c.pattern],
-    gap: `The checks pass either way. Which trade-off is acceptable depends on how people use the ${c.screen.toLowerCase()}, which no check can see.`,
-    means: m.means,
-    says: m.says,
-    noun: m.noun,
+    ask: `Keep “${c.action}” looking as it does, or make it a Button on purpose?`,
+    found: `The lint reported ${n} literals on “${c.action}”, and each is exactly a token’s value. But it is a link built by hand, small and grey, where every other action on the ${c.screen.toLowerCase()} is the system’s Button, and rule 1 of the agent’s skill says an action is a Button. As a Button it would be as easy to find as “${c.beside}”, in a job meant to change nothing visible. Kept as it looks, it needs a variant the Button doesn’t have.`,
+    gap: `The checks pass either way, and neither direction moves a pixel in this change. Whether “${c.action}” should be easy to find is a product decision, which no check can see.`,
+    means: 'Hand-built action',
+    says: 'Small grey text, built by hand. The system would make it a Button.',
     evidence: [
-      { for: `A ${m.label.toLowerCase()} value`, says: `It is struck through${c.pattern === 'replaced' ? ' beside the value that replaced it' : ', and nothing took its place'}. Nothing failed.` },
-      { for: 'A failure', says: 'It is the exact red of “Payment failed”, which the design system names --color-danger, for a failure.' },
-      { for: 'A familiar signal', says: 'It came over from the old billing app with these screens, as a literal. That is all the repository says about who looks for it.' },
+      { for: 'Quiet on purpose', says: 'It is styled to be less visible than every other action on the screen, which looks deliberate.' },
+      { for: 'Left over', says: 'It came over from the old billing app as it was. Its history has one commit, and no reason.' },
+      { for: 'An action', says: `It ${c.does} when pressed, and rule 1 says an action is the system’s Button, not a raw element.` },
     ],
-    recommendation: `The same red stands for a failure and a ${m.label.toLowerCase()} value. Separating them would make red mean one thing across the billing screens.`,
-    unknown: `Whether people who use the ${c.screen.toLowerCase()} screen rely on the red to notice a ${c.noticing} during time-sensitive work. That could change this recommendation.`,
-    inferred: 'The red came over from the old billing app, so the people who use these screens may be used to it.',
+    recommendation:
+      'The job is to change nothing visible, and rule 9 allows a new variant with a story that leaves the others as they are. Ghost, the nearest, is a full-height control in darker ink, so it would still change what people see.',
+    unknown: `Whether “${c.action}” is quiet on purpose, and who decides how easy it is to find. That could change this recommendation.`,
+    inferred: 'It came over from the old billing app with these screens, so it may be quiet for a reason nobody wrote down.',
+    origin: 'A link built by hand, from the old billing app',
+    start: 'Compare the two actions',
+    triedSays: 'All 3 checks pass with either direction, and neither moves a pixel.',
     gathered: gathered ? GATHERED : undefined,
-    paused: [5],
+    paused: [5, 6],
     options: directions(c, gathered),
     pattern: c.pattern,
-    twin: FAILED,
+    twin: besideOf(c),
     tried: tradeoffChecks(c),
   };
 }
 
-const FOUND: Record<Struck, string> = {
-  replaced: 'The lint reported this red as a literal, #b42318. Two tokens have that value: --color-danger, which the design system keeps for a failure, and --color-diff-remove-ink. Here it marks a value that was replaced, so either name would say something the other doesn’t.',
-  removed: 'The lint reported this red as a literal, #b42318. Two tokens have that value: --color-danger, which the design system keeps for a failure, and --color-diff-remove-ink. Here it marks a line that was removed, so either name would say something the other doesn’t.',
-};
-
-const ACTIVITY: Case = { pattern: 'replaced', file: file('BillingActivity.css'), screen: 'Billing activity', noticing: 'plan change', frames: 2, stories: 2 };
-
-const activityRed: Work = {
-  id: 'activity-red',
-  file: ACTIVITY.file,
-  screen: ACTIVITY.screen,
-  title: 'The plan change in the billing activity, and what its red means',
-  status: 'asking',
-  sample: { label: 'Plan', old: 'Starter', replacement: 'Growth' },
-  sketch: SKETCHES.activity,
-  lines: [
-    { selector: '.activity__old', property: 'color', before: '#b42318' },
-    { selector: '.activity__new', property: 'color', before: '#1f7a3f' },
-  ],
-  question: struckQuestion(ACTIVITY),
+const CANCEL: Case = {
+  pattern: 'exit',
+  file: file('BillingSettings.css'),
+  screen: 'Billing settings',
+  action: 'Cancel subscription',
+  does: 'ends the subscription',
+  verb: 'cancel',
+  measure: 'cancellations',
+  beside: 'Change plan',
+  padded: true,
   frames: 2,
   stories: 2,
+};
+
+const cancelAction: Work = {
+  id: 'cancel-action',
+  file: CANCEL.file,
+  screen: CANCEL.screen,
+  title: '“Cancel subscription” in billing settings, and whether it stays quiet',
+  status: 'asking',
+  sample: { action: CANCEL.action },
+  sketch: SKETCHES.settings,
+  lines: linesOf(CANCEL),
+  question: actionQuestion(CANCEL),
+  frames: CANCEL.frames,
+  stories: CANCEL.stories,
   history: [
-    { at: '13:09', who: 'agent', text: 'Two tokens are this red. Tried both, and a neutral style with a label: the lint and axe pass with each. Only the plan change moves.' },
-    { at: '13:09', who: 'agent', text: 'Asked: the red means a failure elsewhere, and here a plan that was replaced (boundary 5).' },
+    { at: '13:34', who: 'agent', text: 'Its 3 values are each a token’s, but the link is built by hand, and no component draws it this way. Tried both directions: the lint, axe and the visual check pass with each, and nothing moves.' },
+    { at: '13:34', who: 'agent', text: 'Asked: the system makes an action a Button, and this one is quiet (boundaries 5 and 6).' },
   ],
 };
 
 /* Held behind the first question, because the same decision may settle
-   them: three are the same case on other screens, and one is close but not
-   the same, a line struck through with nothing beside it. */
-function held(
-  w: Pick<Work, 'id' | 'file' | 'screen' | 'title' | 'sample' | 'sketch' | 'lines' | 'frames' | 'stories'>,
-  c: Pick<Case, 'pattern' | 'noticing'>,
-  at: string,
-): Work {
+   them: two are the same case on the plan card, an action that ends or
+   reduces the subscription, and one is close but not the same, an action
+   that removes something the customer set up. */
+function held(c: Case, sketch: Sketch, at: string): Work {
   return {
-    ...w,
+    id: `${c.action.toLowerCase().replace(/\s+/g, '-')}`,
+    file: c.file,
+    screen: c.screen,
+    title: `“${c.action}” on the ${c.screen.toLowerCase()}, and whether it stays quiet`,
     status: 'waiting',
-    waitsOn: 'activity-red',
-    question: struckQuestion({ ...c, file: w.file, screen: w.screen, frames: w.frames, stories: w.stories }),
+    waitsOn: 'cancel-action',
+    sample: { action: c.action },
+    sketch,
+    lines: linesOf(c),
+    question: actionQuestion(c),
+    frames: c.frames,
+    stories: c.stories,
     history: [
-      { at, who: 'agent', text: 'Tried both directions: the lint and axe pass with each. Only this value moves.' },
-      { at, who: 'agent', text: 'Held: the same red as the billing activity’s question. The decision there may settle it.' },
+      { at, who: 'agent', text: 'Tried both directions: the lint, axe and the visual check pass with each. Nothing moves.' },
+      { at, who: 'agent', text: 'Held: the same question as “Cancel subscription”. The decision there may settle it.' },
     ],
   };
 }
 
-const invoiceAmount = held(
-  {
-    id: 'invoice-amount',
-    file: file('InvoiceDetail.css'),
-    screen: 'Invoice detail',
-    title: 'The changed amount on an invoice, and what its red means',
-    sample: { label: 'Amount', old: '$1,200.00', replacement: '$1,450.00' },
-    sketch: SKETCHES.invoiceAmount,
-    lines: [
-      { selector: '.invoice__amount-old', property: 'color', before: '#b42318' },
-      { selector: '.invoice__amount-new', property: 'color', before: '#1f7a3f' },
-    ],
-    frames: 4,
-    stories: 4,
-  },
-  { pattern: 'replaced', noticing: 'changed amount' },
-  '13:12',
-);
+const PLAN = { file: file('PlanCard.css'), screen: 'Plan card', frames: 2, stories: 2 };
 
-const invoiceRemoved = held(
-  {
-    id: 'invoice-removed',
-    file: file('InvoiceDetail.css'),
-    screen: 'Invoice detail',
-    title: 'The removed line item on an invoice, and what its red means',
-    sample: { label: 'Onboarding fee', old: '$200.00' },
-    sketch: SKETCHES.invoiceRemoved,
-    lines: [{ selector: '.invoice__line--removed', property: 'color', before: '#b42318' }],
-    frames: 4,
-    stories: 4,
-  },
-  { pattern: 'removed', noticing: 'removed line item' },
-  '13:12',
-);
-
-const planSeats = held(
-  {
-    id: 'plan-seats',
-    file: file('PlanCard.css'),
-    screen: 'Plan card',
-    title: 'The changed seat count on the plan card, and what its red means',
-    sample: { label: 'Seats', old: '50', replacement: '45' },
-    sketch: SKETCHES.plan,
-    lines: [
-      { selector: '.plan__seats-old', property: 'color', before: '#b42318' },
-      { selector: '.plan__seats-new', property: 'color', before: '#1f7a3f' },
-    ],
-    frames: 2,
-    stories: 2,
-  },
-  { pattern: 'replaced', noticing: 'seat change' },
+const downgradePlan = held(
+  { ...PLAN, pattern: 'exit', action: 'Downgrade plan', does: 'moves the customer to a smaller plan', verb: 'downgrade', measure: 'downgrades', beside: 'Upgrade plan' },
+  SKETCHES.planDowngrade,
   '13:20',
 );
 
-const settingsEmail = held(
-  {
-    id: 'settings-email',
-    file: file('BillingSettings.css'),
-    screen: 'Billing settings',
-    title: 'The changed billing email, and what its red means',
-    sample: { label: 'Billing email', old: 'ap@northwind.example', replacement: 'billing@northwind.example' },
-    sketch: SKETCHES.settings,
-    lines: [
-      { selector: '.settings__email-old', property: 'color', before: '#b42318' },
-      { selector: '.settings__email-new', property: 'color', before: '#1f7a3f' },
-    ],
-    frames: 2,
-    stories: 2,
-  },
-  { pattern: 'replaced', noticing: 'changed email' },
-  '13:31',
+const removeSeats = held(
+  { ...PLAN, pattern: 'exit', action: 'Remove seats', does: 'reduces the seats the customer pays for', verb: 'remove seats', measure: 'seat removals', beside: 'Add seats' },
+  SKETCHES.planSeats,
+  '13:20',
+);
+
+const removeCard = held(
+  { ...CANCEL, padded: false, pattern: 'removal', action: 'Remove card', does: 'removes the saved card', verb: 'remove a card', measure: 'card removals', beside: 'Update card' },
+  SKETCHES.settingsCard,
+  '13:34',
 );
 
 /* Outside the delegation: the agent knows exactly what to do, and may not.
@@ -772,13 +718,20 @@ const meterRadius: Work = {
   history: [{ at: '13:26', who: 'agent', text: 'Stopped: no token is 999px (boundary 6), and adding one is outside this delegation (boundary 7).' }],
 };
 
+/* The reason Dana gives for her decision, in her words, as the stories and
+   the case study play it: the agent's draft, with the one thing the agent
+   could not know written in front of it. Simulated context, like the rest of
+   the run; nothing here claims a real retention test. */
+export const DANAS_REASON =
+  'The grey link is from a retention test last year that ended without a decision, and nobody turned it off. How easy it is to cancel is a product decision, so it gets its own change. A quiet Button would let any agent make any action this hard to find.';
+
 export function initialDelegation(): DelegationState {
   return {
     brief: {
       id: 'billing',
-      title: 'Bring the billing screens onto the token layer',
+      title: 'Bring the billing screens onto the design system',
       request:
-        'The token lint reports 36 literals in src/product/billing/, the screens that came over from the old billing app. Move them onto the token layer. Merge what doesn’t move a pixel, and ask me about the rest.',
+        'The token lint reports 36 literals in src/product/billing/, the screens that came over from the old billing app, and some of their controls are built by hand. Move the values onto tokens and the controls onto the system’s components. Nothing should look different: merge what doesn’t move a pixel, and ask me about the rest.',
       by: dana,
       agent: { name: 'Claude Code', run: 'run_01K6M4' },
       repo: 'relay/web',
@@ -789,7 +742,7 @@ export function initialDelegation(): DelegationState {
     },
     boundaries,
     work: [
-      activityRed,
+      cancelAction,
       meterRadius,
       settingsRoutine,
       meterRoutine,
@@ -798,10 +751,9 @@ export function initialDelegation(): DelegationState {
       paymentRoutine,
       invoiceRoutine,
       activityRoutine,
-      invoiceAmount,
-      invoiceRemoved,
-      planSeats,
-      settingsEmail,
+      downgradePlan,
+      removeSeats,
+      removeCard,
     ],
     rules: [],
     decisions: [],

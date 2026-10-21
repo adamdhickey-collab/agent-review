@@ -6,8 +6,8 @@ import { WorkRecord } from './WorkRecord';
 
 const start = initialDelegation();
 const work = (id: string, s = start) => find(s, id) as Work;
-const withRule = play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: true });
-const reverted = play(withRule, { type: 'revert', id: 'plan-seats' });
+const withRule = play(start, { type: 'answer', id: 'cancel-action', option: 'quiet', makeRule: true });
+const reverted = play(withRule, { type: 'revert', id: 'remove-seats' });
 const left = play(start, { type: 'answer', id: 'meter-radius', option: 'leave', makeRule: false });
 const allowed = play(start, { type: 'answer', id: 'meter-radius', option: 'add', makeRule: false });
 
@@ -79,12 +79,12 @@ export const Inconclusive: Story = {
 };
 
 export const ByYourRule: Story = {
-  args: { work: work('invoice-amount', withRule), rule: withRule.rules[0] },
+  args: { work: work('downgrade-plan', withRule), rule: withRule.rules[0] },
   parameters: { docs: { description: { story: 'Settled by a rule the person made. The authority is the rule, in its own words.' } } },
 };
 
 export const Reverted: Story = {
-  args: { work: work('plan-seats', reverted), rule: reverted.rules[0] },
+  args: { work: work('remove-seats', reverted), rule: reverted.rules[0] },
   parameters: { docs: { description: { story: 'Reverted by the person. The history keeps the merge and the revert, and Restore applies the change again.' } } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);

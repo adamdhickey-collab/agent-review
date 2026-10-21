@@ -47,7 +47,9 @@ import { Inline } from '../Inline';
    act on, and nothing simulated is said as if it were real.
 
    TWO RUNS, SINCE 2026-10-07. The billing run's decision is missing
-   intent: two reds, and no check can say which meaning is right. A second
+   intent: an action built by hand to be quiet, "Cancel subscription", and
+   no check can say whether it should stay that way (two reds until
+   2026-10-21; data/billing.ts, THE TRADE-OFF). A second
    run, the shared table, is a permission boundary: the agent knows exactly
    how to make the fix, and the fix is in a component forty screens share.
    The strip that says this is a simulation also says which one is playing,
@@ -107,7 +109,7 @@ import { Inline } from '../Inline';
 
 /* The runs, as the switch names them: what each is about, in two words. */
 const RUNS: { id: RunId; label: string; kind: string }[] = [
-  { id: 'billing', label: 'Two reds', kind: 'missing intent' },
+  { id: 'billing', label: 'Quiet cancel', kind: 'missing intent' },
   { id: 'shared-table', label: 'Shared table', kind: 'a permission boundary' },
 ];
 
@@ -158,7 +160,7 @@ function StartHere({ work, chosen, first }: { work: Work; chosen: boolean; first
   const q = work.question!;
   const tradeoff = q.options.some((o) => o.benefits);
   const steps = tradeoff
-    ? ['Compare the two meanings', 'Choose a direction', 'Preview it', 'Apply it']
+    ? [q.start ?? 'Compare the directions', 'Choose a direction', 'Preview it', 'Apply it']
     : q.kind === 'scope'
       ? [q.reach ? 'See what the fix reaches' : 'See what it would change', 'Choose an answer', 'Apply it']
       : ['Compare the readings', 'Choose an answer', 'Apply it'];
@@ -240,7 +242,7 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
         const current = activeRule(s);
         if (current && current.answer !== optionId) return { offer: 'conflict', settles: [], existing: ruleText(current) };
         const covers: Pattern[] = current ? Array.from(new Set([...current.covers, pattern])) : [pattern];
-        const rule = { answer: optionId, covers, text: draft.text };
+        const rule = { answer: optionId, covers, text: draft.text, where: draft.where, does: draft.does };
         const settles = wouldSettle(s, rule, w.id).filter((x) => x.id !== w.id);
         return { offer: current ? 'widen' : 'make', text: ruleText(rule), excludes: draft.excludes, scope: draft.scope, fixed: Boolean(draft.text), settles };
       },

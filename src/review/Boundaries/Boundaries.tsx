@@ -4,7 +4,7 @@ import {
   BOUNDARY_GROUP_ICON,
   BOUNDARY_GROUP_LABEL,
   PATTERN_LABEL,
-  RULE_EXCLUDES,
+  patternsIn,
   ruleText,
   type Boundary,
   type BoundaryGroup,
@@ -192,10 +192,12 @@ export function RuleCard({ rule, work, onEdit, onRevoke, initialMode }: RuleCard
             <dd>{rule.why}</dd>
           </div>
         ) : null}
-        <div>
-          <dt>It doesn’t cover</dt>
-          <dd>{rule.excludes ?? RULE_EXCLUDES}</dd>
-        </div>
+        {rule.excludes ? (
+          <div>
+            <dt>It doesn’t cover</dt>
+            <dd>{rule.excludes}</dd>
+          </div>
+        ) : null}
         <div>
           <dt>What it has done</dt>
           <dd>
@@ -233,11 +235,11 @@ export function RuleCard({ rule, work, onEdit, onRevoke, initialMode }: RuleCard
         >
           <fieldset className="rule__fieldset">
             <legend>It covers</legend>
-            {(['replaced', 'removed'] as Pattern[]).map((p, i) => (
+            {patternsIn(work).map((p, i) => (
               <Checkbox
                 key={p}
                 ref={i === 0 ? first : undefined}
-                label={PATTERN_LABEL[p].replace(/^a /, 'A ')}
+                label={PATTERN_LABEL[p].replace(/^./, (c) => c.toUpperCase())}
                 checked={covers.includes(p)}
                 onChange={(e) => toggle(p, e.target.checked)}
               />

@@ -145,16 +145,23 @@ export interface Addition {
   header?: string;
 }
 
-/** A case an answer can be kept for: a value struck through beside the value
-    that replaced it, or on its own; or a fix that would reach past the
-    screen asked about into a shared component. */
-export type Pattern = 'replaced' | 'removed' | 'shared';
+/** A case an answer can be kept for: an action built by hand that ends or
+    reduces a subscription, or one that removes something the customer set
+    up; or a fix that would reach past the screen asked about into a shared
+    component. */
+export type Pattern = 'exit' | 'removal' | 'shared';
 
 export const PATTERN_LABEL: Record<Pattern, string> = {
-  replaced: 'a value struck through beside the one that replaced it',
-  removed: 'a value struck through with nothing replacing it',
+  exit: 'an action that ends or reduces a subscription',
+  removal: 'an action that removes something the customer set up',
   shared: 'a fix that would change a shared component',
 };
+
+/** The cases a run's changes can be kept for, in the order they first ask:
+    what a rule made in this run can be edited to cover. */
+export function patternsIn(work: Work[]): Pattern[] {
+  return Array.from(new Set(work.flatMap((w) => (w.question?.pattern ? [w.question.pattern] : []))));
+}
 
 /** What an answer becomes if a person keeps it for similar cases. A rule
     always says where it applies, what it leaves out and why, because a rule
@@ -162,6 +169,9 @@ export const PATTERN_LABEL: Record<Pattern, string> = {
 export interface RuleDraft {
   /** The rule in words, when it is not built from the patterns it covers (ruleText). */
   text?: string;
+  /** For a rule built from what it covers: where it applies, as its sentence opens ("On the billing screens"), and what it does with each case it covers, as the sentence ends. */
+  where?: string;
+  does?: string;
   /** Where it applies, in a few words: "The billing screens". */
   scope: string;
   /** What it doesn't cover. */
@@ -231,6 +241,11 @@ export interface Option {
   done?: string[];
   /** The record a decision for this direction leaves. */
   decision?: DecisionDraft;
+  /** For an action built by hand: what the preview draws it as, proposed,
+      when that is markup rather than declarations (a quiet Button, or the
+      system's Button), and a line saying what the proposed view shows when
+      it is not this change: "Drawn as its follow-up change makes it". */
+  draws?: { as: 'quiet' | 'button'; note?: string };
 }
 
 /** What a decision records beyond the choice: what it traded for what, the
@@ -310,23 +325,20 @@ export interface Question {
   /** The boundaries that stopped it. */
   paused: number[];
   options: Option[];
-  /** The struck-through pattern this is an instance of, so an answer can become a rule for it. */
+  /** The case this is an instance of, so an answer can become a rule for it. */
   pattern?: Pattern;
-  /** For a question about what a value means: an element drawn in the same
-      value whose meaning is not in question, so the person sees one color
-      with two meanings side by side before reading a token's name. */
+  /** For a question about what an element is for: an element beside it whose
+      meaning is not in question, so the person sees the two side by side
+      before reading a line of code. */
   twin?: Twin;
   /** The checks, run with each answer in place in turn, when every answer
       gave the same result: the record that no check can choose between them. */
   tried?: Check[];
-  /** What the value in question is, as its tile is headed: "Replaced value". */
+  /** What the element in question is, as its caption is headed: "Hand-built action". */
   means?: string;
-  /** What its red means, in a sentence a person who has never heard of a
-      token can read: "Red means this value was replaced." */
+  /** What it is, in a sentence a person who has never read the code can
+      read: "Small grey text, built by hand. Every other action here is a Button." */
   says?: string;
-  /** The meaning as a noun, for what each answer does to it: "Replacement
-      stays the same". */
-  noun?: string;
   note?: string;
   /** For a scope question, what the agent was asked to do, in a sentence. */
   asked?: string;
@@ -346,23 +358,31 @@ export interface Question {
   inferred?: string;
   /** What it found when asked for evidence. */
   gathered?: Gathered;
+  /** Where the element in question came from, as the preview's caption under it says: "A link built by hand, in the old billing app". */
+  origin?: string;
+  /** The first step of the task, as the screen's Start here line names it: "Compare the two actions". */
+  start?: string;
+  /** What the checks tried with each answer say together, as their folded line reads: "All 3 checks pass with either direction". */
+  triedSays?: string;
 }
 
-/** An element in the same color as the one in question, whose meaning was settled. */
+/** An element beside the one in question, whose meaning was never in doubt:
+    for an action built by hand, an action on the same screen that the
+    system's component already draws. */
 export interface Twin {
-  /** The element as it reads: "Payment failed". */
+  /** The element as it reads: "Change plan". */
   text: string;
-  /** What it is, as its tile is headed and as a noun: "Failure". */
+  /** What it is, as its caption is headed: "System Button". */
   means: string;
-  /** The screen it is on: "Payment history". */
+  /** The tag its mark carries in the preview, which its caption repeats: "The system’s Button". */
+  tag: string;
+  /** The screen it is on: "Billing settings". */
   screen: string;
-  /** What its red means, in a sentence: "Red means something went wrong." */
+  /** What it is, in a sentence: "Every other action here is the system’s Button." */
   says: string;
-  /** The token it was given. */
+  /** What draws it: the component, or the token it was given. */
   token: string;
-  /** What that token is for, in a word, as an answer names it: "danger". */
-  role: string;
-  /** Its screen as the preview draws it, beside the one in question. */
+  /** Its screen as the preview draws it, beside the one in question, when it is on another screen. */
   sketch?: Sketch;
 }
 
@@ -389,6 +409,8 @@ export interface SketchRow {
   meta?: string;
   /** A status word, at the row's end, as the screen sets one. */
   status?: string;
+  /** An action at the row's end, drawn as the system's Button. */
+  action?: string;
   /** The row the change is on, or (on a twin's screen) the twin itself. */
   focus?: true;
 }
@@ -401,11 +423,10 @@ export type Sketch =
   /** A real screen of the product, drawn as itself, at the narrowest width it is laid out for. */
   | { kind: 'screen'; screen: 'customers'; minWidth: number; focus: string };
 
-/** A rendered specimen of the element in question, so a designer sees it as well as reads it. */
+/** A rendered specimen of the element in question, so a designer sees it as
+    well as reads it: an action built by hand, by the words it shows. */
 export interface Sample {
-  label: string;
-  old: string;
-  replacement?: string;
+  action: string;
 }
 
 export type WorkStatus = 'made' | 'asking' | 'waiting' | 'reverted' | 'left';
@@ -456,6 +477,9 @@ export interface Rule {
   history: Entry[];
   /** The rule in words, when it is not built from what it covers. */
   text?: string;
+  /** For a rule built from what it covers, how its sentence opens and ends: from the answer's RuleDraft. */
+  where?: string;
+  does?: string;
   /** Where it applies, what it leaves out, and why: from the answer's RuleDraft. */
   scope?: string;
   excludes?: string;
@@ -515,24 +539,22 @@ export function waitingOn(s: DelegationState, id: string): Work[] {
   return s.work.filter((w) => w.status === 'waiting' && w.waitsOn === id);
 }
 
-/** What a rule says, in words, from what it covers and what it chooses. A
-    rule written in its own words (the shared-table run's) says those. The
-    billing run's two directions: separate the meanings, so red is a
-    failure's alone, or keep the red for now, as a written exception. */
-export function ruleText(rule: Pick<Rule, 'answer' | 'covers' | 'text'>): string {
+/** What a rule says, in words. A rule written in its own words (the
+    shared-table run's) says those. One built from what it covers says where
+    it applies, each case it covers, and what it does with them, in the words
+    of the answer it was made from (its RuleDraft), so widening or editing
+    what it covers rewrites the sentence and nothing here knows any run's
+    subject. */
+export function ruleText(rule: Pick<Rule, 'covers' | 'text' | 'where' | 'does'>): string {
   if (rule.text) return rule.text;
-  const both = rule.covers.includes('replaced') && rule.covers.includes('removed');
-  const what = both ? 'a value replaced or removed' : rule.covers.includes('removed') ? 'a value removed with nothing in its place' : 'a value replaced by another';
-  if (rule.answer === 'separate') return `On the billing screens, ${what} is neutral and struck through, with a label that says what happened. Red is for failures.`;
-  return `On the billing screens, ${what} stays red for now, with a label that says what happened: an exception to red meaning a failure, to review once a neutral style is tested.`;
+  const what = rule.covers.map((p) => PATTERN_LABEL[p]).join(', or ');
+  return `${rule.where ? `${rule.where}, ` : ''}${what} ${rule.does ?? ''}`.trim().replace(/^./, (c) => c.toUpperCase());
 }
 
 /** The decision a rule was made from, if a person made it from one. */
 export function decisionOf(s: DelegationState, ruleId: string): Decision | undefined {
   return s.decisions.find((d) => d.rule === ruleId);
 }
-
-export const RULE_EXCLUDES = 'Any other red or green, a row’s background, shared components, and every screen outside billing.';
 
 /** The changes still asking whose pattern a rule would settle, other than the one being answered. */
 export function wouldSettle(s: DelegationState, rule: Pick<Rule, 'covers'>, except?: string): Work[] {
@@ -956,7 +978,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
     case 'edit-rule': {
       const r = s.rules.find((x) => x.id === a.id);
       if (!r || r.status !== 'active' || a.covers.length === 0) return s;
-      const covers = (['replaced', 'removed'] as Pattern[]).filter((p) => a.covers.includes(p));
+      const covers = patternsIn(s.work).filter((p) => a.covers.includes(p));
       const next = {
         ...s,
         ...tick,

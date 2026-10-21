@@ -1,65 +1,59 @@
 import type { ReactNode } from 'react';
-import { Badge, Icon } from '../../components';
+import { Button } from '../../components';
 import { CustomerTable } from '../../product/customers/CustomerTable';
-import type { Line, Option, Sample, Sketch, SketchRow, Twin, Work } from '../../data/delegation';
+import type { Line, Option, Sample, Sketch, SketchRow, Work } from '../../data/delegation';
 import './Sketch.css';
 
 /* A screen of the product as the decision preview draws it, on the
-   product's surface, in the product's tokens and its components (Badge,
+   product's surface, in the product's tokens and its components (Button,
    and for the customer list the real screen). The rows come from the
    change's sketch (data/delegation.ts, WHAT THE PREVIEW DRAWS); the element
    in question comes from the change itself: its sample, carrying the class
    names its lines are written against, so the preview can apply those
-   lines to it (DecisionPreview). Nothing here colors the element: it is
+   lines to it (DecisionPreview). Nothing here styles the element: it is
    unstyled until a line says what it is, which is the point.
 
    The sketches are drawn, not pictured, and stay readable at any width: a
    row puts its value under its label when there is no room beside it. */
 
-/** The last class in a selector, which is the element a line is about: `.activity__old` from `.activity__old`, `table` from `.customers .table`. */
+/** The last class in a selector, which is the element a line is about: `settings__cancel-subscription` from `.settings__cancel-subscription`, `table` from `.customers .table`. */
 function classOf(selector: string): string {
   const all = selector.match(/\.[\w-]+/g);
   return all ? all[all.length - 1].slice(1) : '';
 }
 
-/** A direction's label, from what it adds: the text inside the Badge it puts before the value. */
-function addedLabel(option?: Option): string | undefined {
-  const add = option?.adds?.find((a) => a.header === 'a label');
-  return add?.text.match(/>([^<]+)</)?.[1];
-}
-
-/* The element a struck-value question is about, as it renders: the old
-   value struck through, and the value that replaced it, each carrying the
-   class its line is written against. A direction that adds a label shows it
-   first. The visually hidden words say what the strike and the arrow say. */
-function Struck({ sample, lines, label }: { sample: Sample; lines: Line[]; label?: string }) {
+/* The element an action-built-by-hand question is about, as it renders.
+   Today it is a link built by hand, carrying the class its lines are
+   written against, so the preview's declarations draw it: the grey, the
+   small size. Proposed, it is what the direction makes it: a quiet Button,
+   which carries the same class and so draws exactly what the link drew
+   (the variant is the preview's, sketch__quiet, and never the Button's own
+   until a direction that adds it is applied); or the system's Button, which
+   draws itself, as every other action on the screen does. */
+function HandBuilt({ sample, lines, as }: { sample: Sample; lines: Line[]; as?: 'quiet' | 'button' }) {
+  const cls = classOf(lines[0]?.selector ?? '');
+  if (as === 'button') {
+    return (
+      <Button size="compact" variant="secondary">
+        {sample.action}
+      </Button>
+    );
+  }
+  if (as === 'quiet') {
+    return (
+      <Button size="compact" variant="ghost" className={`sketch__quiet ${cls}`}>
+        {sample.action}
+      </Button>
+    );
+  }
   return (
-    <span className="sketch__struck">
-      {label ? (
-        <Badge icon="swap" className="sketch__added">
-          {label}
-        </Badge>
-      ) : null}
-      <s className={classOf(lines[0]?.selector ?? '')}>
-        <span className="visually-hidden">was </span>
-        {sample.old}
-      </s>
-      {sample.replacement ? (
-        <>
-          <Icon name="arrow-right" size={12} className="sketch__arrow" />
-          <span className={classOf(lines[1]?.selector ?? '')}>
-            <span className="visually-hidden">, now </span>
-            {sample.replacement}
-          </span>
-        </>
-      ) : (
-        <span className="visually-hidden">, removed</span>
-      )}
-    </span>
+    <a href="#" className={`sketch__hand ${cls}`} onClick={(e) => e.preventDefault()}>
+      {sample.action}
+    </a>
   );
 }
 
-function Rows({ title, subtitle, rows, focus, twin }: { title: string; subtitle?: string; rows: SketchRow[]; focus?: ReactNode; twin?: Twin }) {
+function Rows({ title, subtitle, rows, focus, twin }: { title: string; subtitle?: string; rows: SketchRow[]; focus?: ReactNode; twin?: string }) {
   return (
     <section className="sketch" aria-label={title}>
       <header className="sketch__head">
@@ -68,21 +62,30 @@ function Rows({ title, subtitle, rows, focus, twin }: { title: string; subtitle?
       </header>
       <ul className="sketch__rows">
         {rows.map((r) => (
-          <li key={r.label} className="sketch__row" data-focus={r.focus && !twin ? '' : undefined} data-twin={r.focus && twin ? '' : undefined}>
+          <li key={r.label} className="sketch__row">
             <span className="sketch__what">
               <span className="sketch__label">{r.label}</span>
               {r.meta ? <span className="sketch__meta">{r.meta}</span> : null}
             </span>
             <span className="sketch__value">
-              {r.focus && focus ? focus : r.value}
-              {r.focus && twin ? (
-                <>
-                  {/* The twin, in the red its own change gave it on its own:
-                      the status "Payment failed", --color-danger. */}
-                  <span className="sketch__status sketch__status--failed">{twin.text}</span>
-                </>
-              ) : r.status ? (
-                <span className="sketch__status">{r.status}</span>
+              {r.value ? <span>{r.value}</span> : null}
+              {r.status ? <span className="sketch__status">{r.status}</span> : null}
+              {r.action || (r.focus && focus) ? (
+                <span className="sketch__actions">
+                  {/* The action the system's Button already draws; the one
+                      the question names beside the element asked about is
+                      the twin, and the preview marks it. */}
+                  {r.action ? (
+                    <Button size="compact" variant="secondary" data-twin={twin === r.action ? '' : undefined}>
+                      {r.action}
+                    </Button>
+                  ) : null}
+                  {r.focus && focus ? (
+                    <span className="sketch__focus" data-focus="">
+                      {focus}
+                    </span>
+                  ) : null}
+                </span>
               ) : null}
             </span>
           </li>
@@ -117,13 +120,13 @@ function Meter({ sketch, lines }: { sketch: Extract<Sketch, { kind: 'meter' }>; 
 
 export interface SketchScreenProps {
   work: Work;
-  /** The direction being previewed, for the label it adds; the colors come from its lines, applied by the preview. */
+  /** The direction being previewed, for what it draws the element as; its declarations come from its lines, applied by the preview. */
   option?: Option;
-  /** What each screen's red means, from the review: a caption under the screen in question and one under its twin's, in the same columns. */
+  /** What each marked element is, from the review: a caption for the element in question and one for its twin, under the screen. */
   captions?: [ReactNode, ReactNode];
 }
 
-/** The screen a change is on, with the element in question in place, and its twin's screen beside it when it has one. */
+/** The screen a change is on, with the element in question in place, and its twin marked beside it, or on its own screen beside this one. */
 export function SketchScreen({ work, option, captions }: SketchScreenProps) {
   const sketch = work.sketch;
   if (!sketch) return null;
@@ -146,33 +149,27 @@ export function SketchScreen({ work, option, captions }: SketchScreenProps) {
     );
   }
   const twin = work.question?.twin;
-  const label = addedLabel(option);
+  const focus = work.sample ? <HandBuilt sample={work.sample} lines={work.lines} as={option?.draws?.as} /> : null;
   return (
     <div className="sketch-host">
-    <div className="sketch-screen" data-pair={twin?.sketch ? '' : undefined}>
-      <Rows
-        title={sketch.title}
-        subtitle={sketch.subtitle}
-        rows={sketch.rows}
-        focus={work.sample ? <Struck sample={work.sample} lines={work.lines} label={label} /> : null}
-      />
-      {twin?.sketch?.kind === 'rows' ? <Rows title={twin.sketch.title} subtitle={twin.sketch.subtitle} rows={twin.sketch.rows} twin={twin} /> : null}
-      {/* The captions are the review's, drawn in the grid the screens are
-          drawn in, each under its own screen (Sketch.css places them), so
-          what a red means is read where the red is. The list is display:
-          contents so its items take the grid's cells; the roles say what
-          the box no longer does. */}
-      {captions && twin?.sketch ? (
-        <ul className="sketch__captions" aria-label="The two reds" role="list">
-          <li className="sketch__caption" data-for="decision" data-surface="review" role="listitem">
-            {captions[0]}
-          </li>
-          <li className="sketch__caption" data-for="twin" data-surface="review" role="listitem">
-            {captions[1]}
-          </li>
-        </ul>
-      ) : null}
-    </div>
+      <div className="sketch-screen" data-pair={twin?.sketch ? '' : undefined} data-captions={captions && twin ? '' : undefined}>
+        <Rows title={sketch.title} subtitle={sketch.subtitle} rows={sketch.rows} focus={focus} twin={twin && !twin.sketch ? twin.text : undefined} />
+        {twin?.sketch?.kind === 'rows' ? <Rows title={twin.sketch.title} subtitle={twin.sketch.subtitle} rows={twin.sketch.rows} twin={twin.text} /> : null}
+        {/* The captions are the review's, drawn in the grid the screens are
+            drawn in (Sketch.css places them), so what each marked element is
+            is read under it. The list is display: contents so its items take
+            the grid's cells; the roles say what the box no longer does. */}
+        {captions && twin ? (
+          <ul className="sketch__captions" aria-label="What each marked element is" role="list">
+            <li className="sketch__caption" data-for="decision" data-surface="review" role="listitem">
+              {captions[0]}
+            </li>
+            <li className="sketch__caption" data-for="twin" data-surface="review" role="listitem">
+              {captions[1]}
+            </li>
+          </ul>
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -116,7 +116,7 @@ test.describe('the delegated work on a phone, answering', () => {
 
   test('the confirmation and the rule fit, and their controls are a fingertip', async ({ page }) => {
     await open(page, '#/');
-    await page.getByRole('button', { name: /^Select and preview\s+Separate the meanings$/ }).click();
+    await page.getByRole('button', { name: /^Select and preview\s+Add a quiet variant$/ }).click();
     await page.getByText('Use this decision for similar cases').click();
     await expect(page.getByText('The rule, as it will read')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
@@ -140,15 +140,15 @@ test.describe('the delegated work on a phone, the other direction', () => {
     await page.getByRole('button', { name: 'Request evidence' }).click();
     await expect(page.getByText('What the agent found when you asked')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
-    await page.getByRole('button', { name: /^Select and preview\s+Keep the red for now$/ }).click();
+    await page.getByRole('button', { name: /^Select and preview\s+Make it a Button in its own change$/ }).click();
     await expect(page.getByRole('textbox', { name: 'Your reason' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
-    for (const name of [/^Selected\s+Keep the red for now$/, /^Select and preview\s+Separate the meanings$/]) {
+    for (const name of [/^Selected\s+Make it a Button in its own change$/, /^Select and preview\s+Add a quiet variant$/]) {
       const box = await page.getByRole('button', { name }).boundingBox();
       expect(box!.height, String(name)).toBeGreaterThanOrEqual(FLOOR);
     }
     await page.getByRole('button', { name: 'Apply', exact: true }).click();
-    await expect(page.getByRole('article', { name: 'Keep the red for now' })).toBeVisible();
+    await expect(page.getByRole('article', { name: 'Make it a Button in its own change' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   });
 });

@@ -17,10 +17,11 @@ The product now opens on delegated work: an account of what an agent did
 inside written boundaries, the few decisions that still need a person and
 why, a way to turn an answer into a scoped rule that can be edited or
 revoked, and completed work that can be inspected and reverted. Two runs
-show the two kinds of stop: the billing run (`#/`), where one red means a
-failure on one screen and a replaced value on another, and the agent can
-fix it two defensible ways and can't tell which trade-off the people who
-use those screens can live with, and the shared
+show the two kinds of stop: the billing run (`#/`), where "Cancel
+subscription" is the one action built by hand, small and grey, among the
+system's Buttons, and the agent's faithful fix (a quiet Button variant)
+would make hiding an action a supported style, so it asks whether cancel
+should stay quiet, which no check can tell; and the shared
 table (`#/runs/shared-table`), where the fix that fits is in a component
 forty screens share and is not the agent's to make. Both are simulated,
 and say so; the experiment's review queue is at `#/queue`. Each decision

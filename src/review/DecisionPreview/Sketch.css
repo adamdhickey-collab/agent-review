@@ -14,7 +14,9 @@
 }
 
 /* A screen and its twin's, side by side where both fit, the screen in
-   question the wider; one over the other where they don't. The review's
+   question the wider; one over the other where they don't. (One screen
+   holding both, the billing run's, is drawn across the row, its captions
+   under it.) The review's
    captions (DecisionPreview) sit in the same grid, each under its own
    screen: a second row in the same columns side by side, and in one column
    each straight under the screen it is about, by order. */
@@ -58,6 +60,16 @@
 
   .sketch__caption[data-for='twin'] {
     grid-area: 2 / 2;
+  }
+
+  /* One screen with its twin on it: the screen across both columns, and
+     the two captions side by side under it. */
+  .sketch-screen[data-captions]:not([data-pair]) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .sketch-screen[data-captions]:not([data-pair]) > .sketch {
+    grid-column: 1 / -1;
   }
 }
 
@@ -118,28 +130,43 @@
   font-variant-numeric: tabular-nums;
 }
 
-.sketch__struck {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-2);
-}
-
-.sketch__arrow {
-  color: var(--color-text-muted);
-}
-
 .sketch__status {
   color: var(--color-text-muted);
 }
 
-/* The twin's red: the status "Payment failed", which the agent gave
-   --color-danger on its own (data/billing.ts, paymentFailed). On this
-   surface that is the product's danger, #b42318, the same red the element in
-   question draws today. */
-.sketch__status--failed {
-  color: var(--color-danger);
-  font-weight: var(--weight-medium);
+.sketch__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+/* The element in question, which the mark hugs. */
+.sketch__focus {
+  display: inline-flex;
+}
+
+/* An action built by hand, as the old billing app drew it: a link, its ink
+   and size written by the change's own lines (DecisionPreview), and nothing
+   else. */
+.sketch__hand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: underline;
+}
+
+/* The quiet variant a direction proposes, in the preview only: the Button,
+   with everything that makes it look like one taken away, so the lines the
+   link was drawn with draw it the same. It is never the Button's own. */
+.btn.sketch__quiet {
+  height: auto;
+  padding-inline: 0;
+  border: 0;
+  box-shadow: none;
+  background: none;
+  font-weight: var(--weight-regular);
+  line-height: inherit;
+  text-decoration: underline;
 }
 
 .sketch__meter {
