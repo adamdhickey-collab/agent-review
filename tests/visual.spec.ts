@@ -52,7 +52,7 @@ for (const width of WIDTHS) {
     test('the delegated work, a direction selected', async ({ page }) => {
       await page.goto('#/');
       await settle(page);
-      await page.getByRole('button', { name: /^Select and preview\s+Separate the meanings$/ }).click();
+      await page.getByRole('button', { name: /^Select and preview\s+Add a quiet variant$/ }).click();
       await page.evaluate(() => window.scrollTo(0, 0));
       await settle(page);
       await expect(page).toHaveScreenshot(`delegation-selected-${width}.png`);

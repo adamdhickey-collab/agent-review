@@ -68,52 +68,6 @@
   line-height: var(--leading-tight);
 }
 
-/* The element as a reader of the billing screen sees it: a line of the
-   card, not a box in it. The card around it is the frame. */
-.ask__sample {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-1) var(--space-3);
-  align-self: flex-start;
-}
-
-.ask__sample-label {
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-}
-
-.ask__sample-old {
-  color: var(--color-diff-remove-ink);
-}
-
-.ask__sample-new {
-  color: var(--color-diff-add-ink);
-}
-
-/* From the old value to the new: "replaced", drawn. The card's, not the
-   billing screen's, so it is quiet. */
-.ask__sample-arrow {
-  align-self: center;
-  color: var(--color-text-muted);
-}
-
-/* The twin: a status in the red, as the payment history sets it. */
-.ask__sample-status {
-  color: var(--color-danger);
-  font-weight: var(--weight-medium);
-}
-
-/* THE TWO REDS: the value in question first, then its twin, each a tile
-   headed by its meaning, then the specimen, the sentence saying what its red
-   means, and its token under that, quietly. They are read, not pressed, so
-   they sit on the sunken ground and are not raised; only the answers are.
-   The columns are the answers' own. The specimens are two steps larger than
-   the card's text (2026-10-09; one before), because the red is the subject:
-   two reds at the size of a heading, side by side, are the demonstration
-   that they look the same, and the question over them says it in words. A
-   "Same red" label on the seam between the tiles was tried the same day
-   and covered the second tile's heading. */
 /* THE CHECKS, FOLDED (2026-10-09): one line with the pass mark, "All 3
    automated checks passed, with either token.", and the three results a
    press away, each beside what it established. The line is read, not
@@ -194,18 +148,8 @@
   background: var(--color-surface-sunken);
 }
 
-.ask__tile .ask__sample {
-  margin-bottom: var(--space-1);
-  font-size: var(--text-xl);
-}
-
-
-.ask__tile .ask__sample-label {
-  font-size: var(--text-md);
-}
-
-/* What the red means, in a sentence: the line that makes the two tiles two
-   different things, so it is the card's own ink, not a label's. */
+/* What a tile says, in a sentence: the line that makes the tiles different
+   things, so it is the card's own ink, not a label's. */
 .ask__tile-means {
   color: var(--color-text);
   line-height: var(--leading-body);
@@ -480,18 +424,6 @@
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-sm);
   background: var(--color-surface-sunken);
-}
-
-.ask__sample--labelled {
-  align-items: center;
-}
-
-.ask__sample--labelled[data-look='neutral'] .ask__sample-old {
-  color: var(--color-text-muted);
-}
-
-.ask__sample--labelled[data-look='neutral'] .ask__sample-new {
-  color: var(--color-text);
 }
 
 /* The main risk, in view before a direction is chosen: the risk list's

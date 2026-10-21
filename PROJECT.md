@@ -150,18 +150,21 @@ them? Human attention is the cost being spent, and fewer required reviews
 is the goal, provided nothing important is hidden to get there.
 
 The front door (`#/`) is now **delegated work**: one run, Claude Code moving
-Relay's billing screens onto the token layer. The review queue the
-experiment was built around is unchanged at `#/queue`.
+Relay's billing screens onto the design system (the token layer until
+2026-10-21, when the run's decision changed; THE QUIET CANCEL, below). The
+review queue the experiment was built around is unchanged at `#/queue`.
 
 **The run is simulated, and labelled so on the screen.** Unlike rv-2041 and
 rv-2042, nothing in it was run: the billing screens, the times, the commits
 and the checks' figures are written to agree with each other
 (`src/data/billing.ts`) and played back through one pure reducer
 (`src/data/delegation.ts`), so the same presses always end in the same
-place. Nothing learns. The tokens are real, and so are the two facts the
-scenario turns on: `--color-danger` and `--color-diff-remove-ink` are both
-`#b42318`, and `--color-success` and `--color-diff-add-ink` are both
-`#1f7a3f`, so either name passes every check.
+place. Nothing learns. The tokens are real, and so is the Button the
+decision turns on, with its four variants and none that draws an action as
+small grey text. (Until 2026-10-21 the facts it turned on were two pairs of
+tokens with one value each, `--color-danger` and `--color-diff-remove-ink`
+both `#b42318`, so either name passed every check; the entries below that
+describe the two reds are the record of that decision.)
 
 Decisions:
 
@@ -312,7 +315,8 @@ Relay's forty screens are written into the scenario, not built: only the
 customer list exists here, and the strip says the run is simulated.
 
 - **Two runs, one strip.** The strip that says this is a simulation names
-  the run on screen and links to the other ("Two reds", "Shared table").
+  the run on screen and links to the other ("Two reds", now "Quiet cancel",
+  and "Shared table").
   They are links, not a SegmentedControl, because each run is a place with
   an address; each keeps its own state, and Reset puts back the one shown.
 - **The case for a permission decision.** The card says what the agent was
@@ -402,6 +406,56 @@ this prototype). Three changes to the workspace, and one fix:
   (`pixelsOf`, `pixelSentence` in data/delegation.ts), and the story
   OutcomeSummary/WhatTheScreenShows holds the two to each other on every
   path through the first decision.
+
+THE QUIET CANCEL, 2026-10-21. Run 1's decision changed. The two reds were
+a real question and a small one: the person's reason (support scans the
+feed for red) was a fact anyone near support could have supplied, and
+getting it wrong cost a mislabeled plan change. Two rounds of cold reads
+(three personas, both orders, the portfolio's case study as the frame)
+preferred this, 6 to 0 in the second round, once it was reworked so the
+agent's recommendation was the faithful one and the person's call had an
+end date:
+
+- **The job** is now "onto the design system": the values onto tokens and
+  the controls onto the system's components, nothing visibly different.
+  Boundary 1 says both; 5 and 6 are what an element is for, and no token
+  or component drawing it as it is; 7 is the token layer or how a shared
+  component draws. 36 literals still: 26 merged on its own, 4 asking, 6
+  waiting.
+- **The decision.** "Cancel subscription" on Billing settings is a link
+  built by hand, `#6a6a76` at `0.75rem` with 4px above and below, each
+  exactly a token's value, where every other action is the Button. Rule 1
+  of the skill says an action is a Button; a Button would make cancelling
+  as easy to find as "Change plan". The agent recommends a quiet variant
+  (rule 9: a new variant with a story, the others untouched) and says why
+  ghost won't do; it can't determine whether cancel is quiet on purpose or
+  who decides how easy it is to find. The other direction leaves the link as
+  built under an exception ending Oct 15 and opens its own change, owned by
+  product design, to make it a Button; growth counts cancellations before
+  and after, and it ships either way. The checks pass with both, and
+  neither moves a pixel. Dana chooses the second, and her reason in the
+  stories and the case study adds the one thing the agent couldn't know: the
+  grey link is a retention test from last year that nobody turned off.
+- **The rule** covers "an action that ends or reduces a subscription"
+  ("Downgrade plan" and "Remove seats" on the plan card); "Remove card",
+  which removes something the customer set up, is close and outside it, and
+  asks.
+- **What the engine stopped knowing.** The rule's sentence is built from
+  the cases it covers and the answer's own `where` and `does`
+  (`RuleDraft`), what it excludes is the answer's, and a rule can be edited
+  to cover the cases its run has (`patternsIn`), so nothing in
+  data/delegation.ts names any run's subject any more. A direction that
+  changes markup rather than declarations says so (`Option.draws`: a quiet
+  Button, or the system's Button with a note that the preview shows its
+  own change), and a twin can be on the same screen: the action beside it
+  that the system's Button draws, marked dashed.
+- **The preview** draws the screen's actions as the real Button, the link
+  as built, the quiet variant as a Button stripped to the link's look
+  (preview-only, `sketch__quiet`, never the Button's own), and holds the
+  two to the same box: DecisionPreview/QuietVariant measures them.
+
+284 stories still, every one passing; the nine visual baselines that show
+the billing run or the run switch were re-recorded.
 
 ## Exploration: three information architectures
 

@@ -98,11 +98,13 @@ Teal is the review's color: what the screen asks a person to do (Apply,
 the recommended answer's button), the direction they have selected, the
 place they are in, a link, the focus ring, and the annotation the preview
 draws around the element a decision is about. It is never a color in the
-product the review shows. The reds in the billing preview are Relay's own,
-`#b42318`, written by the change's own lines, so a mark the review draws
-on the preview cannot settle what a color in the product means. The
-replaced plan and "Payment failed" are the same red in the current
-interface, which is the question.
+product the review shows. The grey of "Cancel subscription" in the billing
+preview is Relay's own, `#6a6a76`, written by the change's own lines, so a
+mark the review draws on the preview cannot settle how quiet an action in
+the product should be. The link and the quiet Button a direction proposes
+are drawn the same, which is the question. (Until 2026-10-21 the billing
+preview's question was two reds, `#b42318`, a failure's and a replaced
+plan's.)
 
 ## Two surfaces
 
@@ -120,9 +122,9 @@ only ever adds tokens or re-values them on its own surface:
 - The decision preview's annotation is the review's (it is drawn over the
   product), in the light scheme whatever the theme, because the product
   under it always is: the light accent is 6.4:1 on Relay's white, where the
-  dark scheme's pale teal would be under 2:1. What each red means is a
-  caption under its screen, in the screens' own columns, led by the same tag
-  the mark carries (since later on 2026-10-11; it was a key under the whole
+  dark scheme's pale teal would be under 2:1. What each marked element is
+  is a caption under its screen, in the screens' own columns, led by the
+  same tag the mark carries (since later on 2026-10-11; it was a key under the whole
   frame, in columns of its own, led by drawn swatches a reader could not
   match to the marks).
 
@@ -179,13 +181,13 @@ named by its tooltip.
 
 ```
 ┌ app bar: Agent Review · Delegated work · Reviews ········ Storybook · Source · ⌨ · ☀ ☾ 🖥 · relay/web · DW ┐
-├ run bar: [Two reds | Shared table]  Simulated  A sample run, played back the same way every time.  Reset ┤
+├ run bar: [Quiet cancel|Shared table]  Simulated  A sample run, played back the same way each time. Reset ┤
 │ Delegated to Claude Code by Dana · 1 h ago                                                              │
-│ Bring the billing screens onto the token layer                                                          │
+│ Bring the billing screens onto the design system                                                        │
 │ 7 changes made and checked. 2 decisions need you.   [7 on its own] [1 judgment] [1 approval]  ▓▓▓▓░░    │
-│ ┌ preview: Billing activity · BillingActivity.tsx   Current | Proposed  ┐ ┌ Needs you 2   1 of 2 ‹ › ┐   │
+│ ┌ preview: Billing settings · BillingSettings.tsx   Current | Proposed  ┐ ┌ Needs you 2   1 of 2 ‹ › ┐   │
 │ │   the screen, rendered, the element marked                            │ │ Needs judgment            │   │
-│ ├ what each red means                                                   ┤ │ the question              │   │
+│ ├ what each marked element is                                           ┤ │ the question              │   │
 │ └───────────────────────────────────────────────────────────────────────┘ │ checks, and what they     │   │
 │ [Recommended]   [What I can't determine · Request evidence]               │  can't say                │   │
 │ ▸ The evidence and the code                                               │ two direction cards       │   │
@@ -230,8 +232,8 @@ pressing through the app.
 | State | Light | Dark |
 | --- | --- | --- |
 | The billing decision, before a selection | [1-billing-before-light](screens/1-billing-before-light.png) | [1-billing-before-dark](screens/1-billing-before-dark.png) |
-| Separate the meanings, selected and previewed | [2-billing-separate-light](screens/2-billing-separate-light.png) | [2-billing-separate-dark](screens/2-billing-separate-dark.png) |
-| Keep the red for now, selected, a reason typed, kept as a rule | [3-billing-keep-light](screens/3-billing-keep-light.png) | [3-billing-keep-dark](screens/3-billing-keep-dark.png) |
+| Add a quiet variant, selected and previewed | [2-billing-quiet-light](screens/2-billing-quiet-light.png) | [2-billing-quiet-dark](screens/2-billing-quiet-dark.png) |
+| Make it a Button in its own change, selected, a reason typed, kept as a rule | [3-billing-own-change-light](screens/3-billing-own-change-light.png) | [3-billing-own-change-dark](screens/3-billing-own-change-dark.png) |
 | The same, in the real window, scrolled: the preview has followed | [3b-billing-follow-light](screens/3b-billing-follow-light.png) | [3b-billing-follow-dark](screens/3b-billing-follow-dark.png) |
 | The decision applied: the record | [4-billing-record-light](screens/4-billing-record-light.png) | [4-billing-record-dark](screens/4-billing-record-dark.png) |
 | The shared table, before an answer | [5-table-before-light](screens/5-table-before-light.png) | [5-table-before-dark](screens/5-table-before-dark.png) |

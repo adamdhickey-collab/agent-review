@@ -94,7 +94,7 @@ boundaries panel, and says why it should not have happened.
 **Note.** Where they look first; whether the boundary citation on each record
 is read; whether "Recommended" is challenged anywhere.
 
-### 3. The two reds (weighing)
+### 3. The quiet cancel (weighing)
 
 **Prompt.** "The agent stopped on this. Decide it the way you would at work."
 
@@ -111,8 +111,8 @@ pointing at the badge; whether preview is mistaken for apply.
 again next week. What would you do here?" Then: "Tell me what the rule you
 made will and won't do."
 
-**Success.** States that it covers struck-through values on the billing
-screens only; names one thing it excludes; says that revoking it stops it
+**Success.** States that it covers actions that end or reduce a
+subscription, on the billing screens only; names one thing it excludes; says that revoking it stops it
 applying without undoing what it already did.
 
 **Note.** Whether they think the agent "learned"; whether they find the rule

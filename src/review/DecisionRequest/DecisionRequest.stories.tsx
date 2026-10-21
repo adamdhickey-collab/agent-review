@@ -7,7 +7,7 @@ import type { DecisionRequestProps, RulePreview } from './DecisionRequest';
 import { DecisionRequest } from './DecisionRequest';
 
 const start = initialDelegation();
-const withRule = play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: true });
+const withRule = play(start, { type: 'answer', id: 'cancel-action', option: 'quiet', makeRule: true });
 
 function props(s: DelegationState, id: string, preview: RulePreview): DecisionRequestProps {
   const w = find(s, id) as Work;
@@ -23,20 +23,23 @@ function props(s: DelegationState, id: string, preview: RulePreview): DecisionRe
 
 const makeRule: RulePreview = {
   offer: 'make',
-  text: 'On the billing screens, a value replaced by another is neutral and struck through, with a label that says what happened. Red is for failures.',
-  settles: waitingOn(start, 'activity-red').filter((w) => w.question?.pattern === 'replaced'),
+  text: 'On the billing screens, an action that ends or reduces a subscription never gets a quiet variant: it stays as built, under an exception with an end date, until its own change makes it a Button.',
+  settles: waitingOn(start, 'cancel-action').filter((w) => w.question?.pattern === 'exit'),
 };
+
+const DRAFT_OWN = 'How easy it is to cancel is a product decision, so it gets its own change. A quiet variant would let any agent make any action this hard to find.';
+const DRAFT_QUIET = 'The job was to change nothing visible. A quiet variant keeps that promise, and rule 9 allows it.';
 
 const meta = {
   title: 'Review/DecisionRequest',
   component: DecisionRequest,
-  args: props(start, 'activity-red', makeRule),
+  args: props(start, 'cancel-action', makeRule),
   parameters: {
     a11y: { test: 'error' },
     docs: {
       description: {
         component:
-          'The inspector of the delegated work’s workspace (Preview Studio): a change the agent stopped on, asking for one decision, and saying which kind as its status: Needs judgment or Needs approval. What the agent read and found is beside the preview, not here (Review/DecisionRead). Needs judgment, in the billing run, is a trade-off: the agent found one red with two meanings and proposes two defensible directions. Each direction is a card of the same shape (what it does, its main risk, its three benefits and three risks folded, and Select and preview), and the checks, folded to one line with the sentence that keeps them apart from the decision, come after the directions; selecting one marks it, shows it in the screen’s preview as proposed, and opens what the agent will do, the person’s reason and the rule box under the cards, with the other still there to switch to. Needs approval: the agent knows what to do and may not, so the card shows the line it would change and what each answer does, and, for a fix in a shared component, who else it reaches and what has and hasn’t been checked; choosing an answer turns the answers into its confirmation. Both cite the boundary that stopped them on one line, and fold what was found, the code and the evidence. A rule is never made by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
+          'The inspector of the delegated work’s workspace (Preview Studio): a change the agent stopped on, asking for one decision, and saying which kind as its status: Needs judgment or Needs approval. What the agent read and found is beside the preview, not here (Review/DecisionRead). Needs judgment, in the billing run, is a trade-off: the agent found an action built by hand to be quiet, “Cancel subscription”, where every other action is the system’s Button, and proposes two defensible directions. Each direction is a card of the same shape (what it does, its main risk, its three benefits and three risks folded, and Select and preview), and the checks, folded to one line with the sentence that keeps them apart from the decision, come after the directions; selecting one marks it, shows it in the screen’s preview as proposed, and opens what the agent will do, the person’s reason and the rule box under the cards, with the other still there to switch to. Needs approval: the agent knows what to do and may not, so the card shows the line it would change and what each answer does, and, for a fix in a shared component, who else it reaches and what has and hasn’t been checked; choosing an answer turns the answers into its confirmation. Both cite the boundary that stopped them on one line, and fold what was found, the code and the evidence. A rule is never made by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
       },
     },
   },
@@ -48,35 +51,39 @@ type Story = StoryObj<typeof meta>;
 const choose = (title: string) => ({ name: new RegExp(`^Select and preview\\s+${title}$`) });
 const chosen = (title: string) => ({ name: new RegExp(`^Selected\\s+${title}$`) });
 
+const QUIET = 'Add a quiet variant';
+const OWN = 'Make it a Button in its own change';
+
 export const TradeOff: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          'The first question of the billing run, as a trade-off, as the inspector holds it. Its kind, where it is and the four changes held behind it; the question; the checks, folded (lint and accessibility pass with either direction, and only this value moves), and under them that passing is not evidence either trade-off works for the people who use the screen. Then the two directions, two cards of one shape, each with its main risk in view and its three benefits and three risks folded under it; “Recommended” is a small badge, and both buttons are the same. Neither is selected.',
+          'The first question of the billing run, as a trade-off, as the inspector holds it. Its kind, where it is and the three changes held behind it; the question; the checks, folded (all three pass with either direction, and neither moves a pixel), and under them that passing is not evidence either trade-off works for the people who use the screen. Then the two directions, two cards of one shape, each with its main risk in view and its three benefits and three risks folded under it; “Recommended” is a small badge, and both buttons are the same. Neither is selected.',
       },
     },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('4 changes wait on this')).toBeInTheDocument();
-    await expect(canvas.getByRole('heading', { name: 'Separate the two meanings of red, or keep the familiar signal?' })).toBeInTheDocument();
-    const tried = canvas.getByText('Lint and accessibility pass with either direction. Only this value moves.').closest('details')!;
+    await expect(canvas.getByText('3 changes wait on this')).toBeInTheDocument();
+    await expect(canvas.getByRole('heading', { name: 'Keep “Cancel subscription” looking as it does, or make it a Button on purpose?' })).toBeInTheDocument();
+    const said = 'All 3 checks pass with either direction, and neither moves a pixel.';
+    const tried = canvas.getByText(said).closest('details')!;
     await expect(tried).not.toHaveAttribute('open');
-    await userEvent.click(canvas.getByText('Lint and accessibility pass with either direction. Only this value moves.'));
+    await userEvent.click(canvas.getByText(said));
     const checks = within(tried).getByRole('list', { name: 'The checks, with each direction in place' });
-    await expect(checks).toHaveTextContent('Visual baselines: 2 of 2 frames moved with both');
+    await expect(checks).toHaveTextContent('Visual baselines: 0 of 2 frames moved with both');
     /* The checks are not the decision. */
     await expect(canvas.getByText(/Passing doesn’t mean either trade-off works for the people who use this screen\./)).toBeInTheDocument();
     const answers = canvas.getByRole('group', { name: 'Which trade-off is acceptable?' });
     const cards = within(answers).getAllByRole('listitem').filter((li) => li.classList.contains('ask__choice'));
     await expect(cards).toHaveLength(2);
-    await expect(cards[0]).toHaveTextContent(/^Separate the meanings\s*Recommended/);
-    await expect(cards[1]).toHaveTextContent(/^Keep the red for now/);
+    await expect(cards[0]).toHaveTextContent(/^Add a quiet variant\s*Recommended/);
+    await expect(cards[1]).toHaveTextContent(/^Make it a Button in its own change/);
     /* The main risk is in view before anything is chosen; the whole case
        for and against is folded under it, one press away. */
-    await expect(cards[0]).toHaveTextContent('Main risk: Changes a signal people may rely on.');
-    await expect(cards[1]).toHaveTextContent('Main risk: Red still means two things.');
+    await expect(cards[0]).toHaveTextContent('Main risk: Any later agent can make any action this quiet.');
+    await expect(cards[1]).toHaveTextContent('Main risk: “Cancel subscription” stays hard to find until its own change ships, on Oct 15.');
     for (const card of cards) {
       const more = within(card).getByText('3 benefits and 3 risks').closest('details')!;
       await expect(more).not.toHaveAttribute('open');
@@ -89,83 +96,84 @@ export const TradeOff: Story = {
     }
     await expect(canvas.queryByRole('button', { name: 'Apply' })).toBeNull();
     /* What the agent read is the preview's side of the workspace now. */
-    await expect(canvas.queryByRole('list', { name: 'The two reds' })).toBeNull();
+    await expect(canvas.queryByRole('list', { name: 'What each marked element is' })).toBeNull();
     await expect(canvas.queryByRole('list', { name: 'The agent’s read' })).toBeNull();
   },
 };
 
 export const Choosing: Story = {
-  args: { initialChoice: 'keep' },
+  args: { initialChoice: 'own-change' },
   parameters: {
     docs: {
       description: {
         story:
-          'The other direction chosen: keep the red for now. Its card is marked and its button pressed; the recommended card is still there. Under them, what the agent will do if it is applied, in order, the person’s reason, starting as the agent’s draft, and the rule box, unchecked. Choosing the other direction switches the plan and keeps what was typed for each, and clears the rule box. Apply is the one accent, and passes the reason with the answer.',
+          'The other direction chosen: make it a Button in its own change. Its card is marked and its button pressed; the recommended card is still there. Under them, what the agent will do if it is applied, in order, the person’s reason, starting as the agent’s draft, and the rule box, unchecked. Choosing the other direction switches the plan and keeps what was typed for each, and clears the rule box. Apply is the one accent, and passes the reason with the answer.',
       },
     },
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('If you apply “Keep the red for now”, the agent will:')).toHaveFocus();
-    await expect(canvas.getByRole('button', chosen('Keep the red for now'))).toHaveAttribute('aria-pressed', 'true');
-    await expect(canvas.getByRole('button', choose('Separate the meanings'))).toHaveAttribute('aria-pressed', 'false');
+    await expect(canvas.getByText(`If you apply “${OWN}”, the agent will:`)).toHaveFocus();
+    await expect(canvas.getByRole('button', chosen(OWN))).toHaveAttribute('aria-pressed', 'true');
+    await expect(canvas.getByRole('button', choose(QUIET))).toHaveAttribute('aria-pressed', 'false');
     const plan = canvasElement.querySelector('.ask__plan') as HTMLElement;
     await expect(plan.children).toHaveLength(5);
-    await expect(plan).toHaveTextContent('Write the exception into the design system’s list of exceptions.');
+    await expect(plan).toHaveTextContent('Write the exception down, ending Oct 15.');
+    await expect(plan).toHaveTextContent('The change ships either way.');
     const reason = canvas.getByRole('textbox', { name: 'Your reason' });
-    await expect(reason).toHaveValue('Familiarity matters more right now. Keep the red until a neutral style has been tested with the people who use it.');
+    await expect(reason).toHaveValue(DRAFT_OWN);
     await userEvent.clear(reason);
-    await userEvent.type(reason, 'Support watches for red during renewals.');
+    await userEvent.type(reason, 'The grey link is a retention test nobody turned off.');
     await userEvent.click(canvas.getByText('Use this decision for similar cases'));
     await expect(canvas.getByText('The rule, as it will read')).toBeInTheDocument();
     /* Switch: the plan is the other direction's, the box is cleared, nothing typed is lost. */
-    await userEvent.click(canvas.getByRole('button', choose('Separate the meanings')));
-    await expect(canvas.getByText('If you apply “Separate the meanings”, the agent will:')).toHaveFocus();
+    await userEvent.click(canvas.getByRole('button', choose(QUIET)));
+    await expect(canvas.getByText(`If you apply “${QUIET}”, the agent will:`)).toHaveFocus();
     await expect(canvas.getByRole('checkbox', { name: 'Use this decision for similar cases' })).not.toBeChecked();
-    await expect(canvas.getByRole('textbox', { name: 'Your reason' })).toHaveValue('Red should mean something went wrong. A plan change is routine, and the label says what it is.');
-    await userEvent.click(canvas.getByRole('button', choose('Keep the red for now')));
-    await expect(canvas.getByRole('textbox', { name: 'Your reason' })).toHaveValue('Support watches for red during renewals.');
+    await expect(canvas.getByRole('textbox', { name: 'Your reason' })).toHaveValue(DRAFT_QUIET);
+    await userEvent.click(canvas.getByRole('button', choose(OWN)));
+    await expect(canvas.getByRole('textbox', { name: 'Your reason' })).toHaveValue('The grey link is a retention test nobody turned off.');
     const bar = canvasElement.querySelector('.ask__bar') as HTMLElement;
     await expect(getComputedStyle(bar).position).toBe('sticky');
-    await expect(bar.querySelector('.ask__bar-what')).toHaveTextContent(/^Keep the red for now$/);
+    await expect(bar.querySelector('.ask__bar-what')).toHaveTextContent(new RegExp(`^${OWN}$`));
     await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
-    await expect(args.onAnswer).toHaveBeenCalledWith('keep', false, 'Support watches for red during renewals.');
+    await expect(args.onAnswer).toHaveBeenCalledWith('own-change', false, 'The grey link is a retention test nobody turned off.');
   },
 };
 
 export const ChoosingTheRecommended: Story = {
-  args: { initialChoice: 'separate' },
+  args: { initialChoice: 'quiet' },
   parameters: {
-    docs: { description: { story: 'The recommended direction chosen and kept as a rule: the rule as it will read, the three waiting changes it settles now, and that the next matching case follows it and names this decision. The draft reason is passed as it stands.' } },
+    docs: { description: { story: 'The recommended direction chosen and kept as a rule: the rule as it will read, the two waiting changes it settles now, and that the next matching case follows it and names this decision. The draft reason is passed as it stands.' } },
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await expect(canvasElement.querySelector('.ask__plan')).toHaveTextContent('Open a task to check the new style with people who use the billing activity screen.');
+    await expect(canvasElement.querySelector('.ask__plan')).toHaveTextContent('Add a quiet variant to the Button, with a story, and leave the other four as they are.');
     await userEvent.click(canvas.getByText('Use this decision for similar cases'));
-    await expect(canvas.getByText(/It settles now:/).closest('p')).toHaveTextContent('3 changes that match');
+    await expect(canvas.getByText(/It settles now:/).closest('p')).toHaveTextContent('2 changes that match, on the plan card');
     await expect(canvas.getByText(/Next time:/).closest('p')).toHaveTextContent('its record names the decision the rule came from');
-    await expect(canvasElement.querySelector('.ask__bar-what')).toHaveTextContent('Separate the meanings, kept as a rule');
+    await expect(canvasElement.querySelector('.ask__bar-what')).toHaveTextContent('Add a quiet variant, kept as a rule');
     await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
-    await expect(args.onAnswer).toHaveBeenCalledWith('separate', true, 'Red should mean something went wrong. A plan change is routine, and the label says what it is.');
+    await expect(args.onAnswer).toHaveBeenCalledWith('quiet', true, DRAFT_QUIET);
   },
 };
 
 export const CancelWithEscape: Story = {
-  args: { initialChoice: 'keep' },
+  args: { initialChoice: 'own-change' },
   parameters: {
     docs: { description: { story: 'Escape is Cancel. The plan closes, neither card is chosen, and focus goes back to the one that was.' } },
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await userEvent.keyboard('{Escape}');
-    await expect(canvas.getByRole('button', choose('Keep the red for now'))).toHaveFocus();
+    await expect(canvas.getByRole('button', choose(OWN))).toHaveFocus();
     await expect(canvas.queryByText(/If you apply/)).toBeNull();
     await expect(args.onAnswer).not.toHaveBeenCalled();
   },
 };
 
 export const AfterEvidence: Story = {
-  args: props(play(start, { type: 'answer', id: 'activity-red', option: 'evidence', makeRule: false }), 'activity-red', makeRule),
+  args: props(play(start, { type: 'answer', id: 'cancel-action', option: 'evidence', makeRule: false }), 'cancel-action', makeRule),
   parameters: {
     docs: {
       description: {
@@ -176,8 +184,8 @@ export const AfterEvidence: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('button', choose('Keep the red for now'))).toBeInTheDocument();
-    await expect(canvas.getByRole('button', choose('Separate the meanings'))).toBeInTheDocument();
+    await expect(canvas.getByRole('button', choose(OWN))).toBeInTheDocument();
+    await expect(canvas.getByRole('button', choose(QUIET))).toBeInTheDocument();
     await expect(canvas.queryByRole('button', { name: 'Request evidence' })).toBeNull();
   },
 };
@@ -191,7 +199,7 @@ export const OutsideTheDelegation: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('Needs approval')).toBeInTheDocument();
     await expect(canvas.getByText('Allowed once. The boundary stays where it is.')).toBeInTheDocument();
-    await expect(canvas.getByText(/^Needs your approval: Changing a shared component/)).toBeInTheDocument();
+    await expect(canvas.getByText(/^Needs your approval: Changing the token layer/)).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'Add --radius-full, this once' }));
     await expect(canvas.queryByRole('checkbox')).toBeNull();
     await expect(canvas.getByText(/doesn’t widen the delegation/)).toBeInTheDocument();
@@ -199,24 +207,24 @@ export const OutsideTheDelegation: Story = {
 };
 
 export const OutsideYourRule: Story = {
-  args: props(withRule, 'invoice-removed', {
+  args: props(withRule, 'remove-card', {
     offer: 'widen',
-    text: 'On the billing screens, a value replaced or removed is neutral and struck through, with a label that says what happened. Red is for failures.',
+    text: 'On the billing screens, an action that ends or reduces a subscription, or an action that removes something the customer set up is a quiet Button, drawn as it looks today.',
     settles: [],
   }),
   parameters: {
-    docs: { description: { story: 'After a rule was made. This case is close to it and outside it, and the card says so before anything else, in the reason it paused. Deciding it the same way can add the case to the rule rather than make a second one.' } },
+    docs: { description: { story: 'After a rule was made. Removing a card is close to it and outside it, and the card says so before anything else, in the reason it paused. Deciding it the same way can add the case to the rule rather than make a second one.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
-    await userEvent.click(canvas.getByRole('button', choose('Separate the meanings')));
+    await userEvent.click(canvas.getByRole('button', choose(QUIET)));
     await expect(canvas.getByText('Add this case to your rule')).toBeInTheDocument();
   },
 };
 
 export const AnsweredOnceElsewhere: Story = {
-  args: props(play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: false }), 'plan-seats', makeRule),
+  args: props(play(start, { type: 'answer', id: 'cancel-action', option: 'own-change', makeRule: false }), 'remove-seats', makeRule),
   parameters: {
     docs: { description: { story: 'The first question decided once, without a rule. This change was waiting on it, and asks anyway, saying why: a one-time decision does not carry over.' } },
   },

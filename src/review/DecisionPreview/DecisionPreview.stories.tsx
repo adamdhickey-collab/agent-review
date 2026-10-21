@@ -14,10 +14,10 @@ import { DecisionPreview, type PreviewView } from './DecisionPreview';
 
 const start = initialDelegation();
 const table = initialTableRun();
-const red = find(start, 'activity-red') as Work;
+const cancel = find(start, 'cancel-action') as Work;
 const meter = find(start, 'meter-radius') as Work;
 const rows = find(table, 'table-rows') as Work;
-const removed = find(play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: true }), 'invoice-removed') as Work;
+const card = find(play(start, { type: 'answer', id: 'cancel-action', option: 'quiet', makeRule: true }), 'remove-card') as Work;
 
 function Stateful({ work, optionId, initial = 'proposed' }: { work: Work; optionId?: string; initial?: PreviewView }) {
   const [view, setView] = useState<PreviewView>(initial);
@@ -28,13 +28,13 @@ function Stateful({ work, optionId, initial = 'proposed' }: { work: Work; option
 const meta = {
   title: 'Review/DecisionPreview',
   component: Stateful,
-  args: { work: red },
+  args: { work: cancel },
   parameters: {
     a11y: { test: 'error' },
     docs: {
       description: {
         component:
-          'The large pane of the delegated work’s workspace (Preview Studio): the screen a decision changes, rendered on the product’s surface in the product’s tokens, never pictured. The element in question is drawn unstyled and the preview writes its lines onto it: the change’s own values for the screen as it is (the literal #b42318), a selected direction’s for the screen as proposed. The toolbar names the screen and says, in words, whether this is the current interface or a proposal, not applied; a thin accent outline marks the decision, a dashed one its twin. Under the frame, what each red means, or every screen a shared component reaches.',
+          'The large pane of the delegated work’s workspace (Preview Studio): the screen a decision changes, rendered on the product’s surface in the product’s tokens and components, never pictured. The element in question is drawn unstyled and the preview writes its lines onto it: the change’s own values for the screen as it is (the literals #6a6a76 and 0.75rem), a selected direction’s for the screen as proposed; a direction that changes the markup (a quiet Button, the system’s Button) is drawn as that. The toolbar names the screen and says, in words, whether this is the current interface or a proposal, not applied, and when a proposal draws a later change rather than this one; a thin accent outline marks the decision, a dashed one its twin. Under the frame, what each marked element is, or every screen a shared component reaches.',
       },
     },
   },
@@ -43,78 +43,89 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/* The color an element is drawn in, as the browser resolved it. */
+/* How an element is drawn, as the browser resolved it. */
 const ink = (el: Element | null) => (el ? getComputedStyle(el).color : '');
-const RED = 'rgb(180, 35, 24)'; /* #b42318, the product's danger and the hard-coded literal */
-const MUTED = 'rgb(106, 106, 118)'; /* #6a6a76, the product's muted ink */
+const size = (el: Element | null) => (el ? getComputedStyle(el).fontSize : '');
+const MUTED = 'rgb(106, 106, 118)'; /* #6a6a76, the product's muted ink and the literal the old billing app typed */
+const CANCEL = '.settings__cancel-subscription';
 
 export const Current: Story = {
   parameters: {
-    docs: { description: { story: 'Nothing selected: the billing activity as it is, beside the payment history. The old plan and “Payment failed” are the same red, which is the question; teal is only the annotation. Under each screen, in its own column, a caption led by the tag its mark carries says what that red means. No view control yet, because there is nothing to compare.' } },
+    docs: { description: { story: 'Nothing selected: billing settings as they are. Every action is the system’s Button except “Cancel subscription”, a link built by hand, small and grey, which is the question; teal is only the annotation, a solid outline on the link and a dashed one on “Change plan”. Under the screen, a caption for each, led by the tag its mark carries. No view control yet, because there is nothing to compare.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('Current interface')).toBeInTheDocument();
     await expect(canvas.queryByRole('radiogroup', { name: 'Preview shows' })).toBeNull();
-    const old = canvasElement.querySelector('.activity__old');
-    await expect(ink(old)).toBe(RED);
-    await expect(ink(canvasElement.querySelector('.sketch__status--failed'))).toBe(RED);
-    await expect(canvasElement.querySelector('.sketch__added')).toBeNull();
-    /* The captions, under their screens, each led by its mark's own tag. */
-    const reds = canvas.getByRole('list', { name: 'The two reds' });
-    await expect(reds).toHaveTextContent(/^Decision 1\s*Replaced value · Billing activity\s*Red means this value was replaced\.\s*Hard-coded #b42318, from the old billing app/);
-    await expect(reds).toHaveTextContent(/Same red: failure\s*Failure · Payment history\s*Red means something went wrong\.\s*--color-danger$/);
-    const [decision, twinCap] = within(reds).getAllByRole('listitem');
+    const link = canvasElement.querySelector(CANCEL)!;
+    await expect(link.tagName).toBe('A');
+    await expect(ink(link)).toBe(MUTED);
+    await expect(size(link)).toBe('12px');
+    await expect(canvas.getByRole('button', { name: 'Change plan' })).toHaveAttribute('data-twin');
+    /* The captions, under the screen, each led by its mark's own tag. */
+    const marked = canvas.getByRole('list', { name: 'What each marked element is' });
+    await expect(marked).toHaveTextContent(/^Decision 1\s*Hand-built action · Billing settings\s*Small grey text, built by hand\. The system would make it a Button\.\s*A link built by hand, from the old billing app/);
+    await expect(marked).toHaveTextContent(/The system’s Button\s*System Button · Billing settings\s*Every other action on the billing settings is the system’s Button\.\s*<Button variant="secondary">$/);
+    const [decision, twinCap] = within(marked).getAllByRole('listitem');
     await expect(within(decision).getByText('Decision 1')).toHaveClass('studio-tag');
-    await expect(within(twinCap).getByText('Same red: failure')).toHaveAttribute('data-tone', 'twin');
+    await expect(within(twinCap).getByText('The system’s Button')).toHaveAttribute('data-tone', 'twin');
     await waitFor(() => expect(canvasElement.querySelector('.studio-mark')).not.toHaveAttribute('hidden'));
     await expect(canvasElement.querySelector('.studio-mark')).toHaveAttribute('data-label', 'Decision 1');
     await expect(getComputedStyle(canvasElement.querySelector('.studio-preview__frame')!).colorScheme).toBe('light');
   },
 };
 
-export const SeparateTheMeanings: Story = {
-  args: { optionId: 'separate' },
+export const QuietVariant: Story = {
+  args: { optionId: 'quiet' },
   parameters: {
-    docs: { description: { story: 'The recommended direction, proposed: the old plan neutral (the product’s muted ink, from the direction’s own line) with the “Replaced” label; the failure still red. The toolbar says it is proposed and not applied. Flipping to Current puts the red back and takes the label away.' } },
+    docs: { description: { story: 'The recommended direction, proposed: “Cancel subscription” is a Button now, a quiet one, and it looks exactly as the link did: the same ink and size, from the direction’s own lines, in the same box. That sameness is the point and the risk. Flipping to Current puts the link back, and nothing on the screen moves.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText(/Proposed:/)).toHaveTextContent('Proposed: Separate the meanings');
+    await expect(canvas.getByText(/Proposed:/)).toHaveTextContent('Proposed: Add a quiet variant');
     await expect(canvas.getByText('Not applied')).toBeInTheDocument();
-    await expect(ink(canvasElement.querySelector('.activity__old'))).toBe(MUTED);
-    await expect(ink(canvasElement.querySelector('.sketch__status--failed'))).toBe(RED);
-    await expect(canvasElement.querySelector('.sketch__added')).toHaveTextContent('Replaced');
+    const quiet = canvasElement.querySelector(CANCEL)!;
+    await expect(quiet.tagName).toBe('BUTTON');
+    await expect(quiet).toHaveClass('sketch__quiet');
+    await expect(ink(quiet)).toBe(MUTED);
+    await expect(size(quiet)).toBe('12px');
+    const proposed = quiet.getBoundingClientRect();
     await userEvent.click(canvas.getByRole('radio', { name: 'Current' }));
     await expect(canvas.getByText('Current interface')).toBeInTheDocument();
-    await expect(ink(canvasElement.querySelector('.activity__old'))).toBe(RED);
-    await expect(canvasElement.querySelector('.sketch__added')).toBeNull();
+    const link = canvasElement.querySelector(CANCEL)!;
+    await expect(link.tagName).toBe('A');
+    const current = link.getBoundingClientRect();
+    await expect(Math.abs(current.width - proposed.width)).toBeLessThan(1);
+    await expect(Math.abs(current.height - proposed.height)).toBeLessThan(1);
   },
 };
 
-export const KeepTheRed: Story = {
-  args: { optionId: 'keep' },
+export const ItsOwnChange: Story = {
+  args: { optionId: 'own-change' },
   parameters: {
-    docs: { description: { story: 'The other direction, proposed: the old plan stays red and gains the same “Replaced” label; the failure stays red. The two reds are still the same red, now told apart by the word.' } },
+    docs: { description: { story: 'The other direction, proposed: “Cancel subscription” as the system’s Button, beside the others, the way its own change will draw it, which the toolbar says beside “Not applied”, because this change leaves the link as built. Flipping to Current puts the link back.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText(/Proposed:/)).toHaveTextContent('Proposed: Keep the red for now');
-    await expect(ink(canvasElement.querySelector('.activity__old'))).toBe(RED);
-    await expect(ink(canvasElement.querySelector('.sketch__status--failed'))).toBe(RED);
-    await expect(canvasElement.querySelector('.sketch__added')).toHaveTextContent('Replaced');
+    await expect(canvas.getByText(/Proposed:/)).toHaveTextContent('Proposed: Make it a Button in its own change');
+    await expect(canvas.getByText('As its own change will draw it')).toBeInTheDocument();
+    await expect(canvasElement.querySelector(CANCEL)).toBeNull();
+    await expect(canvas.getByRole('button', { name: 'Cancel subscription' })).toHaveClass('btn--secondary');
+    await userEvent.click(canvas.getByRole('radio', { name: 'Current' }));
+    await expect(canvasElement.querySelector(CANCEL)?.tagName).toBe('A');
   },
 };
 
-export const RemovedValue: Story = {
-  args: { work: removed, optionId: 'separate' },
+export const RemoveCard: Story = {
+  args: { work: card, optionId: 'quiet' },
   parameters: {
-    docs: { description: { story: 'A held change of the same question on another screen: the invoice’s removed line item, struck through with nothing replacing it, proposed neutral with its “Removed” label.' } },
+    docs: { description: { story: 'The case close to the rule and outside it, on the same screen: “Remove card”, built by hand the same way, beside “Update card”, which the system’s Button draws; proposed as a quiet Button.' } },
   },
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByText('Invoice detail', { selector: 'strong' })).toBeInTheDocument();
-    await expect(ink(canvasElement.querySelector('.invoice__line--removed'))).toBe(MUTED);
-    await expect(canvasElement.querySelector('.sketch__added')).toHaveTextContent('Removed');
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('Billing settings', { selector: 'strong' })).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: 'Update card' })).toHaveAttribute('data-twin');
+    await expect(canvasElement.querySelector('.settings__remove-card')).toHaveClass('sketch__quiet');
   },
 };
 
@@ -173,7 +184,7 @@ export const SharedTableApprovedOnce: Story = {
 };
 
 export const Dark: Story = {
-  args: { optionId: 'separate' },
+  args: { optionId: 'quiet' },
   globals: { theme: 'dark' },
   parameters: {
     docs: { description: { story: 'The review dark, the product under it still light, because Relay has one scheme; the annotation is drawn in the light scheme for the same reason, where the dark theme’s pale teal would not be seen on white.' } },

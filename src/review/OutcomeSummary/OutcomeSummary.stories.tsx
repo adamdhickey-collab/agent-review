@@ -5,14 +5,14 @@ import { account, pixelsOf, play, type DelegationState } from '../../data/delega
 import { OutcomeFacts, OutcomeSummary } from './OutcomeSummary';
 
 const start = initialDelegation();
-const withRule = play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: true });
+const withRule = play(start, { type: 'answer', id: 'cancel-action', option: 'quiet', makeRule: true });
 const quiet = play(
   withRule,
   { type: 'answer', id: 'meter-radius', option: 'add', makeRule: false },
-  { type: 'answer', id: 'invoice-removed', option: 'separate', makeRule: false },
+  { type: 'answer', id: 'remove-card', option: 'quiet', makeRule: false },
 );
-const mixed = play(quiet, { type: 'revert', id: 'plan-seats' });
-const left = play(withRule, { type: 'answer', id: 'meter-radius', option: 'leave', makeRule: false }, { type: 'answer', id: 'invoice-removed', option: 'separate', makeRule: false });
+const mixed = play(quiet, { type: 'revert', id: 'remove-seats' });
+const left = play(withRule, { type: 'answer', id: 'meter-radius', option: 'leave', makeRule: false }, { type: 'answer', id: 'remove-card', option: 'quiet', makeRule: false });
 
 const meta = {
   title: 'Review/OutcomeSummary',
@@ -57,7 +57,7 @@ export const Settled: Story = {
   parameters: { docs: { description: { story: 'The first question answered with a rule. A fourth tile, settled by you, arrives with the first answer, and the four share the row.' } } },
   play: async ({ canvasElement }) => {
     const modes = within(canvasElement).getByRole('list', { name: 'How the work was handled' });
-    await expect(modes).toHaveTextContent('7 proceeded on its own1 needs your judgment1 needs your approval4 settled by you');
+    await expect(modes).toHaveTextContent('7 proceeded on its own1 needs your judgment1 needs your approval3 settled by you');
     await expect(within(modes).getAllByRole('listitem')).toHaveLength(4);
   },
 };
@@ -72,10 +72,10 @@ export const Settled: Story = {
    only says none moved when the badge says none changed. */
 const paths: [string, DelegationState][] = [
   ['as found', start],
-  ['keep, with a rule', play(start, { type: 'answer', id: 'activity-red', option: 'keep', makeRule: true })],
-  ['keep, once', play(start, { type: 'answer', id: 'activity-red', option: 'keep', makeRule: false })],
-  ['separate, with a rule', withRule],
-  ['separate, once', play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: false })],
+  ['its own change, with a rule', play(start, { type: 'answer', id: 'cancel-action', option: 'own-change', makeRule: true })],
+  ['its own change, once', play(start, { type: 'answer', id: 'cancel-action', option: 'own-change', makeRule: false })],
+  ['quiet variant, with a rule', withRule],
+  ['quiet variant, once', play(start, { type: 'answer', id: 'cancel-action', option: 'quiet', makeRule: false })],
   ['every decision made', quiet],
   ['a change reverted', mixed],
 ];
@@ -130,7 +130,7 @@ export const Narrow: Story = {
   parameters: { docs: { description: { story: 'The account in a 360px column, as on a phone. Four tiles across would leave each a word wide, so each mode is a row: the mark and count, then the words, the held changes under them. The account’s own width decides, not the window’s.' } } },
   play: async ({ canvasElement }) => {
     const modes = within(canvasElement).getByRole('list', { name: 'How the work was handled' });
-    await expect(modes).toHaveTextContent('7 proceeded on its own1 needs your judgment · 4 more wait on it1 needs your approval');
+    await expect(modes).toHaveTextContent('7 proceeded on its own1 needs your judgment · 3 more wait on it1 needs your approval');
     await expect(modes.scrollWidth).toBeLessThanOrEqual(modes.clientWidth);
     const [own, asks] = within(modes).getAllByRole('listitem');
     await expect(asks.getBoundingClientRect().top).toBeGreaterThan(own.getBoundingClientRect().top);
@@ -155,7 +155,7 @@ export const Quiet: Story = {
   args: { state: quiet },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByText('Nothing needs your attention.')).toBeInTheDocument();
-    await expect(within(canvasElement).getByText('13 changes made and checked. Completed work is below.')).toBeInTheDocument();
+    await expect(within(canvasElement).getByText('12 changes made and checked. Completed work is below.')).toBeInTheDocument();
   },
 };
 

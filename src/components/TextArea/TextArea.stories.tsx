@@ -26,13 +26,13 @@ export const Empty: Story = {
     const field = canvas.getByRole('textbox', { name: 'Your reason' });
     await expect(field).toHaveAccessibleDescription('Kept with the decision, so whoever reads it later knows why.');
     await userEvent.click(field);
-    await userEvent.keyboard('Red is for failures.');
-    await expect(field).toHaveValue('Red is for failures.');
+    await userEvent.keyboard('Cancel gets its own change.');
+    await expect(field).toHaveValue('Cancel gets its own change.');
   },
 };
 
 export const Filled: Story = {
-  args: { defaultValue: 'Red should mean something went wrong. A plan change is routine, and the label says what it is.' },
+  args: { defaultValue: 'How easy it is to cancel is a product decision, so it gets its own change. A quiet variant would let any agent make any action this hard to find.' },
 };
 
 export const WithoutHint: Story = {

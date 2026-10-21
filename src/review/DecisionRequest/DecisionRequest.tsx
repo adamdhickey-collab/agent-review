@@ -5,13 +5,11 @@ import {
   BOUNDARY_GROUP_LABEL,
   KIND_GROUP,
   KIND_STATUS,
-  RULE_EXCLUDES,
   type Boundary,
   type Check,
   type Gathered,
   type Option,
   type Reach,
-  type Sample,
   type Work,
 } from '../../data/delegation';
 import { DiffViewer } from '../DiffViewer/DiffViewer';
@@ -264,32 +262,6 @@ function CheckBadge({ check }: { check: Check }) {
   );
 }
 
-function Specimen({ sample, unlabelled }: { sample: Sample; unlabelled?: boolean }) {
-  /* The element as it renders today: the old value struck through in the
-     red, and the value that replaced it. `unlabelled` leaves its label
-     ("Plan") to the tile above. */
-  return (
-    <p className="ask__sample">
-      {unlabelled ? null : <span className="ask__sample-label">{sample.label}</span>}
-      <s className="ask__sample-old">
-        <span className="visually-hidden">was </span>
-        {sample.old}
-      </s>
-      {sample.replacement ? (
-        <>
-          <Icon name="arrow-right" size={12} className="ask__sample-arrow" />
-          <span className="ask__sample-new">
-            <span className="visually-hidden">, now </span>
-            {sample.replacement}
-          </span>
-        </>
-      ) : (
-        <span className="visually-hidden">, removed</span>
-      )}
-    </p>
-  );
-}
-
 /* What the agent found when it was asked for evidence: a short record with
    its labels in the margin, the way the permission card labels what it was
    asked. What it couldn't verify is said as plainly as what it could, and
@@ -312,7 +284,7 @@ function GatheredEvidence({ g, id }: { g: Gathered; id: string }) {
       </p>
       <dl className="ask__brief">
         <div>
-          <dt>Where this red is used</dt>
+          <dt>Where it is used</dt>
           <dd>
             <ul className="ask__gathered-list">
               {g.uses.map((u) => (
@@ -575,9 +547,11 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
             <p className="ask__rule-text">
               <Inline text={p.text ?? ''} />
             </p>
-            <p>
-              <strong>It doesn’t cover:</strong> {p.excludes ?? RULE_EXCLUDES}
-            </p>
+            {p.excludes ? (
+              <p>
+                <strong>It doesn’t cover:</strong> {p.excludes}
+              </p>
+            ) : null}
             {p.settles.length ? (
               <p>
                 <strong>It settles now:</strong> {plural(p.settles.length, 'change')} that match, on the{' '}
@@ -638,11 +612,11 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
             summary={
               <span className="ask__tried-sum">
                 <Icon name="status-passed" size={16} />
-                {tradeoff ? 'Lint and accessibility pass with either direction. Only this value moves.' : `All ${q.tried.length} automated checks passed, with either token.`}
+                {q.triedSays ?? `All ${q.tried.length} automated checks passed, with either answer.`}
               </span>
             }
           >
-            <ul className="ask__checks" aria-label={tradeoff ? 'The checks, with each direction in place' : 'The checks, with either token in place'}>
+            <ul className="ask__checks" aria-label={tradeoff ? 'The checks, with each direction in place' : 'The checks, with each answer in place'}>
               {q.tried.map((c) => (
                 <li key={c.name}>
                   <CheckBadge check={c} />
@@ -911,8 +885,6 @@ export interface DecisionReadProps {
 export function DecisionRead({ work, waiting = [], onAnswer }: DecisionReadProps) {
   const q = work.question!;
   const id = useId();
-  const sample = work.sample;
-  const twin = q.kind === 'intent' ? q.twin : undefined;
   const tradeoff = q.options.some((o) => o.benefits);
   const recommended = q.options.find((o) => o.recommended);
   const evidence = q.options.find((o) => o.asks);
@@ -992,7 +964,6 @@ export function DecisionRead({ work, waiting = [], onAnswer }: DecisionReadProps
         <div className="ask__more-body">
           {q.kind === 'intent' ? (
             <>
-              {!twin && sample ? <Specimen sample={sample} /> : null}
               <p>
                 <Inline text={q.found} />
               </p>
@@ -1040,8 +1011,7 @@ export function DecisionRead({ work, waiting = [], onAnswer }: DecisionReadProps
                   <ul className="ask__list">
                     {waiting.map((w) => (
                       <li key={w.id}>
-                        {w.screen}: {w.sample?.label.toLowerCase()}
-                        {w.question?.pattern === 'removed' ? ', struck through with nothing replacing it' : ''}
+                        {w.screen}: {w.sample ? `“${w.sample.action}”` : w.title}
                       </li>
                     ))}
                   </ul>

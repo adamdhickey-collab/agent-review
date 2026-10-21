@@ -21,7 +21,7 @@ function props(s: DelegationState, id: string): DecisionReadProps {
 const meta = {
   title: 'Review/DecisionRead',
   component: DecisionRead,
-  args: props(start, 'activity-red'),
+  args: props(start, 'cancel-action'),
   parameters: {
     a11y: { test: 'error' },
     docs: {
@@ -38,18 +38,20 @@ type Story = StoryObj<typeof meta>;
 
 export const TradeOff: Story = {
   parameters: {
-    docs: { description: { story: 'The billing run’s first question. It recommends separating the meanings, and says what it can’t determine (whether people rely on the red to notice a plan change) and what it inferred rather than checked. The four changes held behind the decision are named in the fold.' } },
+    docs: { description: { story: 'The billing run’s first question. It recommends a quiet variant, says why ghost won’t do, and says what it can’t determine (whether cancel is quiet on purpose, and who decides how easy it is to find) and what it inferred rather than checked. The three changes held behind the decision are named in the fold.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const read = canvas.getByRole('list', { name: 'The agent’s read' });
-    await expect(read).toHaveTextContent(/^Recommended\s*Separate the meanings/);
-    await expect(read).toHaveTextContent(/What I can’t determine\s*Whether people who use the billing activity screen rely on the red/);
+    await expect(read).toHaveTextContent(/^Recommended\s*Add a quiet variant/);
+    await expect(read).toHaveTextContent(/Ghost, the nearest, is a full-height control/);
+    await expect(read).toHaveTextContent(/What I can’t determine\s*Whether “Cancel subscription” is quiet on purpose, and who decides how easy it is to find/);
     await expect(read).toHaveTextContent('That could change this recommendation.');
     await expect(read).toHaveTextContent(/Inferred, not checked:/);
-    await expect(canvas.getByText(/4 changes are held until you decide/)).not.toBeVisible();
+    await expect(canvas.getByText(/3 changes are held until you decide/)).not.toBeVisible();
     await userEvent.click(canvas.getByText('The evidence and the code'));
-    await expect(canvas.getByText(/4 changes are held until you decide/)).toBeVisible();
+    await expect(canvas.getByText(/3 changes are held until you decide/)).toBeVisible();
+    await expect(canvas.getByText(/Plan card: “Downgrade plan”/)).toBeVisible();
   },
 };
 
@@ -64,20 +66,20 @@ export const RequestEvidence: Story = {
 };
 
 export const AfterEvidence: Story = {
-  args: props(play(start, { type: 'answer', id: 'activity-red', option: 'evidence', makeRule: false }), 'activity-red'),
+  args: props(play(start, { type: 'answer', id: 'cancel-action', option: 'evidence', makeRule: false }), 'cancel-action'),
   parameters: {
     docs: {
       description: {
         story:
-          'After the agent gathered the evidence it was asked for: where this red is used, what each direction would change, what depends on it, what it could not verify (nobody’s usage, because the repository has none), and a way to find out, marked proposed and not run. The way to ask for more is gone.',
+          'After the agent gathered the evidence it was asked for: every action built by hand on the billing screens, what each direction would change, what depends on it, what it could not verify (why cancel was made quiet, and nobody’s usage, because the repository has none), and a way to find out, marked proposed and not run. The way to ask for more is gone.',
       },
     },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const found = canvas.getByRole('region', { name: 'What the agent found when you asked' });
-    await expect(found).toHaveTextContent(/5 places on 4 screens/);
-    await expect(found).toHaveTextContent(/There is no usage data or research about it in the repository\./);
+    await expect(found).toHaveTextContent(/4 places on 2 screens/);
+    await expect(found).toHaveTextContent(/There is no usage data in the repository\./);
     await expect(found).toHaveTextContent(/Proposed, not run\./);
     await expect(canvas.queryByRole('button', { name: 'Request evidence' })).toBeNull();
   },

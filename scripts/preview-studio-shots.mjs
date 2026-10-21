@@ -31,7 +31,9 @@ fs.mkdirSync(out, { recursive: true });
 
 const W = 1440;
 const H = 1000;
-const REASON = 'Support scans this feed for red during renewal week.';
+/* Dana's reason, as data/billing.ts's DANAS_REASON has it. */
+const REASON =
+  'The grey link is from a retention test last year that ended without a decision, and nobody turned it off. How easy it is to cancel is a product decision, so it gets its own change. A quiet Button would let any agent make any action this hard to find.';
 const browser = await chromium.launch();
 const problems = [];
 
@@ -74,17 +76,17 @@ for (const theme of ['light', 'dark']) {
   await page.goto(`${base}#/`, { waitUntil: 'networkidle' });
   await tall(page, `1-billing-before-${theme}.png`, '.studio');
 
-  await page.getByRole('button', { name: /^Select and preview\s+Separate the meanings$/ }).click();
-  await tall(page, `2-billing-separate-${theme}.png`, '.studio');
+  await page.getByRole('button', { name: /^Select and preview\s+Add a quiet variant$/ }).click();
+  await tall(page, `2-billing-quiet-${theme}.png`, '.studio');
 
-  await page.getByRole('button', { name: /^Select and preview\s+Keep the red for now$/ }).click();
+  await page.getByRole('button', { name: /^Select and preview\s+Make it a Button in its own change$/ }).click();
   await page.getByRole('textbox', { name: 'Your reason' }).fill(REASON);
   await page.getByText('Use this decision for similar cases').click();
-  await tall(page, `3-billing-keep-${theme}.png`, '.studio');
+  await tall(page, `3-billing-own-change-${theme}.png`, '.studio');
 
   /* The real window, scrolled to the second direction: the preview has
      followed it. */
-  await page.getByRole('button', { name: /^Selected\s+Keep the red for now$/ }).scrollIntoViewIfNeeded();
+  await page.getByRole('button', { name: /^Selected\s+Make it a Button in its own change$/ }).scrollIntoViewIfNeeded();
   await settle(page);
   await page.screenshot({ path: path.join(out, `3b-billing-follow-${theme}.png`) });
   console.log(`  3b-billing-follow-${theme}.png  ${W}x${H}`);

@@ -23,16 +23,19 @@ import './DecisionPreview.css';
    that fits a wide screen to the column) and the mark (ComponentPreview's
    mark.ts), not a toolbar.
 
-   What makes the picture honest is where its colors come from. The element
+   What makes the picture honest is where its look comes from. The element
    in question is drawn unstyled, carrying the class its lines are written
    against (Sketch.tsx), and the preview writes those lines onto it: the
-   change's own `before` values for the screen as it is (the literal
-   #b42318, from the old billing app), a direction's `after` values for the
-   screen as proposed (var(--color-text-muted), resolved by the product's
-   tokens). A token a direction adds (--radius-full) is declared on the
-   frame for its preview and nowhere else. So the red in the preview is the
-   red the code draws, and teal, the review's color, is only ever the
-   annotation around it.
+   change's own `before` values for the screen as it is (the literals
+   #6a6a76 and 0.75rem, from the old billing app), a direction's `after`
+   values for the screen as proposed (var(--color-text-muted), resolved by
+   the product's tokens). A direction that changes markup rather than
+   declarations (a quiet Button, the system's Button) says so (Option.draws)
+   and the sketch draws it; one that draws a later change, not this one,
+   says that too, beside "Not applied". A token a direction adds
+   (--radius-full) is declared on the frame for its preview and nowhere
+   else. So the grey in the preview is the grey the code draws, and teal,
+   the review's color, is only ever the annotation around it.
 
    The toolbar says which screen this is and whether the frame shows the
    interface as it is or as proposed, in words, never by color alone; once a
@@ -44,14 +47,15 @@ import './DecisionPreview.css';
    The annotation is a thin accent outline with a small tag, drawn above the
    product in the frame (mark.ts), so the product's own elements are never
    restyled for the review. It is drawn in the light scheme whatever the
-   review's theme, because the product under it always is. A twin, the same
-   red elsewhere whose meaning was settled, gets a dashed neutral one.
+   review's theme, because the product under it always is. A twin, the
+   action beside it that the system's Button already draws, gets a dashed
+   neutral one.
 
-   What the picture can't say: for two reds, what each one means and where
-   it comes from, as a caption under each screen in the screens' own grid,
-   led by the tag its mark carries; under the frame, for a shared component,
-   every screen it reaches, which of them have a visual baseline, and which
-   move under the answer being previewed. */
+   What the picture can't say: what each marked element is and where it
+   comes from, as a caption under the screen, led by the tag its mark
+   carries; under the frame, for a shared component, every screen it
+   reaches, which of them have a visual baseline, and which move under the
+   answer being previewed. */
 
 export type PreviewView = 'current' | 'proposed';
 
@@ -192,7 +196,7 @@ export function DecisionPreview({ work, option, view, onViewChange, position = 1
   /* The tags the marks carry, which their captions repeat, so the caption
      under a screen is found by the words on the mark above it. */
   const decisionTag = `Decision ${position}`;
-  const twinTag = twin ? `Same red: ${twin.means.toLowerCase()}` : '';
+  const twinTag = twin?.tag ?? '';
 
   return (
     <section className="studio-preview" aria-labelledby={`${id}-screen`}>
@@ -215,6 +219,7 @@ export function DecisionPreview({ work, option, view, onViewChange, position = 1
                 <Badge className="studio-preview__unapplied" icon="clock">
                   Not applied
                 </Badge>
+                {option?.draws?.note ? <span className="studio-preview__note">{option.draws.note}</span> : null}
               </>
             ) : (
               <>
@@ -248,7 +253,7 @@ export function DecisionPreview({ work, option, view, onViewChange, position = 1
                 captions={
                   twin && work.sample
                     ? [
-                        <Caption key="decision" tone="decision" tag={decisionTag} means={q.means ?? ''} where={work.screen} says={q.says ?? ''} token={`Hard-coded ${work.lines[0]?.before ?? ''}, from the old billing app`} />,
+                        <Caption key="decision" tone="decision" tag={decisionTag} means={q.means ?? ''} where={work.screen} says={q.says ?? ''} token={q.origin ?? ''} />,
                         <Caption key="twin" tone="twin" tag={twinTag} means={twin.means} where={twin.screen} says={twin.says} token={twin.token} />,
                       ]
                     : undefined
@@ -266,10 +271,10 @@ export function DecisionPreview({ work, option, view, onViewChange, position = 1
   );
 }
 
-/* What a red means, under the screen it is on (Sketch.tsx places it in the
-   screens' own grid): the mark's tag, repeated, so the caption is found by
-   the words on the mark; the meaning and the screen; the sentence; and the
-   token or literal, quietly. Until 2026-10-11 (later still) this was a key
+/* What a marked element is, under the screen it is on (Sketch.tsx places it
+   in the screen's own grid): the mark's tag, repeated, so the caption is
+   found by the words on the mark; what it is and the screen; the sentence;
+   and where it comes from, or what draws it, quietly. Until 2026-10-11 (later still) this was a key
    under the whole frame, two columns of its own width led by small drawn
    swatches of the two marks, and a reader could not tell which column was
    about which screen. */

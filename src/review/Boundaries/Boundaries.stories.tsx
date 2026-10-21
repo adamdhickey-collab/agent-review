@@ -6,7 +6,7 @@ import { play } from '../../data/delegation';
 import { Boundaries } from './Boundaries';
 
 const start = initialDelegation();
-const withRule = play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: true });
+const withRule = play(start, { type: 'answer', id: 'cancel-action', option: 'quiet', makeRule: true });
 const revoked = play(withRule, { type: 'revoke-rule', id: 'rule-1' });
 
 const meta = {
@@ -54,14 +54,14 @@ export const AGroupOpen: Story = {
     await expect(asks).toHaveTextContent('Asks for your judgment2 boundaries');
     await userEvent.click(canvas.getByText('Asks for your judgment'));
     await expect(asks.open).toBe(true);
-    await expect(canvas.getByText('When no token has the value, so a swap would move pixels.')).toBeVisible();
+    await expect(canvas.getByText('When no token or component draws it as it is.')).toBeVisible();
   },
 };
 
 export const WithARule: Story = {
   args: { rules: withRule.rules, work: withRule.work },
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByText(/3 changes, on the invoice detail, plan card, billing settings/)).toBeInTheDocument();
+    await expect(within(canvasElement).getByText(/2 changes, on the plan card\./)).toBeInTheDocument();
   },
 };
 
@@ -70,12 +70,12 @@ export const EditingARule: Story = {
   parameters: { docs: { description: { story: 'Edit: what the rule covers, as two boxes. Save is refused with neither checked, and says to revoke instead.' } } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByText('A value struck through beside the one that replaced it'));
+    await userEvent.click(canvas.getByText('An action that ends or reduces a subscription'));
     await expect(canvas.getByRole('button', { name: 'Save' })).toBeDisabled();
     await expect(canvas.getByText(/Choose at least one/)).toBeInTheDocument();
-    await userEvent.click(canvas.getByText('A value struck through with nothing replacing it'));
+    await userEvent.click(canvas.getByText('An action that removes something the customer set up'));
     await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
-    await expect(args.onEditRule).toHaveBeenCalledWith('rule-1', ['removed']);
+    await expect(args.onEditRule).toHaveBeenCalledWith('rule-1', ['removal']);
     await expect(canvas.getByRole('button', { name: 'Edit' })).toHaveFocus();
   },
 };

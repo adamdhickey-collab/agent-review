@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import type { ReactNode } from 'react';
 import { StoreProvider } from '../../app/store';
-import { initialDelegation } from '../../data/billing';
+import { DANAS_REASON, initialDelegation } from '../../data/billing';
 import { initialTableRun } from '../../data/table';
 import { account, play, type DelegationState } from '../../data/delegation';
 import { DelegationScreen } from './DelegationScreen';
@@ -13,12 +13,12 @@ import { DelegationScreen } from './DelegationScreen';
    from the start to the quiet state, and asserts each state change. */
 
 const start = initialDelegation();
-const withRule = play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: true });
-const answeredOnce = play(start, { type: 'answer', id: 'activity-red', option: 'separate', makeRule: false });
+const withRule = play(start, { type: 'answer', id: 'cancel-action', option: 'quiet', makeRule: true });
+const answeredOnce = play(start, { type: 'answer', id: 'cancel-action', option: 'own-change', makeRule: false });
 const quiet = play(
   withRule,
   { type: 'answer', id: 'meter-radius', option: 'add', makeRule: false },
-  { type: 'answer', id: 'invoice-removed', option: 'separate', makeRule: true },
+  { type: 'answer', id: 'remove-card', option: 'quiet', makeRule: true },
 );
 
 function inStore(state: DelegationState) {
@@ -50,7 +50,7 @@ type Story = StoryObj<typeof meta>;
 export const Initial: Story = {
   decorators: [inStore(start)],
   parameters: {
-    docs: { description: { story: 'The run as the person finds it: seven changes made and checked, two decisions, four changes held behind the first. The totals are counted from the work, and the work accounts for every literal the lint reported. Of the seven, the three with something to look at (an inconclusive check, a fix after a failed first try, a red chosen by meaning) are rows of their own; the four routine swaps are folded into one row.' } },
+    docs: { description: { story: 'The run as the person finds it: seven changes made and checked, two decisions, three changes held behind the first. The totals are counted from the work, and the work accounts for every literal the lint reported. Of the seven, the three with something to look at (an inconclusive check, a fix after a failed first try, a red chosen by meaning) are rows of their own; the four routine swaps are folded into one row.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -60,11 +60,11 @@ export const Initial: Story = {
     await expect(a.valuesMade + a.literalsLeft).toBe(start.brief.literals);
     await expect(canvas.getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
     await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('26 merged10 waiting on your 2 decisions');
-    await expect(canvas.getByRole('list', { name: 'How the work was handled' })).toHaveTextContent('7 proceeded on its own1 needs your judgment · 4 more wait on it1 needs your approval');
+    await expect(canvas.getByRole('list', { name: 'How the work was handled' })).toHaveTextContent('7 proceeded on its own1 needs your judgment · 3 more wait on it1 needs your approval');
     await expect(canvas.queryByText(/settled by you/)).toBeNull();
     await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveTextContent('2');
     await expect(canvas.getByRole('heading', { name: /Completed work/ })).toHaveTextContent('7');
-    await expect(canvas.getByText(/4 changes are held until you decide/)).toBeInTheDocument();
+    await expect(canvas.getByText(/3 changes are held until you decide/)).toBeInTheDocument();
     await expect(canvas.getByText('Simulated')).toBeInTheDocument();
     await expect(canvas.getByText('4 routine swaps')).toBeInTheDocument();
     await expect(canvas.queryByText('On its own')).toBeNull();
@@ -74,24 +74,24 @@ export const Initial: Story = {
 export const AfterARule: Story = {
   decorators: [inStore(withRule)],
   parameters: {
-    docs: { description: { story: 'The first question answered with the diff pair, and made a rule. The rule settled the three waiting changes it covers and is listed under the boundaries with what it has done. The removed line item is close to the rule but outside it, so it asks, and says so.' } },
+    docs: { description: { story: 'The first question answered with the recommended direction, a quiet variant, and made a rule. The rule settled the two waiting changes it covers and is listed under the boundaries with what it has done. Removing a card is close to the rule but outside it, so it asks, and says so.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('11 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
-    await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('34 merged2 waiting on your 2 decisions');
-    await expect(canvas.getByRole('list', { name: 'How the work was handled' })).toHaveTextContent('7 proceeded on its own1 needs your judgment1 needs your approval4 settled by you');
+    await expect(canvas.getByText('10 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
+    await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('33 merged3 waiting on your 2 decisions');
+    await expect(canvas.getByRole('list', { name: 'How the work was handled' })).toHaveTextContent('7 proceeded on its own1 needs your judgment1 needs your approval3 settled by you');
     await expect(canvas.getByRole('button', { name: 'See the decision record' })).toBeInTheDocument();
-    const record = canvas.getByRole('article', { name: 'Separate the meanings' });
+    const record = canvas.getByRole('article', { name: 'Add a quiet variant' });
     await expect(record).toHaveTextContent(/Your reason.*The agent’s draft, kept as written/);
-    await expect(record).toHaveTextContent('Accepted trade-offOne meaning for red, over a signal people already know.');
-    await expect(record).toHaveTextContent(/Follow-up.*Check the neutral style with people who use the billing activity screen.*Open/);
-    await expect(record).toHaveTextContent(/Kept as your rule\. 3 later changes followed it/);
-    await expect(canvas.getByText(/Follow-up from your decision at 14:26: check the neutral style/)).toBeInTheDocument();
+    await expect(record).toHaveTextContent('Accepted trade-offA job that changes nothing visible, over a system with no way to make an action hard to find.');
+    await expect(record).toHaveTextContent(/Follow-up.*Decide with whoever owns it how easy “Cancel subscription” should be to find\..*Open/);
+    await expect(record).toHaveTextContent(/Kept as your rule\. 2 later changes followed it/);
+    await expect(canvas.getByText(/Follow-up from your decision at 14:26: decide with whoever owns it/)).toBeInTheDocument();
     /* The case outside the rule is the second decision. */
     await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
     await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
-    await expect(canvas.getAllByText('Your rule')).toHaveLength(3);
+    await expect(canvas.getAllByText('Your rule')).toHaveLength(2);
     await expect(canvas.getByText('Active')).toBeInTheDocument();
   },
 };
@@ -99,23 +99,23 @@ export const AfterARule: Story = {
 export const AnsweredOnce: Story = {
   decorators: [inStore(answeredOnce)],
   parameters: {
-    docs: { description: { story: 'The same answer, given once. A one-time answer does not become standing permission, so the four changes that were waiting each ask, and each says why: the same question was answered once, for another change.' } },
+    docs: { description: { story: 'Dana’s direction, given once. A one-time answer does not become standing permission, so the three changes that were waiting each ask, and each says why: the same question was answered once, for another change.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('8 changes made and checked. 5 decisions need you.')).toBeInTheDocument();
-    await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('28 merged8 waiting on your 5 decisions');
-    /* One decision at a time: the four that were waiting are the second to
-       the fifth, and each says why it asks. */
-    await expect(canvas.getByText('Decision 1 of 5')).toBeInTheDocument();
+    await expect(canvas.getByText('8 changes made and checked. 4 decisions need you.')).toBeInTheDocument();
+    await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('29 merged7 waiting on your 4 decisions');
+    /* One decision at a time: the three that were waiting are the second to
+       the fourth, and each says why it asks. */
+    await expect(canvas.getByText('Decision 1 of 4')).toBeInTheDocument();
     await expect(canvas.getByRole('button', { name: 'Previous decision' })).toBeDisabled();
-    for (let n = 2; n <= 5; n++) {
+    for (let n = 2; n <= 4; n++) {
       await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
-      await expect(canvas.getByText(`Decision ${n} of 5`)).toBeInTheDocument();
+      await expect(canvas.getByText(`Decision ${n} of 4`)).toBeInTheDocument();
       await expect(canvas.getByText(/A one-time decision doesn’t carry over to another change/)).toBeInTheDocument();
     }
     await expect(canvas.getByRole('button', { name: 'Next decision' })).toBeDisabled();
-    await expect(canvas.getByRole('article', { name: 'Separate the meanings' })).toHaveTextContent(/Not kept for similar cases\./);
+    await expect(canvas.getByRole('article', { name: 'Make it a Button in its own change' })).toHaveTextContent(/Not kept for similar cases\./);
     await expect(canvas.getByText('No rules yet')).toBeInTheDocument();
   },
 };
@@ -129,10 +129,10 @@ export const Quiet: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('Nothing needs your attention.')).toBeInTheDocument();
     await expect(canvas.queryByRole('heading', { name: /Needs you/ })).toBeNull();
-    await expect(canvas.getByRole('heading', { name: /Completed work/ })).toHaveTextContent('13');
+    await expect(canvas.getByRole('heading', { name: /Completed work/ })).toHaveTextContent('12');
     await expect(canvas.getByText('All 36')).toBeInTheDocument();
     await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('36 merged');
-    await expect(canvas.getByRole('list', { name: 'How the work was handled' })).toHaveTextContent('7 proceeded on its own0 need your judgment0 need your approval6 settled by you');
+    await expect(canvas.getByRole('list', { name: 'How the work was handled' })).toHaveTextContent('7 proceeded on its own0 need your judgment0 need your approval5 settled by you');
   },
 };
 
@@ -142,7 +142,7 @@ export const TheWholeLoop: Story = {
     docs: {
       description: {
         story:
-          'Presses through the loop from the start: inspect work the agent did on its own; answer the first question and make the answer a rule; see the rule settle three changes and the case outside it pause; widen the rule, which settles that case; revert one change the rule made; revoke the rule; allow the new token once; and arrive at the quiet state. Each step asserts the counts, the statuses and what the person can do next.',
+          'Presses through the loop from the start: inspect work the agent did on its own; decide the first question against the recommendation and make the decision a rule; see the rule settle two changes and the case outside it pause; widen the rule, which settles that case; revert one change the rule made; revoke the rule; allow the new token once; and arrive at the quiet state. Each step asserts the counts, the statuses and what the person can do next.',
       },
     },
   },
@@ -157,39 +157,41 @@ export const TheWholeLoop: Story = {
       await expect(within(failed).getByRole('button', { name: 'Revert this change' })).toBeVisible();
     });
 
-    await step('Answer, and make the answer a rule', async () => {
-      await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Separate the meanings$/ }));
-      await expect(canvas.getByText('If you apply “Separate the meanings”, the agent will:')).toHaveFocus();
-      /* Selecting it previews it, and says so. */
-      await expect(canvas.getByText(/Proposed:/)).toHaveTextContent('Proposed: Separate the meanings');
+    await step('Decide against the recommendation, and make the decision a rule', async () => {
+      await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Make it a Button in its own change$/ }));
+      await expect(canvas.getByText('If you apply “Make it a Button in its own change”, the agent will:')).toHaveFocus();
+      /* Selecting it previews it, and says so, and says the preview is the change it opens. */
+      await expect(canvas.getByText(/Proposed:/)).toHaveTextContent('Proposed: Make it a Button in its own change');
       await expect(canvas.getByText('Not applied')).toBeInTheDocument();
+      await expect(canvas.getByText('As its own change will draw it')).toBeInTheDocument();
       const apply = canvas.getByRole('button', { name: 'Apply' });
       await userEvent.click(canvas.getByText('Use this decision for similar cases'));
-      await expect(canvas.getByText(/It settles now:/).closest('p')).toHaveTextContent('3 changes that match');
+      await expect(canvas.getByText(/It settles now:/).closest('p')).toHaveTextContent('2 changes that match, on the plan card');
       await userEvent.click(apply);
-      await expect(canvas.getByText(/Decided: separate the meanings, and made a rule\. The agent applied it and recorded your reason\. Your rule settled 3 waiting changes\. 1 change is asking now\./)).toBeInTheDocument();
+      await expect(canvas.getByText(/Decided: make it a button in its own change, and made a rule\. The agent applied it and recorded your reason\. Your rule settled 2 waiting changes\. 1 change is asking now\./)).toBeInTheDocument();
       await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveFocus();
-      await expect(canvas.getByText('11 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
+      await expect(canvas.getByText('10 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
     });
 
     await step('The case outside the rule pauses, and says why', async () => {
       await expect(canvas.getByText('Decision 1 of 2')).toBeInTheDocument();
       await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
       await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
-      await expect(canvas.getByRole('list', { name: 'The two reds' })).toHaveTextContent(/Removed value · Invoice detail\s*Red means this value was removed\./);
+      await expect(canvas.getByRole('heading', { name: /Keep “Remove card” looking as it does/ })).toBeInTheDocument();
+      await expect(canvas.getByRole('list', { name: 'What each marked element is' })).toHaveTextContent(/Hand-built action · Billing settings\s*Small grey text, built by hand\./);
     });
 
     await step('Widen the rule, and it settles that case', async () => {
       await userEvent.click(canvas.getByRole('button', { name: 'Edit' }));
-      await userEvent.click(canvas.getByText('A value struck through with nothing replacing it'));
+      await userEvent.click(canvas.getByText('An action that removes something the customer set up'));
       await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
       await expect(canvas.getByText(/Rule saved\. Your rule settled 1 waiting change\./)).toBeInTheDocument();
-      await expect(canvas.getByText('12 changes made and checked. 1 decision needs you.')).toBeInTheDocument();
+      await expect(canvas.getByText('11 changes made and checked. 1 decision needs you.')).toBeInTheDocument();
       await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('35 merged1 waiting on your decision');
     });
 
     await step('Revert one change the rule made, and the history keeps both', async () => {
-      const seats = Array.from(canvasElement.querySelectorAll<HTMLDetailsElement>('.record')).find((r) => r.textContent?.includes('The changed seat count'))!;
+      const seats = Array.from(canvasElement.querySelectorAll<HTMLDetailsElement>('.record')).find((r) => r.textContent?.includes('“Remove seats” on the plan card'))!;
       seats.open = true;
       await userEvent.click(within(seats).getByRole('button', { name: 'Revert this change' }));
       await expect(seats.dataset.status).toBe('reverted');
@@ -207,7 +209,7 @@ export const TheWholeLoop: Story = {
       await expect(canvas.getByText('Revoked')).toBeInTheDocument();
       await expect(canvas.getByText(/It no longer applies/)).toHaveFocus();
       await expect(canvas.queryByRole('button', { name: 'Edit' })).toBeNull();
-      await expect(canvas.getAllByText('Your rule')).toHaveLength(4);
+      await expect(canvas.getAllByText('Your rule')).toHaveLength(3);
     });
 
     await step('Allow the new token once, and reach the quiet state', async () => {
@@ -217,7 +219,7 @@ export const TheWholeLoop: Story = {
       await waitFor(() => expect(canvas.getByText('Nothing needs your attention.')).toBeInTheDocument());
       await expect(canvas.getByText('Nothing needs your attention.').closest('p')).toHaveFocus();
       await expect(canvas.getByText('Allowed once')).toBeInTheDocument();
-      await expect(canvas.getByRole('heading', { name: /Completed work/ })).toHaveTextContent('13');
+      await expect(canvas.getByRole('heading', { name: /Completed work/ })).toHaveTextContent('12');
     });
 
     await step('Reset puts the run back at its start', async () => {
@@ -228,37 +230,38 @@ export const TheWholeLoop: Story = {
   },
 };
 
-/* The other direction, kept as a rule, with the person's own reason: as
-   real a decision as the recommended one, with its own work and its own
-   record. */
-const keptRed = play(start, { type: 'answer', id: 'activity-red', option: 'keep', makeRule: true, reason: 'Support scans this feed for red during renewal week.' });
+/* The direction the agent did not recommend, kept as a rule, with the
+   person's own reason, which carries the one thing the agent could not
+   know: as real a decision as the recommended one, with its own work and
+   its own record. */
+const ownChange = play(start, { type: 'answer', id: 'cancel-action', option: 'own-change', makeRule: true, reason: DANAS_REASON });
 
-export const KeepTheRed: Story = {
-  decorators: [inStore(keptRed)],
+export const ItsOwnChange: Story = {
+  decorators: [inStore(ownChange)],
   parameters: {
     docs: {
       description: {
         story:
-          'The direction the agent did not recommend, chosen and kept as a rule, in the person’s own words. Nothing about it is an error: the agent kept the red, added the label, wrote the exception down and opened a review, and the record says what was accepted, what is still a risk, and that the reason is the person’s. The three changes the rule covers followed it, and each of their records names the decision.',
+          'The direction the agent did not recommend, chosen and kept as a rule, in the person’s own words. Nothing about it is an error: the agent moved the link’s values onto tokens and left it as built, wrote the exception down with an end date, and opened the change that makes it a Button, and the record says what was accepted, what is still a risk, and that the reason is the person’s. The two changes the rule covers followed it, and each of their records names the decision.',
       },
     },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('11 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
-    const record = canvas.getByRole('article', { name: 'Keep the red for now' });
-    await expect(record).toHaveTextContent(/Your reasonSupport scans this feed for red during renewal week\. In your words/);
-    await expect(record).toHaveTextContent('Accepted trade-offA familiar signal now, over one meaning for red.');
-    await expect(record).toHaveTextContent(/Remaining riskRed still means two things/);
-    await expect(record).toHaveTextContent(/Wrote the exception into the design system’s list of exceptions\./);
-    await expect(record).toHaveTextContent(/stays red for now, with a label that says what happened/);
-    await expect(canvas.getByText(/Follow-up from your decision at 14:26: review this exception/)).toBeInTheDocument();
+    await expect(canvas.getByText('10 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
+    const record = canvas.getByRole('article', { name: 'Make it a Button in its own change' });
+    await expect(record).toHaveTextContent(/Your reasonThe grey link is from a retention test last year.*In your words/);
+    await expect(record).toHaveTextContent('Accepted trade-offA system with no way to make an action hard to find, over finishing every control in this job.');
+    await expect(record).toHaveTextContent(/Remaining risk“Cancel subscription” stays hard to find until its own change ships, on Oct 15\./);
+    await expect(record).toHaveTextContent(/Wrote the exception down, ending Oct 15\./);
+    await expect(record).toHaveTextContent(/never gets a quiet variant: it stays as built/);
+    await expect(canvas.getByText(/Follow-up from your decision at 14:26: make “Cancel subscription” a Button in its own change, by Oct 15/)).toBeInTheDocument();
     const rule = canvasElement.querySelector('.rule') as HTMLElement;
-    await expect(rule).toHaveTextContent(/WhySupport scans this feed for red during renewal week\./);
-    const seats = Array.from(canvasElement.querySelectorAll<HTMLDetailsElement>('.record')).find((r) => r.textContent?.includes('The changed seat count'))!;
-    seats.open = true;
-    await expect(seats).toHaveTextContent(/Followed your rule, from your decision at 14:26 \(keep the red for now\)/);
-    await expect(seats).toHaveTextContent(/docs\/design-system\/exceptions\.md/);
+    await expect(rule).toHaveTextContent(/WhyThe grey link is from a retention test last year/);
+    const downgrade = Array.from(canvasElement.querySelectorAll<HTMLDetailsElement>('.record')).find((r) => r.textContent?.includes('“Downgrade plan” on the plan card'))!;
+    downgrade.open = true;
+    await expect(downgrade).toHaveTextContent(/Followed your rule, from your decision at 14:26 \(make it a button in its own change\)/);
+    await expect(downgrade).toHaveTextContent(/docs\/design-system\/exceptions\.md/);
   },
 };
 
@@ -283,7 +286,7 @@ export const DecisionFirst: Story = {
     const canvas = within(canvasElement);
     const before = (a: Element, b: Element) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
     const lead = canvas.getByText('7 changes made and checked. 2 decisions need you.');
-    const preview = canvas.getByRole('region', { name: 'Preview of Billing activity BillingActivity.tsx' });
+    const preview = canvas.getByRole('region', { name: 'Preview of Billing settings BillingSettings.tsx' });
     const needs = canvas.getByRole('heading', { name: /Needs you/ });
     const checks = canvas.getByRole('list', { name: 'Checks run on every change' });
     const done = canvas.getByRole('heading', { name: /Completed work/ });
@@ -326,23 +329,23 @@ const selectThen = (title: string) => async ({ canvasElement }: { canvasElement:
   await expect(canvas.getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
 };
 
-export const SeparateSelected: Story = {
+export const QuietSelected: Story = {
   decorators: [inStore(start)],
-  parameters: { docs: { description: { story: 'The recommended direction selected: the old plan neutral in the preview with its label, the failure still red, and the plan, the reason and Apply in the inspector.' } } },
-  play: selectThen('Separate the meanings'),
+  parameters: { docs: { description: { story: 'The recommended direction selected: in the preview, “Cancel subscription” as a quiet Button, which looks exactly as the link did, and the plan, the reason and Apply in the inspector.' } } },
+  play: selectThen('Add a quiet variant'),
 };
 
-export const KeepSelected: Story = {
+export const OwnChangeSelected: Story = {
   decorators: [inStore(start)],
-  parameters: { docs: { description: { story: 'The other direction selected: the old plan still red in the preview, with the same label, and its own plan and reason.' } } },
-  play: selectThen('Keep the red for now'),
+  parameters: { docs: { description: { story: 'The other direction selected: in the preview, “Cancel subscription” as the system’s Button, the way its own change will draw it, which the preview says; and its own plan and reason.' } } },
+  play: selectThen('Make it a Button in its own change'),
 };
 
-export const KeepSelectedDark: Story = {
+export const OwnChangeSelectedDark: Story = {
   decorators: [inStore(start)],
   globals: { theme: 'dark' },
   parameters: { docs: { description: { story: 'The same, in the dark theme. The product in the preview stays light, as Relay does.' } } },
-  play: selectThen('Keep the red for now'),
+  play: selectThen('Make it a Button in its own change'),
 };
 
 export const SwitchingKeepsTheWork: Story = {
@@ -352,14 +355,14 @@ export const SwitchingKeepsTheWork: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Keep the red for now$/ }));
+    await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Make it a Button in its own change$/ }));
     await userEvent.click(canvas.getByRole('radio', { name: 'Current' }));
     await expect(canvas.getByText('Current interface')).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
     await expect(canvas.getByRole('heading', { name: 'Add a token for a fully round corner?' })).toBeInTheDocument();
     await expect(canvas.getByText('Current interface')).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'Previous decision' }));
-    await expect(canvas.getByRole('button', { name: /^Selected\s+Keep the red for now$/ })).toHaveAttribute('aria-pressed', 'true');
+    await expect(canvas.getByRole('button', { name: /^Selected\s+Make it a Button in its own change$/ })).toHaveAttribute('aria-pressed', 'true');
     await expect(canvas.getByRole('radio', { name: 'Current' })).toHaveAttribute('aria-checked', 'true');
   },
 };
@@ -371,15 +374,15 @@ export const SwitchingKeepsTheWork: Story = {
 export const StartHere: Story = {
   decorators: [inStore(start)],
   parameters: {
-    docs: { description: { story: 'The first decision, before anything is chosen: “Start here”, then compare the two meanings, choose a direction, preview it, and apply it, the first current. Selecting a direction marks the first three done and makes Apply current. After the first decision is applied, the line over the next one says “Next”.' } },
+    docs: { description: { story: 'The first decision, before anything is chosen: “Start here”, then compare the two actions, choose a direction, preview it, and apply it, the first current. Selecting a direction marks the first three done and makes Apply current. After the first decision is applied, the line over the next one says “Next”.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const cue = canvas.getByRole('region', { name: 'Start here' });
     const current = () => cue.querySelector('[aria-current="step"]');
-    await expect(within(cue).getAllByRole('listitem').map((li) => li.textContent)).toEqual(['1Compare the two meanings', '2Choose a direction', '3Preview it', '4Apply it']);
-    await expect(current()).toHaveTextContent('Compare the two meanings');
-    await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Keep the red for now$/ }));
+    await expect(within(cue).getAllByRole('listitem').map((li) => li.textContent)).toEqual(['1Compare the two actions', '2Choose a direction', '3Preview it', '4Apply it']);
+    await expect(current()).toHaveTextContent('Compare the two actions');
+    await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Make it a Button in its own change$/ }));
     await expect(current()).toHaveTextContent('Apply it');
     await expect(cue.querySelectorAll('[data-done]')).toHaveLength(3);
     await expect(cue).toHaveTextContent('Choose a direction (done)');
@@ -413,7 +416,7 @@ export const SharedTable: Story = {
     await expect(canvas.getByRole('list', { name: 'Where the fixes are' })).toHaveTextContent('2 merged1 waiting on your decision');
     const runs = canvas.getByRole('navigation', { name: 'Sample runs' });
     await expect(within(runs).getByRole('link', { name: /Shared table/ })).toHaveAttribute('aria-current', 'page');
-    await expect(within(runs).getByRole('link', { name: /Two reds/ })).toHaveAttribute('href', '#/');
+    await expect(within(runs).getByRole('link', { name: /Quiet cancel/ })).toHaveAttribute('href', '#/');
     await expect(canvas.getByText('Needs approval')).toBeInTheDocument();
     await expect(canvas.getByText(/One stopped at the edge: the fix is in a shared component\./)).toBeInTheDocument();
     await expect(canvas.getByText('2 routine fixes')).toBeInTheDocument();
