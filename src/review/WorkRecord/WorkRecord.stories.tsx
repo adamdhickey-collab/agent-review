@@ -44,7 +44,7 @@ export const OnItsOwn: Story = {
 
 export const Closed: Story = {
   args: { open: false },
-  parameters: { docs: { description: { story: 'The record as a row in the completed work: one mark, its worst check, beside the title, and a grey line under the title with where, how many and the commit. Since 2026-10-09 the three checks are not three marks in columns; a check that did not plainly pass is said in the grey line instead.' } } },
+  parameters: { docs: { description: { story: 'The record as a row in the completed work: one mark, its worst check, beside the title, and a gray line under the title with where, how many and the commit. Since 2026-10-09 the three checks are not three marks in columns; a check that did not plainly pass is said in the gray line instead.' } } },
   play: async ({ canvasElement }) => {
     const summary = canvasElement.querySelector('summary')!;
     await expect(summary.querySelectorAll('.record__mark')).toHaveLength(1);
@@ -60,7 +60,7 @@ export const ChosenByMeaning: Story = {
 
 export const FixedAfterAFailure: Story = {
   args: { work: work('plan-routine') },
-  parameters: { docs: { description: { story: 'A problem the agent caused and fixed inside its boundaries: it named a token that does not exist, the lint and the visual check both failed, it looked the value up and corrected the name. Closed, the row says so in its grey line. Open, each check shows its first run beside its last, and the history is a timeline with every step: a dot per event, the event, and when and who.' } } },
+  parameters: { docs: { description: { story: 'A problem the agent caused and fixed inside its boundaries: it named a token that does not exist, the lint and the visual check both failed, it looked the value up and corrected the name. Closed, the row says so in its gray line. Open, each check shows its first run beside its last, and the history is a timeline with every step: a dot per event, the event, and when and who.' } } },
   play: async ({ canvasElement }) => {
     await expect(canvasElement.querySelector('.record__note')).toHaveTextContent('Fixed after a failed first try');
     const history = canvasElement.querySelector('.record__history')!;

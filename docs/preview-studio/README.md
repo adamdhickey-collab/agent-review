@@ -58,7 +58,7 @@ below is derived from the brief's and measured the same way:
 
 | Token | Light | Dark | Why |
 | --- | --- | --- | --- |
-| `--color-text-secondary` | `#3d4c59` | `#c3d0da` | Running text in a card; muted ink for whole paragraphs read grey |
+| `--color-text-secondary` | `#3d4c59` | `#c3d0da` | Running text in a card; muted ink for whole paragraphs read gray |
 | `--color-surface-hover` | `#eef2f6` | `#222d38` | A row or a ghost control under the pointer |
 | `--color-surface-hover-strong` | `#e5ebf0` | `#2b3743` | A queue row under the pointer, as far as muted ink allows |
 | `--color-divider` | `#e6ebf0` | `#29353f` | The line between rows inside a panel, a step under the border |
@@ -98,7 +98,7 @@ Teal is the review's color: what the screen asks a person to do (Apply,
 the recommended answer's button), the direction they have selected, the
 place they are in, a link, the focus ring, and the annotation the preview
 draws around the element a decision is about. It is never a color in the
-product the review shows. The grey of "Cancel subscription" in the billing
+product the review shows. The gray of "Cancel subscription" in the billing
 preview is Relay's own, `#6a6a76`, written by the change's own lines, so a
 mark the review draws on the preview cannot settle how quiet an action in
 the product should be. The link and the quiet Button a direction proposes

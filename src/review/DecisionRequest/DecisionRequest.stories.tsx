@@ -123,7 +123,7 @@ export const Choosing: Story = {
     const reason = canvas.getByRole('textbox', { name: 'Your reason' });
     await expect(reason).toHaveValue(DRAFT_OWN);
     await userEvent.clear(reason);
-    await userEvent.type(reason, 'The grey link is a retention test nobody turned off.');
+    await userEvent.type(reason, 'The gray link is a retention test nobody turned off.');
     await userEvent.click(canvas.getByText('Use this decision for similar cases'));
     await expect(canvas.getByText('The rule, as it will read')).toBeInTheDocument();
     /* Switch: the plan is the other direction's, the box is cleared, nothing typed is lost. */
@@ -132,12 +132,12 @@ export const Choosing: Story = {
     await expect(canvas.getByRole('checkbox', { name: 'Use this decision for similar cases' })).not.toBeChecked();
     await expect(canvas.getByRole('textbox', { name: 'Your reason' })).toHaveValue(DRAFT_QUIET);
     await userEvent.click(canvas.getByRole('button', choose(OWN)));
-    await expect(canvas.getByRole('textbox', { name: 'Your reason' })).toHaveValue('The grey link is a retention test nobody turned off.');
+    await expect(canvas.getByRole('textbox', { name: 'Your reason' })).toHaveValue('The gray link is a retention test nobody turned off.');
     const bar = canvasElement.querySelector('.ask__bar') as HTMLElement;
     await expect(getComputedStyle(bar).position).toBe('sticky');
     await expect(bar.querySelector('.ask__bar-what')).toHaveTextContent(new RegExp(`^${OWN}$`));
     await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
-    await expect(args.onAnswer).toHaveBeenCalledWith('own-change', false, 'The grey link is a retention test nobody turned off.');
+    await expect(args.onAnswer).toHaveBeenCalledWith('own-change', false, 'The gray link is a retention test nobody turned off.');
   },
 };
 

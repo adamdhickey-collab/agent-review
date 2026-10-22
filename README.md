@@ -18,7 +18,7 @@ inside written boundaries, the few decisions that still need a person and
 why, a way to turn an answer into a scoped rule that can be edited or
 revoked, and completed work that can be inspected and reverted. Two runs
 show the two kinds of stop: the billing run (`#/`), where "Cancel
-subscription" is the one action built by hand, small and grey, among the
+subscription" is the one action built by hand, small and gray, among the
 system's Buttons, and the agent's faithful fix (a quiet Button variant)
 would make hiding an action a supported style, so it asks whether cancel
 should stay quiet, which no check can tell; and the shared

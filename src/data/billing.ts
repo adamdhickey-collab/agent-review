@@ -333,7 +333,7 @@ const byHand = (selector: string, padded = false): Line[] => [
 const GATHERED: Gathered = {
   uses: [
     {
-      what: 'Actions built by hand, small and grey',
+      what: 'Actions built by hand, small and gray',
       places: '4 places on 2 screens: “Cancel subscription” and “Remove card” in billing settings, and “Downgrade plan” and “Remove seats” on the plan card.',
     },
     { what: 'Actions drawn as the system’s Button', places: 'Every other action on both screens, from “Change plan” to “Add seats”.' },
@@ -356,7 +356,7 @@ const GATHERED: Gathered = {
 function tradeoffChecks(c: Case): Check[] {
   return [
     { name: 'Token lint', state: 'passed', label: 'Passed with both', established: 'Either direction names tokens, and every token it names exists.' },
-    { name: 'Stories with axe', state: 'passed', label: `${c.stories} of ${c.stories} passed with both`, established: 'The grey clears 4.5:1 (it measures 5.3:1), as a link or as a quiet Button.' },
+    { name: 'Stories with axe', state: 'passed', label: `${c.stories} of ${c.stories} passed with both`, established: 'The gray clears 4.5:1 (it measures 5.3:1), as a link or as a quiet Button.' },
     { name: 'Visual baselines', state: 'passed', label: `0 of ${c.frames} frames moved with both`, established: 'Neither direction moves a pixel in this change.' },
   ];
 }
@@ -372,7 +372,7 @@ function directions(c: Case, gathered: boolean): Option[] {
     title: 'Add a quiet variant',
     label: 'Add a quiet variant',
     recommended: true,
-    outcome: `The Button gains a quiet variant that matches the grey text. “${c.action}” becomes a Button, and looks exactly as it does now.`,
+    outcome: `The Button gains a quiet variant that matches the gray text. “${c.action}” becomes a Button, and looks exactly as it does now.`,
     effect: `It adds a quiet variant to the Button, with a story, leaves the other four as they are, and makes “${c.action}” a quiet Button on its tokens. Nothing moves.`,
     after: after(lines),
     draws: { as: 'quiet' },
@@ -576,10 +576,10 @@ function actionQuestion(c: Case, gathered = false): Question {
   return {
     kind: 'intent',
     ask: `Keep “${c.action}” looking as it does, or make it a Button on purpose?`,
-    found: `The lint reported ${n} literals on “${c.action}”, and each is exactly a token’s value. But it is a link built by hand, small and grey, where every other action on the ${c.screen.toLowerCase()} is the system’s Button, and rule 1 of the agent’s skill says an action is a Button. As a Button it would be as easy to find as “${c.beside}”, in a job meant to change nothing visible. Kept as it looks, it needs a variant the Button doesn’t have.`,
+    found: `The lint reported ${n} literals on “${c.action}”, and each is exactly a token’s value. But it is a link built by hand, small and gray, where every other action on the ${c.screen.toLowerCase()} is the system’s Button, and rule 1 of the agent’s skill says an action is a Button. As a Button it would be as easy to find as “${c.beside}”, in a job meant to change nothing visible. Kept as it looks, it needs a variant the Button doesn’t have.`,
     gap: `The checks pass either way, and neither direction moves a pixel in this change. Whether “${c.action}” should be easy to find is a product decision, which no check can see.`,
     means: 'Hand-built action',
-    says: 'Small grey text, built by hand. The system would make it a Button.',
+    says: 'Small gray text, built by hand. The system would make it a Button.',
     evidence: [
       { for: 'Quiet on purpose', says: 'It is styled to be less visible than every other action on the screen, which looks deliberate.' },
       { for: 'Left over', says: 'It came over from the old billing app as it was. Its history has one commit, and no reason.' },
@@ -723,7 +723,7 @@ const meterRadius: Work = {
    could not know written in front of it. Simulated context, like the rest of
    the run; nothing here claims a real retention test. */
 export const DANAS_REASON =
-  'The grey link is from a retention test last year that ended without a decision, and nobody turned it off. How easy it is to cancel is a product decision, so it gets its own change. A quiet Button would let any agent make any action this hard to find.';
+  'The gray link is from a retention test last year that ended without a decision, and nobody turned it off. How easy it is to cancel is a product decision, so it gets its own change. A quiet Button would let any agent make any action this hard to find.';
 
 export function initialDelegation(): DelegationState {
   return {

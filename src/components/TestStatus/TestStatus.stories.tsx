@@ -39,7 +39,7 @@ export const Failed: Story = { args: { state: 'failed' } };
 export const Running: Story = {
   args: { state: 'running' },
   parameters: {
-    docs: { description: { story: 'Not an answer yet: an open arc on a faint track, turning, in the accent. It is the one state that is happening now, so it does not share the grey of the check that did not run. The turn stops under prefers-reduced-motion.' } },
+    docs: { description: { story: 'Not an answer yet: an open arc on a faint track, turning, in the accent. It is the one state that is happening now, so it does not share the gray of the check that did not run. The turn stops under prefers-reduced-motion.' } },
   },
 };
 export const Skipped: Story = {
