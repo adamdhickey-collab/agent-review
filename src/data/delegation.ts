@@ -337,7 +337,7 @@ export interface Question {
   /** What the element in question is, as its caption is headed: "Hand-built action". */
   means?: string;
   /** What it is, in a sentence a person who has never read the code can
-      read: "Small grey text, built by hand. Every other action here is a Button." */
+      read: "Small gray text, built by hand. Every other action here is a Button." */
   says?: string;
   note?: string;
   /** For a scope question, what the agent was asked to do, in a sentence. */

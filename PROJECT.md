@@ -161,7 +161,7 @@ and the checks' figures are written to agree with each other
 (`src/data/delegation.ts`), so the same presses always end in the same
 place. Nothing learns. The tokens are real, and so is the Button the
 decision turns on, with its four variants and none that draws an action as
-small grey text. (Until 2026-10-21 the facts it turned on were two pairs of
+small gray text. (Until 2026-10-21 the facts it turned on were two pairs of
 tokens with one value each, `--color-danger` and `--color-diff-remove-ink`
 both `#b42318`, so either name passed every check; the entries below that
 describe the two reds are the record of that decision.)
@@ -355,7 +355,7 @@ customer list exists here, and the strip says the run is simulated.
   panel's three groups are "Proceeds on its own", "Asks for your judgment"
   and "Needs your approval"; a decision card's badge is its status, "Needs
   judgment" or "Needs approval", in the amber the account's bar gives what
-  waits on the person (it was a grey label, "Missing intent"); and the
+  waits on the person (it was a gray label, "Missing intent"); and the
   account opens on one line that counts the run's changes by mode, with a
   fourth count, "settled by you", once there is one. Judgment and approval
   share the amber and are told apart by their marks and their words, a
@@ -368,7 +368,7 @@ customer list exists here, and the strip says the run is simulated.
   system beyond this change (within the agent's authority and able to
   become a rule; allowed once, with the boundary left where it is;
   deciding nothing yet). And after a decision, what stood in the card's
-  place is a result rather than a grey line: a mark for what happened, the
+  place is a result rather than a gray line: a mark for what happened, the
   sentence, and "See your rule" when the answer made or used one. Nothing
   learns, still; a rule exists because a person made one.
 
@@ -435,7 +435,7 @@ end date:
   and after, and it ships either way. The checks pass with both, and
   neither moves a pixel. Dana chooses the second, and her reason in the
   stories and the case study adds the one thing the agent couldn't know: the
-  grey link is a retention test from last year that nobody turned off.
+  gray link is a retention test from last year that nobody turned off.
 - **The rule** covers "an action that ends or reduces a subscription"
   ("Downgrade plan" and "Remove seats" on the plan card); "Remove card",
   which removes something the customer set up, is close and outside it, and

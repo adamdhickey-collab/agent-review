@@ -57,7 +57,7 @@ export const ItsOwnChangeInYourWords: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { name: 'Make it a Button in its own change' })).toBeInTheDocument();
     await expect(canvas.getByText('In your words')).toBeInTheDocument();
-    await expect(canvas.getByText(/The grey link is from a retention test last year/)).toBeInTheDocument();
+    await expect(canvas.getByText(/The gray link is from a retention test last year/)).toBeInTheDocument();
     const did = canvas.getByRole('list', { name: 'What the agent did' });
     await expect(did).toHaveTextContent(/Wrote the exception down, ending Oct 15\./);
     await expect(did).toHaveTextContent(/Opened a follow-up to make “Cancel subscription” a Button, owned by product design, due Oct 15\./);

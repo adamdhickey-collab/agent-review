@@ -51,7 +51,7 @@ const CANCEL = '.settings__cancel-subscription';
 
 export const Current: Story = {
   parameters: {
-    docs: { description: { story: 'Nothing selected: billing settings as they are. Every action is the system’s Button except “Cancel subscription”, a link built by hand, small and grey, which is the question; teal is only the annotation, a solid outline on the link and a dashed one on “Change plan”. Under the screen, a caption for each, led by the tag its mark carries. No view control yet, because there is nothing to compare.' } },
+    docs: { description: { story: 'Nothing selected: billing settings as they are. Every action is the system’s Button except “Cancel subscription”, a link built by hand, small and gray, which is the question; teal is only the annotation, a solid outline on the link and a dashed one on “Change plan”. Under the screen, a caption for each, led by the tag its mark carries. No view control yet, because there is nothing to compare.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -64,7 +64,7 @@ export const Current: Story = {
     await expect(canvas.getByRole('button', { name: 'Change plan' })).toHaveAttribute('data-twin');
     /* The captions, under the screen, each led by its mark's own tag. */
     const marked = canvas.getByRole('list', { name: 'What each marked element is' });
-    await expect(marked).toHaveTextContent(/^Decision 1\s*Hand-built action · Billing settings\s*Small grey text, built by hand\. The system would make it a Button\.\s*A link built by hand, from the old billing app/);
+    await expect(marked).toHaveTextContent(/^Decision 1\s*Hand-built action · Billing settings\s*Small gray text, built by hand\. The system would make it a Button\.\s*A link built by hand, from the old billing app/);
     await expect(marked).toHaveTextContent(/The system’s Button\s*System Button · Billing settings\s*Every other action on the billing settings is the system’s Button\.\s*<Button variant="secondary">$/);
     const [decision, twinCap] = within(marked).getAllByRole('listitem');
     await expect(within(decision).getByText('Decision 1')).toHaveClass('studio-tag');

@@ -33,7 +33,7 @@ const W = 1440;
 const H = 1000;
 /* Dana's reason, as data/billing.ts's DANAS_REASON has it. */
 const REASON =
-  'The grey link is from a retention test last year that ended without a decision, and nobody turned it off. How easy it is to cancel is a product decision, so it gets its own change. A quiet Button would let any agent make any action this hard to find.';
+  'The gray link is from a retention test last year that ended without a decision, and nobody turned it off. How easy it is to cancel is a product decision, so it gets its own change. A quiet Button would let any agent make any action this hard to find.';
 const browser = await chromium.launch();
 const problems = [];
 

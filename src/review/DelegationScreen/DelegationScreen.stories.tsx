@@ -178,7 +178,7 @@ export const TheWholeLoop: Story = {
       await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
       await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
       await expect(canvas.getByRole('heading', { name: /Keep “Remove card” looking as it does/ })).toBeInTheDocument();
-      await expect(canvas.getByRole('list', { name: 'What each marked element is' })).toHaveTextContent(/Hand-built action · Billing settings\s*Small grey text, built by hand\./);
+      await expect(canvas.getByRole('list', { name: 'What each marked element is' })).toHaveTextContent(/Hand-built action · Billing settings\s*Small gray text, built by hand\./);
     });
 
     await step('Widen the rule, and it settles that case', async () => {
@@ -250,14 +250,14 @@ export const ItsOwnChange: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('10 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
     const record = canvas.getByRole('article', { name: 'Make it a Button in its own change' });
-    await expect(record).toHaveTextContent(/Your reasonThe grey link is from a retention test last year.*In your words/);
+    await expect(record).toHaveTextContent(/Your reasonThe gray link is from a retention test last year.*In your words/);
     await expect(record).toHaveTextContent('Accepted trade-offA system with no way to make an action hard to find, over finishing every control in this job.');
     await expect(record).toHaveTextContent(/Remaining risk“Cancel subscription” stays hard to find until its own change ships, on Oct 15\./);
     await expect(record).toHaveTextContent(/Wrote the exception down, ending Oct 15\./);
     await expect(record).toHaveTextContent(/never gets a quiet variant: it stays as built/);
     await expect(canvas.getByText(/Follow-up from your decision at 14:26: make “Cancel subscription” a Button in its own change, by Oct 15/)).toBeInTheDocument();
     const rule = canvasElement.querySelector('.rule') as HTMLElement;
-    await expect(rule).toHaveTextContent(/WhyThe grey link is from a retention test last year/);
+    await expect(rule).toHaveTextContent(/WhyThe gray link is from a retention test last year/);
     const downgrade = Array.from(canvasElement.querySelectorAll<HTMLDetailsElement>('.record')).find((r) => r.textContent?.includes('“Downgrade plan” on the plan card'))!;
     downgrade.open = true;
     await expect(downgrade).toHaveTextContent(/Followed your rule, from your decision at 14:26 \(make it a button in its own change\)/);
