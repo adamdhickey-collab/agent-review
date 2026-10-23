@@ -474,13 +474,21 @@ screen asks for one press. It says the situation in the next screen's own
 words ("A coding agent did most of the work. The rest needs you."), who the
 person is in it and what the agent did, counted from the run as it starts,
 and the four steps, read from the same function Start here reads
-(`DelegationScreen/steps.ts`), each with a line on what it means. Beside
+(`DelegationScreen/steps.ts`), each with a few words on what it means. Beside
 them, where the workspace has two columns, a small drawing of the workspace
 pins each step where it happens; it is hidden from a screen reader, which
 hears its caption, and it is not drawn under 56rem, where the workspace is
 one column. The product's name in the bar goes back to it. A run's own
 address, `#/runs/billing` or `#/runs/shared-table`, goes straight to the
 run: whoever has that link has chosen it.
+
+Its first version ran about 190 words, most of the minute it promises spent
+before the press. The same day it was cut to about half: the lead to three
+short sentences (who you are, what you asked, what the agent made and left),
+each step to the few words a person needs before pressing, and two closing
+lines dropped, one that the map already shows (the steps run across the next
+screen's top) and one that the Simulated badge already says (the run is a
+sample). The title, the steps, the button and the map did not change.
 
 ## Exploration: three information architectures
 

@@ -17,7 +17,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The front door, at "/": one screen before the delegated work that says what it is and what a person will do in it, and asks for one press. The situation in a line, in the words the next screen uses ("Needs you"); who the person is in it and what the agent did, counted from the billing run as it starts; the steps, the same ones Start here names over the workspace, each with a line on what it means; the way in; and that it is simulated. Beside it, where the workspace has two columns, a map of the workspace marks where each step happens; the map is a drawing, hidden from a screen reader, which hears its caption. Under 56rem there is no map, because the workspace is one column and there is no left and right to point at.',
+          'The front door, at "/": one screen before the delegated work that says what it is and what a person will do in it, and asks for one press. The situation in a line, in the words the next screen uses ("Needs you"); who the person is in it and what the agent did, counted from the billing run as it starts; the steps, the same ones Start here names over the workspace, each with a few words on what it means; the way in; and that it is simulated. Beside it, where the workspace has two columns, a map of the workspace marks where each step happens; the map is a drawing, hidden from a screen reader, which hears its caption. Under 56rem there is no map, because the workspace is one column and there is no left and right to point at.',
       },
     },
   },
@@ -35,7 +35,7 @@ export const Default: Story = {
     await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('A coding agent did most of the work. The rest needs you.');
     /* Counted from the run, so it cannot disagree with the account the next screen opens on. */
     await expect(canvasElement.querySelector('.start__lead')).toHaveTextContent(`It made ${start.own.length} changes`);
-    await expect(canvasElement.querySelector('.start__lead')).toHaveTextContent(`stopped at ${start.asking.length} it couldn’t settle`);
+    await expect(canvasElement.querySelector('.start__lead')).toHaveTextContent(`left ${start.asking.length} for you`);
     await expect(canvas.getByRole('button', { name: 'Start the review' })).toBeVisible();
   },
 };
@@ -59,7 +59,7 @@ export const TheMapIsADrawing: Story = {
   play: async ({ canvasElement }) => {
     const map = canvasElement.querySelector('.start__map')!;
     await expect(map.querySelector('.start__map-screen')).toHaveAttribute('aria-hidden', 'true');
-    await expect(within(map as HTMLElement).getByText('The next screen, and where each step happens on it.')).toBeVisible();
+    await expect(within(map as HTMLElement).getByText('Where each step happens on the next screen.')).toBeVisible();
     await expect(map.querySelectorAll('a, button, input, [tabindex]').length).toBe(0);
   },
 };
