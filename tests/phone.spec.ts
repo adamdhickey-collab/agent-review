@@ -45,7 +45,8 @@ for (const width of WIDTHS) {
     test.use({ ...phone, viewport: { width, height: 800 }, deviceScaleFactor: 1 });
 
     const SCREENS: [string, string][] = [
-      ['the delegated work', '#/'],
+      ['the start', '#/'],
+      ['the delegated work', '#/runs/billing'],
       ['the shared-table run', '#/runs/shared-table'],
       ['the queue', '#/queue'],
       ['a change', '#/changes/rv-2041'],
@@ -115,7 +116,7 @@ test.describe('the delegated work on a phone, answering', () => {
   test.use({ ...phone, viewport: { width: 320, height: 800 }, deviceScaleFactor: 1 });
 
   test('the confirmation and the rule fit, and their controls are a fingertip', async ({ page }) => {
-    await open(page, '#/');
+    await open(page, '#/runs/billing');
     await page.getByRole('button', { name: /^Select and preview\s+Add a quiet variant$/ }).click();
     await page.getByText('Use this decision for similar cases').click();
     await expect(page.getByText('The rule, as it will read')).toBeVisible();
@@ -136,7 +137,7 @@ test.describe('the delegated work on a phone, the other direction', () => {
   test.use({ ...phone, viewport: { width: 320, height: 800 }, deviceScaleFactor: 1 });
 
   test('the evidence, the plan and the record fit, and their controls are a fingertip', async ({ page }) => {
-    await open(page, '#/');
+    await open(page, '#/runs/billing');
     await page.getByRole('button', { name: 'Request evidence' }).click();
     await expect(page.getByText('What the agent found when you asked')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);

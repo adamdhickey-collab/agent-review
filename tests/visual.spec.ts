@@ -26,8 +26,14 @@ for (const width of WIDTHS) {
     test.beforeEach(async ({ page }) => {
       await page.addInitScript(chooseLight);
     });
-    test('the delegated work', async ({ page }) => {
+    test('the start', async ({ page }) => {
       await page.goto('#/');
+      await settle(page);
+      await expect(page).toHaveScreenshot(`start-${width}.png`, { fullPage: true });
+    });
+
+    test('the delegated work', async ({ page }) => {
+      await page.goto('#/runs/billing');
       await settle(page);
       await expect(page).toHaveScreenshot(`delegation-${width}.png`, { fullPage: true });
     });
@@ -50,7 +56,7 @@ for (const width of WIDTHS) {
        scrolls; the capture goes back to the top so it is the same picture
        at every width. */
     test('the delegated work, a direction selected', async ({ page }) => {
-      await page.goto('#/');
+      await page.goto('#/runs/billing');
       await settle(page);
       await page.getByRole('button', { name: /^Select and preview\s+Add a quiet variant$/ }).click();
       await page.evaluate(() => window.scrollTo(0, 0));
@@ -84,8 +90,13 @@ test.describe('on a phone, 375', () => {
     await settle(page);
   }
 
-  test('the delegated work', async ({ page }) => {
+  test('the start', async ({ page }) => {
     await open(page, '#/');
+    await expect(page).toHaveScreenshot('start-375.png', { fullPage: true });
+  });
+
+  test('the delegated work', async ({ page }) => {
+    await open(page, '#/runs/billing');
     await expect(page).toHaveScreenshot('delegation-375.png', { fullPage: true });
   });
 
@@ -121,8 +132,14 @@ test.describe('in the dark theme, chosen, at 1280', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(chooseDark);
   });
-  test('the delegated work', async ({ page }) => {
+  test('the start', async ({ page }) => {
     await page.goto('#/');
+    await settle(page);
+    await expect(page).toHaveScreenshot('start-1280-dark.png', { fullPage: true });
+  });
+
+  test('the delegated work', async ({ page }) => {
+    await page.goto('#/runs/billing');
     await settle(page);
     await expect(page).toHaveScreenshot('delegation-1280-dark.png', { fullPage: true });
   });
@@ -144,7 +161,7 @@ test.describe('in the dark theme, chosen, at 1280', () => {
    color-scheme and nothing on it. Not a screenshot; the -dark baselines are
    the picture of it. */
 test('a first visit is dark', async ({ page }) => {
-  await page.goto('#/');
+  await page.goto('#/runs/billing');
   await settle(page);
   expect(await page.evaluate(() => [document.documentElement.dataset.theme ?? null, getComputedStyle(document.documentElement).colorScheme])).toEqual([null, 'dark']);
   await expect(page.getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true');

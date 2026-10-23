@@ -153,6 +153,8 @@ The front door (`#/`) is now **delegated work**: one run, Claude Code moving
 Relay's billing screens onto the design system (the token layer until
 2026-10-21, when the run's decision changed; THE QUIET CANCEL, below). The
 review queue the experiment was built around is unchanged at `#/queue`.
+Since 2026-10-23 a start screen stands at `#/` in front of it, and the run
+is at `#/runs/billing` (A START SCREEN, below).
 
 **The run is simulated, and labelled so on the screen.** Unlike rv-2041 and
 rv-2042, nothing in it was run: the billing screens, the times, the commits
@@ -456,6 +458,29 @@ end date:
 
 284 stories still, every one passing; the nine visual baselines that show
 the billing run or the run switch were re-recorded.
+
+### A start screen (2026-10-23)
+
+Rearranging the delegated work's first minute (#37) put the question first
+and made Start here's steps take a person to what they name. It could not
+say, before the person was in the workspace, what the workspace was for,
+and the first screen still overwhelmed: a run bar, a job, an account, the
+steps, a marked product and a decision, all at once, with nothing saying
+which of it was the visitor's to do.
+
+So `#/` is a start screen now (`src/review/StartScreen/`), and the billing
+run moved to `#/runs/billing`, an address the router already read. The
+screen asks for one press. It says the situation in the next screen's own
+words ("A coding agent did most of the work. The rest needs you."), who the
+person is in it and what the agent did, counted from the run as it starts,
+and the four steps, read from the same function Start here reads
+(`DelegationScreen/steps.ts`), each with a line on what it means. Beside
+them, where the workspace has two columns, a small drawing of the workspace
+pins each step where it happens; it is hidden from a screen reader, which
+hears its caption, and it is not drawn under 56rem, where the workspace is
+one column. The product's name in the bar goes back to it. A run's own
+address, `#/runs/billing` or `#/runs/shared-table`, goes straight to the
+run: whoever has that link has chosen it.
 
 ## Exploration: three information architectures
 

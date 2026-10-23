@@ -49,7 +49,7 @@ for (const size of sizes) {
   const context = await browser.newContext(size.use);
   const page = await context.newPage();
   await page.goto('about:blank');
-  await page.goto(`${base}#/`);
+  await page.goto(`${base}#/runs/billing`);
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(400);
 

@@ -1,8 +1,9 @@
 import { StoreProvider } from './store';
-import { useRoute } from './router';
+import { href, useRoute } from './router';
 import { useRouteEffects } from './useRouteEffects';
 import { Shell } from '../review/Shell/Shell';
 import { QueueScreen } from '../review/QueueScreen/QueueScreen';
+import { StartScreen } from '../review/StartScreen/StartScreen';
 import { DelegationScreen } from '../review/DelegationScreen/DelegationScreen';
 import { ChangeScreen } from '../review/ChangeScreen/ChangeScreen';
 import { EmptyState } from '../components';
@@ -14,6 +15,7 @@ function Screens() {
   useRouteEffects(route, arrival);
   return (
     <Shell route={route}>
+      {route.name === 'start' ? <StartScreen /> : null}
       {route.name === 'delegation' ? <DelegationScreen run={route.run ?? 'billing'} /> : null}
       {route.name === 'queue' ? <QueueScreen /> : null}
       {route.name === 'change' ? <ChangeScreen id={route.id} findingId={route.findingId} /> : null}
@@ -22,7 +24,7 @@ function Screens() {
           <h1 className="visually-hidden" tabIndex={-1}>
             Page not found
           </h1>
-          <EmptyState icon="search" title="There is nothing at this address" description={<code>{route.path}</code>} action={{ label: 'Back to the delegated work', onClick: () => (location.hash = '#/') }} />
+          <EmptyState icon="search" title="There is nothing at this address" description={<code>{route.path}</code>} action={{ label: 'Back to the delegated work', onClick: () => (location.hash = href({ name: 'delegation' })) }} />
         </>
       ) : null}
     </Shell>

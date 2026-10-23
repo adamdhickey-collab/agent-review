@@ -58,7 +58,7 @@ const atTheTop = { y: 0, bar: 0 };
 const arrived = (page: Page, heading: string | RegExp) => expect(page.getByRole('heading', { level: 1, name: heading })).toBeFocused();
 
 test('a screen opened from its address starts at the top', async ({ page }) => {
-  for (const hash of ['#/', '#/runs/shared-table', '#/queue', '#/changes/rv-2041']) {
+  for (const hash of ['#/', '#/runs/billing', '#/runs/shared-table', '#/queue', '#/changes/rv-2041']) {
     await open(page, hash);
     expect(await where(page), hash).toMatchObject(atTheTop);
   }
@@ -82,7 +82,7 @@ test('a new screen starts at the top, wherever the last one was left', async ({ 
   expect(await where(page)).toEqual({ ...atTheTop, heading: true });
 
   /* The other run, from the run tabs scrolled up to the top edge. */
-  await open(page, '#/');
+  await open(page, '#/runs/billing');
   const tabs = page.getByRole('navigation', { name: 'Sample runs' });
   const top = await tabs.evaluate((el) => Math.round(el.getBoundingClientRect().top + window.scrollY));
   await scrollTo(page, top - 8);
@@ -109,7 +109,7 @@ test('selecting a finding on a change keeps the page where it is', async ({ page
 });
 
 test('a reload puts the page back where it was', async ({ page }) => {
-  await open(page, '#/');
+  await open(page, '#/runs/billing');
   await scrollTo(page, 900);
   await page.reload();
   await page.evaluate(() => document.fonts.ready);
@@ -140,7 +140,7 @@ test('back and forward put each screen back where it was left, with focus on its
 });
 
 test('coming back to the page from somewhere else finds it where it was', async ({ page }) => {
-  await open(page, '#/');
+  await open(page, '#/runs/billing');
   await scrollTo(page, 900);
   await page.goto('about:blank');
   await page.goBack();

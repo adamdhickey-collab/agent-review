@@ -16,8 +16,10 @@ Its second iteration asks what happens as agents need less supervision.
 The product now opens on delegated work: an account of what an agent did
 inside written boundaries, the few decisions that still need a person and
 why, a way to turn an answer into a scoped rule that can be edited or
-revoked, and completed work that can be inspected and reverted. Two runs
-show the two kinds of stop: the billing run (`#/`), where "Cancel
+revoked, and completed work that can be inspected and reverted. A start
+screen at `#/` says what that is and what a person will do in it before
+they meet it. Two runs show the two kinds of stop: the billing run
+(`#/runs/billing`), where "Cancel
 subscription" is the one action built by hand, small and gray, among the
 system's Buttons, and the agent's faithful fix (a quiet Button variant)
 would make hiding an action a supported style, so it asks whether cancel

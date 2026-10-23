@@ -73,7 +73,7 @@ for (const theme of ['light', 'dark']) {
   page.on('pageerror', (e) => problems.push(String(e)));
   page.on('console', (m) => m.type() === 'error' && problems.push(m.text()));
 
-  await page.goto(`${base}#/`, { waitUntil: 'networkidle' });
+  await page.goto(`${base}#/runs/billing`, { waitUntil: 'networkidle' });
   await tall(page, `1-billing-before-${theme}.png`, '.studio');
 
   await page.getByRole('button', { name: /^Select and preview\s+Add a quiet variant$/ }).click();
@@ -107,7 +107,7 @@ for (const theme of ['light', 'dark']) {
   await pctx.addInitScript((t) => localStorage.setItem('agent-review:theme', t), theme);
   const ppage = await pctx.newPage();
   await ppage.goto('about:blank');
-  await ppage.goto(`${base}#/`, { waitUntil: 'networkidle' });
+  await ppage.goto(`${base}#/runs/billing`, { waitUntil: 'networkidle' });
   const wide = await ppage.evaluate(() => document.documentElement.scrollWidth);
   if (wide > 390) problems.push(`the phone page is ${wide}px wide at 390`);
   await tall(ppage, `7-billing-phone-${theme}.png`, '.studio', 390);

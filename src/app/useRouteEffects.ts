@@ -54,7 +54,9 @@ function place(y: number, settle = false) {
 export function useRouteEffects(route: Route, arrival: Arrival) {
   const store = useStore();
   const screen =
-    route.name === 'delegation'
+    route.name === 'start'
+      ? 'Start'
+      : route.name === 'delegation'
       ? route.run === 'shared-table'
         ? 'Delegated work: the shared table'
         : 'Delegated work'

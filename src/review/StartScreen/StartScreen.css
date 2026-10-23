@@ -1,0 +1,348 @@
+/* THE START SCREEN (StartScreen.tsx): the words on the left at a reading
+   measure, and beside them, where the workspace has two columns, a map of
+   it. On the page's own ground, with nothing raised: the screen asks for one
+   press, and the one thing with weight after the title is that button. */
+.start {
+  display: grid;
+  grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-8);
+  width: 100%;
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
+}
+
+.start__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.start__kicker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* The workspace's heading size, so the next screen's title does not read
+   as a step down from this one. */
+.start__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.start__title:focus-visible {
+  outline: none; /* a destination focus is sent to, as every screen's heading is */
+}
+
+.start__lead {
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+.start__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.start__h2 {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+
+.start__steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* A step: its number, drawn as Start here draws it on the next screen,
+   then its name in the text ink and what it means in the secondary. */
+.start__steps li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+.start__steps strong {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.start__num,
+.start__map-step,
+.start__pin {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--space-5);
+  height: var(--space-5);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.start__num {
+  margin-top: calc((var(--text-md) * var(--leading-body) - var(--space-5)) / 2); /* centred on the first line */
+  color: var(--color-text);
+}
+
+.start__hint {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.start__go {
+  padding-top: var(--space-2);
+}
+
+.start__note {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+/* THE MAP: the workspace drawn small, its parts where the next screen puts
+   them at this width (the steps across the top, the interface on the left,
+   the decision on the right), and a pin where each step happens. Shapes for
+   anything to be read there, words only for the names of the parts. The
+   pins are the steps' numbers in the accent's ink: the one place the accent
+   is spent here besides the button, because they point at what to do. */
+.start__map {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.start__map-screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.62fr);
+  align-items: start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-canvas);
+  box-shadow: var(--shadow-raised);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  line-height: var(--leading-ui);
+}
+
+.start__map-label {
+  color: var(--color-text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+.start__map-bar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-chrome);
+}
+
+.start__map-bar .start__map-label {
+  margin-right: var(--space-1);
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.start__map-step {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+
+.start__map-stage,
+.start__map-inspector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+/* The decision is the one raised panel on the next screen, so it is here. */
+.start__map-inspector {
+  box-shadow: var(--shadow-raised);
+}
+
+.start__map-product {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+}
+
+.start__map-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+}
+
+.start__map-row + .start__map-row {
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.start__map-line {
+  display: block;
+  width: 55%;
+  height: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-border);
+}
+
+.start__map-line--title {
+  width: 85%;
+  height: var(--space-3);
+}
+
+.start__map-line--short {
+  width: 40%;
+}
+
+.start__map-control {
+  position: relative;
+  flex: none;
+  width: var(--space-8);
+  height: var(--space-4);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+}
+
+/* The part in question, ringed as the preview rings it. */
+.start__map-control.is-marked {
+  border-style: dashed;
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* The preview's head: its name, and the switch between the interface as it
+   is and as a choice would leave it, which is where previewing happens. */
+.start__map-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.start__map-toggle {
+  position: relative;
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: 2px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+}
+
+.start__map-toggle > span:not(.start__pin) {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.start__map-toggle > [data-on] {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-control);
+  color: var(--color-text);
+}
+
+.start__map-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.start__map-option .start__map-line {
+  width: 80%;
+}
+
+.start__map-option .start__map-line--short {
+  width: 50%;
+}
+
+.start__map-apply {
+  position: relative;
+  align-self: flex-start;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+  font-weight: var(--weight-semibold);
+  line-height: var(--control-height-compact);
+}
+
+/* A pin sits on the corner of what it marks, over its edge. */
+.start__pin {
+  position: absolute;
+  top: calc(var(--space-5) / -2);
+  right: calc(var(--space-5) / -2);
+  border-color: var(--color-accent-border);
+  background: var(--color-surface);
+  color: var(--color-accent);
+  font-weight: var(--weight-semibold);
+}
+
+.start__map-caption {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+@media (max-width: 64rem) {
+  .start {
+    gap: var(--space-6);
+  }
+}
+
+/* One column, where the workspace is one column too, and no map: there is
+   no left and right on the next screen to point at. */
+@media (max-width: 56rem) {
+  .start {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .start__copy {
+    max-width: 34rem;
+  }
+
+  .start__map {
+    display: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .start {
+    padding: var(--space-6) var(--space-4);
+  }
+}

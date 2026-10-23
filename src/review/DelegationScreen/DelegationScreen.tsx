@@ -12,8 +12,12 @@ import { RecordHead, WorkRecord } from '../WorkRecord/WorkRecord';
 import { Boundaries } from '../Boundaries/Boundaries';
 import './DelegationScreen.css';
 import { Inline } from '../Inline';
+import { startSteps, type StartStep } from './steps';
 
-/* The front door: work an agent was handed, and what came of it. The
+/* Work an agent was handed, and what came of it. It was the front door
+   until 2026-10-23, when a start screen went in front of it (StartScreen):
+   it is at "/runs/billing" now, and "/" says what this screen is before a
+   person meets it. The
    review queue asks a person to look at every change; this screen is built
    for the case that should become ordinary as agents get better, where
    most of the work needed nobody, and says so first.
@@ -213,23 +217,8 @@ function useFollow(a: RefObject<HTMLElement | null>, b: RefObject<HTMLElement | 
    to Proposed; for applying, the plan and Apply. A step that needs a choice
    made first, before there is one, goes to the choice. Nothing is decided
    by a step; it only moves the person's eye and focus. */
-type StartStep = 'look' | 'choose' | 'preview' | 'apply';
-
 function StartHere({ work, chosen, first, onStep }: { work: Work; chosen: boolean; first: boolean; onStep: (step: StartStep) => void }) {
-  const q = work.question!;
-  const tradeoff = q.options.some((o) => o.benefits);
-  const steps: { label: string; to: StartStep }[] = tradeoff
-    ? [
-        { label: q.start ?? 'Compare the directions', to: 'look' },
-        { label: 'Choose a direction', to: 'choose' },
-        { label: 'Preview it', to: 'preview' },
-        { label: 'Apply it', to: 'apply' },
-      ]
-    : [
-        { label: q.kind === 'scope' ? (q.reach ? 'See what the fix reaches' : 'See what it would change') : 'Compare the readings', to: 'look' },
-        { label: 'Choose an answer', to: 'choose' },
-        { label: 'Apply it', to: 'apply' },
-      ];
+  const steps = startSteps(work);
   const at = chosen ? steps.length - 1 : 0;
   return (
     <section className="studio__start" aria-labelledby="start-label">

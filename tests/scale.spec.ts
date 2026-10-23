@@ -38,7 +38,7 @@ for (const [width, step] of STEPS) {
     test.use({ viewport: { width, height: 900 } });
 
     test(`the page is drawn at ${step}`, async ({ page }) => {
-      await open(page, '#/');
+      await open(page, '#/runs/billing');
       expect(await zoom(page)).toBe(step);
     });
   });
@@ -50,7 +50,7 @@ test.describe('on a touch screen at 1440', () => {
   test('the page is drawn at 1', async ({ page }) => {
     /* A touch context applies its emulation to the next navigation. */
     await page.goto('about:blank');
-    await open(page, '#/');
+    await open(page, '#/runs/billing');
     expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches), 'the touch styles are on').toBe(true);
     expect(await zoom(page)).toBe('1');
   });
@@ -61,7 +61,8 @@ for (const width of [1296, 1440]) {
     test.use({ viewport: { width, height: 900 } });
 
     const SCREENS: [string, string][] = [
-      ['the delegated work', '#/'],
+      ['the start', '#/'],
+      ['the delegated work', '#/runs/billing'],
       ['the shared-table run', '#/runs/shared-table'],
       ['the queue', '#/queue'],
       ['a change, with a finding open', '#/changes/rv-2041/findings/f1-shared-table'],

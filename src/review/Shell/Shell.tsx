@@ -1,16 +1,19 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Icon, IconButton, SegmentedControl, type SegmentedOption } from '../../components';
-import type { Route } from '../../app/router';
+import { href, type Route } from '../../app/router';
 import { useTheme, type Appearance } from '../../app/useTheme';
 import { opensSheet, useSingleKeys } from '../../app/shortcuts';
 import { ShortcutSheet } from '../ShortcutSheet/ShortcutSheet';
 import './Shell.css';
 
 /* The chrome: one bar. The product's name, where you are, and who you
-   are. Everything else is the screen. Two places: the delegated work, which
-   is the front door, and the reviews, the queue of single changes the
-   experiment was built around. The bar is a landmark (header) and
-   the content is main, so a screen reader can skip to it.
+   are. Everything else is the screen. Two places: the delegated work and
+   the reviews, the queue of single changes the experiment was built around.
+   The product's name goes to the front door, the start screen, which is
+   not a place in the product but the way into it (since 2026-10-23), so it
+   is not in the nav and nothing there is current while it is up. The bar
+   is a landmark (header) and the content is main, so a screen reader can
+   skip to it.
 
    The route is the URL's hash, so a link to "#main" would be read as a
    route and replace the screen with "nothing at this address". The skip
@@ -73,7 +76,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
         Skip to content
       </a>
       <header className="shell__bar">
-        <a className="shell__brand" href="#/" aria-label="Agent Review, the delegated work">
+        <a className="shell__brand" href={href({ name: 'start' })} aria-label="Agent Review, start">
           <span className="shell__mark" aria-hidden="true">
             <Icon name="check" size={14} />
           </span>
@@ -81,7 +84,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
         </a>
         <div className="shell__where">
           <nav className="shell__nav" aria-label="Primary">
-            <a href="#/" aria-current={route.name === 'delegation' ? 'page' : undefined}>
+            <a href={href({ name: 'delegation' })} aria-current={route.name === 'delegation' ? 'page' : undefined}>
               <span className="shell__long">Delegated work</span>
               <span className="shell__short" aria-hidden="true">
                 Work
