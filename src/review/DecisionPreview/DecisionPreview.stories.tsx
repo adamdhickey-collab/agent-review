@@ -49,6 +49,17 @@ const size = (el: Element | null) => (el ? getComputedStyle(el).fontSize : '');
 const MUTED = 'rgb(106, 106, 118)'; /* #6a6a76, the product's muted ink and the literal the old billing app typed */
 const CANCEL = '.settings__cancel-subscription';
 
+/* The product's type, arrived. The decorator mounts the web fonts with the
+   story, so text measured at once is in the fallback and text measured a
+   moment later may be in Inter: on the Linux runner the fallback is DejaVu
+   Sans, and "Cancel subscription" at 12px is 117.67px in it and 112px in
+   Inter. Two boxes compared across a press are compared in one type only
+   once Inter has loaded. */
+const productType = async () => {
+  await waitFor(() => expect([...document.fonts].some((f) => f.family === 'Inter' && f.status === 'loaded')).toBe(true), { timeout: 4000 });
+  await document.fonts.ready;
+};
+
 export const Current: Story = {
   parameters: {
     docs: { description: { story: 'Nothing selected: billing settings as they are. Every action is the system’s Button except “Cancel subscription”, a link built by hand, small and gray, which is the question; teal is only the annotation, a solid outline on the link and a dashed one on “Change plan”. Under the screen, a caption for each, led by the tag its mark carries. No view control yet, because there is nothing to compare.' } },
@@ -89,6 +100,7 @@ export const QuietVariant: Story = {
     await expect(quiet).toHaveClass('sketch__quiet');
     await expect(ink(quiet)).toBe(MUTED);
     await expect(size(quiet)).toBe('12px');
+    await productType();
     const proposed = quiet.getBoundingClientRect();
     await userEvent.click(canvas.getByRole('radio', { name: 'Current' }));
     await expect(canvas.getByText('Current interface')).toBeInTheDocument();
