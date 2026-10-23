@@ -49,6 +49,32 @@ export const NeedsYou: Story = {
   },
 };
 
+/* The two halves, since 2026-10-23: the delegated work draws the sentence
+   over the workspace and the tiles and bar under it (OutcomeSummary.tsx,
+   THE SENTENCE AT THE TOP). */
+export const LeadAlone: Story = {
+  args: { part: 'lead' },
+  parameters: { docs: { description: { story: 'The sentence alone, as the delegated work draws it over the decision: how the run went and how many decisions need the person, and nothing else.' } } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
+    await expect(canvas.queryByRole('list', { name: 'How the work was handled' })).toBeNull();
+    await expect(canvas.queryByRole('list', { name: 'Where the literals are' })).toBeNull();
+  },
+};
+
+export const CountsAlone: Story = {
+  args: { part: 'counts' },
+  parameters: { docs: { description: { story: 'The tiles and the bar alone, as the delegated work draws them first in the rest of the run, under the decision: the evidence for the sentence, counted the same way.' } } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByText('7 changes made and checked. 2 decisions need you.')).toBeNull();
+    await expect(canvas.getByRole('region', { name: 'How the run went' })).toBeInTheDocument();
+    await expect(canvas.getByRole('list', { name: 'How the work was handled' })).toHaveTextContent('7 proceeded on its own1 needs your judgment · 3 more wait on it1 needs your approval');
+    await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('26 merged10 waiting on your 2 decisions');
+  },
+};
+
 /* The modes as tiles, since 2026-10-09: one per mode, the count as the
    headline and what it counts under it, so these stories read the tiles as
    well as the line's text, which is unchanged. */

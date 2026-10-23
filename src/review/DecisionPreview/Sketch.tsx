@@ -14,7 +14,19 @@ import './Sketch.css';
    unstyled until a line says what it is, which is the point.
 
    The sketches are drawn, not pictured, and stay readable at any width: a
-   row puts its value under its label when there is no room beside it. */
+   row puts its value under its label when there is no room beside it.
+
+   A DRAWING OF A BUTTON IS NOT A BUTTON, SINCE 2026-10-23. The settings
+   screen's actions are the system's Buttons, drawn as they draw themselves,
+   and until now they could be tabbed to and pressed, and did nothing: the
+   most pressable things on a first visit, and none of them part of the
+   review. They keep their look, which is what the decision is about, and
+   lose their press (Sketch.css), their tab stop, and their say in what a
+   screen reader offers, which hears them as unavailable. The customer list
+   is the real screen and is meant to be used, so it keeps all three. */
+
+/* What a drawn control carries instead of a press. */
+const DRAWN = { tabIndex: -1, 'aria-disabled': true } as const;
 
 /** The last class in a selector, which is the element a line is about: `settings__cancel-subscription` from `.settings__cancel-subscription`, `table` from `.customers .table`. */
 function classOf(selector: string): string {
@@ -34,20 +46,20 @@ function HandBuilt({ sample, lines, as }: { sample: Sample; lines: Line[]; as?: 
   const cls = classOf(lines[0]?.selector ?? '');
   if (as === 'button') {
     return (
-      <Button size="compact" variant="secondary">
+      <Button size="compact" variant="secondary" {...DRAWN}>
         {sample.action}
       </Button>
     );
   }
   if (as === 'quiet') {
     return (
-      <Button size="compact" variant="ghost" className={`sketch__quiet ${cls}`}>
+      <Button size="compact" variant="ghost" className={`sketch__quiet ${cls}`} {...DRAWN}>
         {sample.action}
       </Button>
     );
   }
   return (
-    <a href="#" className={`sketch__hand ${cls}`} onClick={(e) => e.preventDefault()}>
+    <a href="#" className={`sketch__hand ${cls}`} onClick={(e) => e.preventDefault()} {...DRAWN}>
       {sample.action}
     </a>
   );
@@ -76,7 +88,7 @@ function Rows({ title, subtitle, rows, focus, twin }: { title: string; subtitle?
                       the question names beside the element asked about is
                       the twin, and the preview marks it. */}
                   {r.action ? (
-                    <Button size="compact" variant="secondary" data-twin={twin === r.action ? '' : undefined}>
+                    <Button size="compact" variant="secondary" data-twin={twin === r.action ? '' : undefined} {...DRAWN}>
                       {r.action}
                     </Button>
                   ) : null}
