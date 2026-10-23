@@ -86,6 +86,29 @@ export const Current: Story = {
   },
 };
 
+/* Since 2026-10-23 (Sketch.tsx, A DRAWING OF A BUTTON IS NOT A BUTTON). */
+export const DrawnNotPressed: Story = {
+  parameters: {
+    docs: { description: { story: 'The settings screen is a drawing of the product, so its actions keep their look and lose their press: no tab stop, unavailable to a screen reader, and nothing under the pointer. The marked “Cancel subscription” is drawn the same way. The customer list, which is the real screen, keeps its controls (SharedTable).' } },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    for (const name of ['Change plan', 'Update card', 'Download invoices']) {
+      const button = canvas.getByRole('button', { name });
+      await expect(button).toHaveAttribute('tabindex', '-1');
+      await expect(button).toHaveAttribute('aria-disabled', 'true');
+      await expect(getComputedStyle(button).pointerEvents).toBe('none');
+      /* Its look is the system's Button, untouched. */
+      await expect(button).toHaveClass('btn--secondary');
+      await expect(button).not.toBeDisabled();
+    }
+    const link = canvasElement.querySelector(CANCEL) as HTMLElement;
+    await expect(link).toHaveAttribute('tabindex', '-1');
+    await expect(getComputedStyle(link).pointerEvents).toBe('none');
+    await expect(ink(link)).toBe(MUTED);
+  },
+};
+
 export const QuietVariant: Story = {
   args: { optionId: 'quiet' },
   parameters: {
@@ -166,6 +189,10 @@ export const SharedTable: Story = {
     await expect(canvasElement.querySelectorAll('.studio-reach__areas .studio-reach__screen')).toHaveLength(40);
     await expect(canvasElement.querySelectorAll('.studio-reach__areas [data-baseline]')).toHaveLength(12);
     await expect(getComputedStyle(canvasElement.querySelector('.table tbody tr > :nth-child(2)')!).paddingTop).toBe('8px');
+    /* The real screen is meant to be used: its controls keep their press. */
+    const box = canvasElement.querySelector('.studio-preview__frame input[type="checkbox"]') as HTMLInputElement;
+    await expect(box.tabIndex).toBe(0);
+    await expect(getComputedStyle(box).pointerEvents).not.toBe('none');
   },
 };
 

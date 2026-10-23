@@ -638,6 +638,13 @@
   background: var(--color-surface-sunken);
 }
 
+/* The way to the proposed interface, where the screen has put it out of
+   sight (DecisionRequest.tsx, `see`): a quiet press at its own width, over
+   the plan. */
+.ask__see {
+  align-self: flex-start;
+}
+
 /* Cancel and Apply in a bar at the confirmation's foot, with what Apply will
    do beside them. It sticks to the bottom of the window while the
    confirmation runs past it (a rule's preview can), on the confirmation's

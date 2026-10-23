@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObje
 import { Badge, Button, Disclosure, Icon, IconButton } from '../../components';
 import { useStore } from '../../app/store';
 import { href } from '../../app/router';
-import { account, activeRule, ruleText, waitingOn, whyAsking, wordsOf, wouldSettle, type Action, type Pattern, type RunId, type Work } from '../../data/delegation';
+import { account, activeRule, ruleText, waitingOn, whyAsking, wordsOf, wouldSettle, type Action, type DelegationState, type Pattern, type RunId, type Work } from '../../data/delegation';
 import { plural, relativeTime } from '../format';
 import { OutcomeFacts, OutcomeSummary } from '../OutcomeSummary/OutcomeSummary';
 import { DecisionRead, DecisionRequest, type RulePreview } from '../DecisionRequest/DecisionRequest';
@@ -103,9 +103,36 @@ import { Inline } from '../Inline';
      made, what the checks established, the completed work, and beside them
      the boundaries and the rules.
 
-   Under 56rem the workspace is one column, the preview first, then the
-   read, then the inspector, and nothing is dropped. Nothing is fixed to the
-   window's height and nothing scrolls inside anything else: the page grows. */
+   Under 56rem the workspace is one column, the inspector first, then the
+   preview, then the read, and nothing is dropped. Nothing is fixed to the
+   window's height and nothing scrolls inside anything else: the page grows.
+
+   FIRST MINUTE, SINCE 2026-10-23. Most people who open this have never
+   supervised an agent, arrive from a link, and give it a minute. They met a
+   run bar, an account of four tiles and a bar of literals, and a preview
+   whose buttons looked pressable and did nothing; the buttons that move the
+   demo were under the fold of a laptop, three screens down on a phone; and
+   applying the first decision made "2 decisions need you" read "4". So:
+
+   - The question first. The account's sentence stays over the workspace;
+     its tiles and bar lead the rest of the run (OutcomeSummary, `part`).
+     The inspector comes before the preview in the document, so a phone
+     opens on the question and a screen reader hears it first; on a wide
+     screen the grid still draws the interface on the left.
+   - Start here takes you there. Each step is a button that brings what it
+     names into view and focuses it, ringed: the interface, the directions,
+     the proposed interface, the plan and Apply (StartHere).
+   - The picture of the product is a picture. Its buttons keep their look
+     and lose their press and their tab stop (Sketch.tsx); the customer
+     list, which is the real screen, stays usable.
+   - The interface stays beside the choice. When the preview and the read
+     together are too tall to follow, the preview follows alone (useFollow),
+     so selecting a direction and reading its plan keeps the proposed
+     interface in view.
+   - The first answer ends something. In place of the workspace, one panel
+     says what the answer did, in the reducer's words, why more may be
+     asking now, and two ways on: the other run, or the next decision here
+     (FirstMinute). The next decision comes after it, not instead of it. */
 
 /* The runs, as the switch names them: what each is about, in two words. */
 const RUNS: { id: RunId; label: string; kind: string }[] = [
@@ -119,7 +146,16 @@ const RUNS: { id: RunId; label: string; kind: string }[] = [
    the window, so following never holds any of it out of view, and only
    while there are two columns (the stylesheet says when). Measured rather
    than assumed, because which is shorter depends on the decision and on
-   what is open in it; re-measured whenever either changes size. */
+   what is open in it; re-measured whenever either changes size.
+
+   Since 2026-10-23 there is a third case. When the interface and the read
+   under it are together too tall for the window but the decision is longer
+   still, the preview follows on its own: the stage stretches to the row so
+   the preview has somewhere to travel, and the read passes under it. That is
+   the case a direction's plan makes, and the reason for it: the proposed
+   interface stays beside the plan and Apply. The stage's height is measured
+   from its contents, not its box, because the box is the row's once it
+   stretches. */
 function useFollow(a: RefObject<HTMLElement | null>, b: RefObject<HTMLElement | null>, key: string) {
   useLayoutEffect(() => {
     const one = a.current;
@@ -128,14 +164,25 @@ function useFollow(a: RefObject<HTMLElement | null>, b: RefObject<HTMLElement | 
     const decide = () => {
       const zoom = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
       const room = window.innerHeight - 2 * 16 * zoom; /* --space-4 above and below, at the page's zoom */
-      const h1 = one.getBoundingClientRect().height;
+      const first = one.firstElementChild;
+      const last = one.lastElementChild;
+      const h1 = first && last ? last.getBoundingClientRect().bottom - first.getBoundingClientRect().top : one.getBoundingClientRect().height;
       const h2 = two.getBoundingClientRect().height;
-      one.toggleAttribute('data-follows', h1 < h2 && h1 <= room);
-      two.toggleAttribute('data-follows', h2 < h1 && h2 <= room);
+      const preview = one.querySelector<HTMLElement>(':scope > .studio-preview');
+      const hp = preview?.getBoundingClientRect().height ?? Infinity;
+      const stage = h1 < h2 && h1 <= room;
+      const inspector = h2 < h1 && h2 <= room;
+      const alone = !stage && !inspector && hp < h2 && hp <= room;
+      one.toggleAttribute('data-follows', stage);
+      one.toggleAttribute('data-holds', alone);
+      two.toggleAttribute('data-follows', inspector);
+      preview?.toggleAttribute('data-follows', alone);
     };
     decide();
     const ro = new ResizeObserver(decide);
-    ro.observe(one);
+    /* The stage's contents, not its box: the box is what `decide` stretches,
+       and watching it would answer its own change in the same frame. */
+    for (const child of Array.from(one.children)) ro.observe(child);
     ro.observe(two);
     window.addEventListener('resize', decide);
     return () => {
@@ -155,32 +202,134 @@ function useFollow(a: RefObject<HTMLElement | null>, b: RefObject<HTMLElement | 
    explanation, which it replaces (DecisionRequest's "Which trade-off is
    acceptable?" lost the paragraph that said the same thing). The label is
    "Start here" until the person has settled something in the run, and
-   "Next" after that. */
-function StartHere({ work, chosen, first }: { work: Work; chosen: boolean; first: boolean }) {
+   "Next" after that.
+
+   A STEP TAKES YOU THERE, SINCE 2026-10-23. The line named the steps and
+   could not be pressed, so it said what to do without saying where. Each
+   step is a Button now (ghost, compact: chrome, not an action on the work),
+   and pressing it brings what it names into view and focuses it, ringed
+   (DelegationScreen.css, POINTED AT): the interface for the first step; the
+   directions or answers for choosing; for previewing, the interface turned
+   to Proposed; for applying, the plan and Apply. A step that needs a choice
+   made first, before there is one, goes to the choice. Nothing is decided
+   by a step; it only moves the person's eye and focus. */
+type StartStep = 'look' | 'choose' | 'preview' | 'apply';
+
+function StartHere({ work, chosen, first, onStep }: { work: Work; chosen: boolean; first: boolean; onStep: (step: StartStep) => void }) {
   const q = work.question!;
   const tradeoff = q.options.some((o) => o.benefits);
-  const steps = tradeoff
-    ? [q.start ?? 'Compare the directions', 'Choose a direction', 'Preview it', 'Apply it']
-    : q.kind === 'scope'
-      ? [q.reach ? 'See what the fix reaches' : 'See what it would change', 'Choose an answer', 'Apply it']
-      : ['Compare the readings', 'Choose an answer', 'Apply it'];
+  const steps: { label: string; to: StartStep }[] = tradeoff
+    ? [
+        { label: q.start ?? 'Compare the directions', to: 'look' },
+        { label: 'Choose a direction', to: 'choose' },
+        { label: 'Preview it', to: 'preview' },
+        { label: 'Apply it', to: 'apply' },
+      ]
+    : [
+        { label: q.kind === 'scope' ? (q.reach ? 'See what the fix reaches' : 'See what it would change') : 'Compare the readings', to: 'look' },
+        { label: 'Choose an answer', to: 'choose' },
+        { label: 'Apply it', to: 'apply' },
+      ];
   const at = chosen ? steps.length - 1 : 0;
   return (
     <section className="studio__start" aria-labelledby="start-label">
       <p className="studio__start-label" id="start-label">
         {first ? 'Start here' : 'Next'}
       </p>
-      <ol className="studio__start-steps">
+      <ol className="studio__start-steps" role="list">
         {steps.map((step, i) => (
-          <li key={step} aria-current={i === at ? 'step' : undefined} data-done={i < at || undefined}>
-            <span className="studio__start-num" aria-hidden="true">
-              {i < at ? <Icon name="check" size={14} /> : i + 1}
-            </span>
-            {step}
-            {i < at ? <span className="visually-hidden"> (done)</span> : null}
+          <li key={step.label} role="listitem" aria-current={i === at ? 'step' : undefined} data-done={i < at || undefined}>
+            <Button variant="ghost" size="compact" className="studio__start-step" onClick={() => onStep(step.to)}>
+              <span className="studio__start-num" aria-hidden="true">
+                {i < at ? <Icon name="check" size={14} /> : i + 1}
+              </span>
+              {step.label}
+              {i < at ? <span className="visually-hidden"> (done)</span> : null}
+            </Button>
           </li>
         ))}
       </ol>
+    </section>
+  );
+}
+
+/* THE FIRST MINUTE ENDS, SINCE 2026-10-23. The first answer in a run used to
+   be followed by the next question at once, and in the billing run by more
+   of them than before: answered once, the three changes held behind the
+   first decision each ask, so "2 decisions need you" became "4". A person
+   who had just done the one thing the screen exists for met a longer list
+   and no sign they had done it.
+
+   So the first answer ends something. In the workspace's place, one panel:
+   what the answer did, in the reducer's own sentence (the notice's, which
+   stays the live region); the record it left, one press away; when changes
+   that were held behind it are asking now, why, in a sentence; and two ways
+   on, the other sample run or the next decision here. It claims nothing the
+   reducer did not do, and it comes once per run: after it, the workspace is
+   as it always was. */
+function FirstMinute({
+  state,
+  answered,
+  other,
+  onRecord,
+  onNext,
+  onLeave,
+  titleRef,
+}: {
+  state: DelegationState;
+  answered: string;
+  other: (typeof RUNS)[number];
+  onRecord?: () => void;
+  onNext: () => void;
+  /** Going to the other run ends it too, so coming back finds the workspace. */
+  onLeave: () => void;
+  titleRef: RefObject<HTMLHeadingElement | null>;
+}) {
+  const asking = account(state).asking;
+  const held = asking.filter((w) => w.waitsOn === answered);
+  const ruled = Boolean(state.noticeRule);
+  return (
+    <section className="studio-end" aria-labelledby="end-title">
+      <h2 ref={titleRef} id="end-title" className="studio-end__title" tabIndex={-1}>
+        <Icon name="status-passed" size={20} />
+        That’s the loop
+      </h2>
+      <p className="studio-end__lead">The agent stopped at a question only a person could answer. You answered it, and it acted on your answer.</p>
+      <ul className="studio-end__facts">
+        <li>
+          <p>
+            <strong>What happened.</strong> <Inline text={state.notice ?? ''} />
+          </p>
+        </li>
+        {onRecord ? (
+          <li>
+            <p>
+              <strong>On record.</strong> Your reason, the trade-off you accepted and the risk that remains are in the decision record.
+            </p>
+            <Button size="compact" variant="secondary" onClick={onRecord}>
+              See the decision record
+            </Button>
+          </li>
+        ) : null}
+        {held.length ? (
+          <li>
+            <p>
+              <strong>
+                Why {held.length} more {held.length === 1 ? 'is' : 'are'} asking.
+              </strong>{' '}
+              {ruled ? whyAsking(state, held[0]) : 'You decided for this change only. A decision kept for similar cases settles the ones it covers without asking you.'}
+            </p>
+          </li>
+        ) : null}
+      </ul>
+      <div className="studio-end__next">
+        <Button variant="primary" onClick={onNext}>
+          {asking.length ? 'Keep going here' : 'See the finished run'}
+        </Button>
+        <a className="studio-end__other" href={href({ name: 'delegation', run: other.id })} onClick={onLeave}>
+          Try the other run: {other.label}, {other.kind}
+        </a>
+      </div>
     </section>
   );
 }
@@ -211,6 +360,7 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
   const top = useRef<HTMLHeadingElement>(null);
   const bounds = useRef<HTMLElement>(null);
   const records = useRef<Record<string, HTMLElement | null>>({});
+  const end = useRef<HTMLHeadingElement>(null);
   const focusNext = useRef(false);
 
   /* Which decision the workspace shows, and what is selected in each. The
@@ -222,11 +372,14 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
   const [at, setAt] = useState<{ id?: string; index: number }>({ index: 0 });
   const [chosen, setChosen] = useState<Record<string, string | undefined>>({});
   const [views, setViews] = useState<Record<string, PreviewView>>({});
+  /* The run whose first answer is being shown its end (FirstMinute), and the
+     change that answer was about, until the person moves on. */
+  const [ending, setEnding] = useState<{ run: RunId; id: string } | null>(null);
 
   useEffect(() => {
     if (!focusNext.current) return;
     focusNext.current = false;
-    (needs.current ?? lead.current)?.focus();
+    (end.current ?? needs.current ?? lead.current)?.focus();
   });
 
   /* Whether an answer can become a rule, and the rule as it would read. Only
@@ -263,14 +416,43 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
   const previewing = current?.question?.options.find((o) => o.id === choice && !o.asks);
   const view: PreviewView = current && previewing ? (views[current.id] ?? 'proposed') : 'current';
 
+  const ended = ending?.run === run && a.settled.length > 0 ? ending : null;
+  const other = RUNS.find((r) => r.id !== run)!;
+
   const stage = useRef<HTMLDivElement>(null);
   const inspector = useRef<HTMLDivElement>(null);
-  useFollow(stage, inspector, current?.id ?? '');
+  useFollow(stage, inspector, `${current?.id ?? ''}:${ended ? 'ended' : ''}`);
 
+  /* The first answer in a run that decides something (more evidence
+     decides nothing) ends the first minute. */
   const answer = (w: Work, option: string, makeRule: boolean, reason?: string) => {
     focusNext.current = true;
     setAt({ index });
+    if (a.settled.length === 0 && !w.question?.options.find((o) => o.id === option)?.asks) setEnding({ run, id: w.id });
     delegate({ type: 'answer', id: w.id, option, makeRule, reason });
+  };
+
+  /* Where a step of Start here takes the person (StartHere). Into view, then
+     focus, which the stylesheet rings on these destinations alone; smoothly,
+     unless they have asked for less motion. */
+  const point = (el: HTMLElement | null | undefined) => {
+    if (!el) return;
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' });
+    el.focus({ preventScroll: true });
+  };
+  const step = (to: StartStep) => {
+    const screen = stage.current?.querySelector<HTMLElement>('.studio-preview');
+    const choices = inspector.current?.querySelector<HTMLElement>('.ask__options');
+    const plan = inspector.current?.querySelector<HTMLElement>('.ask__confirm');
+    if (to === 'look') return point(screen ?? choices);
+    if (to === 'choose') return point(choices ?? plan);
+    if (!previewing || !current) return point(choices ?? plan);
+    if (to === 'preview') {
+      setViews((m) => ({ ...m, [current.id]: 'proposed' }));
+      return point(screen);
+    }
+    return point(plan);
   };
 
   const record = (w: Work) => (
@@ -313,6 +495,7 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
               setAt({ index: 0 });
               setChosen({});
               setViews({});
+              setEnding(null);
               top.current?.focus();
             }}
           >
@@ -340,11 +523,14 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
             </Disclosure>
           </div>
 
-          <OutcomeSummary ref={lead} state={s} />
+          <OutcomeSummary ref={lead} state={s} part="lead" />
         </header>
 
+        {/* While the first minute's end is up, it says what the notice says,
+            and more, and focus is on it; the notice stays in the tree, as
+            the live region, and empty, so nothing is said twice. */}
         <div className="delegation__notice" data-kind={s.noticeKind} aria-live="polite">
-          {s.notice ? (
+          {s.notice && !ended ? (
             <>
               <Icon name={s.noticeKind === 'back' ? 'undo' : s.noticeKind === 'open' ? 'status-inconclusive' : 'status-passed'} size={16} />
               <p>
@@ -378,20 +564,30 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
           ) : null}
         </div>
 
-        {current ? (
+        {ended ? (
+          <FirstMinute
+            state={s}
+            answered={ended.id}
+            other={other}
+            titleRef={end}
+            onRecord={
+              s.noticeDecision && s.decisions.some((d) => d.id === s.noticeDecision)
+                ? () => {
+                    const el = records.current[s.noticeDecision!];
+                    el?.scrollIntoView({ block: 'nearest' });
+                    el?.focus();
+                  }
+                : undefined
+            }
+            onNext={() => {
+              focusNext.current = true;
+              setEnding(null);
+            }}
+            onLeave={() => setEnding(null)}
+          />
+        ) : current ? (
           <section className="studio" aria-labelledby="needs-title">
-            <StartHere work={current} chosen={Boolean(choice)} first={a.settled.length === 0} />
-            <div ref={stage} className="studio__stage">
-              <DecisionPreview
-                work={current}
-                option={previewing}
-                view={view}
-                onViewChange={(v) => setViews((m) => ({ ...m, [current.id]: v }))}
-                position={index + 1}
-              />
-              <DecisionRead work={current} waiting={waitingOn(s, current.id)} onAnswer={(option, makeRule) => answer(current, option, makeRule)} />
-            </div>
-
+            <StartHere work={current} chosen={Boolean(choice)} first={a.settled.length === 0} onStep={step} />
             <div ref={inspector} className="studio__inspector">
               <div className="studio__head">
                 <h2 ref={needs} id="needs-title" className="delegation__h2" tabIndex={-1}>
@@ -422,13 +618,26 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
                   setViews((m) => ({ ...m, [current.id]: 'proposed' }));
                 }}
                 onAnswer={(option, makeRule, reason) => answer(current, option, makeRule, reason)}
+                onSeePreview={() => step('preview')}
               />
+            </div>
+
+            <div ref={stage} className="studio__stage">
+              <DecisionPreview
+                work={current}
+                option={previewing}
+                view={view}
+                onViewChange={(v) => setViews((m) => ({ ...m, [current.id]: v }))}
+                position={index + 1}
+              />
+              <DecisionRead work={current} waiting={waitingOn(s, current.id)} onAnswer={(option, makeRule) => answer(current, option, makeRule)} />
             </div>
           </section>
         ) : null}
 
         <div className="delegation__layout">
           <div className="delegation__main">
+            <OutcomeSummary state={s} part="counts" />
             {s.decisions.length ? (
               <section className="delegation__section" aria-labelledby="decided-title">
                 <h2 id="decided-title" className="delegation__h2">

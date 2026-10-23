@@ -199,7 +199,8 @@ export function DecisionPreview({ work, option, view, onViewChange, position = 1
   const twinTag = twin?.tag ?? '';
 
   return (
-    <section className="studio-preview" aria-labelledby={`${id}-screen`}>
+    /* Focusable by script alone: a step of Start here brings the person here (DelegationScreen.tsx). */
+    <section className="studio-preview" aria-labelledby={`${id}-screen`} tabIndex={-1}>
       <div className="studio-preview__bar">
         <p className="studio-preview__screen" id={`${id}-screen`}>
           <Icon name="monitor" size={16} />

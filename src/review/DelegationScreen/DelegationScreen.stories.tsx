@@ -169,8 +169,10 @@ export const TheWholeLoop: Story = {
       await expect(canvas.getByText(/It settles now:/).closest('p')).toHaveTextContent('2 changes that match, on the plan card');
       await userEvent.click(apply);
       await expect(canvas.getByText(/Decided: make it a button in its own change, and made a rule\. The agent applied it and recorded your reason\. Your rule settled 2 waiting changes\. 1 change is asking now\./)).toBeInTheDocument();
-      await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveFocus();
+      await expect(canvas.getByRole('heading', { name: 'That’s the loop' })).toHaveFocus();
       await expect(canvas.getByText('10 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
+      await userEvent.click(canvas.getByRole('button', { name: 'Keep going here' }));
+      await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveFocus();
     });
 
     await step('The case outside the rule pauses, and says why', async () => {
@@ -280,7 +282,7 @@ export const Dark: Story = {
 export const DecisionFirst: Story = {
   decorators: [inStore(start)],
   parameters: {
-    docs: { description: { story: 'The order a person who has something to decide wants: the account in one sentence, the tiles and a bar, then the workspace, the decision’s screen first and the inspector beside it, and only then the evidence for the sentence (the checks, what is unresolved, the scope) and the completed work. The inspector is the one raised surface on the screen: the preview, the read, the completed work and the boundaries are flat panels, an edge and no shadow, and the strip’s “Simulated” is in the ink, not the accent.' } },
+    docs: { description: { story: 'The order a person who has something to decide wants: the account in one sentence, then the workspace, the decision first in the document (so a phone and a screen reader meet the question first) and the interface it changes beside it on a wide screen, and only then the evidence for the sentence: the tiles and the bar, the checks, what is unresolved, the scope, and the completed work. The inspector is the one raised surface on the screen: the preview, the read, the completed work and the boundaries are flat panels, an edge and no shadow, and the strip’s “Simulated” is in the ink, not the accent.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -288,12 +290,16 @@ export const DecisionFirst: Story = {
     const lead = canvas.getByText('7 changes made and checked. 2 decisions need you.');
     const preview = canvas.getByRole('region', { name: 'Preview of Billing settings BillingSettings.tsx' });
     const needs = canvas.getByRole('heading', { name: /Needs you/ });
+    const counts = canvas.getByRole('list', { name: 'How the work was handled' });
     const checks = canvas.getByRole('list', { name: 'Checks run on every change' });
     const done = canvas.getByRole('heading', { name: /Completed work/ });
-    await expect(before(lead, preview)).toBe(true);
-    await expect(before(preview, needs)).toBe(true);
-    await expect(before(needs, checks)).toBe(true);
+    await expect(before(lead, needs)).toBe(true);
+    await expect(before(needs, preview)).toBe(true);
+    await expect(before(preview, counts)).toBe(true);
+    await expect(before(counts, checks)).toBe(true);
     await expect(before(checks, done)).toBe(true);
+    /* On a wide screen the interface is still drawn on the left. */
+    await expect(preview.getBoundingClientRect().left).toBeLessThan(needs.getBoundingClientRect().left);
     await expect(canvas.getByText('Decision 1 of 2')).toBeInTheDocument();
     /* Unresolved is below the decisions, not gone. */
     await expect(canvas.getByText(/Axe couldn’t measure/)).toBeInTheDocument();
@@ -374,7 +380,7 @@ export const SwitchingKeepsTheWork: Story = {
 export const StartHere: Story = {
   decorators: [inStore(start)],
   parameters: {
-    docs: { description: { story: 'The first decision, before anything is chosen: “Start here”, then compare the two actions, choose a direction, preview it, and apply it, the first current. Selecting a direction marks the first three done and makes Apply current. After the first decision is applied, the line over the next one says “Next”.' } },
+    docs: { description: { story: 'The first decision, before anything is chosen: “Start here”, then compare the two actions, choose a direction, preview it, and apply it, the first current. Selecting a direction marks the first three done and makes Apply current. After the first decision is applied and the person goes on from its end, the line over the next one says “Next”.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -387,10 +393,125 @@ export const StartHere: Story = {
     await expect(cue.querySelectorAll('[data-done]')).toHaveLength(3);
     await expect(cue).toHaveTextContent('Choose a direction (done)');
     await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
+    await userEvent.click(await canvas.findByRole('button', { name: 'Keep going here' }));
     await waitFor(() => expect(canvas.getByRole('region', { name: 'Next' })).toBeInTheDocument());
     await expect(canvas.queryByRole('region', { name: 'Start here' })).toBeNull();
   },
 };
+
+/* A STEP TAKES YOU THERE: each step of Start here is a button that brings
+   what it names into view and focuses it. Nothing is decided by a step. */
+export const StepsTakeYouThere: Story = {
+  decorators: [inStore(start)],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Each step of Start here is a press. Compare the two actions goes to the interface; Choose a direction goes to the directions; Preview it and Apply it go to the directions too while none is chosen. With a direction chosen, Preview it turns the interface to Proposed and goes to it, and Apply it goes to the plan, the reason and Apply. The place a step goes to is ringed. Nothing is chosen or applied by a step.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const cue = within(canvas.getByRole('region', { name: 'Start here' }));
+    const preview = canvas.getByRole('region', { name: 'Preview of Billing settings BillingSettings.tsx' });
+    const directions = canvas.getByRole('group', { name: 'Which trade-off is acceptable?' });
+    const ring = (el: Element) => getComputedStyle(el).outlineStyle;
+
+    await userEvent.click(cue.getByRole('button', { name: /Compare the two actions/ }));
+    await expect(preview).toHaveFocus();
+    await expect(ring(preview)).toBe('solid');
+    await userEvent.click(cue.getByRole('button', { name: /Choose a direction/ }));
+    await expect(directions).toHaveFocus();
+    await expect(ring(directions)).toBe('solid');
+    for (const name of [/Preview it/, /Apply it/]) {
+      await userEvent.click(cue.getByRole('button', { name }));
+      await expect(directions).toHaveFocus();
+    }
+    await expect(canvas.queryByText('Not applied')).toBeNull();
+
+    await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Add a quiet variant$/ }));
+    await userEvent.click(canvas.getByRole('radio', { name: 'Current' }));
+    await expect(canvas.getByText('Current interface')).toBeInTheDocument();
+    await userEvent.click(cue.getByRole('button', { name: /Preview it/ }));
+    await expect(preview).toHaveFocus();
+    await expect(canvas.getByRole('radio', { name: 'Proposed' })).toHaveAttribute('aria-checked', 'true');
+    await userEvent.click(cue.getByRole('button', { name: /Apply it/ }));
+    await expect(canvas.getByRole('form', { name: 'If you apply “Add a quiet variant”, the agent will:' })).toHaveFocus();
+    /* Still nothing applied. */
+    await expect(canvas.getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
+  },
+};
+
+/* THE FIRST MINUTE ENDS: the first answer in a run, in the workspace's
+   place, says what it did and offers two ways on. */
+const firstMinute = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+  const canvas = within(canvasElement);
+  await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Add a quiet variant$/ }));
+  await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
+  const end = canvas.getByRole('region', { name: 'That’s the loop' });
+  await expect(canvas.getByRole('heading', { name: 'That’s the loop' })).toHaveFocus();
+  /* What happened, in the reducer's words, said once. */
+  await expect(end).toHaveTextContent('What happened. Decided: add a quiet variant. The agent applied it and recorded your reason. 3 changes are asking now.');
+  await expect(canvasElement.querySelector('.delegation__notice')).toBeEmptyDOMElement();
+  await expect(end).toHaveTextContent('Why 3 more are asking. You decided for this change only.');
+  /* In place of the workspace, not as well as it. */
+  await expect(canvas.queryByRole('heading', { name: /Needs you/ })).toBeNull();
+  await expect(canvas.getByText('8 changes made and checked. 4 decisions need you.')).toBeInTheDocument();
+  await expect(within(end).getByRole('link', { name: /Try the other run: Shared table/ })).toHaveAttribute('href', '#/runs/shared-table');
+  await userEvent.click(within(end).getByRole('button', { name: 'See the decision record' }));
+  await expect(canvas.getByRole('article', { name: 'Add a quiet variant' })).toHaveFocus();
+};
+
+export const FirstMinuteEnds: Story = {
+  decorators: [inStore(start)],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The first answer in a run ends something. In the workspace’s place: that was the loop; what the answer did, in the reducer’s own sentence; that the decision record has the reason, the trade-off and the risk; why three more changes are asking now; and two ways on, the next decision here or the other sample run. Going on brings the workspace back at the next decision, with “Next” over it.',
+      },
+    },
+  },
+  play: async (context) => {
+    await firstMinute(context);
+    const canvas = within(context.canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Keep going here' }));
+    await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveFocus();
+    await expect(canvas.getByText('Decision 1 of 4')).toBeInTheDocument();
+    await expect(canvas.queryByRole('region', { name: 'That’s the loop' })).toBeNull();
+    /* The notice is back once the end is gone. */
+    await expect(context.canvasElement.querySelector('.delegation__notice')).toHaveTextContent(/^Decided: add a quiet variant\./);
+  },
+};
+
+export const FirstMinuteEndsDark: Story = {
+  decorators: [inStore(start)],
+  globals: { theme: 'dark' },
+  parameters: { docs: { description: { story: 'The first minute’s end in the dark theme.' } } },
+  play: firstMinute,
+};
+
+export const FirstMinuteEndsWithARule: Story = {
+  decorators: [inStore(start)],
+  parameters: {
+    docs: {
+      description: {
+        story: 'The first answer kept for similar cases: the rule settles two of the waiting changes, and the one it does not cover says why in the end’s own words, from the same sentence the decision gives when it asks.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Add a quiet variant$/ }));
+    await userEvent.click(canvas.getByText('Use this decision for similar cases'));
+    await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
+    const end = canvas.getByRole('region', { name: 'That’s the loop' });
+    await expect(end).toHaveTextContent(/Your rule settled 2 waiting changes\. 1 change is asking now\./);
+    await expect(end).toHaveTextContent(/Why 1 more is asking\. Close to your rule, but outside it\./);
+  },
+};
+
 
 /* The second run: the shared table. A permission boundary rather than
    missing intent, and three answers that end differently. */
@@ -532,5 +653,29 @@ export const SharedTableDark: Story = {
   play: async ({ canvasElement }) => {
     await expect(getComputedStyle(canvasElement.ownerDocument.documentElement).colorScheme).toBe('dark');
     await expect(within(canvasElement).getByText('Needs approval')).toBeInTheDocument();
+  },
+};
+
+export const FirstMinuteOnceARun: Story = {
+  args: { run: 'shared-table' },
+  decorators: [inStore(table)],
+  parameters: {
+    docs: {
+      description: {
+        story: 'The end comes after the first answer that decides something. Asking for more evidence decides nothing and brings the question back as it always has; the answer after it ends the first minute, and, nothing being left to decide, the way on is the finished run.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Show me the 40 screens' }));
+    await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveFocus();
+    await expect(canvas.queryByRole('region', { name: 'That’s the loop' })).toBeNull();
+    await userEvent.click(canvas.getByRole('button', { name: 'Fix this screen only' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
+    const end = canvas.getByRole('region', { name: 'That’s the loop' });
+    await expect(within(end).getByRole('link', { name: /Try the other run: Quiet cancel/ })).toHaveAttribute('href', '#/');
+    await userEvent.click(within(end).getByRole('button', { name: 'See the finished run' }));
+    await expect(canvas.getByText('Nothing needs your attention.').closest('p')).toHaveFocus();
   },
 };

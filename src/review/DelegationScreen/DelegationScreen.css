@@ -69,11 +69,12 @@
   min-width: 0;
 }
 
-/* The job, and its account under it. */
+/* The job, and the account's sentence under it (the tiles are under the
+   workspace since 2026-10-23, so the sentence sits a step closer). */
 .delegation__header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-3);
 }
 
 .delegation__heading {
@@ -263,6 +264,25 @@
     padding: var(--space-2);
   }
 
+  /* On a phone the bar was three rows and a sixth of the screen before the
+     job's title (since 2026-10-23): the runs and the reset now share the
+     first row, and the simulation's line runs the width of the second, its
+     words wrapping under the label rather than beside it. */
+  .delegation__runbar-inner > .btn {
+    margin-left: auto;
+  }
+
+  .delegation__sim {
+    display: block;
+    flex-basis: 100%;
+    order: 1;
+  }
+
+  .delegation__sim p {
+    display: inline;
+    margin-left: var(--space-2);
+  }
+
   .delegation__routine > .disclosure__summary {
     padding: var(--space-3); /* the records' own padding on a phone, so the routine row's chevron and mark line up with theirs */
   }
@@ -364,7 +384,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2) var(--space-4);
+  gap: var(--space-1) var(--space-2);
   padding: var(--space-2) var(--space-4);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
@@ -372,21 +392,21 @@
 }
 
 .studio__start-label {
+  margin-right: var(--space-2);
   color: var(--color-text);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
 }
 
+/* The list takes no box of its own, so its steps wrap in the label's row
+   and a phone starts the first step beside "Start here" rather than under
+   it. The roles in the markup say what the box no longer does. */
 .studio__start-steps {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-4);
+  display: contents;
 }
 
 .studio__start-steps li {
   display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
   color: var(--color-text-secondary);
   font-size: var(--text-sm);
   line-height: var(--leading-ui);
@@ -395,6 +415,22 @@
 .studio__start-steps li[aria-current='step'] {
   color: var(--color-text);
   font-weight: var(--weight-medium);
+}
+
+/* Each step is a ghost Button (DelegationScreen.tsx, A STEP TAKES YOU
+   THERE), in the step's own ink rather than the ghost's, so the current one
+   still reads as current; the ghost's hover ground says it can be pressed.
+   The number and the words sit in the Button's label, a step apart. */
+.studio__start-steps .studio__start-step {
+  padding-inline: var(--space-1);
+  color: inherit;
+  font-weight: inherit;
+}
+
+.studio__start-step .btn__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .studio__start-num {
@@ -424,6 +460,22 @@
   flex-direction: column;
   gap: var(--space-4);
   min-width: 0;
+}
+
+/* POINTED AT: where a step of Start here takes the person. These three are
+   focused only from a step, so their ring says "here" after a press as well
+   as after a key, in the focus ring's own tokens. */
+.studio .studio-preview:focus,
+.studio .ask__options:focus,
+.studio .ask__confirm:focus {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.studio .studio-preview,
+.studio .ask__options,
+.studio .ask__confirm {
+  scroll-margin-block: var(--space-4); /* brought into view with room for the ring */
 }
 
 /* The inspector is one panel, the one raised surface on the screen: the
@@ -469,6 +521,39 @@
     position: sticky;
     top: var(--space-4);
   }
+
+  /* The preview following on its own: the stage takes the row's height so
+     the preview has somewhere to travel, and the preview is drawn over the
+     read as the read passes under it. */
+  .studio__stage[data-holds] {
+    align-self: stretch;
+  }
+
+  /* The gap above it is the page's ground too, drawn as a flat edge of the
+     canvas's color rather than left open, so the read does not show
+     through the strip between the window's top and the preview. */
+  .studio .studio-preview[data-follows] {
+    z-index: 1;
+    box-shadow: 0 calc(var(--space-4) * -1) 0 0 var(--color-canvas);
+  }
+
+  /* The inspector comes first in the document, for a phone and a screen
+     reader (DelegationScreen.tsx, FIRST MINUTE); two columns put the
+     interface back on the left. */
+  .studio__stage {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .studio__inspector {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  /* Beside the decision, the proposed interface is already in view. */
+  .studio .ask__see {
+    display: none;
+  }
 }
 
 @media (max-width: 64rem) {
@@ -478,8 +563,8 @@
   }
 }
 
-/* One column: the interface first, what the agent read, then the decision.
-   Nothing is dropped; the inspector is the width of the screen. */
+/* One column: the decision first, then the interface, then what the agent
+   read. Nothing is dropped; the inspector is the width of the screen. */
 @media (max-width: 56rem) {
   .studio {
     grid-template-columns: minmax(0, 1fr);
@@ -505,4 +590,84 @@
 .studio__inspector .ask__where {
   order: 2;
   flex-basis: 100%;
+}
+
+/* THE FIRST MINUTE'S END (DelegationScreen.tsx, FirstMinute), in the
+   workspace's place after the first answer in a run: the one raised panel on
+   the screen while it is up, as the inspector is otherwise, at a reading
+   measure. A title with the result's mark, a line on what the loop was, what
+   happened in a short list led by bold labels, and the two ways on. */
+.studio-end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  max-width: 44rem;
+  padding: var(--space-6);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.studio-end__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+
+.studio-end__title .icon {
+  flex: none;
+  color: var(--color-success);
+}
+
+.studio-end__title:focus-visible {
+  outline: none; /* a destination focus is sent to, as the screen's headings are */
+}
+
+.studio-end__lead {
+  margin-top: calc(var(--space-2) * -1);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+.studio-end__facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  line-height: var(--leading-body);
+}
+
+.studio-end__facts li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.studio-end__next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+  padding-top: var(--space-2);
+}
+
+@media (max-width: 40rem) {
+  .studio-end {
+    padding: var(--space-4);
+  }
+}
+
+/* The other run is a place with an address, so a link, as the run bar's
+   are; a fingertip's height on a touch screen, as they are. */
+@media (pointer: coarse) {
+  .studio-end__other {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-height-touch);
+  }
 }

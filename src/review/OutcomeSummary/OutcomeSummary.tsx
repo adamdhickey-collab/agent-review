@@ -154,9 +154,20 @@ function Mode({ icon, n, words, note }: { icon: IconName; n: number; words: stri
 
 export interface OutcomeSummaryProps {
   state: DelegationState;
+  /** The whole account; its sentence alone, for the top of the screen; or its tiles and bar alone, for under the decision. */
+  part?: 'all' | 'lead' | 'counts';
 }
 
-export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryProps>(function OutcomeSummary({ state }, ref) {
+/* THE SENTENCE AT THE TOP, THE COUNTS UNDER THE DECISION, SINCE 2026-10-23.
+   A first-time reader met four tiles and a bar of literals before the
+   question they had come to answer, and on a laptop the buttons that answer
+   it were under the fold. The delegated work now draws the account in two
+   places (DelegationScreen.tsx, FIRST MINUTE): the sentence over the
+   workspace, which is the answer to how the run went, and the tiles and the
+   bar first in the rest of the run, which are the evidence for the
+   sentence. Same figures, counted the same way; `part` says which half to
+   draw, and a story that wants the whole account still gets it. */
+export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryProps>(function OutcomeSummary({ state, part = 'all' }, ref) {
   const a = account(state);
   const words = wordsOf(state.brief);
   const quiet = a.asking.length === 0;
@@ -177,8 +188,8 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
   const segments = kinds.filter((s) => s.n > 0);
   const pixels = pixelSentence(a.made, words);
 
-  return (
-    <section className="outcome" aria-label="What happened">
+  const lead = (
+    <>
       <p ref={ref} className="outcome__lead" tabIndex={-1} data-quiet={quiet || undefined}>
         {quiet ? (
           <>
@@ -196,7 +207,10 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
           {plural(a.made.length, 'change')} made and checked. Completed work is below.
         </p>
       ) : null}
+    </>
+  );
 
+  const counts = (
       <div className="outcome__row">
       <ul className="outcome__modes" aria-label="How the work was handled">
         <li data-mode="own" data-zero={a.own.length === 0 || undefined}>
@@ -242,6 +256,19 @@ export const OutcomeSummary = forwardRef<HTMLParagraphElement, OutcomeSummaryPro
         </ul>
       </div>
       </div>
+  );
+
+  if (part === 'counts') {
+    return (
+      <section className="outcome" aria-label="How the run went">
+        {counts}
+      </section>
+    );
+  }
+  return (
+    <section className="outcome" aria-label="What happened">
+      {lead}
+      {part === 'all' ? counts : null}
     </section>
   );
 });

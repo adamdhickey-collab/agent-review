@@ -477,11 +477,13 @@ export interface DecisionRequestProps {
   /** The selected direction or answer, when the screen holds it so its preview can read it too. */
   choice?: string;
   onChoiceChange?: (optionId: string | undefined) => void;
+  /** A way to the interface as the selected direction would draw it, where it is not beside the decision (the delegated work's one column). */
+  onSeePreview?: () => void;
 }
 
 const basename = (path: string) => path.split('/').pop();
 
-export function DecisionRequest({ work, why, boundaries, waiting = [], preview, onAnswer, initialChoice, choice: held, onChoiceChange }: DecisionRequestProps) {
+export function DecisionRequest({ work, why, boundaries, waiting = [], preview, onAnswer, initialChoice, choice: held, onChoiceChange, onSeePreview }: DecisionRequestProps) {
   const q = work.question!;
   const id = useId();
   const [own, setOwn] = useState<string | undefined>(initialChoice);
@@ -592,6 +594,16 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
     </div>
   ) : null;
 
+  /* The interface as proposed, one press away, when the screen holding this
+     card has put it out of sight (since 2026-10-23: on a phone the preview
+     is under the decision, a screen below Apply). Above the plan, so it is
+     in view when selecting a direction brings the plan into view. */
+  const see = onSeePreview && option && !option.asks ? (
+    <Button className="ask__see" variant="ghost" size="compact" leadingIcon="eye" onClick={onSeePreview}>
+      Show the proposed screen
+    </Button>
+  ) : null;
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!option) return;
@@ -662,7 +674,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
 
       {tradeoff ? (
         <>
-          <div className="ask__options" role="group" aria-labelledby={`${id}-if`}>
+          <div className="ask__options" role="group" aria-labelledby={`${id}-if`} tabIndex={-1}>
             <p className="ask__if" id={`${id}-if`}>
               Which trade-off is acceptable?
             </p>
@@ -690,6 +702,23 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                         <strong>Main risk:</strong> {(o.risks ?? [])[0]}
                       </span>
                     </p>
+                    {/* The press before the whole case, since 2026-10-23: the
+                        title, what it does and its main risk are what a
+                        choice needs, and with the case first, the first
+                        button was still under the fold of a laptop. */}
+                    <Button
+                      ref={(el) => {
+                        optionRefs.current[o.id] = el;
+                      }}
+                      className="ask__pick"
+                      variant="secondary"
+                      aria-pressed={chosen}
+                      leadingIcon={chosen ? 'check' : 'eye'}
+                      onClick={() => pick(o)}
+                    >
+                      {chosen ? 'Selected' : 'Select and preview'}
+                      <span className="visually-hidden"> {o.title}</span>
+                    </Button>
                     <Disclosure className="ask__weigh-more" summary={`${plural(o.benefits!.length, 'benefit')} and ${plural((o.risks ?? []).length, 'risk')}`}>
                     <div className="ask__weigh">
                       <p className="ask__weigh-label" id={`${id}-${o.id}-good`}>
@@ -716,19 +745,6 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                       </ul>
                     </div>
                     </Disclosure>
-                    <Button
-                      ref={(el) => {
-                        optionRefs.current[o.id] = el;
-                      }}
-                      className="ask__pick"
-                      variant="secondary"
-                      aria-pressed={chosen}
-                      leadingIcon={chosen ? 'check' : 'eye'}
-                      onClick={() => pick(o)}
-                    >
-                      {chosen ? 'Selected' : 'Select and preview'}
-                      <span className="visually-hidden"> {o.title}</span>
-                    </Button>
                   </li>
                 );
               })}
@@ -741,7 +757,8 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
           {checksPart}
 
           {option && p ? (
-            <form className="ask__confirm ask__decide" aria-labelledby={`${id}-plan`} onSubmit={submit} onKeyDown={escape}>
+            <form className="ask__confirm ask__decide" aria-labelledby={`${id}-plan`} onSubmit={submit} onKeyDown={escape} tabIndex={-1}>
+              {see}
               <p ref={plan} className="ask__plan-head" id={`${id}-plan`} tabIndex={-1}>
                 If you apply “{option.title}”, the agent will:
               </p>
@@ -790,7 +807,8 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
           </div>
 
           {option && p ? (
-            <form className="ask__confirm" aria-label={`Apply: ${option.label}`} onSubmit={submit} onKeyDown={escape}>
+            <form className="ask__confirm" aria-label={`Apply: ${option.label}`} onSubmit={submit} onKeyDown={escape} tabIndex={-1}>
+              {see}
               <p className="ask__effect">
                 <strong>
                   <Inline text={option.label} />.
@@ -806,7 +824,7 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
               {bar}
             </form>
           ) : (
-            <div className="ask__options" role="group" aria-label="Answers">
+            <div className="ask__options" role="group" aria-label="Answers" tabIndex={-1}>
               <ul className="ask__choices" data-count={q.options.length}>
                 {q.options.map((o) => (
                   <li key={o.id} className="ask__choice" data-recommended={o.recommended || undefined}>

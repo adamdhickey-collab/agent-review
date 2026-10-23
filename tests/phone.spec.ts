@@ -150,6 +150,13 @@ test.describe('the delegated work on a phone, the other direction', () => {
     await page.getByRole('button', { name: 'Apply', exact: true }).click();
     await expect(page.getByRole('article', { name: 'Make it a Button in its own change' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    /* The first answer's end, in the workspace's place: it fits, and its
+       ways on are a fingertip. */
+    await expect(page.getByRole('heading', { name: 'That’s the loop' })).toBeFocused();
+    for (const control of [page.getByRole('button', { name: 'See the decision record' }), page.getByRole('button', { name: 'Keep going here' }), page.getByRole('link', { name: /Try the other run/ })]) {
+      const box = await control.boundingBox();
+      expect(box!.height, (await control.textContent()) ?? '').toBeGreaterThanOrEqual(FLOOR);
+    }
   });
 });
 

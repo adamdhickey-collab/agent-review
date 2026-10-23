@@ -39,7 +39,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The inspector of the delegated work’s workspace (Preview Studio): a change the agent stopped on, asking for one decision, and saying which kind as its status: Needs judgment or Needs approval. What the agent read and found is beside the preview, not here (Review/DecisionRead). Needs judgment, in the billing run, is a trade-off: the agent found an action built by hand to be quiet, “Cancel subscription”, where every other action is the system’s Button, and proposes two defensible directions. Each direction is a card of the same shape (what it does, its main risk, its three benefits and three risks folded, and Select and preview), and the checks, folded to one line with the sentence that keeps them apart from the decision, come after the directions; selecting one marks it, shows it in the screen’s preview as proposed, and opens what the agent will do, the person’s reason and the rule box under the cards, with the other still there to switch to. Needs approval: the agent knows what to do and may not, so the card shows the line it would change and what each answer does, and, for a fix in a shared component, who else it reaches and what has and hasn’t been checked; choosing an answer turns the answers into its confirmation. Both cite the boundary that stopped them on one line, and fold what was found, the code and the evidence. A rule is never made by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
+          'The inspector of the delegated work’s workspace (Preview Studio): a change the agent stopped on, asking for one decision, and saying which kind as its status: Needs judgment or Needs approval. What the agent read and found is beside the preview, not here (Review/DecisionRead). Needs judgment, in the billing run, is a trade-off: the agent found an action built by hand to be quiet, “Cancel subscription”, where every other action is the system’s Button, and proposes two defensible directions. Each direction is a card of the same shape (what it does, its main risk, Select and preview, and its three benefits and three risks folded under the button), and the checks, folded to one line with the sentence that keeps them apart from the decision, come after the directions; selecting one marks it, shows it in the screen’s preview as proposed, and opens what the agent will do, the person’s reason and the rule box under the cards, with the other still there to switch to. Needs approval: the agent knows what to do and may not, so the card shows the line it would change and what each answer does, and, for a fix in a shared component, who else it reaches and what has and hasn’t been checked; choosing an answer turns the answers into its confirmation. Both cite the boundary that stopped them on one line, and fold what was found, the code and the evidence. A rule is never made by default: the box starts unchecked, and checking it shows the rule in words, what it does not cover, and what it would settle at once. A scope decision offers no rule; allowing a step once is not moving the boundary.',
       },
     },
   },
@@ -59,7 +59,7 @@ export const TradeOff: Story = {
     docs: {
       description: {
         story:
-          'The first question of the billing run, as a trade-off, as the inspector holds it. Its kind, where it is and the three changes held behind it; the question; the checks, folded (all three pass with either direction, and neither moves a pixel), and under them that passing is not evidence either trade-off works for the people who use the screen. Then the two directions, two cards of one shape, each with its main risk in view and its three benefits and three risks folded under it; “Recommended” is a small badge, and both buttons are the same. Neither is selected.',
+          'The first question of the billing run, as a trade-off, as the inspector holds it. Its kind, where it is and the three changes held behind it; the question; the checks, folded (all three pass with either direction, and neither moves a pixel), and under them that passing is not evidence either trade-off works for the people who use the screen. Then the two directions, two cards of one shape, each with its main risk in view, Select and preview under it, and its three benefits and three risks folded under that; “Recommended” is a small badge, and both buttons are the same. Neither is selected.',
       },
     },
   },
@@ -138,6 +138,26 @@ export const Choosing: Story = {
     await expect(bar.querySelector('.ask__bar-what')).toHaveTextContent(new RegExp(`^${OWN}$`));
     await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
     await expect(args.onAnswer).toHaveBeenCalledWith('own-change', false, 'The gray link is a retention test nobody turned off.');
+  },
+};
+
+/* Since 2026-10-23: where the screen holding the card has put the preview
+   out of sight (the delegated work's one column, the preview under the
+   decision), a selected direction offers a way to it, over the plan. */
+export const WithAWayToThePreview: Story = {
+  args: { initialChoice: 'quiet', onSeePreview: fn() },
+  parameters: {
+    docs: { description: { story: 'A direction selected where the preview is out of sight: “Show the proposed screen”, a quiet press over the plan, takes the person to the interface as the direction would draw it. The delegated work offers it only in one column; beside the decision, the preview is already in view.' } },
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const see = canvas.getByRole('button', { name: 'Show the proposed screen' });
+    await expect(see).toHaveClass('btn--ghost');
+    await expect(see.compareDocumentPosition(canvas.getByText(`If you apply “${QUIET}”, the agent will:`)) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    await userEvent.click(see);
+    await expect(args.onSeePreview).toHaveBeenCalledOnce();
+    /* Nothing is applied by it. */
+    await expect(args.onAnswer).not.toHaveBeenCalled();
   },
 };
 
