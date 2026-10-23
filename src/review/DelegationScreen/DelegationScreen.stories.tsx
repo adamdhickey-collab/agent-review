@@ -537,7 +537,7 @@ export const SharedTable: Story = {
     await expect(canvas.getByRole('list', { name: 'Where the fixes are' })).toHaveTextContent('2 merged1 waiting on your decision');
     const runs = canvas.getByRole('navigation', { name: 'Sample runs' });
     await expect(within(runs).getByRole('link', { name: /Shared table/ })).toHaveAttribute('aria-current', 'page');
-    await expect(within(runs).getByRole('link', { name: /Quiet cancel/ })).toHaveAttribute('href', '#/');
+    await expect(within(runs).getByRole('link', { name: /Quiet cancel/ })).toHaveAttribute('href', '#/runs/billing');
     await expect(canvas.getByText('Needs approval')).toBeInTheDocument();
     await expect(canvas.getByText(/One stopped at the edge: the fix is in a shared component\./)).toBeInTheDocument();
     await expect(canvas.getByText('2 routine fixes')).toBeInTheDocument();
@@ -674,7 +674,7 @@ export const FirstMinuteOnceARun: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Fix this screen only' }));
     await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
     const end = canvas.getByRole('region', { name: 'That’s the loop' });
-    await expect(within(end).getByRole('link', { name: /Try the other run: Quiet cancel/ })).toHaveAttribute('href', '#/');
+    await expect(within(end).getByRole('link', { name: /Try the other run: Quiet cancel/ })).toHaveAttribute('href', '#/runs/billing');
     await userEvent.click(within(end).getByRole('button', { name: 'See the finished run' }));
     await expect(canvas.getByText('Nothing needs your attention.').closest('p')).toHaveFocus();
   },

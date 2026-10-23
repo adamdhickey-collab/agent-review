@@ -3,15 +3,19 @@ import { flushSync } from 'react-dom';
 
 import type { RunId } from '../data/delegation';
 
-/* A hash router in fifty lines. Four routes, one hook. The hash is the
+/* A hash router in fifty lines. Five routes, one hook. The hash is the
    state, so a URL names a screen and a finding, and the back button
-   works. The delegated work is the front door at "/", and the review queue
-   the experiment was built around is at "/queue". A second delegated run,
-   the shared table, is at "/runs/shared-table", so it can be linked to
-   directly; the billing run stays at "/". A route with parameters beyond an
-   id and a finding is when a dependency earns its place. */
+   works. The front door at "/" is the start screen, which says what the
+   delegated work is and what a person will do in it before they meet it
+   (since 2026-10-23; until then the delegated work was the front door).
+   The billing run is at "/runs/billing", and a second delegated run, the
+   shared table, at "/runs/shared-table", so each can be linked to directly.
+   The review queue the experiment was built around is at "/queue". A route
+   with parameters beyond an id and a finding is when a dependency earns its
+   place. */
 
 export type Route =
+  | { name: 'start' }
   | { name: 'delegation'; run?: RunId }
   | { name: 'queue' }
   | { name: 'change'; id: string; findingId?: string }
@@ -19,7 +23,8 @@ export type Route =
 
 export function parse(hash: string): Route {
   const path = hash.replace(/^#/, '') || '/';
-  if (path === '/' || path === '/runs/billing') return { name: 'delegation' };
+  if (path === '/') return { name: 'start' };
+  if (path === '/runs/billing' || path === '/runs/billing/') return { name: 'delegation' };
   if (path === '/runs/shared-table' || path === '/runs/shared-table/') return { name: 'delegation', run: 'shared-table' };
   if (path === '/queue' || path === '/queue/') return { name: 'queue' };
   const m = path.match(/^\/changes\/([\w-]+)(?:\/findings\/([\w-]+))?\/?$/);
@@ -29,8 +34,10 @@ export function parse(hash: string): Route {
 
 export function href(route: Route): string {
   switch (route.name) {
+    case 'start':
+      return '#/';
     case 'delegation':
-      return route.run && route.run !== 'billing' ? `#/runs/${route.run}` : '#/';
+      return `#/runs/${route.run ?? 'billing'}`;
     case 'queue':
       return '#/queue';
     case 'change':

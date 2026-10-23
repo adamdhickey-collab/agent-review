@@ -218,7 +218,7 @@ samp {
 /* A fingertip is about 44px. Where the pointer is coarse, the review's own
    chrome gives every control that height: the bar, the queue, the change's
    header and summary and findings, the preview's controls, the dialog, and
-   the delegated work.
+   the start screen and the delegated work.
    Components already read --control-height, so this is a token set where
    it is wanted and no component is restyled. The preview FRAME is left out
    on purpose: it shows the product as the checks measured it, so Relay's
@@ -232,6 +232,7 @@ samp {
   .preview__bar,
   .return,
   .shortcuts,
+  .start,
   .delegation {
     --control-height: var(--control-height-touch);
     --control-height-compact: var(--control-height-touch);
