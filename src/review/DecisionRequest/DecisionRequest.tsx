@@ -479,11 +479,48 @@ export interface DecisionRequestProps {
   onChoiceChange?: (optionId: string | undefined) => void;
   /** A way to the interface as the selected direction would draw it, where it is not beside the decision (the delegated work's one column). */
   onSeePreview?: () => void;
+  /** The id of a question the screen draws itself (DecisionHead); the card then draws no head of its own. */
+  titled?: string;
 }
 
 const basename = (path: string) => path.split('/').pop();
 
-export function DecisionRequest({ work, why, boundaries, waiting = [], preview, onAnswer, initialChoice, choice: held, onChoiceChange, onSeePreview }: DecisionRequestProps) {
+/* The decision's head: its kind, where it is, what waits on it, and the
+   question. The card draws it at its top; the delegated work's desk draws it
+   in the decision panel's band instead (DelegationScreen.tsx, THE DESK) and
+   passes the title's id to the card as `titled`, so the card is still named
+   by its question without saying it twice. */
+export function DecisionHead({ work, waiting = [], titleId, level = 3 }: { work: Work; waiting?: Work[]; titleId: string; level?: 2 | 3 }) {
+  const q = work.question!;
+  const Title = level === 2 ? 'h2' : 'h3';
+  return (
+    <>
+      <header className="ask__head">
+        {/* The kind is the card's status, in the amber the account's bar
+            gives what waits on the person; its mark is the boundary
+            group's own (the panel's question or lock), so the card and the
+            panel name the stop the same way. */}
+        <Badge tone="warning" icon={BOUNDARY_GROUP_ICON[KIND_GROUP[q.kind]]}>
+          {KIND_STATUS[q.kind]}
+        </Badge>
+        <span className="ask__where">
+          {work.screen} <span aria-hidden="true">·</span> <code>{basename(work.file)}</code>
+        </span>
+        {waiting.length ? (
+          <Badge className="ask__holds" icon="clock">
+            {plural(waiting.length, 'change')} {waiting.length === 1 ? 'waits' : 'wait'} on this
+          </Badge>
+        ) : null}
+      </header>
+
+      <Title className="ask__title" id={titleId}>
+        {q.ask}
+      </Title>
+    </>
+  );
+}
+
+export function DecisionRequest({ work, why, boundaries, waiting = [], preview, onAnswer, initialChoice, choice: held, onChoiceChange, onSeePreview, titled }: DecisionRequestProps) {
   const q = work.question!;
   const id = useId();
   const [own, setOwn] = useState<string | undefined>(initialChoice);
@@ -647,28 +684,8 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
       ) : null;
 
   return (
-    <article className="ask" data-kind={q.kind} data-tradeoff={tradeoff || undefined} aria-labelledby={`${id}-title`}>
-      <header className="ask__head">
-        {/* The kind is the card's status, in the amber the account's bar
-            gives what waits on the person; its mark is the boundary
-            group's own (the panel's question or lock), so the card and the
-            panel name the stop the same way. */}
-        <Badge tone="warning" icon={BOUNDARY_GROUP_ICON[KIND_GROUP[q.kind]]}>
-          {KIND_STATUS[q.kind]}
-        </Badge>
-        <span className="ask__where">
-          {work.screen} <span aria-hidden="true">·</span> <code>{basename(work.file)}</code>
-        </span>
-        {waiting.length ? (
-          <Badge className="ask__holds" icon="clock">
-            {plural(waiting.length, 'change')} {waiting.length === 1 ? 'waits' : 'wait'} on this
-          </Badge>
-        ) : null}
-      </header>
-
-      <h3 className="ask__title" id={`${id}-title`}>
-        {q.ask}
-      </h3>
+    <article className="ask" data-kind={q.kind} data-tradeoff={tradeoff || undefined} aria-labelledby={titled ?? `${id}-title`}>
+      {titled ? null : <DecisionHead work={work} waiting={waiting} titleId={`${id}-title`} />}
 
       {why ? <p className="ask__why">{why}</p> : null}
 

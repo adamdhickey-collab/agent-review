@@ -341,3 +341,29 @@ export const SharedComponentAfterEvidence: Story = {
     await expect(canvas.getByRole('button', { name: 'Approve, this once' })).toBeInTheDocument();
   },
 };
+
+export const Titled: Story = {
+  args: { ...props(start, 'cancel-action', makeRule), titled: 'story-question' },
+  decorators: [
+    (Story) => (
+      <div>
+        <h2 id="story-question">Keep “Cancel subscription” looking as it does, or make it a Button on purpose?</h2>
+        <Story />
+      </div>
+    ),
+  ],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The card under a head the screen draws itself (the delegated work’s desk draws it in the decision panel’s band, with DecisionHead): no kind, place or question of its own, and named by the screen’s question, so it is not said twice.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getAllByRole('heading', { name: /Keep “Cancel subscription”/ })).toHaveLength(1);
+    await expect(canvas.queryByText('Needs judgment')).toBeNull();
+    await expect(canvas.getByRole('article', { name: 'Keep “Cancel subscription” looking as it does, or make it a Button on purpose?' })).toBeInTheDocument();
+  },
+};

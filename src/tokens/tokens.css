@@ -315,5 +315,20 @@
     0 12px 24px -6px light-dark(rgba(16, 24, 32, 0.14), rgba(0, 0, 0, 0.44));
   --color-scrim: light-dark(rgba(16, 24, 32, 0.36), rgba(0, 0, 0, 0.6)); /* behind a dialog */
 
+  /* The band, since 2026-10-24: the one solid ground in the light, under the
+     decision a person is asked (DelegationScreen.tsx, THE DESK), so the
+     question is the first thing the eye finds on the screen. A deep teal of
+     the accent's hue; raised is a control or a row on it. White clears 13.9:1
+     on the band and 10.8:1 raised; the muted ink 7.7:1 and 6.0:1; the
+     warning's solid 6.6:1 beside it. The dark values hold the place until the
+     dark scheme is designed for the desk. On-warning is the ink on the
+     warning's solid, where the desk's counts and the band's kind sit: 6.5:1
+     in the light and 6.3:1 in the dark. */
+  --color-band: light-dark(#12303b, #183a47);
+  --color-band-raised: light-dark(#1a4250, #21495a);
+  --color-text-on-band: #ffffff;
+  --color-text-on-band-muted: #a9c6cf;
+  --color-text-on-warning-solid: #3d2a05;
+
   --focus-ring-color: var(--color-accent);
 }

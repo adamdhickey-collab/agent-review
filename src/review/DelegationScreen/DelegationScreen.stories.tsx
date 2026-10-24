@@ -32,6 +32,9 @@ function inStore(state: DelegationState) {
 const meta = {
   title: 'Review/DelegationScreen',
   component: DelegationScreen,
+  /* The workspace as it is under 72rem, whatever the test browser's width;
+     the Desk stories at the end show it from 72rem (THE DESK). */
+  args: { layout: 'studio' },
   parameters: {
     layout: 'fullscreen',
     a11y: { test: 'error' },
@@ -677,5 +680,98 @@ export const FirstMinuteOnceARun: Story = {
     await expect(within(end).getByRole('link', { name: /Try the other run: Quiet cancel/ })).toHaveAttribute('href', '#/runs/billing');
     await userEvent.click(within(end).getByRole('button', { name: 'See the finished run' }));
     await expect(canvas.getByText('Nothing needs your attention.').closest('p')).toHaveFocus();
+  },
+};
+
+/* THE DESK: from 72rem, the workspace is the window's height in three
+   columns, and the decision panel's steps are its pages. */
+export const Desk: Story = {
+  args: { layout: 'desk' },
+  decorators: [inStore(start)],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The desk, as a laptop opens the billing run. On the left the queue: the two decisions that need the person, numbered in the warning’s solid, the first marked as the one in view, and the seven changes done, each with its check. In the middle the interface, with “Cancel subscription” and its neighbor marked. On the right the decision: its band holds which decision of how many, its kind, the three changes waiting on it, the question, and the steps, Compare current. The page under the band is Compare: what the agent recommends and can’t determine, the checks and why it paused. Next: choose is at the panel’s foot.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('heading', { level: 3, name: 'Keep “Cancel subscription” looking as it does, or make it a Button on purpose?' })).toBeInTheDocument();
+    const queue = within(canvas.getByRole('navigation', { name: 'The run’s work' }));
+    await expect(queue.getAllByRole('listitem')).toHaveLength(9);
+    await expect(queue.getByRole('button', { current: true })).toHaveTextContent('Keep “Cancel subscription”');
+    const steps = canvas.getByRole('list', { name: 'Steps' });
+    await expect(steps.querySelector('[aria-current="step"]')).toHaveTextContent('Compare');
+    await expect(canvas.getByRole('region', { name: 'What the agent read' })).toBeInTheDocument();
+    await expect(canvas.queryByRole('group', { name: 'Which trade-off is acceptable?' })).toBeNull();
+    await expect(canvas.getByRole('button', { name: 'Next: choose' })).toBeEnabled();
+  },
+};
+
+export const DeskSteps: Story = {
+  args: { layout: 'desk' },
+  decorators: [inStore(start)],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The steps are pages. Next: choose shows the two directions and nothing else, and Next waits for one. Selecting a direction turns the panel to Preview, which turns the interface to Proposed and says what the agent will do. Next: apply adds the reason and Apply, and the foot gives way to the card’s own bar. Cancel lets the direction go and goes back to Choose. Nothing is applied by a step.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const steps = canvas.getByRole('list', { name: 'Steps' });
+    const here = () => steps.querySelector('[aria-current="step"]');
+    await userEvent.click(canvas.getByRole('button', { name: 'Next: choose' }));
+    await expect(here()).toHaveTextContent('Choose');
+    await expect(canvas.getByRole('group', { name: 'Which trade-off is acceptable?' })).toBeVisible();
+    await expect(canvas.queryByRole('region', { name: 'What the agent read' })).toBeNull();
+    await expect(canvas.getByRole('button', { name: 'Next: preview' })).toBeDisabled();
+    await expect(canvas.getByText('Select a direction to preview it.')).toBeInTheDocument();
+
+    await userEvent.click(canvas.getByRole('button', { name: /^Select and preview\s+Add a quiet variant$/ }));
+    await expect(here()).toHaveTextContent('Preview');
+    await expect(steps.querySelectorAll('[data-done]')).toHaveLength(2);
+    await expect(canvas.getByRole('radio', { name: 'Proposed' })).toHaveAttribute('aria-checked', 'true');
+    await expect(canvas.getByText('If you apply “Add a quiet variant”, the agent will:')).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: 'Apply' })).toBeNull();
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Next: apply' }));
+    await expect(here()).toHaveTextContent('Apply');
+    await expect(canvas.getByRole('textbox', { name: 'Your reason' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Apply' })).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: /^Next:/ })).toBeNull();
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }));
+    await expect(here()).toHaveTextContent('Choose');
+    await expect(canvas.getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
+  },
+};
+
+export const DeskAnAnswer: Story = {
+  args: { layout: 'desk' },
+  decorators: [inStore(start)],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The second decision, from the queue: a question of approval, so its steps are Look, Choose and Apply. Choosing an answer goes straight to Apply, where the card says what it will do and offers Apply; Back is the card’s Cancel.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const queue = within(canvas.getByRole('navigation', { name: 'The run’s work' }));
+    await userEvent.click(queue.getByRole('button', { name: /Add a token for a fully round corner\?/ }));
+    await expect(canvas.getByRole('heading', { level: 3, name: 'Add a token for a fully round corner?' })).toBeInTheDocument();
+    const steps = canvas.getByRole('list', { name: 'Steps' });
+    await expect(within(steps).getAllByRole('button').map((b) => b.textContent)).toEqual(['1Step 1: Look', '2Step 2: Choose', '3Step 3: Apply']);
+    await userEvent.click(canvas.getByRole('button', { name: 'Next: choose' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Add --radius-full, this once' }));
+    await expect(steps.querySelector('[aria-current="step"]')).toHaveTextContent('Apply');
+    await expect(canvas.getByRole('button', { name: 'Apply' })).toHaveFocus();
   },
 };

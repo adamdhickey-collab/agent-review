@@ -5,7 +5,7 @@ import { href } from '../../app/router';
 import { account, activeRule, ruleText, waitingOn, whyAsking, wordsOf, wouldSettle, type Action, type DelegationState, type Pattern, type RunId, type Work } from '../../data/delegation';
 import { plural, relativeTime } from '../format';
 import { OutcomeFacts, OutcomeSummary } from '../OutcomeSummary/OutcomeSummary';
-import { DecisionRead, DecisionRequest, type RulePreview } from '../DecisionRequest/DecisionRequest';
+import { DecisionHead, DecisionRead, DecisionRequest, type RulePreview } from '../DecisionRequest/DecisionRequest';
 import { DecisionPreview, type PreviewView } from '../DecisionPreview/DecisionPreview';
 import { DecisionRecord } from '../DecisionRecord/DecisionRecord';
 import { RecordHead, WorkRecord } from '../WorkRecord/WorkRecord';
@@ -242,6 +242,96 @@ function StartHere({ work, chosen, first, onStep }: { work: Work; chosen: boolea
   );
 }
 
+/* THE DESK, SINCE 2026-10-24. On a laptop the workspace read as a page: an
+   account, a line of steps, the interface, and a decision panel that ran past
+   the window, so the question and Apply were never on screen together, and a
+   step only ringed a box. From 72rem the workspace is a desk the height of
+   the window, in three columns that scroll on their own:
+
+   - The queue, on the left: what needs the person, numbered in the warning's
+     solid, the one in view marked; and the completed work, each with its
+     check, one press from its record below.
+   - The interface, in the middle, as the decision would change it
+     (DecisionPreview), the element and its neighbor marked.
+   - The decision, on the right. Its band, in the one solid ground the light
+     scheme has, holds which decision this is, its kind and the question, and
+     the steps (DeskSteps). The steps are the panel's pages, not places to
+     scroll to: Compare is what the agent found and why it needs a person;
+     Choose is the directions; Preview turns the interface to Proposed and
+     says what the agent will do; Apply adds the reason and Apply. The panel
+     keeps Back and Next at its foot, so the next move is always in view.
+
+   One DecisionRequest stays mounted under every step and shows the step's
+   part (DelegationScreen.css, THE DESK), so a reason typed at Apply survives
+   a look back at the directions. Under 72rem the workspace is as it was, the
+   steps are places again, and nothing is hidden. */
+const DESK = '(min-width: 72rem)';
+
+function useMedia(query: string) {
+  const [on, setOn] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches);
+  useEffect(() => {
+    const m = window.matchMedia(query);
+    const change = () => setOn(m.matches);
+    change();
+    m.addEventListener('change', change);
+    return () => m.removeEventListener('change', change);
+  }, [query]);
+  return on;
+}
+
+/* The desk takes the rest of the window under whatever is above it on a
+   fresh load, and never less than a laptop's worth. Measured, because what
+   is above it (the run's bar, the job, a notice) wraps differently by width,
+   and in visual pixels divided by the page's zoom (app/scale.css). */
+function useDeskHeight(desk: RefObject<HTMLElement | null>, above: RefObject<HTMLElement | null>, key: string) {
+  useLayoutEffect(() => {
+    const el = desk.current;
+    if (!el) return;
+    const fit = () => {
+      const zoom = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+      const top = el.getBoundingClientRect().top + window.scrollY * zoom;
+      const room = (window.innerHeight - top) / zoom - 24; /* --space-6, the body's own padding under it */
+      el.style.setProperty('--desk-height', `${Math.max(room, 544)}px`); /* 34rem at least */
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    if (above.current) ro.observe(above.current);
+    window.addEventListener('resize', fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', fit);
+    };
+  }, [desk, above, key]);
+}
+
+/* The desk's steps: the same words as Start here (steps.ts), as the panel's
+   pages. Done steps carry the success solid and a check, the current one the
+   warning's; each says its state in words to a screen reader. A step past
+   the choice, before there is one, opens Choose. */
+const SHORT: Record<StartStep, string> = { look: 'Compare', choose: 'Choose', preview: 'Preview', apply: 'Apply' };
+
+function DeskSteps({ work, at, onStep }: { work: Work; at: StartStep; onStep: (step: StartStep) => void }) {
+  const steps = startSteps(work);
+  const here = Math.max(0, steps.findIndex((s) => s.to === at));
+  return (
+    <ol className="desk__steps" aria-label="Steps">
+      {steps.map((step, i) => (
+        <li key={step.to} aria-current={i === here ? 'step' : undefined} data-done={i < here || undefined}>
+          <Button variant="ghost" size="compact" className="desk__step" onClick={() => onStep(step.to)}>
+            <span className="desk__step-num" aria-hidden="true">
+              {i < here ? <Icon name="check" size={12} /> : i + 1}
+            </span>
+            {/* Named as a step, so it is never mistaken for the act it names: "Step 4: Apply" is not Apply. */}
+            <span className="visually-hidden">Step {i + 1}: </span>
+            {step.to === 'look' ? (work.question?.kind === 'scope' ? 'Look' : 'Compare') : SHORT[step.to]}
+            {i < here ? <span className="visually-hidden"> (done)</span> : null}
+          </Button>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 /* THE FIRST MINUTE ENDS, SINCE 2026-10-23. The first answer in a run used to
    be followed by the next question at once, and in the billing run by more
    of them than before: answered once, the three changes held behind the
@@ -338,7 +428,7 @@ function latest(w: Work): string {
   return w.history[w.history.length - 1]?.at ?? '';
 }
 
-export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
+export function DelegationScreen({ run = 'billing', layout }: { run?: RunId; /** The desk or the one-column workspace, whatever the window: for a story. Left out, the window decides (THE DESK). */ layout?: 'desk' | 'studio' }) {
   const { runs, delegate: dispatch, resetDelegation } = useStore();
   const s = runs[run];
   const delegate = (action: Action) => dispatch(run, action);
@@ -364,6 +454,14 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
   /* The run whose first answer is being shown its end (FirstMinute), and the
      change that answer was about, until the person moves on. */
   const [ending, setEnding] = useState<{ run: RunId; id: string } | null>(null);
+  /* The desk (THE DESK): whether the window is wide enough for it, and the
+     page each decision's panel is on, kept per decision like its choice. */
+  const wide = useMedia(DESK);
+  const desk = layout ? layout === 'desk' : wide;
+  const [pages, setPages] = useState<Record<string, StartStep>>({});
+  const header = useRef<HTMLElement>(null);
+  const deskRef = useRef<HTMLElement>(null);
+  const deskBody = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!focusNext.current) return;
@@ -410,7 +508,43 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
 
   const stage = useRef<HTMLDivElement>(null);
   const inspector = useRef<HTMLDivElement>(null);
-  useFollow(stage, inspector, `${current?.id ?? ''}:${ended ? 'ended' : ''}`);
+  useFollow(stage, inspector, `${current?.id ?? ''}:${ended ? 'ended' : ''}:${desk}`);
+
+  const onDesk = desk && Boolean(current) && !ended;
+  useDeskHeight(deskRef, header, `${onDesk}:${current?.id ?? ''}`);
+  const tradeoff = Boolean(current?.question?.options.some((o) => o.benefits));
+  const order = current ? startSteps(current).map((x) => x.to) : [];
+  /* A page past the choice with nothing chosen (after Reset, or a choice let
+     go from the card) is Choose. */
+  const kept: StartStep = current ? (pages[current.id] ?? 'look') : 'look';
+  const page: StartStep = (kept === 'preview' || kept === 'apply') && !previewing ? 'choose' : kept;
+  const before = order[order.indexOf(page) - 1];
+  const after = order[order.indexOf(page) + 1];
+
+  /* Turning the desk's panel to a page (THE DESK). A page past the choice,
+     before there is one, is Choose. Choose, for an answer rather than a
+     direction, lets the answer go, because its card shows the answers or the
+     chosen one, never both. The interface follows: as it is while the person
+     compares and chooses, as proposed once they preview. Focus goes to the
+     top of the panel's page, which is what changed. */
+  const turn = (to: StartStep) => {
+    if (!current) return;
+    const page = (to === 'preview' || to === 'apply') && !previewing ? 'choose' : to;
+    if (page === 'choose' && !tradeoff && choice) setChosen((m) => ({ ...m, [current.id]: undefined }));
+    setPages((m) => ({ ...m, [current.id]: page }));
+    setViews((m) => ({ ...m, [current.id]: page === 'preview' || page === 'apply' ? 'proposed' : 'current' }));
+    deskBody.current?.scrollTo({ top: 0 });
+    deskBody.current?.focus({ preventScroll: true });
+  };
+
+  /* A completed change, from the desk's queue: its record below, or the
+     section when it is folded among the routine ones. */
+  const seeWork = (w: Work) => {
+    const el = document.getElementById(`work-${w.id}`);
+    const target = el && el.offsetParent ? el : document.getElementById('done-title');
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    target?.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
+  };
 
   /* The first answer in a run that decides something (more evidence
      decides nothing) ends the first minute. */
@@ -456,7 +590,7 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
   );
 
   return (
-    <div className="delegation">
+    <div className="delegation" data-desk={onDesk || undefined}>
       {/* The run's own bar, in the chrome under the app's: which sample run
           this is, that it is one, and the way back to its start. */}
       <div className="delegation__runbar">
@@ -484,6 +618,7 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
               setAt({ index: 0 });
               setChosen({});
               setViews({});
+              setPages({});
               setEnding(null);
               top.current?.focus();
             }}
@@ -494,7 +629,7 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
       </div>
 
       <div className="delegation__body">
-        <header className="delegation__header">
+        <header ref={header} className="delegation__header">
           <div className="delegation__heading">
             <p className="delegation__by">
               <Icon name="bot" size={16} />
@@ -574,6 +709,117 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
             }}
             onLeave={() => setEnding(null)}
           />
+        ) : current && desk ? (
+          <section ref={deskRef} className="desk" aria-labelledby="needs-title">
+            <nav className="desk__queue" aria-label="The run’s work">
+              <p className="desk__queue-head">
+                Needs you <span className="desk__count" data-kind="asking">{asking.length}</span>
+              </p>
+              <ul className="desk__list">
+                {asking.map((w, i) => (
+                  <li key={w.id}>
+                    <Button variant="ghost" className="desk__item" aria-current={i === index ? 'true' : undefined} onClick={() => go(i)}>
+                      <span className="desk__mark" data-kind="asking" aria-hidden="true">
+                        {i + 1}
+                      </span>
+                      <span className="desk__item-text">
+                        <span className="desk__item-title">{w.question?.ask}</span>
+                        <span className="desk__item-where">
+                          {w.screen}
+                          {waitingOn(s, w.id).length ? ` · ${plural(waitingOn(s, w.id).length, 'change')} wait` : ''}
+                        </span>
+                      </span>
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              <p className="desk__queue-head">
+                Done <span className="desk__count" data-kind="done">{done.length}</span>
+              </p>
+              <ul className="desk__list">
+                {done.map((w) => (
+                  <li key={w.id}>
+                    <Button variant="ghost" className="desk__item" onClick={() => seeWork(w)}>
+                      <span className="desk__mark" data-kind={w.status === 'made' ? 'done' : 'other'} aria-hidden="true">
+                        <Icon name={w.status === 'made' ? 'check' : w.status === 'reverted' ? 'undo' : 'minus'} size={12} />
+                      </span>
+                      <span className="desk__item-text">
+                        <span className="desk__item-title">{w.title}</span>
+                        <span className="desk__item-where">{w.screen}</span>
+                      </span>
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <div className="desk__stage">
+              <DecisionPreview
+                work={current}
+                option={previewing}
+                view={view}
+                onViewChange={(v) => setViews((m) => ({ ...m, [current.id]: v }))}
+                position={index + 1}
+              />
+            </div>
+
+            <div className="desk__panel" data-page={page} data-tradeoff={tradeoff || undefined}>
+              <div className="desk__band">
+                <div className="desk__band-top">
+                  <h2 ref={needs} id="needs-title" className="desk__needs" tabIndex={-1}>
+                    Needs you <span className="desk__count" data-kind="asking">{asking.length}</span>
+                  </h2>
+                  <p className="desk__position" aria-live="polite">
+                    Decision {index + 1} of {asking.length}
+                  </p>
+                  {asking.length > 1 ? (
+                    <span className="desk__pager">
+                      <IconButton icon="chevron-left" label="Previous decision" disabled={index === 0} onClick={() => go(index - 1)} />
+                      <IconButton icon="chevron-right" label="Next decision" tooltip="end" disabled={index === asking.length - 1} onClick={() => go(index + 1)} />
+                    </span>
+                  ) : null}
+                </div>
+                <DecisionHead work={current} waiting={waitingOn(s, current.id)} titleId="desk-question" />
+                <DeskSteps work={current} at={page} onStep={turn} />
+              </div>
+
+              <div ref={deskBody} className="desk__body" tabIndex={-1} aria-labelledby="desk-question">
+                {page === 'look' ? <DecisionRead work={current} waiting={waitingOn(s, current.id)} onAnswer={(option, makeRule) => answer(current, option, makeRule)} /> : null}
+                <DecisionRequest
+                  key={current.id}
+                  titled="desk-question"
+                  work={current}
+                  why={current.waitsOn ? whyAsking(s, current) : undefined}
+                  boundaries={s.boundaries.filter((b) => current.question!.paused.includes(b.n))}
+                  waiting={waitingOn(s, current.id)}
+                  preview={preview(current)}
+                  choice={choice}
+                  onChoiceChange={(next) => {
+                    setChosen((m) => ({ ...m, [current.id]: next }));
+                    setViews((m) => ({ ...m, [current.id]: next ? 'proposed' : 'current' }));
+                    setPages((m) => ({ ...m, [current.id]: next ? (tradeoff ? 'preview' : 'apply') : 'choose' }));
+                  }}
+                  onAnswer={(option, makeRule, reason) => answer(current, option, makeRule, reason)}
+                />
+              </div>
+
+              {page === 'apply' ? null : (
+                <div className="desk__foot">
+                  {before ? (
+                    <Button variant="ghost" onClick={() => turn(before)}>
+                      Back
+                    </Button>
+                  ) : null}
+                  {page === 'choose' && !previewing ? <p className="desk__hint">{tradeoff ? 'Select a direction to preview it.' : 'Choose an answer to apply it.'}</p> : null}
+                  {after ? (
+                    <Button variant="primary" className="desk__next" trailingIcon="arrow-right" disabled={page === 'choose' && !previewing} onClick={() => turn(after)}>
+                      Next: {SHORT[after].toLowerCase()}
+                    </Button>
+                  ) : null}
+                </div>
+              )}
+            </div>
+          </section>
         ) : current ? (
           <section className="studio" aria-labelledby="needs-title">
             <StartHere work={current} chosen={Boolean(choice)} first={a.settled.length === 0} onStep={step} />
@@ -664,7 +910,9 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
               <p className="delegation__hint">Done on its own unless marked. Open one for what changed, why, and what the checks established.</p>
               <ul className="delegation__records">
                 {notable.map((w) => (
-                  <li key={w.id}>{record(w)}</li>
+                  <li key={w.id} id={`work-${w.id}`}>
+                    {record(w)}
+                  </li>
                 ))}
                 {easy.length ? (
                   <li>
@@ -674,7 +922,9 @@ export function DelegationScreen({ run = 'billing' }: { run?: RunId }) {
                     >
                       <ul>
                         {easy.map((w) => (
-                          <li key={w.id}>{record(w)}</li>
+                          <li key={w.id} id={`work-${w.id}`}>
+                            {record(w)}
+                          </li>
                         ))}
                       </ul>
                     </Disclosure>
