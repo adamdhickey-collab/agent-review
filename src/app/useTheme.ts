@@ -1,25 +1,26 @@
 import { useCallback, useEffect, useState } from 'react';
 
-/* The review's appearance: Dark, Light, or System, chosen in the bar
-   (Shell) and remembered. Until a person chooses, it is Dark: the root's
-   color-scheme is dark (app/global.css), so every light-dark() token in
-   tokens.css resolves to its dark half, and every first visit sees the same
-   thing, which is also what the review's pictures show. Choosing Light or
-   System puts data-theme on the root: light fixes the scheme, system sets it
-   to "light dark", which follows the operating system's setting live, with
-   nothing listening in script. Choosing Dark takes the attribute off again.
+/* The review's appearance: Light, Dark, or System, chosen in the bar
+   (Shell) and remembered. Until a person chooses, it is System: the root's
+   color-scheme is "light dark" (app/global.css), so every light-dark() token
+   in tokens.css follows the operating system's setting live, with nothing
+   listening in script. A first visit is light, unless the person has already
+   asked their system for dark, and then it is dark. Choosing Light or Dark
+   puts data-theme on the root and fixes the scheme; choosing System takes
+   the attribute off again.
 
    The choice is kept where the earlier light/dark toggle kept it
    (localStorage 'agent-review:theme'), so a choice made before System
    existed is read as it was written: 'light' and 'dark' mean what they
    meant, and 'system' is the one new value. Nothing to migrate.
 
-   Dark by default since 2026-10-11 (later still), by decision; Preview
-   Studio opened that day following the system, it was light from earlier
-   that day, and dark from 2026-10-05.
+   Following the system since 2026-10-24, by decision, so light for most
+   first visits; dark by default from later on 2026-10-11, following the
+   system when Preview Studio opened that day, light from earlier that day,
+   and dark from 2026-10-05.
 
-   index.html applies a remembered Light or System before the first paint, so
-   a person who chose light never sees a dark page first; this hook keeps the
+   index.html applies a remembered Light or Dark before the first paint, so
+   a person who chose one never sees the other first; this hook keeps the
    attribute and the storage in step after that. Storage can throw (a
    private window, a blocked site), and then the choice lasts for the visit.
 
@@ -34,9 +35,9 @@ export const APPEARANCE_KEY = 'agent-review:theme';
 function remembered(): Appearance {
   try {
     const v = localStorage.getItem(APPEARANCE_KEY);
-    return v === 'light' || v === 'dark' || v === 'system' ? v : 'dark';
+    return v === 'light' || v === 'dark' || v === 'system' ? v : 'system';
   } catch {
-    return 'dark';
+    return 'system';
   }
 }
 
@@ -45,7 +46,7 @@ export function useTheme(): { appearance: Appearance; setAppearance: (next: Appe
 
   useEffect(() => {
     const root = document.documentElement;
-    if (appearance === 'dark') delete root.dataset.theme;
+    if (appearance === 'system') delete root.dataset.theme;
     else root.dataset.theme = appearance;
   }, [appearance]);
 

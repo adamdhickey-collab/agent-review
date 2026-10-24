@@ -7,11 +7,12 @@ import { devices, expect, test, type Page } from '@playwright/test';
 
 const WIDTHS = [1280, 768] as const;
 
-/* The review is dark until a person chooses otherwise (app/useTheme.ts,
-   since 2026-10-11, later still). The baselines predate that: the ones not
-   named -dark are of the light theme and the -dark ones of the dark, so each
-   set now makes its choice first, the way the bar's control does, by
-   remembering it, and a first visit is checked on its own below. */
+/* The review follows the operating system until a person chooses
+   otherwise (app/useTheme.ts, since 2026-10-24). The baselines not named
+   -dark are of the light theme and the -dark ones of the dark, and each set
+   makes its choice first, the way the bar's control does, by remembering
+   it, so a baseline never depends on the machine's own setting; a first
+   visit is checked on its own below, in both of the system's schemes. */
 const chooseDark = () => localStorage.setItem('agent-review:theme', 'dark');
 const chooseLight = () => localStorage.setItem('agent-review:theme', 'light');
 
@@ -157,15 +158,20 @@ test.describe('in the dark theme, chosen, at 1280', () => {
   });
 });
 
-/* A first visit, with nothing remembered: dark, with the root's own
-   color-scheme and nothing on it. Not a screenshot; the -dark baselines are
-   the picture of it. */
-test('a first visit is dark', async ({ page }) => {
-  await page.goto('#/runs/billing');
-  await settle(page);
-  expect(await page.evaluate(() => [document.documentElement.dataset.theme ?? null, getComputedStyle(document.documentElement).colorScheme])).toEqual([null, 'dark']);
-  await expect(page.getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true');
-});
+/* A first visit, with nothing remembered: the system's scheme, with the
+   root's own color-scheme and nothing on it. Light on a light system and
+   dark on a dark one, read from a token rather than a screenshot; the
+   baselines above are the pictures of each. */
+for (const scheme of ['light', 'dark'] as const) {
+  test(`a first visit on a ${scheme} system is ${scheme}`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.goto('#/runs/billing');
+    await settle(page);
+    expect(await page.evaluate(() => [document.documentElement.dataset.theme ?? null, getComputedStyle(document.documentElement).colorScheme])).toEqual([null, 'light dark']);
+    expect(await page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches)).toBe(scheme === 'dark');
+    await expect(page.getByRole('radio', { name: 'System' })).toHaveAttribute('aria-checked', 'true');
+  });
+}
 
 test.describe('the product screens', () => {
   test.beforeEach(async ({ page }) => {

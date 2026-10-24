@@ -154,21 +154,20 @@ A Light / Dark / System control in the bar, built from the system's
 SegmentedControl: one tab stop, arrow keys between the three, each an icon
 named by its tooltip.
 
-- With no saved choice, the review is dark (since later on 2026-10-11, by
-  decision; Preview Studio opened following the system): the root's own
-  `color-scheme` is `dark`, so every `light-dark()` token resolves to its
-  dark half, and every first visit, and every picture of the review, is the
-  same.
-- Choosing Light or System puts `data-theme` on the root and remembers it:
-  `light` fixes the scheme, `system` sets it to `light dark`, which follows
-  the operating system live. Choosing Dark takes the attribute off and
-  remembers that.
+- With no saved choice, the review follows the system (since 2026-10-24, by
+  decision; dark from later on 2026-10-11, and following the system when
+  Preview Studio opened): the root's own `color-scheme` is `light dark`, so
+  a first visit is light unless the operating system is set to dark, and
+  follows it live. The pictures of the review are of the light theme.
+- Choosing Light or Dark puts `data-theme` on the root and remembers it,
+  fixing the scheme. Choosing System takes the attribute off and remembers
+  that.
 - The choice is stored where the earlier toggle stored it,
   `localStorage['agent-review:theme']`, so a choice made before System
   existed reads as it was written (`light`, `dark`); `system` is the one
   new value. Nothing to migrate.
-- `index.html` applies a remembered Light or System before the first paint.
-  Dark needs nothing before it: it is the stylesheet's own default.
+- `index.html` applies a remembered Light or Dark before the first paint.
+  System needs nothing before it: it is the stylesheet's own default.
 - `color-scheme` is set on the root in every case, so native controls (a
   scrollbar, a text field) follow the theme.
 - Changing it changes one attribute; nothing remounts, so the run, the
