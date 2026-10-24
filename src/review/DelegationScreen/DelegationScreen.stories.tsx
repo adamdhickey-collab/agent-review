@@ -32,8 +32,8 @@ function inStore(state: DelegationState) {
 const meta = {
   title: 'Review/DelegationScreen',
   component: DelegationScreen,
-  /* The workspace as it is under 72rem, whatever the test browser's width;
-     the Desk stories at the end show it from 72rem (THE DESK). */
+  /* The workspace as it is under 76rem, whatever the test browser's width;
+     the Desk stories at the end show it from 76rem (THE DESK). */
   args: { layout: 'studio' },
   parameters: {
     layout: 'fullscreen',
@@ -683,7 +683,7 @@ export const FirstMinuteOnceARun: Story = {
   },
 };
 
-/* THE DESK: from 72rem, the workspace is the window's height in three
+/* THE DESK: from 76rem, the workspace is the window's height in three
    columns, and the decision panel's steps are its pages. */
 export const Desk: Story = {
   args: { layout: 'desk' },
@@ -773,5 +773,25 @@ export const DeskAnAnswer: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Add --radius-full, this once' }));
     await expect(steps.querySelector('[aria-current="step"]')).toHaveTextContent('Apply');
     await expect(canvas.getByRole('button', { name: 'Apply' })).toHaveFocus();
+  },
+};
+
+export const DeskDark: Story = {
+  args: { layout: 'desk' },
+  decorators: [inStore(start)],
+  globals: { theme: 'dark' },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The desk in the dark theme, on its Choose page. The band is a step lighter and bluer than the panels, so it is still the one solid ground; the counts and the current step keep the warning’s solid, the done steps the success solid, and axe holds every ink on the band to 4.5:1.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(getComputedStyle(canvasElement.ownerDocument.documentElement).colorScheme).toBe('dark');
+    await userEvent.click(canvas.getByRole('button', { name: 'Next: choose' }));
+    await expect(canvas.getByRole('group', { name: 'Which trade-off is acceptable?' })).toBeVisible();
   },
 };

@@ -136,6 +136,22 @@ should open well in it, and Claude Code stays the agent).
   red the code draws, and the review's teal is only ever the annotation
   around it. The palette, the appearance control (Light, Dark, System) and
   the layout's rules are in [docs/preview-studio](docs/preview-studio/).
+- **On a laptop the workspace is a desk (2026-10-24).** The workspace read
+  as a page: an account, a line of steps that only ringed a box, the
+  interface, and a decision panel that ran past the window, so the question
+  and Apply were never on screen together. From 76rem it is a desk the
+  height of the window in three columns that scroll on their own: a queue of
+  what needs the person and what is done, the interface, and the decision
+  under a band in the one solid ground the light scheme has. The steps are
+  the panel's pages (Compare: what the agent found and why it asks; Choose:
+  the directions; Preview: the interface proposed and the plan; Apply: the
+  reason and Apply), with Back and Next always in view. It came from a
+  mockup of two directions built on Mobbin references (a docked decision
+  panel with its actions pinned, as in Deel, Aboard and Airwallex; steps
+  that change the content, as in incident.io and HubSpot). Under 76rem the
+  workspace is as it was. Five tokens came with it: `--color-band`,
+  `--color-band-raised`, `--color-text-on-band`,
+  `--color-text-on-band-muted` and `--color-text-on-warning-solid`.
 
 ## The second iteration: delegation (2026-10-03)
 

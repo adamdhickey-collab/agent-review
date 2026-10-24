@@ -672,7 +672,7 @@
   }
 }
 
-/* THE DESK (DelegationScreen.tsx), from 72rem: the workspace as one surface
+/* THE DESK (DelegationScreen.tsx), from 76rem: the workspace as one surface
    the height of the window (--desk-height, measured), in three columns that
    each scroll on their own. The job sits on one row over it, its account's
    sentence at the right, so the desk starts as high as it can. */
@@ -699,7 +699,7 @@
 
 .desk {
   display: grid;
-  grid-template-columns: 15rem minmax(0, 1fr) 25rem;
+  grid-template-columns: 14rem minmax(0, 1fr) 25rem;
   height: var(--desk-height, 40rem);
   overflow: hidden;
   border: var(--border-width) solid var(--color-border);
@@ -785,7 +785,7 @@
    solid down its edge. */
 .desk__queue .desk__item[aria-current='true'] {
   background: var(--color-surface);
-  box-shadow: inset 3px 0 0 var(--color-warning-solid), var(--shadow-raised);
+  box-shadow: inset 3px 0 0 var(--color-warning-solid), 0 0 0 var(--border-width) var(--color-border), var(--shadow-raised); /* the edge, so it lifts in the dark too, where the shadow is all but gone */
 }
 
 .desk__mark {
@@ -923,6 +923,7 @@
 }
 
 .desk__band .ask__holds {
+  margin-left: 0; /* it wraps under where it is, so it starts the line rather than ending one */
   border-color: transparent;
   background: var(--color-band-raised);
   color: var(--color-text-on-band);
