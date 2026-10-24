@@ -2,11 +2,10 @@ import type { Work } from '../../data/delegation';
 
 /* The steps a decision asks for, in the order the workspace asks for them.
    Start here names them over the workspace (DelegationScreen.tsx), and the
-   start screen names them before it (StartScreen.tsx), so a person who read
-   them there meets the same words here. Kept in one place so the two can
-   never disagree. The desk, from 76rem, names each by its first word
-   (DelegationScreen.tsx, DeskSteps): Compare, Choose, Preview, Apply. A trade-off is compared, chosen, previewed and applied;
-   any other question is looked at, answered and applied. */
+   desk, from 76rem, over its decision panel, each by its first word
+   (DeskSteps): Compare, Choose, Preview, Apply. Kept in one place so the two
+   can never disagree. A trade-off is compared, chosen, previewed and
+   applied; any other question is looked at, answered and applied. */
 export type StartStep = 'look' | 'choose' | 'preview' | 'apply';
 
 export function startSteps(work: Work): { label: string; to: StartStep }[] {
