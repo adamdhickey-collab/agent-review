@@ -17,21 +17,22 @@ html {
   -webkit-font-smoothing: antialiased;
   text-size-adjust: 100%;
   font-optical-sizing: none; /* the product's type: Inter's text cut at every size, as it always was */
-  color-scheme: dark; /* the review's default, until a person chooses; see the appearance, below */
+  color-scheme: light dark; /* the review's default, the system's, until a person chooses; see the appearance, below */
 }
 
 /* The appearance. Every color token is light-dark(light, dark) (tokens.css),
    so a theme is nothing but a color-scheme, and native controls (a
-   scrollbar, a text field's caret) follow it too. The review is dark until
-   a person chooses otherwise. Choosing Light or System in the bar's
-   appearance control puts data-theme on the root and remembers it; System
-   is "light dark", the operating system's setting followed live, so the
-   system switching at dusk switches the review with it; choosing Dark takes
-   the attribute off again (app/useTheme.ts). data-theme works on any
-   element, which is how a story renders one screen in the other theme
-   without the rest of the Storybook following it. Dark by default since
-   2026-10-11 (later still); Preview Studio opened that day following the
-   system, it was light from earlier that day, and dark from 2026-10-05. */
+   scrollbar, a text field's caret) follow it too. The review follows the
+   operating system until a person chooses otherwise: "light dark" on the
+   root, so a first visit is light unless the system is set to dark, and the
+   system switching at dusk switches the review with it. Choosing Light or
+   Dark in the bar's appearance control puts data-theme on the root and
+   remembers it; choosing System takes the attribute off again
+   (app/useTheme.ts). data-theme works on any element, which is how a story
+   renders one screen in the other theme without the rest of the Storybook
+   following it. Following the system since 2026-10-24; dark by default from
+   later on 2026-10-11, following the system when Preview Studio opened that
+   day, light from earlier that day, and dark from 2026-10-05. */
 [data-theme='dark'] {
   color-scheme: dark;
 }
