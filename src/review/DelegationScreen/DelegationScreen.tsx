@@ -13,6 +13,7 @@ import { Boundaries } from '../Boundaries/Boundaries';
 import './DelegationScreen.css';
 import { Inline } from '../Inline';
 import { startSteps, type StartStep } from './steps';
+import { useDeskWide } from './deskWide';
 
 /* Work an agent was handed, and what came of it. It was the front door
    until 2026-10-23, when a start screen went in front of it (StartScreen):
@@ -265,29 +266,6 @@ function StartHere({ work, chosen, first, onStep }: { work: Work; chosen: boolea
    part (DelegationScreen.css, THE DESK), so a reason typed at Apply survives
    a look back at the directions. Under 76rem the workspace is as it was, the
    steps are places again, and nothing is hidden. */
-/* The width the desk needs, in the page's own pixels: the window divided by
-   the page's zoom (app/scale.css), because a zoomed page lays out narrower
-   than the window a media query reads. Under it, the interface's column is
-   too narrow for the billing screen's rows to stay on one line. */
-const DESK_REM = 76;
-
-function useDeskWide() {
-  const measure = () => {
-    if (typeof window === 'undefined') return false;
-    const zoom = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-    return window.innerWidth / zoom >= DESK_REM * rem;
-  };
-  const [on, setOn] = useState(measure);
-  useEffect(() => {
-    const change = () => setOn(measure());
-    change();
-    window.addEventListener('resize', change);
-    return () => window.removeEventListener('resize', change);
-  }, []);
-  return on;
-}
-
 /* The desk takes the rest of the window under whatever is above it on a
    fresh load, and never less than a laptop's worth. Measured, because what
    is above it (the run's bar, the job, a notice) wraps differently by width,

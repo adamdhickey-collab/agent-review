@@ -82,8 +82,7 @@
 }
 
 .start__num,
-.start__map-step,
-.start__pin {
+.start__map-step {
   display: inline-grid;
   flex: none;
   place-items: center;
@@ -105,82 +104,127 @@
   padding-top: var(--space-2);
 }
 
-/* THE MAP: the workspace drawn small, its parts where the next screen puts
-   them at this width (the steps across the top, the interface on the left,
-   the decision on the right), and a pin where each step happens. Shapes for
-   anything to be read there, words only for the names of the parts. The
-   pins are the steps' numbers in the accent's ink: the one place the accent
-   is spent here besides the button, because they point at what to do. */
+/* THE MAP: the desk drawn small, its three parts in the desk's order and
+   proportions (the queue, the interface, the decision), each with a note
+   under it saying what it is. Shapes for anything to be read there, and
+   words only for names: the parts' headings, and the steps' names on the
+   decision's tabs, which are the list's first words. Nothing on it is a
+   number to look up; the tabs' numbers are the steps' own, as the desk
+   draws them. */
 .start__map {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
   min-width: 0;
 }
 
-.start__map-screen {
+.start__map-title {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.start__map-desk {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.62fr);
-  align-items: start;
+  grid-template-columns: minmax(0, 0.6fr) minmax(0, 1fr) minmax(0, 1.5fr);
+  grid-template-rows: auto auto;
+  column-gap: var(--space-3);
+}
+
+/* A part spans both rows, panel over note, on the desk's own rows, so the
+   panels are one height and the notes start on one line. */
+.start__map-part {
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  row-gap: var(--space-2);
+  min-width: 0;
+}
+
+.start__map-panel {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-4);
+  padding: var(--space-3);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-canvas);
-  box-shadow: var(--shadow-raised);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
   color: var(--color-text-secondary);
   font-size: var(--text-xs);
   line-height: var(--leading-ui);
 }
 
-.start__map-label {
-  color: var(--color-text-secondary);
-  font-weight: var(--weight-medium);
+/* The note under a part: what it is, in the reading ink, with a short rule
+   above it pointing up at the part it names. */
+.start__map-note {
+  padding-top: var(--space-2);
+  border-top: 2px solid var(--color-border-control);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: var(--leading-tight);
 }
 
-.start__map-bar {
-  grid-column: 1 / -1;
+.start__map-head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-chrome);
-}
-
-.start__map-bar .start__map-label {
-  margin-right: var(--space-1);
   color: var(--color-text);
   font-weight: var(--weight-semibold);
 }
 
-.start__map-step {
+.start__map-count {
+  display: inline-grid;
+  place-items: center;
   width: var(--space-4);
   height: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-warning-solid);
+  color: var(--color-text-on-warning-solid);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
-.start__map-stage,
-.start__map-inspector {
+.start__map-queue {
+  background: var(--color-surface-chrome);
+}
+
+.start__map-item {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  min-width: 0;
-  padding: var(--space-3);
+  gap: var(--space-2);
+  padding: var(--space-2);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--color-surface);
 }
 
-/* The decision is the one raised panel on the next screen, so it is here. */
-.start__map-inspector {
-  box-shadow: var(--shadow-raised);
+.start__map-head + .start__map-item {
+  border-left: 3px solid var(--color-warning-solid);
+}
+
+.start__map-line {
+  display: block;
+  width: 70%;
+  height: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-border);
+}
+
+.start__map-line--short {
+  width: 45%;
+}
+
+.start__map-line--title {
+  width: 85%;
+  height: var(--space-3);
+  background: var(--color-text-on-band-muted);
 }
 
 .start__map-product {
   display: flex;
   flex-direction: column;
-  padding: var(--space-1) var(--space-3);
+  padding: 0 var(--space-3);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface-sunken);
@@ -198,25 +242,11 @@
   border-top: var(--border-width) solid var(--color-border);
 }
 
-.start__map-line {
-  display: block;
-  width: 55%;
-  height: var(--space-2);
-  border-radius: var(--radius-sm);
-  background: var(--color-border);
-}
-
-.start__map-line--title {
-  width: 85%;
-  height: var(--space-3);
-}
-
-.start__map-line--short {
-  width: 40%;
+.start__map-row .start__map-line {
+  width: 50%;
 }
 
 .start__map-control {
-  position: relative;
   flex: none;
   width: var(--space-8);
   height: var(--space-4);
@@ -224,64 +254,74 @@
   border-radius: var(--radius-sm);
 }
 
-/* The part in question, ringed as the preview rings it. */
+/* A change, ringed as the interface rings it. */
 .start__map-control.is-marked {
   border-style: dashed;
   outline: var(--focus-ring-width) solid var(--color-accent);
   outline-offset: var(--focus-ring-offset);
 }
 
-/* The preview's head: its name, and the switch between the interface as it
-   is and as a choice would leave it, which is where previewing happens. */
-.start__map-head {
+/* The decision: the desk's dark band with the question and the steps as
+   tabs, the first one current, then a direction and Next at the foot. */
+.start__map-decision {
+  padding: 0 0 var(--space-3);
+  overflow: hidden;
+}
+
+.start__map-band {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) 0;
+  background: var(--color-band);
+}
+
+.start__map-tabs {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
+  column-gap: var(--space-2);
 }
 
-.start__map-toggle {
-  position: relative;
+.start__map-tab {
   display: inline-flex;
+  align-items: center;
   gap: var(--space-1);
-  padding: 2px;
-  border-radius: var(--radius-md);
-  background: var(--color-surface-sunken);
+  padding-bottom: var(--space-1);
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-on-band-muted);
 }
 
-.start__map-toggle > span:not(.start__pin) {
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-sm);
+.start__map-tab[data-on] {
+  border-bottom-color: var(--color-warning-solid);
+  color: var(--color-text-on-band);
+  font-weight: var(--weight-semibold);
 }
 
-.start__map-toggle > [data-on] {
-  background: var(--color-surface);
-  box-shadow: var(--shadow-control);
-  color: var(--color-text);
+.start__map-step {
+  width: var(--space-4);
+  height: var(--space-4);
+  border-color: currentColor;
+}
+
+.start__map-tab[data-on] .start__map-step {
+  border-color: var(--color-warning-solid);
+  background: var(--color-warning-solid);
+  color: var(--color-text-on-warning-solid);
 }
 
 .start__map-option {
-  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  margin: 0 var(--space-3);
   padding: var(--space-3);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-sm);
 }
 
-.start__map-option .start__map-line {
-  width: 80%;
-}
-
-.start__map-option .start__map-line--short {
-  width: 50%;
-}
-
-.start__map-apply {
-  position: relative;
-  align-self: flex-start;
+.start__map-next {
+  align-self: flex-end;
+  margin-right: var(--space-3);
   padding: 0 var(--space-3);
   border-radius: var(--radius-sm);
   background: var(--color-accent);
@@ -290,21 +330,9 @@
   line-height: var(--control-height-compact);
 }
 
-/* A pin sits on the corner of what it marks, over its edge. */
-.start__pin {
-  position: absolute;
-  top: calc(var(--space-5) / -2);
-  right: calc(var(--space-5) / -2);
-  border-color: var(--color-accent-border);
-  background: var(--color-surface);
-  color: var(--color-accent);
-  font-weight: var(--weight-semibold);
-}
-
-.start__map-caption {
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  text-align: center;
+/* Where the desk is next, the words give its map more of the row. */
+.start--desk {
+  grid-template-columns: minmax(0, 28rem) minmax(0, 1fr);
 }
 
 @media (max-width: 64rem) {
@@ -313,20 +341,12 @@
   }
 }
 
-/* One column, where the workspace is one column too, and no map: there is
-   no left and right on the next screen to point at. */
-@media (max-width: 56rem) {
-  .start {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .start__copy {
-    max-width: 34rem;
-  }
-
-  .start__map {
-    display: none;
-  }
+/* One column under the desk's width, where no map is drawn: the next
+   screen is another shape there, and Start here walks a person through it.
+   The column stays at its reading measure. */
+.start:not(.start--desk) {
+  grid-template-columns: minmax(0, 34rem);
+  justify-content: center;
 }
 
 @media (max-width: 40rem) {

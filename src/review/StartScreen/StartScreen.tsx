@@ -3,6 +3,7 @@ import { href } from '../../app/router';
 import { initialDelegation } from '../../data/billing';
 import { account } from '../../data/delegation';
 import { startSteps, type StartStep } from '../DelegationScreen/steps';
+import { useDeskWide } from '../DelegationScreen/deskWide';
 import './StartScreen.css';
 
 /* THE FRONT DOOR, SINCE 2026-10-23. Most people who open this arrive from a
@@ -21,9 +22,9 @@ import './StartScreen.css';
    the run as it starts, so it cannot disagree with the account they meet
    next; what they will do, as the same steps Start here names over the
    workspace (DelegationScreen/steps.ts), each with a few words on what it
-   means; and one way in. Beside it, where the workspace has two columns, a
-   map of that workspace marks where each step happens, so the first look at
-   it is a second one.
+   means; and one way in. Beside it, where the next screen is the desk, a
+   map of the desk names its parts, so the first look at it is a second
+   one.
 
    It is short because it promises a minute. The first version ran about 190
    words, which is most of that minute spent before the press; it is about
@@ -32,11 +33,11 @@ import './StartScreen.css';
    run across the next screen's top, which the map shows, and one saying the
    run is a sample, which the Simulated badge says.
 
-   The map is a drawing and says nothing the list does not, so a screen
-   reader hears its caption and not its shapes. It is not drawn where the
-   workspace is one column: there the steps come one under another, Start
-   here takes a person to each, and the map would only push the way in down
-   a phone.
+   The map's shapes are a drawing, so a screen reader hears its title and
+   the three notes under it and not the shapes. It is drawn only where the
+   next screen is the desk (deskWide.ts): under that the workspace is another
+   shape, Start here takes a person to each step, and the map would only
+   push the way in down the page.
 
    It is about the billing run, the one the way in opens. The shared table's
    own link goes straight to its run, and so does every address under
@@ -56,76 +57,87 @@ const MEANS: Record<StartStep, string> = {
   apply: 'The agent acts on your answer.',
 };
 
-/* Where each step happens on the next screen, as the map marks it. */
-function Pin({ n }: { n: number }) {
-  return <span className="start__pin">{n}</span>;
-}
+/* The steps by their first word, as the desk's own tabs name them
+   (DelegationScreen.tsx, DeskSteps), so the drawn tabs read as the list. */
+const TAB: Record<StartStep, string> = { look: 'Compare', choose: 'Choose', preview: 'Preview', apply: 'Apply' };
 
-function WorkspaceMap() {
-  const at = (to: StartStep) => steps.findIndex((s) => s.to === to) + 1;
+/* THE MAP, SINCE 2026-10-24: the desk drawn small, each part named in
+   words on the drawing. It used to mark where each step happens with a
+   numbered pin, and a person read a number on the picture, found it in
+   the list, and read back, three times over, past a row of the same
+   numbers along its top. A pin asks for that look; a name does not. So
+   each of the desk's three parts says what it is under it, and the
+   decision panel carries the steps' own names on its tabs, the words the
+   list starts with. Only the steps are numbered, once, in the list and
+   on those tabs, as the desk numbers them. */
+function DeskMap() {
   return (
     <figure className="start__map">
-      <div className="start__map-screen" aria-hidden="true">
-        <div className="start__map-bar">
-          <span className="start__map-label">Start here</span>
-          {steps.map((s, i) => (
-            <span key={s.to} className="start__map-step">
-              {i + 1}
+      <figcaption className="start__map-title">What you’ll see next</figcaption>
+      <div className="start__map-desk">
+        <div className="start__map-part">
+          <div className="start__map-panel start__map-queue" aria-hidden="true">
+            <span className="start__map-head">
+              Needs you <span className="start__map-count">{asking.length}</span>
             </span>
-          ))}
-        </div>
-        <div className="start__map-stage">
-          <span className="start__map-head">
-            <span className="start__map-label">The screen it changed</span>
-            <span className="start__map-toggle">
-              <span>Current</span>
-              <span data-on>Proposed</span>
-              <Pin n={at('preview')} />
-            </span>
-          </span>
-          <div className="start__map-product">
-            <span className="start__map-row">
-              <span className="start__map-line" />
-              <span className="start__map-control" />
-            </span>
-            <span className="start__map-row">
-              <span className="start__map-line" />
-              <span className="start__map-control" />
-            </span>
-            <span className="start__map-row">
-              <span className="start__map-line" />
-              <span className="start__map-control is-marked">
-                <Pin n={at('look')} />
+            {asking.map((w) => (
+              <span key={w.id} className="start__map-item">
+                <span className="start__map-line" />
+                <span className="start__map-line start__map-line--short" />
               </span>
+            ))}
+          </div>
+          <p className="start__map-note">The {asking.length} decisions left for you</p>
+        </div>
+
+        <div className="start__map-part">
+          <div className="start__map-panel" aria-hidden="true">
+            <span className="start__map-head">The screen it changed</span>
+            <span className="start__map-product">
+              {[0, 1, 2].map((i) => (
+                <span key={i} className="start__map-row">
+                  <span className="start__map-line" />
+                  <span className={i === 2 ? 'start__map-control is-marked' : 'start__map-control'} />
+                </span>
+              ))}
             </span>
           </div>
+          <p className="start__map-note">The changes, marked where they are</p>
         </div>
-        <div className="start__map-inspector">
-          <span className="start__map-label">Needs you</span>
-          <span className="start__map-line start__map-line--title" />
-          <span className="start__map-option">
-            <span className="start__map-line" />
-            <span className="start__map-line start__map-line--short" />
-            <Pin n={at('choose')} />
-          </span>
-          <span className="start__map-option">
-            <span className="start__map-line" />
-            <span className="start__map-line start__map-line--short" />
-          </span>
-          <span className="start__map-apply">
-            Apply
-            <Pin n={at('apply')} />
-          </span>
+
+        <div className="start__map-part">
+          <div className="start__map-panel start__map-decision" aria-hidden="true">
+            <span className="start__map-band">
+              <span className="start__map-line start__map-line--title" />
+              <span className="start__map-tabs">
+                {steps.map((s, i) => (
+                  <span key={s.to} className="start__map-tab" data-on={i === 0 || undefined}>
+                    <span className="start__map-step">{i + 1}</span>
+                    {TAB[s.to]}
+                  </span>
+                ))}
+              </span>
+            </span>
+            <span className="start__map-option">
+              <span className="start__map-line" />
+              <span className="start__map-line start__map-line--short" />
+            </span>
+            <span className="start__map-next">Next</span>
+          </div>
+          <p className="start__map-note">Where you take the steps, one at a time</p>
         </div>
       </div>
-      <figcaption className="start__map-caption">Where each step happens on the next screen.</figcaption>
     </figure>
   );
 }
 
-export function StartScreen() {
+/* `map` draws or leaves out the map whatever the width, for a story that
+   shows it at the Storybook's own size; left out, the width decides. */
+export function StartScreen({ map }: { map?: boolean }) {
+  const wide = useDeskWide();
+  const desk = map ?? wide;
   return (
-    <div className="start">
+    <div className={desk ? 'start start--desk' : 'start'}>
       <div className="start__copy">
         <p className="start__kicker">
           <Badge variant="quiet" icon="play">
@@ -166,7 +178,7 @@ export function StartScreen() {
         </div>
       </div>
 
-      <WorkspaceMap />
+      {desk ? <DeskMap /> : null}
     </div>
   );
 }

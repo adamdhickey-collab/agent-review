@@ -9,7 +9,9 @@ import { expect, test, type Page } from '@playwright/test';
       the same order, the desk by each step's first word.
    3. Its one button goes to the billing run, as a new screen: the
       workspace's heading takes focus, and going back finds the start.
-   4. The product's name goes back to the start from anywhere. */
+   4. The product's name goes back to the start from anywhere.
+   5. The map of the desk is drawn exactly where the next screen is the desk,
+      which is a width divided by the page's zoom, not a media query. */
 
 const chooseLight = () => localStorage.setItem('agent-review:theme', 'light');
 
@@ -71,3 +73,16 @@ test('the product’s name goes back to the start', async ({ page }) => {
   await expect(page).toHaveURL(/#\/$/);
   await arrived(page, 'A coding agent did most of the work. The rest needs you.');
 });
+
+/* Either side of the desk's 76rem (1216), and at both of the page's zoom
+   steps (app/scale.css), where the desk asks its width divided by the zoom:
+   the start screen must ask the same question and get the same answer. */
+for (const width of [1100, 1215, 1216, 1300, 1440]) {
+  test(`at ${width}, the map is drawn where the desk is`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await open(page, '#/runs/billing');
+    const desk = (await page.locator('.desk__steps').count()) > 0;
+    await open(page, '#/');
+    await expect(page.locator('.start__map')).toHaveCount(desk ? 1 : 0);
+  });
+}
