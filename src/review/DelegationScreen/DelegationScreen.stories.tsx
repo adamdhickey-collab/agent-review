@@ -707,6 +707,9 @@ export const Desk: Story = {
     await expect(canvas.getByRole('region', { name: 'What the agent read' })).toBeInTheDocument();
     await expect(canvas.queryByRole('group', { name: 'Which trade-off is acceptable?' })).toBeNull();
     await expect(canvas.getByRole('button', { name: 'Next: choose' })).toBeEnabled();
+    /* Each column scrolls on its own, so each is reachable by keyboard: the
+       interface's column takes a tab stop of its own. */
+    await expect(canvas.getByRole('region', { name: 'The interface the decision changes' })).toHaveAttribute('tabindex', '0');
   },
 };
 
