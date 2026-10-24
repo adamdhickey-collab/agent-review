@@ -671,3 +671,402 @@
     min-height: var(--control-height-touch);
   }
 }
+
+/* THE DESK (DelegationScreen.tsx), from 72rem: the workspace as one surface
+   the height of the window (--desk-height, measured), in three columns that
+   each scroll on their own. The job sits on one row over it, its account's
+   sentence at the right, so the desk starts as high as it can. */
+.delegation[data-desk] .delegation__header {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+}
+
+.delegation[data-desk] .delegation__heading {
+  flex: 1 1 32rem;
+}
+
+.delegation[data-desk] .delegation__header > .outcome {
+  flex: 0 1 28rem; /* a basis, because the account is a size container and has no width of its own to offer */
+  text-align: right;
+}
+
+.delegation[data-desk] .delegation__body {
+  gap: var(--space-4);
+}
+
+.desk {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr) 25rem;
+  height: var(--desk-height, 40rem);
+  overflow: hidden;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+/* The queue: what needs the person, then what is done, each a row that is a
+   Button (ghost: chrome, not an action on the work) holding a mark, the
+   question or the change, and where it is. */
+.desk__queue {
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-2);
+  border-right: var(--border-width) solid var(--color-border);
+  background: var(--color-surface-chrome);
+}
+
+.desk__queue-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-2) var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.desk__list + .desk__queue-head {
+  margin-top: var(--space-5);
+}
+
+/* A count in a solid: the warning's for what waits on the person, the
+   success ink for what is done (white on it clears 6.1:1). */
+.desk__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--space-5);
+  height: var(--space-5);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.desk__count[data-kind='asking'] {
+  background: var(--color-warning-solid);
+  color: var(--color-text-on-warning-solid);
+}
+
+.desk__count[data-kind='done'] {
+  background: var(--color-success);
+  color: var(--color-surface);
+}
+
+.desk__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.desk__queue .desk__item {
+  width: 100%;
+  height: auto;
+  padding: var(--space-2);
+  justify-content: flex-start;
+  color: var(--color-text);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-ui);
+  text-align: left;
+  white-space: normal;
+}
+
+.desk__item .btn__label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* The decision in view: lifted off the queue's ground, with the warning's
+   solid down its edge. */
+.desk__queue .desk__item[aria-current='true'] {
+  background: var(--color-surface);
+  box-shadow: inset 3px 0 0 var(--color-warning-solid), var(--shadow-raised);
+}
+
+.desk__mark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--space-5);
+  height: var(--space-5);
+  margin-top: calc((var(--text-md) * var(--leading-ui) - var(--space-5)) / 2); /* centred on the title's first line */
+  border-radius: var(--radius-lg);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+}
+
+.desk__mark[data-kind='asking'] {
+  background: var(--color-warning-solid);
+  color: var(--color-text-on-warning-solid);
+}
+
+.desk__mark[data-kind='done'] {
+  background: var(--color-success-solid);
+  color: var(--color-surface);
+}
+
+.desk__mark[data-kind='other'] {
+  background: var(--color-neutral-solid);
+  color: var(--color-surface);
+}
+
+.desk__item-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.desk__item-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-weight: var(--weight-semibold);
+}
+
+.desk__list:last-child .desk__item-title {
+  color: var(--color-text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+.desk__item-where {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* The interface, on the page's ground, so the product's own white reads as
+   the product's. */
+.desk__stage {
+  min-width: 0;
+  overflow-y: auto;
+  padding: var(--space-5);
+  background: var(--color-canvas);
+}
+
+/* The decision: the band, the page and the foot. */
+.desk__panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-left: var(--border-width) solid var(--color-border);
+}
+
+.desk__band {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5) 0;
+  background: var(--color-band);
+  color: var(--color-text-on-band);
+}
+
+.desk__band-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.desk__needs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.desk__position {
+  margin-left: auto;
+  color: var(--color-text-on-band-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.desk__pager {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.desk__band .icon-btn {
+  background: var(--color-band-raised);
+  color: var(--color-text-on-band);
+}
+
+.desk__band .icon-btn:hover:not(:disabled) {
+  background: var(--color-accent);
+}
+
+.desk__band .icon-btn:disabled {
+  color: var(--color-text-on-band-muted);
+}
+
+/* The decision's head on the band: the kind in the warning's solid, where
+   and what waits in the band's own inks, the question in white. */
+.desk__band .ask__where {
+  color: var(--color-text-on-band-muted);
+}
+
+.desk__band .badge--warning {
+  border-color: transparent;
+  background: var(--color-warning-solid);
+  color: var(--color-text-on-warning-solid);
+}
+
+.desk__band .badge--warning .icon {
+  color: inherit;
+}
+
+.desk__band .ask__holds {
+  border-color: transparent;
+  background: var(--color-band-raised);
+  color: var(--color-text-on-band);
+}
+
+.desk__band .ask__holds .icon {
+  color: inherit;
+}
+
+.desk__band .ask__title {
+  color: var(--color-text-on-band);
+}
+
+.desk__band .desk__needs:focus-visible {
+  outline-color: var(--color-text-on-band);
+}
+
+/* The steps: the panel's pages, along the band's foot. A rule under each,
+   the band's raised ground until done (the success solid) or current (the
+   warning's). */
+.desk__steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.desk__steps li {
+  display: flex;
+  padding-bottom: var(--space-2);
+  border-bottom: 3px solid var(--color-band-raised);
+  color: var(--color-text-on-band-muted);
+}
+
+.desk__steps li[data-done] {
+  border-bottom-color: var(--color-success-solid);
+  color: var(--color-text-on-band);
+}
+
+.desk__steps li[aria-current='step'] {
+  border-bottom-color: var(--color-warning-solid);
+  color: var(--color-text-on-band);
+}
+
+.desk__steps .desk__step {
+  justify-content: flex-start;
+  width: 100%;
+  padding-inline: var(--space-1);
+  color: inherit;
+  font-weight: var(--weight-semibold);
+}
+
+.desk__steps .desk__step:hover {
+  background: var(--color-band-raised);
+  color: var(--color-text-on-band);
+}
+
+.desk__steps .desk__step:focus-visible {
+  outline-color: var(--color-text-on-band);
+}
+
+.desk__step .btn__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.desk__step-num {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--space-5);
+  height: var(--space-5);
+  border: var(--border-width) solid currentColor;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-xs);
+}
+
+.desk__steps li[data-done] .desk__step-num {
+  border-color: var(--color-success-solid);
+  background: var(--color-success-solid);
+}
+
+.desk__steps li[aria-current='step'] .desk__step-num {
+  border-color: var(--color-warning-solid);
+  background: var(--color-warning-solid);
+  color: var(--color-text-on-warning-solid);
+}
+
+/* The page: what the agent read and the card, flat, showing the step's
+   part. */
+.desk__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+
+.desk__body > .ask {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.desk__body .ask__choice .btn {
+  align-self: stretch;
+}
+
+.desk__body .ask__bar {
+  margin-inline: calc(var(--space-5) * -1);
+  margin-bottom: calc(var(--space-5) * -1);
+  padding-inline: var(--space-5);
+}
+
+/* Each page's part of the card. Compare: why it is asking, what the checks
+   established and why it paused (with the agent's read, which the screen
+   renders on this page alone). Choose: the directions or answers. Preview:
+   the plan. Apply: the plan, the reason, the rule and Apply. */
+.desk__panel:not([data-page='look']) :is(.ask__why, .ask__checked, .ask__why-person, .ask__bounds),
+.desk__panel:not([data-page='choose']) .ask__options,
+.desk__panel:is([data-page='look'], [data-page='choose']) .ask__confirm,
+.desk__panel[data-page='preview'] :is(.ask__reason, .ask__rule, .ask__once, .ask__bar) {
+  display: none;
+}
+
+.desk__foot {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  border-top: var(--border-width) solid var(--color-border);
+  background: var(--color-surface-chrome);
+}
+
+.desk__hint {
+  flex: 1;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-align: right;
+}
+
+.desk__next {
+  margin-left: auto;
+}

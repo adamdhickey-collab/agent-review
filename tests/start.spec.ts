@@ -5,8 +5,8 @@ import { expect, test, type Page } from '@playwright/test';
    1. The address everyone is sent to, "/", is the start screen, and every
       address under it goes where it says: a run's own address is that run,
       with no start in front of it.
-   2. The steps it names are the steps Start here names over the workspace,
-      word for word, in the same order.
+   2. The steps it names are the steps the desk names over the decision, in
+      the same order, the desk by each step's first word.
    3. Its one button goes to the billing run, as a new screen: the
       workspace's heading takes focus, and going back finds the start.
    4. The product's name goes back to the start from anywhere. */
@@ -43,13 +43,15 @@ test('the front door is the start, and a run’s own address is the run', async 
   }
 });
 
-test('the start names the steps Start here names, in its order', async ({ page }) => {
+/* At 1280 the workspace is the desk (DelegationScreen.tsx, THE DESK), whose
+   steps are the first word of each: "Compare the two actions" is Compare. */
+test('the start names the steps the desk names, in its order', async ({ page }) => {
   await open(page, '#/');
   const named = await page.locator('.start__steps strong').allTextContents();
   await open(page, '#/runs/billing');
-  const steps = await page.locator('.studio__start-step .btn__label').allTextContents();
-  expect(named.map((s) => s.replace(/\.$/, ''))).toEqual(steps.map((s) => s.replace(/^\d/, '').trim()));
+  const steps = await page.locator('.desk__step .btn__label').allTextContents();
   expect(named).toHaveLength(4);
+  expect(steps.map((s) => s.replace(/^\dStep \d: /, ''))).toEqual(named.map((s) => s.split(' ')[0]));
 });
 
 test('Start the review opens the billing run, and back finds the start', async ({ page }) => {

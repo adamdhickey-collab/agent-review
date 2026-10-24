@@ -59,6 +59,9 @@ for (const width of WIDTHS) {
     test('the delegated work, a direction selected', async ({ page }) => {
       await page.goto('#/runs/billing');
       await settle(page);
+      /* On the desk (1280) the directions are the panel's Choose page. */
+      const choose = page.getByRole('button', { name: 'Next: choose' });
+      if (await choose.isVisible()) await choose.click();
       await page.getByRole('button', { name: /^Select and preview\s+Add a quiet variant$/ }).click();
       await page.evaluate(() => window.scrollTo(0, 0));
       await settle(page);
