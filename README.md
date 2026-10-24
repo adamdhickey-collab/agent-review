@@ -30,7 +30,7 @@ and say so; the experiment's review queue is at `#/queue`. Each decision
 is made in a workspace (Preview Studio): the interface it changes rendered
 large, with the element marked, beside an inspector holding the decision;
 selecting a direction previews it, proposed and not applied. On a laptop
-(from 78rem) the workspace is a desk the height of the window: the run's
+(from 76rem) the workspace is a desk the height of the window: the run's
 work in a queue on the left, the interface in the middle, and the decision
 on the right under a deep-teal band, its steps (Compare, Choose, Preview,
 Apply) the panel's pages, with Back and Next at its foot.

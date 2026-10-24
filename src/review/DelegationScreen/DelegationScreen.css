@@ -672,7 +672,7 @@
   }
 }
 
-/* THE DESK (DelegationScreen.tsx), from 78rem: the workspace as one surface
+/* THE DESK (DelegationScreen.tsx), from 76rem: the workspace as one surface
    the height of the window (--desk-height, measured), in three columns that
    each scroll on their own. The job sits on one row over it, its account's
    sentence at the right, so the desk starts as high as it can. */
@@ -699,7 +699,7 @@
 
 .desk {
   display: grid;
-  grid-template-columns: 15rem minmax(0, 1fr) 25rem;
+  grid-template-columns: 14rem minmax(0, 1fr) 25rem;
   height: var(--desk-height, 40rem);
   overflow: hidden;
   border: var(--border-width) solid var(--color-border);

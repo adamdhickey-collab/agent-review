@@ -245,7 +245,7 @@ function StartHere({ work, chosen, first, onStep }: { work: Work; chosen: boolea
 /* THE DESK, SINCE 2026-10-24. On a laptop the workspace read as a page: an
    account, a line of steps, the interface, and a decision panel that ran past
    the window, so the question and Apply were never on screen together, and a
-   step only ringed a box. From 78rem the workspace is a desk the height of
+   step only ringed a box. From 76rem the workspace is a desk the height of
    the window, in three columns that scroll on their own:
 
    - The queue, on the left: what needs the person, numbered in the warning's
@@ -263,19 +263,28 @@ function StartHere({ work, chosen, first, onStep }: { work: Work; chosen: boolea
 
    One DecisionRequest stays mounted under every step and shows the step's
    part (DelegationScreen.css, THE DESK), so a reason typed at Apply survives
-   a look back at the directions. Under 78rem the workspace is as it was, the
+   a look back at the directions. Under 76rem the workspace is as it was, the
    steps are places again, and nothing is hidden. */
-const DESK = '(min-width: 78rem)'; /* under it, the interface's column is too narrow for the billing screen's rows to stay on one line */
+/* The width the desk needs, in the page's own pixels: the window divided by
+   the page's zoom (app/scale.css), because a zoomed page lays out narrower
+   than the window a media query reads. Under it, the interface's column is
+   too narrow for the billing screen's rows to stay on one line. */
+const DESK_REM = 76;
 
-function useMedia(query: string) {
-  const [on, setOn] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches);
+function useDeskWide() {
+  const measure = () => {
+    if (typeof window === 'undefined') return false;
+    const zoom = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    return window.innerWidth / zoom >= DESK_REM * rem;
+  };
+  const [on, setOn] = useState(measure);
   useEffect(() => {
-    const m = window.matchMedia(query);
-    const change = () => setOn(m.matches);
+    const change = () => setOn(measure());
     change();
-    m.addEventListener('change', change);
-    return () => m.removeEventListener('change', change);
-  }, [query]);
+    window.addEventListener('resize', change);
+    return () => window.removeEventListener('resize', change);
+  }, []);
   return on;
 }
 
@@ -456,7 +465,7 @@ export function DelegationScreen({ run = 'billing', layout }: { run?: RunId; /**
   const [ending, setEnding] = useState<{ run: RunId; id: string } | null>(null);
   /* The desk (THE DESK): whether the window is wide enough for it, and the
      page each decision's panel is on, kept per decision like its choice. */
-  const wide = useMedia(DESK);
+  const wide = useDeskWide();
   const desk = layout ? layout === 'desk' : wide;
   const [pages, setPages] = useState<Record<string, StartStep>>({});
   const header = useRef<HTMLElement>(null);

@@ -32,8 +32,8 @@ function inStore(state: DelegationState) {
 const meta = {
   title: 'Review/DelegationScreen',
   component: DelegationScreen,
-  /* The workspace as it is under 78rem, whatever the test browser's width;
-     the Desk stories at the end show it from 78rem (THE DESK). */
+  /* The workspace as it is under 76rem, whatever the test browser's width;
+     the Desk stories at the end show it from 76rem (THE DESK). */
   args: { layout: 'studio' },
   parameters: {
     layout: 'fullscreen',
@@ -683,7 +683,7 @@ export const FirstMinuteOnceARun: Story = {
   },
 };
 
-/* THE DESK: from 78rem, the workspace is the window's height in three
+/* THE DESK: from 76rem, the workspace is the window's height in three
    columns, and the decision panel's steps are its pages. */
 export const Desk: Story = {
   args: { layout: 'desk' },
