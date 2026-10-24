@@ -762,7 +762,9 @@ export function DelegationScreen({ run = 'billing', layout }: { run?: RunId; /**
               </ul>
             </nav>
 
-            <div className="desk__stage">
+            {/* It scrolls on its own, so it takes a tab stop of its own: a
+                keyboard reaches the interface under the fold (WCAG 2.1.1). */}
+            <div className="desk__stage" tabIndex={0} role="region" aria-label="The interface the decision changes">
               <DecisionPreview
                 work={current}
                 option={previewing}
