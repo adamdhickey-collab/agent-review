@@ -245,7 +245,7 @@ function StartHere({ work, chosen, first, onStep }: { work: Work; chosen: boolea
 /* THE DESK, SINCE 2026-10-24. On a laptop the workspace read as a page: an
    account, a line of steps, the interface, and a decision panel that ran past
    the window, so the question and Apply were never on screen together, and a
-   step only ringed a box. From 72rem the workspace is a desk the height of
+   step only ringed a box. From 78rem the workspace is a desk the height of
    the window, in three columns that scroll on their own:
 
    - The queue, on the left: what needs the person, numbered in the warning's
@@ -263,9 +263,9 @@ function StartHere({ work, chosen, first, onStep }: { work: Work; chosen: boolea
 
    One DecisionRequest stays mounted under every step and shows the step's
    part (DelegationScreen.css, THE DESK), so a reason typed at Apply survives
-   a look back at the directions. Under 72rem the workspace is as it was, the
+   a look back at the directions. Under 78rem the workspace is as it was, the
    steps are places again, and nothing is hidden. */
-const DESK = '(min-width: 72rem)';
+const DESK = '(min-width: 78rem)'; /* under it, the interface's column is too narrow for the billing screen's rows to stay on one line */
 
 function useMedia(query: string) {
   const [on, setOn] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches);
