@@ -16,7 +16,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The front door, at "/": one screen before the delegated work, so a person arriving from a link is not dropped into the middle of a scenario. It says this is simulated and short, sets up the situation in a line, in the words the next screen uses ("Needs you"), says who the person is and what the agent did, counted from the billing run as it starts, says where to begin, and asks for one press. The desk takes a person through the steps itself, so this screen does not list them or draw the screen to come.',
+          'The front door, at "/": the question the prototype answers, what a designer does all day once an agent builds, the six stages of the design cycle with what the designer does in each, one way in, and the two delegated runs as links for whoever came for one moment where an agent stops.',
       },
     },
   },
@@ -27,30 +27,27 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   parameters: {
-    docs: { description: { story: 'The screen as a person arriving from a link meets it: the title, what happened and who they are, where to begin, and Start the review.' } },
+    docs: { description: { story: 'The screen as a person arriving from a link meets it: the question, who they are, the six stages with what the designer does in each, the one way in, and the two runs as links under it.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('A coding agent did most of the work. The rest needs you.');
-    /* Counted from the run, so it cannot disagree with the account the next screen opens on. */
-    await expect(canvasElement.querySelector('.start__lead')).toHaveTextContent(`It made ${start.own.length} changes`);
-    await expect(canvasElement.querySelector('.start__lead')).toHaveTextContent(`left ${start.asking.length} for you`);
-    await expect(canvasElement.querySelector('.start__where')).toHaveTextContent('Start with the first decision.');
-    await expect(canvas.getByRole('button', { name: 'Start the review' })).toBeVisible();
-    /* One press, and nothing else to do here. */
-    await expect(canvasElement.querySelectorAll('a, button, input, [tabindex="0"]').length).toBe(1);
+    await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('If an agent can build the interface, what does the designer do all day?');
+    await expect(canvasElement.querySelectorAll('.start__stages li')).toHaveLength(6);
+    /* Counted from the run, so it cannot disagree with the account the run opens on. */
+    await expect(canvasElement.querySelector('.start__or')).toHaveTextContent(`${start.own.length} changes made, ${start.asking.length} left for you`);
+    await expect(canvas.getByRole('button', { name: 'Explore a product design cycle' })).toBeVisible();
   },
 };
 
-export const StartGoesToTheRun: Story = {
+export const StartGoesToTheCycle: Story = {
   parameters: {
-    docs: { description: { story: 'Start the review goes to the billing run at its own address, "/runs/billing", which the router shows as a new screen. The story puts the address back after.' } },
+    docs: { description: { story: 'The button goes to the cycle’s first stage, "/cycle/discover". The story puts the address back after.' } },
   },
   play: async ({ canvasElement }) => {
     const was = location.hash;
     try {
-      await userEvent.click(within(canvasElement).getByRole('button', { name: 'Start the review' }));
-      await expect(location.hash).toBe('#/runs/billing');
+      await userEvent.click(within(canvasElement).getByRole('button', { name: 'Explore a product design cycle' }));
+      await expect(location.hash).toBe('#/cycle/discover');
     } finally {
       history.replaceState(history.state, '', `${location.pathname}${location.search}${was}`);
     }

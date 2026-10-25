@@ -103,13 +103,14 @@ export const AppearanceRemembered: Story = {
 
 export const LinksOutAreQuieter: Story = {
   parameters: {
-    docs: { description: { story: 'The Storybook and the source are not places in the product, so they are their own nav, on the right, in regular weight and muted ink with no line. The places are the two on the left, and the one you are in is the accent.' } },
+    docs: { description: { story: 'The Storybook and the source are not places in the product, so they are their own nav, on the right, in regular weight and muted ink with no line. The places are the three on the left, and the one you are in is the accent.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const places = canvas.getByRole('navigation', { name: 'Primary' });
     const links = canvas.getByRole('navigation', { name: 'Project links' });
-    await expect(within(places).getAllByRole('link').length).toBe(2);
+    await expect(within(places).getAllByRole('link').length).toBe(3);
+    await expect(within(places).getByRole('link', { name: 'Design cycle' })).toBeInTheDocument();
     await expect(within(places).getByRole('link', { name: 'Delegated work' })).toBeInTheDocument();
     await expect(within(places).getByRole('link', { name: 'Reviews' })).toBeInTheDocument();
     await expect(within(links).getAllByRole('link').map((a) => a.textContent)).toEqual(['Storybook', 'Source']);

@@ -6,6 +6,7 @@ import { QueueScreen } from '../review/QueueScreen/QueueScreen';
 import { StartScreen } from '../review/StartScreen/StartScreen';
 import { DelegationScreen } from '../review/DelegationScreen/DelegationScreen';
 import { ChangeScreen } from '../review/ChangeScreen/ChangeScreen';
+import { CycleScreen } from '../review/CycleScreen/CycleScreen';
 import { EmptyState } from '../components';
 
 /* The store has to be above anything that reads it, and the route effects
@@ -17,6 +18,7 @@ function Screens() {
     <Shell route={route}>
       {route.name === 'start' ? <StartScreen /> : null}
       {route.name === 'delegation' ? <DelegationScreen run={route.run ?? 'billing'} /> : null}
+      {route.name === 'cycle' ? <CycleScreen stage={route.stage} /> : null}
       {route.name === 'queue' ? <QueueScreen /> : null}
       {route.name === 'change' ? <ChangeScreen id={route.id} findingId={route.findingId} /> : null}
       {route.name === 'not-found' ? (

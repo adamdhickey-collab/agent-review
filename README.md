@@ -35,6 +35,21 @@ work in a queue on the left, the interface in the middle, and the decision
 on the right under a deep-teal band, its steps (Compare, Choose, Preview,
 Apply) the panel's pages, with Back and Next at its foot.
 
+Its third iteration (2026-10-25) asks the question the first two left
+open: if an agent can build the interface, what does the designer spend
+the day doing? The front door is now a design cycle (`#/cycle/discover`
+to `#/cycle/learn`): one feature, archiving customers on Relay's table,
+followed through six stages, Discover, Define, Explore, Evaluate,
+Delegate and Learn. Each says what the designer does and what the agent
+does, and asks for one choice a later stage reads: whether the agent's
+summary of the evidence holds up, what wins when speed and safety pull
+apart, which of three working archive directions to build and what it
+must do, the agent's one question, and what to measure and keep. The
+three directions are real screens built from the system
+(`src/product/customers/ArchiveFlow.tsx`); the evidence, the session
+notes and the agent's build are simulated and labelled so. The two runs
+above are still there, linked from the start screen.
+
 - The product: https://adamdhickey-collab.github.io/agent-review/
 - The Storybook: https://adamdhickey-collab.github.io/agent-review/storybook/
 - The case study: https://adamhickey.com/lab/agent-review.html

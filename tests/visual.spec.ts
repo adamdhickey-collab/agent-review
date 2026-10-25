@@ -33,6 +33,25 @@ for (const width of WIDTHS) {
       await expect(page).toHaveScreenshot(`start-${width}.png`, { fullPage: true });
     });
 
+    /* The design cycle (since 2026-10-25): the first stage, and Explore with
+       the batch selected and archived in its first direction, so the
+       baseline holds a working interface mid-use, not only a page. */
+    test('the design cycle, discover', async ({ page }) => {
+      await page.goto('#/cycle/discover');
+      await settle(page);
+      await expect(page).toHaveScreenshot(`cycle-discover-${width}.png`, { fullPage: true });
+    });
+
+    test('the design cycle, explore', async ({ page }) => {
+      await page.goto('#/cycle/explore');
+      await settle(page);
+      await page.getByRole('button', { name: 'Select a batch for me' }).click();
+      await page.getByRole('button', { name: 'Archive', exact: true }).click();
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await settle(page);
+      await expect(page).toHaveScreenshot(`cycle-explore-${width}.png`, { fullPage: true });
+    });
+
     test('the delegated work', async ({ page }) => {
       await page.goto('#/runs/billing');
       await settle(page);

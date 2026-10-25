@@ -506,6 +506,79 @@ lines dropped, one that the map already shows (the steps run across the next
 screen's top) and one that the Simulated badge already says (the run is a
 sample). The title, the steps, the button and the map did not change.
 
+## The third iteration: a design cycle (2026-10-25)
+
+The two runs answer where an agent should stop. A review of the portfolio
+found what they leave out: they make the designer look like someone who
+comes by to approve what an agent built. If an agent can build the
+interface, what does a senior designer spend eight hours doing? The
+prototype didn't say.
+
+So the front door is a design cycle (`#/cycle/<stage>`,
+`src/review/CycleScreen/`, `src/data/cycle.ts`): one feature, archiving
+customers in Relay without losing control of them, from the evidence to
+what to measure, in six stages, each its own address. It is the archive
+the experiment's runs both deferred (see Deferred on purpose: "An Archived
+view and undo for the bulk archive"), so the scenario picks up where the
+real experiment stopped.
+
+- **The designer's work is the subject.** Each stage opens on its
+  question and on two lines, what Dana does and what the agent does, and
+  the designer's is in the reading ink and the accent. Agent Review proper
+  (boundaries, a stop, a rule) appears in Delegate and Learn, as one part
+  of the cycle and not the whole of it. It stays a focused tool: the cycle
+  shows it inside a wider practice and does not pretend to be a research
+  tool, a tracker or an analytics product.
+- **One choice a stage, and each one is read later.** Discover: the
+  agent's summary marks every line observation, interpretation or
+  assumption, and one assumption (archiving deletes data) is contradicted
+  by an engineering note; correcting or keeping it sets the brief's
+  problem, and keeping it follows the work to Learn, which says part of
+  the build solves a problem nobody has. Define: what wins when pace and
+  safety pull apart; it sets two success criteria and the direction the
+  agent recommends. Explore: three working directions (archive now and
+  undo; confirm first, naming active customers; review the batch), tried
+  on a batch holding three active customers and one that can't be
+  archived; what a person does in each is kept. Evaluate: findings from
+  four sources (the evidence, simulated session notes, trying it, the
+  checks), each able to become a requirement, and a direction with a
+  reason, the agent's draft until the person writes their own. Delegate:
+  the brief is written from all of it; the agent builds, says what each
+  check established, and stops once, a different stop for each direction
+  (approval for a new pattern, or judgment on what "active" means); the
+  answer changes what is built, and the build is the working screen.
+  Learn: what was decided, verified and still unknown, measures with
+  targets and no results, research next, and a rule kept only if the
+  person keeps it.
+- **A choice upstream clears what was built on it.** A new direction or a
+  new requirement un-sends the brief, so the screen never shows a build
+  the current choices wouldn't produce (`reduceCycle`).
+- **Order is shown, not enforced.** The rail links every stage and marks
+  a decided one; a stage that needs an earlier choice says which and links
+  to it. The cycle is kept in sessionStorage, so a reload or a link back
+  into the middle finds the choices; Start over clears it, as a second
+  step.
+- **The directions are working software.** `ArchiveFlow` is a new product
+  screen rather than props on CustomerTable, whose history is frozen
+  against the experiment's runs. It uses the Table, Toolbar, Button,
+  Badge, Checkbox and SegmentedControl, and its stories run through axe.
+  The review step is inline under the toolbar rather than a dialog,
+  because the system has no panel and the scenario's own stop asks
+  whether it should.
+- **Simulated stays simulated.** The tickets, the usage signals, the
+  session notes and the agent's build are written to agree with each
+  other. The head of every stage says Simulated once; Evaluate says the
+  session notes show what testing could turn up, not what it did; Learn
+  says its targets are not results. Nothing here was researched, tested
+  with anyone or shipped.
+
+Tests: CycleScreen's stories hold the causal chain (a priority changes the
+recommendation and the criteria, a direction changes the stop, an answer
+changes who the built screen names, keeping the summary's claim reaches
+Learn); `tests/cycle.spec.ts` does the cycle from the keyboard, reloads in
+the middle, steps back and forward, and starts over; the phone check
+covers three stages at four widths, and the visual baselines two.
+
 ## Exploration: three information architectures
 
 Pencil is not available here (no MCP server, no application), so the
@@ -657,4 +730,6 @@ the review's half. The full list with values is in the file; the names in
   as it would in a real one.
 - An Archived view and undo for the bulk archive. Both runs listed it;
   the inline question is the guard until there is a view to restore from.
+  Since 2026-10-25 the design cycle explores exactly this, as three
+  working directions (ArchiveFlow); CustomerTable itself is unchanged.
 - A proper CSS parser for the token lint (see Open questions).
