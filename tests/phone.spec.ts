@@ -46,6 +46,9 @@ for (const width of WIDTHS) {
 
     const SCREENS: [string, string][] = [
       ['the start', '#/'],
+      ['the design cycle, discover', '#/cycle/discover'],
+      ['the design cycle, explore', '#/cycle/explore'],
+      ['the design cycle, evaluate', '#/cycle/evaluate'],
       ['the delegated work', '#/runs/billing'],
       ['the shared-table run', '#/runs/shared-table'],
       ['the queue', '#/queue'],
@@ -68,7 +71,7 @@ for (const width of WIDTHS) {
               /* Inside a closed disclosure is not on the screen: Chrome hides it with
                  content-visibility rather than display: none, so it still has a box,
                  but it cannot be reached or pressed until the disclosure opens. */
-              if (el.closest('.preview__frame, .studio-preview__frame, .visually-hidden, .diff__finding, details:not([open]) > :not(summary)') || el.matches(allowed)) continue;
+              if (el.closest('.preview__frame, .studio-preview__frame, .cycle__product-frame, .visually-hidden, .diff__finding, details:not([open]) > :not(summary)') || el.matches(allowed)) continue;
               /* a checkbox input is a transparent box over its label, and the label is the target */
               const target = el.matches('input[type="checkbox"]') ? (el.closest('label') ?? el) : el;
               const r = target.getBoundingClientRect();

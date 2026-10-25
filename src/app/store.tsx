@@ -1,9 +1,10 @@
-import { createContext, useCallback, useContext, useMemo, useReducer, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
 import { queue as initialQueue } from '../data/scenario';
 import type { Change, Decision } from '../data/types';
 import { initialDelegation } from '../data/billing';
 import { initialTableRun } from '../data/table';
 import { reduce, type Action, type DelegationState, type RunId } from '../data/delegation';
+import { initialCycle, reduceCycle, type CycleAction, type CycleState } from '../data/cycle';
 
 /* The review's state: the queue, and the decisions made in this session.
    In memory, on purpose. A real Agent Review would write a decision to
@@ -21,6 +22,32 @@ import { reduce, type Action, type DelegationState, type RunId } from '../data/d
    There are two delegated runs, the billing run and the shared table, each
    its own state, so switching between them keeps where a person got to in
    each; Reset puts back the one on screen. */
+
+/* The design cycle (data/cycle.ts, since 2026-10-25) is a third piece of
+   state, moved only by `reduceCycle`. Unlike the runs it is kept in
+   sessionStorage, because its six stages are six addresses and a reload or
+   a link back into the middle of it should find the choices the person made
+   on the way. A new tab starts it fresh, and Start over clears it. */
+
+const CYCLE = 'agent-review:cycle';
+
+function loadCycle(): CycleState {
+  try {
+    const kept: unknown = JSON.parse(sessionStorage.getItem(CYCLE) ?? 'null');
+    if (kept && typeof kept === 'object') return { ...initialCycle(), ...(kept as Partial<CycleState>) };
+  } catch {
+    /* no storage, or nothing readable in it: start fresh */
+  }
+  return initialCycle();
+}
+
+function saveCycle(s: CycleState) {
+  try {
+    sessionStorage.setItem(CYCLE, JSON.stringify(s));
+  } catch {
+    /* a private window or a full store: the cycle lasts until the next load */
+  }
+}
 
 const STARTS: Record<RunId, () => DelegationState> = {
   billing: initialDelegation,
@@ -46,6 +73,9 @@ interface Store {
   delegate(run: RunId, action: Action): void;
   /** Back to the start of the run. */
   resetDelegation(run: RunId): void;
+  /** The design cycle, moved only by `reduceCycle`. */
+  cycle: CycleState;
+  cycleDo(action: CycleAction): void;
 }
 
 const StoreContext = createContext<Store | null>(null);
@@ -53,8 +83,11 @@ const StoreContext = createContext<Store | null>(null);
 export function StoreProvider({
   children,
   delegation: start,
+  cycle: cycleStart,
 }: {
   children: ReactNode;
+  /** Where the design cycle starts, for a story: fresh, or from a session's keeping by default. */
+  cycle?: CycleState;
   /** Where a delegated run starts, for a story: the run its brief names; each run from its own start by default. */
   delegation?: DelegationState;
 }) {
@@ -64,6 +97,12 @@ export function StoreProvider({
   const [runs, dispatch] = useReducer(runsReducer, undefined, () => ({ billing: startOf('billing'), 'shared-table': startOf('shared-table') }));
   const delegate = useCallback((run: RunId, action: Action) => dispatch({ run, action }), []);
   const resetDelegation = useCallback((run: RunId) => dispatch({ run, action: { type: 'reset', to: startOf(run) } }), [startOf]);
+
+  const [cycle, cycleDispatch] = useReducer(reduceCycle, undefined, () => cycleStart ?? loadCycle());
+  const cycleDo = useCallback((action: CycleAction) => cycleDispatch(action), []);
+  useEffect(() => {
+    if (!cycleStart) saveCycle(cycle);
+  }, [cycle, cycleStart]);
 
   const decide = useCallback((id: string, decision: Decision) => {
     setChanges((cs) => {
@@ -84,8 +123,8 @@ export function StoreProvider({
   );
 
   const value = useMemo<Store>(
-    () => ({ changes, find: (id) => changes.find((c) => c.id === id), decide, undo, last, runs, delegate, resetDelegation }),
-    [changes, decide, undo, last, runs, delegate, resetDelegation],
+    () => ({ changes, find: (id) => changes.find((c) => c.id === id), decide, undo, last, runs, delegate, resetDelegation, cycle, cycleDo }),
+    [changes, decide, undo, last, runs, delegate, resetDelegation, cycle, cycleDo],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { screenOf, type Arrival, type Route } from './router';
 import { useStore } from './store';
+import { stageOf } from '../data/cycle';
 
 /* What a route change owes a reader who cannot see the page change. The
    title says which screen this is, so a tab, a history entry and a screen
@@ -60,7 +61,9 @@ export function useRouteEffects(route: Route, arrival: Arrival) {
       ? route.run === 'shared-table'
         ? 'Delegated work: the shared table'
         : 'Delegated work'
-      : route.name === 'queue'
+      : route.name === 'cycle'
+        ? `Design cycle: ${stageOf(route.stage).name}`
+        : route.name === 'queue'
         ? 'Review queue'
         : route.name === 'change'
           ? (store.find(route.id)?.title ?? 'No change with that id')

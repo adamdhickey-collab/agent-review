@@ -7,8 +7,9 @@ import { ShortcutSheet } from '../ShortcutSheet/ShortcutSheet';
 import './Shell.css';
 
 /* The chrome: one bar. The product's name, where you are, and who you
-   are. Everything else is the screen. Two places: the delegated work and
-   the reviews, the queue of single changes the experiment was built around.
+   are. Everything else is the screen. Three places: the design cycle (since
+   2026-10-25), the delegated work and the reviews, the queue of single
+   changes the experiment was built around.
    The product's name goes to the front door, the start screen, which is
    not a place in the product but the way into it (since 2026-10-23), so it
    is not in the nav and nothing there is current while it is up. The bar
@@ -84,6 +85,12 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
         </a>
         <div className="shell__where">
           <nav className="shell__nav" aria-label="Primary">
+            <a href={href({ name: 'cycle', stage: 'discover' })} aria-current={route.name === 'cycle' ? 'page' : undefined}>
+              <span className="shell__long">Design cycle</span>
+              <span className="shell__short" aria-hidden="true">
+                Cycle
+              </span>
+            </a>
             <a href={href({ name: 'delegation' })} aria-current={route.name === 'delegation' ? 'page' : undefined}>
               <span className="shell__long">Delegated work</span>
               <span className="shell__short" aria-hidden="true">

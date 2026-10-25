@@ -5,7 +5,7 @@ import { expect, test, type Page } from '@playwright/test';
    1. The address everyone is sent to, "/", is the start screen, and every
       address under it goes where it says: a run's own address is that run,
       with no start in front of it.
-   2. Its one button goes to the billing run, as a new screen: the
+   2. Its one button goes to the design cycle, as a new screen: the
       workspace's heading takes focus, and going back finds the start.
    3. The product's name goes back to the start from anywhere. */
 
@@ -26,7 +26,7 @@ const arrived = (page: Page, heading: string | RegExp) => expect(page.getByRole(
 
 test('the front door is the start, and a run’s own address is the run', async ({ page }) => {
   await open(page, '#/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('A coding agent did most of the work. The rest needs you.');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('If an agent can build the interface, what does the designer do all day?');
   await expect(page).toHaveTitle('Start · Agent Review');
   await expect(page.locator('.shell__nav a[aria-current="page"]')).toHaveCount(0);
 
@@ -41,20 +41,20 @@ test('the front door is the start, and a run’s own address is the run', async 
   }
 });
 
-test('Start the review opens the billing run, and back finds the start', async ({ page }) => {
+test('the way in opens the design cycle, and back finds the start', async ({ page }) => {
   await open(page, '#/');
-  await page.getByRole('button', { name: 'Start the review' }).click();
-  await expect(page).toHaveURL(/#\/runs\/billing$/);
-  await arrived(page, 'Bring the billing screens onto the design system');
+  await page.getByRole('button', { name: 'Explore a product design cycle' }).click();
+  await expect(page).toHaveURL(/#\/cycle\/discover$/);
+  await arrived(page, 'Something is wrong with archiving. What, exactly?');
 
   await page.goBack();
   await expect(page).toHaveURL(/#\/$/);
-  await arrived(page, 'A coding agent did most of the work. The rest needs you.');
+  await arrived(page, 'If an agent can build the interface, what does the designer do all day?');
 });
 
 test('the product’s name goes back to the start', async ({ page }) => {
   await open(page, '#/queue');
   await page.getByRole('link', { name: 'Agent Review, start' }).click();
   await expect(page).toHaveURL(/#\/$/);
-  await arrived(page, 'A coding agent did most of the work. The rest needs you.');
+  await arrived(page, 'If an agent can build the interface, what does the designer do all day?');
 });

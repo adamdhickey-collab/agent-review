@@ -1,0 +1,101 @@
+/* ARCHIVING CUSTOMERS, THREE WAYS (ArchiveFlow.tsx). The customer table's
+   panel, and the few things between the selection bar and the rows that are
+   this screen's own: the notes before a press, the review of a batch, and
+   the sentence after. Everything else is the system's. */
+.archive-flow {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.archive-flow__title {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.archive-flow__count {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.archive-flow__selected,
+.archive-flow__question,
+.archive-flow__result {
+  line-height: var(--leading-ui);
+}
+
+.archive-flow__question strong {
+  font-weight: var(--weight-semibold);
+}
+
+/* What the person should know before the press, under the bar that offers it. */
+.archive-flow__notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-surface-sunken);
+}
+
+.archive-flow__note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  line-height: var(--leading-ui);
+}
+
+/* The review: the batch sorted by what a person should look at, on the
+   sunken ground under the toolbar, so it reads as the toolbar's next step
+   and not as a dialog over the table. */
+.archive-flow__review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-surface-sunken);
+}
+
+.archive-flow__review-title {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.archive-flow__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.archive-flow__group-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-ui);
+}
+
+.archive-flow__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-left: var(--space-2);
+  color: var(--color-text);
+  line-height: var(--leading-ui);
+}
+
+.archive-flow__rows strong {
+  font-weight: var(--weight-semibold);
+}
+
+.archive-flow__review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}

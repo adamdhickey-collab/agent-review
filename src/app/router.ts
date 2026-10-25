@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
 
 import type { RunId } from '../data/delegation';
+import { isStage, type StageId } from '../data/cycle';
 
 /* A hash router in fifty lines. Five routes, one hook. The hash is the
    state, so a URL names a screen and a finding, and the back button
@@ -10,7 +11,10 @@ import type { RunId } from '../data/delegation';
    (since 2026-10-23; until then the delegated work was the front door).
    The billing run is at "/runs/billing", and a second delegated run, the
    shared table, at "/runs/shared-table", so each can be linked to directly.
-   The review queue the experiment was built around is at "/queue". A route
+   The review queue the experiment was built around is at "/queue". The
+   design cycle (since 2026-10-25) is six addresses, "/cycle/discover" to
+   "/cycle/learn", one a stage, so a stage can be linked to and the back
+   button steps between them; "/cycle" is its first. A route
    with parameters beyond an id and a finding is when a dependency earns its
    place. */
 
@@ -18,6 +22,7 @@ export type Route =
   | { name: 'start' }
   | { name: 'delegation'; run?: RunId }
   | { name: 'queue' }
+  | { name: 'cycle'; stage: StageId }
   | { name: 'change'; id: string; findingId?: string }
   | { name: 'not-found'; path: string };
 
@@ -27,6 +32,9 @@ export function parse(hash: string): Route {
   if (path === '/runs/billing' || path === '/runs/billing/') return { name: 'delegation' };
   if (path === '/runs/shared-table' || path === '/runs/shared-table/') return { name: 'delegation', run: 'shared-table' };
   if (path === '/queue' || path === '/queue/') return { name: 'queue' };
+  if (path === '/cycle' || path === '/cycle/') return { name: 'cycle', stage: 'discover' };
+  const c = path.match(/^\/cycle\/([a-z]+)\/?$/);
+  if (c && isStage(c[1])) return { name: 'cycle', stage: c[1] };
   const m = path.match(/^\/changes\/([\w-]+)(?:\/findings\/([\w-]+))?\/?$/);
   if (m) return { name: 'change', id: m[1], findingId: m[2] };
   return { name: 'not-found', path };
@@ -40,6 +48,8 @@ export function href(route: Route): string {
       return `#/runs/${route.run ?? 'billing'}`;
     case 'queue':
       return '#/queue';
+    case 'cycle':
+      return `#/cycle/${route.stage}`;
     case 'change':
       return route.findingId ? `#/changes/${route.id}/findings/${route.findingId}` : `#/changes/${route.id}`;
     case 'not-found':
@@ -135,6 +145,7 @@ function stamp(key: string) {
    transition (below). */
 export function screenOf(route: Route): string {
   if (route.name === 'delegation' && route.run && route.run !== 'billing') return `delegation:${route.run}`;
+  if (route.name === 'cycle') return `cycle:${route.stage}`;
   return route.name === 'change' ? `change:${route.id}` : route.name;
 }
 
