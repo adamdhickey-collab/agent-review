@@ -24,7 +24,7 @@ import './StartScreen.css';
 
    Since 2026-10-25 the way in is the design cycle (data/cycle.ts): the
    question the screen asks is what the designer does all day, and the six
-   stages are listed with what Dana does in each, because that list is the
+   stages are listed with what Alex does in each, because that list is the
    answer in outline. The two runs are links under the button, for whoever
    came for one moment where an agent stops.
 

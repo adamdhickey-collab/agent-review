@@ -234,7 +234,7 @@ export function Define() {
     <div className="cycle__work">
       <div className="cycle__main">
         <article className="cycle__brief" aria-labelledby="cycle-brief">
-          <p className="cycle__brief-kicker">Brief · drafted by the agent, edited by Dana</p>
+          <p className="cycle__brief-kicker">Brief · drafted by the agent, edited by Alex</p>
           <h2 id="cycle-brief" className="cycle__brief-title">
             Archiving customers without losing control
           </h2>

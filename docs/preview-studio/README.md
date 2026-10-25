@@ -179,9 +179,9 @@ named by its tooltip.
 ## The workspace
 
 ```
-┌ app bar: Agent Review · Delegated work · Reviews ········ Storybook · Source · ⌨ · ☀ ☾ 🖥 · relay/web · DW ┐
+┌ app bar: Agent Review · Delegated work · Reviews ········ Storybook · Source · ⌨ · ☀ ☾ 🖥 · relay/web · AW ┐
 ├ run bar: [Quiet cancel|Shared table]  Simulated  A sample run, played back the same way each time. Reset ┤
-│ Delegated to Claude Code by Dana · 1 h ago                                                              │
+│ Delegated to Claude Code by Alex · 1 h ago                                                              │
 │ Bring the billing screens onto the design system                                                        │
 │ 7 changes made and checked. 2 decisions need you.   [7 on its own] [1 judgment] [1 approval]  ▓▓▓▓░░    │
 │ ┌ preview: Billing settings · BillingSettings.tsx   Current | Proposed  ┐ ┌ Needs you 2   1 of 2 ‹ › ┐   │
