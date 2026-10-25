@@ -102,7 +102,7 @@ export const AfterARule: Story = {
 export const AnsweredOnce: Story = {
   decorators: [inStore(answeredOnce)],
   parameters: {
-    docs: { description: { story: 'Dana’s direction, given once. A one-time answer does not become standing permission, so the three changes that were waiting each ask, and each says why: the same question was answered once, for another change.' } },
+    docs: { description: { story: 'Alex’s direction, given once. A one-time answer does not become standing permission, so the three changes that were waiting each ask, and each says why: the same question was answered once, for another change.' } },
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

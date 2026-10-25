@@ -451,7 +451,7 @@ end date:
   built under an exception ending Oct 15 and opens its own change, owned by
   product design, to make it a Button; growth counts cancellations before
   and after, and it ships either way. The checks pass with both, and
-  neither moves a pixel. Dana chooses the second, and her reason in the
+  neither moves a pixel. Alex chooses the second, and her reason in the
   stories and the case study adds the one thing the agent couldn't know: the
   gray link is a retention test from last year that nobody turned off.
 - **The rule** covers "an action that ends or reduces a subscription"
@@ -523,7 +523,7 @@ view and undo for the bulk archive"), so the scenario picks up where the
 real experiment stopped.
 
 - **The designer's work is the subject.** Each stage opens on its
-  question and on two lines, what Dana does and what the agent does, and
+  question and on two lines, what Alex does and what the agent does, and
   the designer's is in the reading ink and the accent. Agent Review proper
   (boundaries, a stop, a rule) appears in Delegate and Learn, as one part
   of the cycle and not the whole of it. It stays a focused tool: the cycle
