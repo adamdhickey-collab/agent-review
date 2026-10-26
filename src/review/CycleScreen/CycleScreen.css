@@ -78,6 +78,17 @@
   transition: background-color var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease);
 }
 
+.cycle__rail-locked {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-text-muted);
+  font-weight: var(--weight-medium);
+  cursor: default;
+}
+
 .cycle__rail a:hover {
   background: var(--color-surface-hover);
   color: var(--color-text);
@@ -187,6 +198,12 @@
   color: var(--color-text-secondary);
 }
 
+.cycle__setup {
+  color: var(--color-text-secondary);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+}
+
 /* ---------- the work and the move ---------- */
 
 .cycle__work {
@@ -194,6 +211,19 @@
   grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
   align-items: start;
   gap: var(--space-6);
+}
+
+/* The move is first in the markup, so a keyboard and a screen reader meet
+   the question before the material, as an eye does; on a wide screen it
+   still sits in the second column, beside the work. */
+.cycle__work > .cycle__move {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.cycle__work > .cycle__main {
+  grid-row: 1;
+  grid-column: 1;
 }
 
 .cycle__main {
@@ -598,50 +628,49 @@
   gap: var(--space-2);
 }
 
-.cycle__ticks {
+/* The three directions as the move's script: the one open now marked in
+   the accent, a tried one checked, with what it showed under its name. */
+.cycle__tries {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  width: 100%;
 }
 
-.cycle__ticks li {
+.cycle__tries li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--color-border);
+}
+
+.cycle__tries li[data-current] {
+  border-left-color: var(--color-accent);
+}
+
+.cycle__try-name {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   color: var(--color-text-secondary);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-ui);
 }
 
-.cycle__ticks li[data-done] {
+.cycle__tries li[data-current] .cycle__try-name {
   color: var(--color-text);
+  font-weight: var(--weight-semibold);
 }
 
-.cycle__ticks li[data-done] .icon {
+.cycle__tries li[data-done] .cycle__try-name .icon {
   color: var(--color-success);
 }
 
-.cycle__tried {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-}
-
-.cycle__tried > span {
-  display: inline-grid;
-  place-items: center;
-  width: var(--space-5);
-  height: var(--space-5);
-  border: var(--border-width) solid var(--color-border-control);
-  border-radius: var(--radius-lg);
+.cycle__try-showed {
   color: var(--color-text-secondary);
-  font-size: var(--text-xs);
-}
-
-.cycle__tried > span[data-done] {
-  border-color: var(--color-success-border);
-  background: var(--color-success-subtle);
-  color: var(--color-success);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
 }
 
 /* ---------- Evaluate ---------- */
@@ -788,6 +817,16 @@
   color: var(--color-text-on-accent);
 }
 
+.cycle__pager-wait {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
 .cycle__pager-dir {
   color: inherit;
   font-weight: var(--weight-regular);
@@ -795,17 +834,21 @@
 
 /* ---------- narrower ---------- */
 
-/* One column under 64rem: the move comes after the work's first section
-   would be wrong (it is the stage's point), so it comes first, under the
-   question, and stops sticking. */
+/* One column under 64rem: the move comes first, under the question, as it
+   is in the markup, and stops sticking. */
 @media (max-width: 64rem) {
   .cycle__work {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .cycle__work > .cycle__move,
+  .cycle__work > .cycle__main {
+    grid-row: auto;
+    grid-column: auto;
+  }
+
   .cycle__move {
     position: static;
-    order: -1;
   }
 
   .cycle__rail ol {

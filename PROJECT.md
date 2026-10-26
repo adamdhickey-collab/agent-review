@@ -553,11 +553,13 @@ real experiment stopped.
 - **A choice upstream clears what was built on it.** A new direction or a
   new requirement un-sends the brief, so the screen never shows a build
   the current choices wouldn't produce (`reduceCycle`).
-- **Order is shown, not enforced.** The rail links every stage and marks
-  a decided one; a stage that needs an earlier choice says which and links
-  to it. The cycle is kept in sessionStorage, so a reload or a link back
-  into the middle finds the choices; Start over clears it, as a second
-  step.
+- **Order is enforced (since 2026-10-26; until then shown, not
+  enforced).** A stage opens once every stage before it is decided. The
+  rail links the open stages and marks a decided one; Next waits for the
+  stage's move and says what it opens; an address further on shows the
+  stage's question and sends the reader to the first open stage. The
+  cycle is kept in sessionStorage, so a reload or a link back into the
+  middle finds the choices; Start over clears it, as a second step.
 - **The directions are working software.** `ArchiveFlow` is a new product
   screen rather than props on CustomerTable, whose history is frozen
   against the experiment's runs. It uses the Table, Toolbar, Button,
@@ -578,6 +580,47 @@ changes who the built screen names, keeping the summary's claim reaches
 Learn); `tests/cycle.spec.ts` does the cycle from the keyboard, reloads in
 the middle, steps back and forward, and starts over; the phone check
 covers three stages at four widths, and the visual baselines two.
+
+### A guided cycle (2026-10-26)
+
+A walk through the published cycle as a reader arriving from the case
+study found three things that made it read as unscripted.
+
+- **The start screen said it twice.** The case study's buttons both
+  landed on it, and it asked the case study's own question and listed the
+  six stages the case study had just walked through. So `#/` is the
+  cycle's first stage now, and the start screen is gone; Discover carries
+  the scenario in one line under its question (who you are, what the
+  agent does, one call in each of six stages, about three minutes). The
+  product's name goes to Discover.
+- **Next ran ahead of the reader.** Pressed without a choice, it walked
+  through four stages, each saying what it would show once one was made,
+  and then Delegate sent the reader back to Evaluate. Next waits now ("Define
+  opens after your move"), and so does the rail (above, Order is
+  enforced).
+- **Explore was a sandbox in a script.** "Select a few customers and
+  archive them" across three tabs, with a checklist of four events per
+  direction and a tally, left the reader to invent the task. Each
+  direction opens with the batch selected now, so the move is one press,
+  and the move lists the three directions in order: what each showed,
+  once tried, in a sentence (`SHOWED` in `data/cycle.ts`, read off
+  `ArchiveFlow`), and a button to the next one. The table stays working:
+  a reader can change the selection or run a direction again.
+
+Two smaller ones went with them. The move comes first in the markup, so
+a keyboard and a screen reader meet the question before the material, as
+an eye already did; on a wide screen CSS still puts it in the second
+column. And on the cycle the bar drops the places (Delegated work,
+Reviews) and the repository: most readers came from a case study for
+three minutes, and a guided path keeps one way in and one way out. Learn
+links the two runs and the case study.
+
+Tests: `tests/start.spec.ts` went with the screen; `tests/cycle.spec.ts`
+holds the front door, the gate (no Next before the move, one rail link on
+a fresh Discover, a later address sending the reader back), and walks the
+whole cycle from the keyboard, Explore's three directions included.
+`tests/seed.ts` seeds the choices that open a later stage, for the phone
+check and the visual baseline that start there.
 
 ## Exploration: three information architectures
 

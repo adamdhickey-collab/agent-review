@@ -3,7 +3,6 @@ import { href, useRoute } from './router';
 import { useRouteEffects } from './useRouteEffects';
 import { Shell } from '../review/Shell/Shell';
 import { QueueScreen } from '../review/QueueScreen/QueueScreen';
-import { StartScreen } from '../review/StartScreen/StartScreen';
 import { DelegationScreen } from '../review/DelegationScreen/DelegationScreen';
 import { ChangeScreen } from '../review/ChangeScreen/ChangeScreen';
 import { CycleScreen } from '../review/CycleScreen/CycleScreen';
@@ -16,7 +15,6 @@ function Screens() {
   useRouteEffects(route, arrival);
   return (
     <Shell route={route}>
-      {route.name === 'start' ? <StartScreen /> : null}
       {route.name === 'delegation' ? <DelegationScreen run={route.run ?? 'billing'} /> : null}
       {route.name === 'cycle' ? <CycleScreen stage={route.stage} /> : null}
       {route.name === 'queue' ? <QueueScreen /> : null}

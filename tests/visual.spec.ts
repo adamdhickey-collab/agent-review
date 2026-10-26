@@ -1,4 +1,5 @@
 import { devices, expect, test, type Page } from '@playwright/test';
+import { FRAMED, seedCycle } from './seed';
 
 /* The screens, at two widths and on a phone, against their baselines. Each screenshot is
    the full page so a change below the fold counts. The product screens
@@ -27,15 +28,10 @@ for (const width of WIDTHS) {
     test.beforeEach(async ({ page }) => {
       await page.addInitScript(chooseLight);
     });
-    test('the start', async ({ page }) => {
-      await page.goto('#/');
-      await settle(page);
-      await expect(page).toHaveScreenshot(`start-${width}.png`, { fullPage: true });
-    });
-
     /* The design cycle (since 2026-10-25): the first stage, and Explore with
-       the batch selected and archived in its first direction, so the
-       baseline holds a working interface mid-use, not only a page. */
+       the batch archived in its first direction, so the baseline holds a
+       working interface mid-use, not only a page. Since 2026-10-26 Discover
+       is the front door, and a direction opens with the batch selected. */
     test('the design cycle, discover', async ({ page }) => {
       await page.goto('#/cycle/discover');
       await settle(page);
@@ -43,9 +39,9 @@ for (const width of WIDTHS) {
     });
 
     test('the design cycle, explore', async ({ page }) => {
+      await seedCycle(page, FRAMED);
       await page.goto('#/cycle/explore');
       await settle(page);
-      await page.getByRole('button', { name: 'Select a batch for me' }).click();
       await page.getByRole('button', { name: 'Archive', exact: true }).click();
       await page.evaluate(() => window.scrollTo(0, 0));
       await settle(page);
@@ -113,11 +109,6 @@ test.describe('on a phone, 375', () => {
     await settle(page);
   }
 
-  test('the start', async ({ page }) => {
-    await open(page, '#/');
-    await expect(page).toHaveScreenshot('start-375.png', { fullPage: true });
-  });
-
   test('the delegated work', async ({ page }) => {
     await open(page, '#/runs/billing');
     await expect(page).toHaveScreenshot('delegation-375.png', { fullPage: true });
@@ -155,12 +146,6 @@ test.describe('in the dark theme, chosen, at 1280', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(chooseDark);
   });
-  test('the start', async ({ page }) => {
-    await page.goto('#/');
-    await settle(page);
-    await expect(page).toHaveScreenshot('start-1280-dark.png', { fullPage: true });
-  });
-
   test('the delegated work', async ({ page }) => {
     await page.goto('#/runs/billing');
     await settle(page);

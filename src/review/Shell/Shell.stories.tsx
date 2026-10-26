@@ -38,6 +38,27 @@ export const OnTheReviews: Story = {
   },
 };
 
+/* On the design cycle the bar is a guided path's (since 2026-10-26): the
+   product's mark, the project links and the appearance, and no places and no
+   repository, so the cycle has one way in and one way out. */
+export const OnTheCycle: Story = {
+  args: { route: { name: 'cycle', stage: 'discover' } },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The bar on the design cycle: no places and no repository. Most people on the cycle came from a case study for three minutes, and the delegated work and the reviews are products they have no frame for. The runs are linked where the cycle ends.',
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('navigation', { name: 'Primary' })).toBeNull();
+    await expect(canvas.queryByText('relay/web')).toBeNull();
+    await expect(canvas.getByRole('link', { name: 'Agent Review, start of the design cycle' })).toHaveAttribute('href', '#/cycle/discover');
+  },
+};
+
 export const Appearance: Story = {
   parameters: {
     docs: {

@@ -22,8 +22,17 @@ function inStore(state: CycleState) {
   );
 }
 
+/* Since 2026-10-26 a stage opens once every stage before it is decided, so
+   a story of a later stage plays the earlier moves first: Explore is
+   decided once each direction has been tried. */
 const framed = play({ type: 'read', call: 'correct' }, { type: 'prioritize', priority: 'recovery' });
-const chosen = reduceCycle(reduceCycle(framed, { type: 'choose', direction: 'undo' }), { type: 'require', feature: 'names-active', on: true });
+const TRIED: CycleAction[] = [
+  { type: 'try', direction: 'undo', event: 'archived' },
+  { type: 'try', direction: 'confirm', event: 'archived' },
+  { type: 'try', direction: 'review', event: 'archived' },
+];
+const explored = TRIED.reduce(reduceCycle, framed);
+const chosen = reduceCycle(reduceCycle(explored, { type: 'choose', direction: 'undo' }), { type: 'require', feature: 'names-active', on: true });
 const sent = reduceCycle(chosen, { type: 'delegate' });
 const built = reduceCycle(sent, { type: 'answer', answer: 'local' });
 
@@ -48,11 +57,17 @@ type Story = StoryObj<typeof meta>;
 export const Discover: Story = {
   args: { stage: 'discover' },
   decorators: [inStore(initialCycle())],
-  parameters: { docs: { description: { story: 'The evidence and the agent’s summary, each line marked observation, interpretation or assumption. Correcting the assumption changes the brief’s problem.' } } },
+  parameters: { docs: { description: { story: 'The front door: the scenario in one line under the question, the evidence and the agent’s summary, each line marked observation, interpretation or assumption. Next waits for the move, and the rail links only the stages that are open. Correcting the assumption changes the brief’s problem.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('Something is wrong with archiving');
+    await expect(canvasElement.querySelector('.cycle__setup')).toHaveTextContent('You’re Alex, a product designer');
+    await expect(canvas.queryByRole('link', { name: /Next/ })).toBeNull();
+    await expect(canvasElement.querySelector('.cycle__pager-wait')).toHaveTextContent('Define opens after your move');
+    await expect(canvas.queryByRole('link', { name: /Define/ })).toBeNull();
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Correct it' }));
+    await expect(canvas.getByRole('link', { name: /Next Define/ })).toBeVisible();
+    await expect(canvas.getByRole('link', { name: 'Define' })).toBeVisible();
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('People can’t see or undo an archive.');
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Keep it' }));
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Archiving can permanently lose customer data');
@@ -77,20 +92,32 @@ export const Define: Story = {
 export const Explore: Story = {
   args: { stage: 'explore' },
   decorators: [inStore(framed)],
-  parameters: { a11y: { test: 'error' }, docs: { description: { story: 'Three working directions, a tab each, and the comparison. What a person does in one is kept and ticked.' } } },
+  parameters: { a11y: { test: 'error' }, docs: { description: { story: 'Three working directions, a tab each, and the comparison. Each opens with the same batch selected, so the move is to press Archive and watch; once a direction is tried the move says what it showed and offers the next one.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Select a batch for me' }));
     await userEvent.click(canvas.getByRole('button', { name: 'Archive' }));
-    await expect(canvasElement.querySelector('.cycle__ticks li[data-done]')).toHaveTextContent('Archived a batch');
-    await userEvent.click(canvas.getByRole('tab', { name: /Confirm first/ }));
+    await expect(canvasElement.querySelector('.cycle__tries li[data-done]')).toHaveTextContent('nothing named them first');
+    await userEvent.click(canvas.getByRole('button', { name: 'Try confirm first, naming who' }));
     await expect(canvasElement.querySelector('.cycle__direction-does')).toHaveTextContent('Archive asks first');
+    await expect(canvas.getByText('5 selected')).toBeVisible();
+  },
+};
+
+export const ExploreAllTried: Story = {
+  args: { stage: 'explore' },
+  decorators: [inStore(explored)],
+  parameters: { docs: { description: { story: 'All three directions tried: each says what it showed, and Next opens Evaluate.' } } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvasElement.querySelectorAll('.cycle__tries li[data-done]')).toHaveLength(3);
+    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('You’ve tried all three.');
+    await expect(canvas.getByRole('link', { name: /Next Evaluate/ })).toBeVisible();
   },
 };
 
 export const Evaluate: Story = {
   args: { stage: 'evaluate' },
-  decorators: [inStore(framed)],
+  decorators: [inStore(explored)],
   parameters: { docs: { description: { story: 'The findings, each with its source, and the choice of direction. A requirement the chosen direction already meets says so instead of offering a box.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -116,7 +143,7 @@ export const DelegateReady: Story = {
 
 export const DelegateStopsDifferently: Story = {
   args: { stage: 'delegate' },
-  decorators: [inStore(reduceCycle(reduceCycle(framed, { type: 'choose', direction: 'confirm' }), { type: 'delegate' }))],
+  decorators: [inStore(reduceCycle(reduceCycle(explored, { type: 'choose', direction: 'confirm' }), { type: 'delegate' }))],
   parameters: { a11y: { test: 'error' }, docs: { description: { story: 'A different direction, a different stop: Confirm asks a question of meaning, who counts as active, and the answer changes who the built screen names.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -127,10 +154,17 @@ export const DelegateStopsDifferently: Story = {
   },
 };
 
-export const DelegateNeedsADirection: Story = {
+export const AStageNotOpenYet: Story = {
   args: { stage: 'delegate' },
-  decorators: [inStore(initialCycle())],
-  parameters: { docs: { description: { story: 'Before a direction is chosen there is nothing to send, and the stage says where the choice is made.' } } },
+  decorators: [inStore(framed)],
+  parameters: { docs: { description: { story: 'An address further on than the reader has come: the stage’s question, and a way to the first stage still open, here Explore. The rail links Explore and the two before it, and nothing after.' } } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('Start with Explore')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Go to Explore' })).toBeVisible();
+    await expect(canvas.queryByRole('link', { name: /Evaluate/ })).toBeNull();
+    await expect(canvas.queryByRole('link', { name: /Next/ })).toBeNull();
+  },
 };
 
 export const Learn: Story = {
@@ -148,7 +182,7 @@ export const Learn: Story = {
 
 export const LearnOnAWrongPremise: Story = {
   args: { stage: 'learn' },
-  decorators: [inStore(play({ type: 'read', call: 'keep' }, { type: 'prioritize', priority: 'pace' }, { type: 'choose', direction: 'undo' }, { type: 'delegate' }, { type: 'answer', answer: 'local' }))],
+  decorators: [inStore(play({ type: 'read', call: 'keep' }, { type: 'prioritize', priority: 'pace' }, ...TRIED, { type: 'choose', direction: 'undo' }, { type: 'delegate' }, { type: 'answer', answer: 'local' }))],
   parameters: { docs: { description: { story: 'Keeping the summary’s claim in Discover follows the work to the end: Learn says the brief rested on data loss the engineering note contradicts.' } } },
   play: async ({ canvasElement }) => {
     await expect(canvasElement.querySelector('.cycle__list--open')).toHaveTextContent('The brief rested on data loss');
