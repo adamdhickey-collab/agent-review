@@ -66,7 +66,7 @@ export function useRouteEffects(route: Route, arrival: Arrival) {
         : route.name === 'change'
           ? (store.find(route.id)?.title ?? 'No change with that id')
           : route.name === 'scene'
-            ? `Scene: ${stageOf(route.id).name}`
+            ? `Scene: ${route.id}`
             : 'Not found';
 
   useEffect(() => {
