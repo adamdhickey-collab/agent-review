@@ -303,6 +303,16 @@ export const DIRECTIONS: readonly Direction[] = [
   },
 ];
 
+/** What each direction showed with the batch Explore selects (three active
+    customers, a trial, and Monarch Dental Group, which can't be archived),
+    said once it has been tried. Read off ArchiveFlow, not written beside it:
+    if a direction changes what it says, this changes with it. */
+export const SHOWED: Record<DirectionId, string> = {
+  undo: 'Four left at once, three of them active, and nothing named them first. Monarch Dental Group was refused after the press. Undo stayed until the next action.',
+  confirm: 'The question named the three active customers before anything left. It offered all five, and only said after the press that Monarch Dental Group can’t be archived.',
+  review: 'Monarch Dental Group was set aside before the press, and the three active customers were named, each one yours to keep out. It took the most steps.',
+};
+
 export function directionOf(id: DirectionId): Direction {
   return DIRECTIONS.find((d) => d.id === id) ?? DIRECTIONS[0];
 }
@@ -673,6 +683,20 @@ export function decided(s: CycleState, stage: StageId): boolean {
 }
 
 /** Which rows the build names as active, by the confirm direction's answer. */
+/** The first stage whose move is not made yet, or STAGES.length when all
+    six are. The cycle is a script, not a sandbox (since 2026-10-26): a stage
+    opens once every stage before it is decided, so each one meets the
+    choices it reads, and nobody arrives at Delegate to be sent back. */
+export function firstOpen(s: CycleState): number {
+  const i = STAGES.findIndex((st) => !decided(s, st.id));
+  return i === -1 ? STAGES.length : i;
+}
+
+/** Whether a stage can be opened yet: every stage before it is decided. */
+export function reachable(s: CycleState, stage: StageId): boolean {
+  return stageIndex(stage) <= firstOpen(s);
+}
+
 export function activeRule(direction: DirectionId, answer: string | null): 'status' | 'recent' {
   return direction === 'confirm' && answer === 'recent' ? 'recent' : 'status';
 }

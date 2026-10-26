@@ -9,6 +9,9 @@ import { isStage, type StageId } from '../data/cycle';
    works. The front door at "/" is the start screen, which says what the
    delegated work is and what a person will do in it before they meet it
    (since 2026-10-23; until then the delegated work was the front door).
+   Since 2026-10-26 the front door is the design cycle's first stage: the
+   start screen repeated what the case study had just said, so "/" opens
+   Discover, and the scenario's one line of setup is on that stage.
    The billing run is at "/runs/billing", and a second delegated run, the
    shared table, at "/runs/shared-table", so each can be linked to directly.
    The review queue the experiment was built around is at "/queue". The
@@ -19,7 +22,6 @@ import { isStage, type StageId } from '../data/cycle';
    place. */
 
 export type Route =
-  | { name: 'start' }
   | { name: 'delegation'; run?: RunId }
   | { name: 'queue' }
   | { name: 'cycle'; stage: StageId }
@@ -28,7 +30,7 @@ export type Route =
 
 export function parse(hash: string): Route {
   const path = hash.replace(/^#/, '') || '/';
-  if (path === '/') return { name: 'start' };
+  if (path === '/') return { name: 'cycle', stage: 'discover' };
   if (path === '/runs/billing' || path === '/runs/billing/') return { name: 'delegation' };
   if (path === '/runs/shared-table' || path === '/runs/shared-table/') return { name: 'delegation', run: 'shared-table' };
   if (path === '/queue' || path === '/queue/') return { name: 'queue' };
@@ -42,8 +44,6 @@ export function parse(hash: string): Route {
 
 export function href(route: Route): string {
   switch (route.name) {
-    case 'start':
-      return '#/';
     case 'delegation':
       return `#/runs/${route.run ?? 'billing'}`;
     case 'queue':

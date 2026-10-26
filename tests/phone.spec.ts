@@ -1,4 +1,5 @@
 import { devices, expect, test, type Page } from '@playwright/test';
+import { EXPLORED, FRAMED, seedCycle } from './seed';
 
 /* The review on a phone. Not a screenshot: three things that must stay true
    at the widths phones come in, each measured on the real screens with a
@@ -44,11 +45,11 @@ for (const width of WIDTHS) {
   test.describe(`at ${width}`, () => {
     test.use({ ...phone, viewport: { width, height: 800 }, deviceScaleFactor: 1 });
 
-    const SCREENS: [string, string][] = [
-      ['the start', '#/'],
-      ['the design cycle, discover', '#/cycle/discover'],
-      ['the design cycle, explore', '#/cycle/explore'],
-      ['the design cycle, evaluate', '#/cycle/evaluate'],
+    /* The cycle's later stages open from the choices before them (seed.ts). */
+    const SCREENS: [string, string, object?][] = [
+      ['the design cycle, discover, the front door', '#/'],
+      ['the design cycle, explore', '#/cycle/explore', FRAMED],
+      ['the design cycle, evaluate', '#/cycle/evaluate', EXPLORED],
       ['the delegated work', '#/runs/billing'],
       ['the shared-table run', '#/runs/shared-table'],
       ['the queue', '#/queue'],
@@ -56,8 +57,9 @@ for (const width of WIDTHS) {
       ['a finding open, with the preview at its width', '#/changes/rv-2043/findings/f3-overflow'],
     ];
 
-    for (const [name, hash] of SCREENS) {
+    for (const [name, hash, seed] of SCREENS) {
       test(`${name} fits the screen and its controls are a fingertip`, async ({ page }) => {
+        if (seed) await seedCycle(page, seed);
         await open(page, hash);
         expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches), 'the touch styles are on').toBe(true);
 

@@ -47,8 +47,11 @@ apart, which of three working archive directions to build and what it
 must do, the agent's one question, and what to measure and keep. The
 three directions are real screens built from the system
 (`src/product/customers/ArchiveFlow.tsx`); the evidence, the session
-notes and the agent's build are simulated and labelled so. The two runs
-above are still there, linked from the start screen.
+notes and the agent's build are simulated and labelled so. Since
+2026-10-26 the cycle is a guided path: `#/` opens Discover, each stage
+opens once the one before it is decided, and the bar drops the product's
+other places. The two runs above are still there, linked where the cycle
+ends.
 
 - The product: https://adamdhickey-collab.github.io/agent-review/
 - The Storybook: https://adamdhickey-collab.github.io/agent-review/storybook/

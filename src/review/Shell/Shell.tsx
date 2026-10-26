@@ -10,11 +10,19 @@ import './Shell.css';
    are. Everything else is the screen. Three places: the design cycle (since
    2026-10-25), the delegated work and the reviews, the queue of single
    changes the experiment was built around.
-   The product's name goes to the front door, the start screen, which is
-   not a place in the product but the way into it (since 2026-10-23), so it
-   is not in the nav and nothing there is current while it is up. The bar
-   is a landmark (header) and the content is main, so a screen reader can
-   skip to it.
+   The product's name goes to the front door, which since 2026-10-26 is the
+   design cycle's first stage (until then a start screen, from 2026-10-23).
+   The bar is a landmark (header) and the content is main, so a screen
+   reader can skip to it.
+
+   On the cycle the bar is quieter still (since 2026-10-26): no places and
+   no repository. Most people on the cycle came from a case study for three
+   minutes, and "Delegated work" and "Reviews" are a second and third
+   product they have no frame for; a guided path keeps one way in and one
+   way out, the way a checkout drops a store's navigation. The two runs are
+   linked where the cycle ends, in Learn, and every place is still at its
+   own address. The project links and the appearance control stay: they
+   leave the product or change how it looks, and take nothing from the path.
 
    The route is the URL's hash, so a link to "#main" would be read as a
    route and replace the screen with "nothing at this address". The skip
@@ -53,6 +61,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
   const { appearance, setAppearance } = useTheme();
   const singleKeys = useSingleKeys();
   const [sheet, setSheet] = useState(false);
+  const guided = route.name === 'cycle';
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -65,7 +74,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
   }, []);
 
   return (
-    <div className="shell" data-surface="review">
+    <div className="shell" data-surface="review" data-guided={guided || undefined}>
       <a
         className="shell__skip"
         href="#main"
@@ -77,15 +86,16 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
         Skip to content
       </a>
       <header className="shell__bar">
-        <a className="shell__brand" href={href({ name: 'start' })} aria-label="Agent Review, start">
+        <a className="shell__brand" href={href({ name: 'cycle', stage: 'discover' })} aria-label="Agent Review, start of the design cycle">
           <span className="shell__mark" aria-hidden="true">
             <Icon name="check" size={14} />
           </span>
           <span>Agent Review</span>
         </a>
         <div className="shell__where">
+          {guided ? null : (
           <nav className="shell__nav" aria-label="Primary">
-            <a href={href({ name: 'cycle', stage: 'discover' })} aria-current={route.name === 'cycle' ? 'page' : undefined}>
+            <a href={href({ name: 'cycle', stage: 'discover' })}>
               <span className="shell__long">Design cycle</span>
               <span className="shell__short" aria-hidden="true">
                 Cycle
@@ -101,6 +111,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
               Reviews
             </a>
           </nav>
+          )}
           <nav className="shell__links" aria-label="Project links">
             <a href="storybook/" target="_blank" rel="noopener">
               Storybook
@@ -123,10 +134,12 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
             onClick={() => setSheet(true)}
           />
           <SegmentedControl className="shell__appearance" label="Appearance" options={APPEARANCES} value={appearance} onChange={setAppearance} size="compact" />
-          <span className="shell__repo">
-            <Icon name="git-branch" size={14} />
-            <code>relay/web</code>
-          </span>
+          {guided ? null : (
+            <span className="shell__repo">
+              <Icon name="git-branch" size={14} />
+              <code>relay/web</code>
+            </span>
+          )}
           <span className="shell__user">
             <span className="shell__avatar" aria-hidden="true">
               AW

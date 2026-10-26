@@ -29,6 +29,7 @@ import {
   READINGS,
   recommendedFor,
   REQUIREMENT,
+  SHOWED,
   stageOf,
   stopOf,
   type CycleState,
@@ -37,7 +38,6 @@ import {
   type Priority,
   type ReadingCall,
   type StageId,
-  type TrialEvent,
 } from '../../data/cycle';
 import { ArchiveFlow, type ArchiveFeatures } from '../../product/customers/ArchiveFlow';
 
@@ -100,10 +100,10 @@ function Consequence({ children }: { children: ReactNode }) {
 }
 
 /** A stage whose work depends on an earlier choice, before that choice is made. */
-function Needs({ stage, what }: { stage: StageId; what: string }) {
+export function Needs({ stage, what, description }: { stage: StageId; what: string; description?: string }) {
   return (
     <div className="cycle__needs">
-      <EmptyState icon="info" title={what} description={`It’s made in ${stageOf(stage).name}.`} action={{ label: `Go to ${stageOf(stage).name}`, onClick: () => (location.hash = href({ name: 'cycle', stage })) }} />
+      <EmptyState icon="info" title={what} description={description ?? `It’s made in ${stageOf(stage).name}.`} action={{ label: `Go to ${stageOf(stage).name}`, onClick: () => (location.hash = href({ name: 'cycle', stage })) }} />
     </div>
   );
 }
@@ -163,6 +163,26 @@ export function Discover() {
 
   return (
     <div className="cycle__work">
+      <Move title="The summary says archiving deletes data. Does that hold up?">
+        <p className="cycle__move-lead">
+          It rests on one ticket. Read the <Button size="compact" variant="ghost" onClick={() => show(DISPUTED.by)}>engineering note</Button> before you answer.
+        </p>
+        <ul className="cycle__choices" role="list">
+          {calls.map((c) => (
+            <Choice key={c.id} name={c.name} says={c.says} chosen={cycle.reading === c.id} onChoose={() => cycleDo({ type: 'read', call: c.id })} />
+          ))}
+        </ul>
+        {cycle.reading ? (
+          <Consequence>
+            The brief will say: “{problemOf(cycle.reading)}”
+          </Consequence>
+        ) : (
+          <p className="cycle__move-note">
+            <span className="visually-hidden">The disputed claim: </span>“{disputed.says}”
+          </p>
+        )}
+      </Move>
+
       <div className="cycle__main">
         <Section title="The agent’s summary">
           <p className="cycle__lead">Each line says what kind of claim it is. Press a source to see it.</p>
@@ -201,26 +221,6 @@ export function Discover() {
           </ul>
         </Section>
       </div>
-
-      <Move title="The summary says archiving deletes data. Does that hold up?">
-        <p className="cycle__move-lead">
-          It rests on one ticket. Read the <Button size="compact" variant="ghost" onClick={() => show(DISPUTED.by)}>engineering note</Button> before you answer.
-        </p>
-        <ul className="cycle__choices" role="list">
-          {calls.map((c) => (
-            <Choice key={c.id} name={c.name} says={c.says} chosen={cycle.reading === c.id} onChoose={() => cycleDo({ type: 'read', call: c.id })} />
-          ))}
-        </ul>
-        {cycle.reading ? (
-          <Consequence>
-            The brief will say: “{problemOf(cycle.reading)}”
-          </Consequence>
-        ) : (
-          <p className="cycle__move-note">
-            <span className="visually-hidden">The disputed claim: </span>“{disputed.says}”
-          </p>
-        )}
-      </Move>
     </div>
   );
 }
@@ -232,6 +232,20 @@ export function Define() {
   const criteria = criteriaOf(cycle.priority, cycle.reading);
   return (
     <div className="cycle__work">
+      <Move title="When speed and safety pull apart, which wins?">
+        <p className="cycle__move-lead">The operations lead wants fewer steps. The account manager wants a guard. Both are in the evidence.</p>
+        <ul className="cycle__choices" role="list">
+          {(Object.keys(PRIORITY) as Priority[]).map((p) => (
+            <Choice key={p} name={PRIORITY[p].name} says={PRIORITY[p].says} chosen={cycle.priority === p} onChoose={() => cycleDo({ type: 'prioritize', priority: p })} />
+          ))}
+        </ul>
+        {cycle.priority ? (
+          <Consequence>
+            This sets two of the success criteria, and the direction the agent will recommend: <strong>{directionOf(recommendedFor(cycle.priority)).name}</strong>.
+          </Consequence>
+        ) : null}
+      </Move>
+
       <div className="cycle__main">
         <article className="cycle__brief" aria-labelledby="cycle-brief">
           <p className="cycle__brief-kicker">Brief · drafted by the agent, edited by Alex</p>
@@ -243,7 +257,6 @@ export function Define() {
               <dt>The problem</dt>
               <dd>
                 {problemOf(cycle.reading)}
-                {cycle.reading === null ? <span className="cycle__from"> Until Discover’s call is made, this is the agent’s draft.</span> : null}
               </dd>
             </div>
             <div>
@@ -296,20 +309,6 @@ export function Define() {
           </dl>
         </article>
       </div>
-
-      <Move title="When speed and safety pull apart, which wins?">
-        <p className="cycle__move-lead">The operations lead wants fewer steps. The account manager wants a guard. Both are in the evidence.</p>
-        <ul className="cycle__choices" role="list">
-          {(Object.keys(PRIORITY) as Priority[]).map((p) => (
-            <Choice key={p} name={PRIORITY[p].name} says={PRIORITY[p].says} chosen={cycle.priority === p} onChoose={() => cycleDo({ type: 'prioritize', priority: p })} />
-          ))}
-        </ul>
-        {cycle.priority ? (
-          <Consequence>
-            This sets two of the success criteria, and the direction the agent will recommend: <strong>{directionOf(recommendedFor(cycle.priority)).name}</strong>.
-          </Consequence>
-        ) : null}
-      </Move>
     </div>
   );
 }
@@ -321,20 +320,22 @@ export function Define() {
    and Monarch Dental Group, which can't be archived. Every direction meets all of it. */
 const BATCH = ['c_01HZK3', 'c_01HZK7', 'c_01HZKB', 'c_01HZKF', 'c_01HZKN'];
 
-const TRIED: { event: TrialEvent; says: string }[] = [
-  { event: 'archived', says: 'Archived a batch' },
-  { event: 'blocked', says: 'Met a customer that can’t be archived' },
-  { event: 'active-archived', says: 'Archived an active customer' },
-  { event: 'undone', says: 'Undid an archive' },
-];
 
 export function Explore() {
   const { cycle, cycleDo } = useStore();
   const d = directionOf(cycle.exploring);
-  const [seed, setSeed] = useState<{ n: number; batch: boolean }>({ n: 0, batch: false });
-  const tried = (id: DirectionId) => new Set(cycle.trials[id]);
-  const mine = tried(d.id);
+  /* The batch is selected whenever a direction opens (since 2026-10-26):
+     the move is to press Archive and watch, not to pick rows, so the three
+     directions meet the same five customers and differ only in what they
+     say. A person can still change the selection; the screen is working. */
+  const [seed, setSeed] = useState(0);
+  const tried = (id: DirectionId) => cycle.trials[id].length > 0;
   const priority = cycle.priority;
+  const upNext = DIRECTIONS.find((x) => x.id !== d.id && !tried(x.id));
+  function go(id: DirectionId) {
+    cycleDo({ type: 'explore', direction: id });
+    setSeed(seed + 1);
+  }
 
   const rows: { label: string; matters?: Priority; values: Record<DirectionId, string> }[] = [
     { label: 'Presses to archive a page', matters: 'pace', values: { undo: '2', confirm: '3', review: '3' } },
@@ -346,16 +347,51 @@ export function Explore() {
 
   return (
     <div className="cycle__work">
+      <Move title="Archive the same batch three ways">
+        <p className="cycle__move-lead">
+          Each direction opens with five customers selected: three active, a trial, and one that can’t be archived. Press Archive, finish what it asks, and see what
+          it tells you, and when.
+        </p>
+        <ol className="cycle__tries" role="list">
+          {DIRECTIONS.map((x, i) => {
+            const done = tried(x.id);
+            return (
+              <li key={x.id} data-current={x.id === d.id || undefined} data-done={done || undefined}>
+                <p className="cycle__try-name">
+                  <Icon name={done ? 'circle-check' : 'circle'} size={14} />
+                  <span>
+                    {i + 1}. {x.name}
+                    <span className="visually-hidden">{done ? ', tried' : x.id === d.id ? ', open now' : ', not tried yet'}</span>
+                  </span>
+                </p>
+                {done ? <p className="cycle__try-showed">{SHOWED[x.id]}</p> : null}
+              </li>
+            );
+          })}
+        </ol>
+        {upNext ? (
+          tried(d.id) ? (
+            <Button variant="primary" trailingIcon="arrow-right" onClick={() => go(upNext.id)}>
+              Try {upNext.name.toLowerCase()}
+            </Button>
+          ) : null
+        ) : tried(d.id) ? (
+          <Consequence>You’ve tried all three. Evaluate lines up what came back.</Consequence>
+        ) : null}
+        {tried(d.id) ? (
+          <Button size="compact" variant="ghost" leadingIcon="undo" onClick={() => setSeed(seed + 1)}>
+            Run this one again
+          </Button>
+        ) : null}
+      </Move>
+
       <div className="cycle__main">
         <Tabs
           className="cycle__tabs"
           label="Directions"
           tabs={DIRECTIONS.map((x, i) => ({ value: x.id, label: `${i + 1}. ${x.name}` }))}
           value={cycle.exploring}
-          onChange={(v) => {
-            cycleDo({ type: 'explore', direction: v });
-            setSeed({ n: seed.n + 1, batch: false });
-          }}
+          onChange={go}
         >
           <div className="cycle__direction">
             <p className="cycle__direction-does">{d.does}</p>
@@ -377,9 +413,9 @@ export function Explore() {
             </dl>
             <Product label={`Relay · customers · direction ${DIRECTIONS.indexOf(d) + 1}, working`}>
               <ArchiveFlow
-                key={`${d.id}-${seed.n}`}
+                key={`${d.id}-${seed}`}
                 direction={d.id}
-                initialSelection={seed.batch ? BATCH : []}
+                initialSelection={BATCH}
                 onEvent={(event) => cycleDo({ type: 'try', direction: d.id, event })}
               />
             </Product>
@@ -422,35 +458,6 @@ export function Explore() {
           </Table>
         </Section>
       </div>
-
-      <Move title="Use each one as a person would">
-        <p className="cycle__move-lead">Select a few customers and archive them. Watch what each direction tells you, and when.</p>
-        <Button variant="secondary" leadingIcon="check" onClick={() => setSeed({ n: seed.n + 1, batch: true })}>
-          Select a batch for me
-        </Button>
-        <p className="cycle__move-note">Five rows: three active customers, a trial, and one that can’t be archived.</p>
-        <h3 className="cycle__h3">In {d.name.toLowerCase()}, you have</h3>
-        <ul className="cycle__ticks" role="list">
-          {TRIED.filter((t) => t.event !== 'undone' || d.id === 'undo').map((t) => (
-            <li key={t.event} data-done={mine.has(t.event) || undefined}>
-              <Icon name={mine.has(t.event) ? 'circle-check' : 'circle'} size={14} />
-              <span>
-                {t.says}
-                <span className="visually-hidden">{mine.has(t.event) ? ', done' : ', not yet'}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-        <p className="cycle__tried">
-          Tried:{' '}
-          {DIRECTIONS.map((x, i) => (
-            <span key={x.id} data-done={tried(x.id).size > 0 || undefined}>
-              {i + 1}
-              <span className="visually-hidden">{tried(x.id).size > 0 ? ' tried' : ' not tried'}</span>
-            </span>
-          ))}
-        </p>
-      </Move>
     </div>
   );
 }
@@ -463,6 +470,34 @@ export function Evaluate() {
   const chosen = cycle.direction;
   return (
     <div className="cycle__work">
+      <Move title="Which direction, and why?">
+        {cycle.priority ? (
+          <p className="cycle__move-lead">
+            The agent recommends <strong>{directionOf(recommended).name}</strong>, because you set “{PRIORITY[cycle.priority].name.toLowerCase()}”. It read the brief, not the
+            sessions.
+          </p>
+        ) : null}
+        <ul className="cycle__choices" role="list">
+          {DIRECTIONS.map((x) => (
+            <Choice key={x.id} name={x.name} says={x.costs} chosen={chosen === x.id} recommended={cycle.priority !== null && x.id === recommended} onChoose={() => cycleDo({ type: 'choose', direction: x.id })} />
+          ))}
+        </ul>
+        {chosen ? (
+          <>
+            <TextArea
+              label="Your reason"
+              hint="The agent’s draft until you change it. It goes in the brief and the record."
+              value={cycle.reason ?? draftReason(chosen, cycle.priority)}
+              onChange={(e) => cycleDo({ type: 'reason', text: e.currentTarget.value })}
+            />
+            <Consequence>
+              The agent gets {directionOf(chosen).name.toLowerCase()} and {requirementCount(cycle)} requirement{requirementCount(cycle) === 1 ? '' : 's'}.{' '}
+              {chosen !== recommended && cycle.priority ? 'You chose against its recommendation, and your reason says why.' : ''}
+            </Consequence>
+          </>
+        ) : null}
+      </Move>
+
       <div className="cycle__main">
         <Section title="What came back">
           <p className="cycle__lead">Each finding says where it came from. Turn the ones that matter into requirements for the build.</p>
@@ -495,37 +530,6 @@ export function Evaluate() {
           <p className="cycle__from">Session notes are simulated: they show what a round of testing could turn up, not what one did.</p>
         </Section>
       </div>
-
-      <Move title="Which direction, and why?">
-        <p className="cycle__move-lead">
-          {cycle.priority ? (
-            <>
-              The agent recommends <strong>{directionOf(recommended).name}</strong>, because you set “{PRIORITY[cycle.priority].name.toLowerCase()}”. It read the brief, not the sessions.
-            </>
-          ) : (
-            <>The agent recommends from the brief’s priority, which isn’t set yet.</>
-          )}
-        </p>
-        <ul className="cycle__choices" role="list">
-          {DIRECTIONS.map((x) => (
-            <Choice key={x.id} name={x.name} says={x.costs} chosen={chosen === x.id} recommended={cycle.priority !== null && x.id === recommended} onChoose={() => cycleDo({ type: 'choose', direction: x.id })} />
-          ))}
-        </ul>
-        {chosen ? (
-          <>
-            <TextArea
-              label="Your reason"
-              hint="The agent’s draft until you change it. It goes in the brief and the record."
-              value={cycle.reason ?? draftReason(chosen, cycle.priority)}
-              onChange={(e) => cycleDo({ type: 'reason', text: e.currentTarget.value })}
-            />
-            <Consequence>
-              The agent gets {directionOf(chosen).name.toLowerCase()} and {requirementCount(cycle)} requirement{requirementCount(cycle) === 1 ? '' : 's'}.{' '}
-              {chosen !== recommended && cycle.priority ? 'You chose against its recommendation, and your reason says why.' : ''}
-            </Consequence>
-          </>
-        ) : null}
-      </Move>
     </div>
   );
 }
@@ -549,6 +553,30 @@ export function Delegate() {
 
   return (
     <div className="cycle__work">
+      {cycle.delegated ? (
+        <Move title={stop.question}>
+          <p className="cycle__move-kind">
+            <Badge tone="warning" icon={stop.kind === 'judgment' ? 'message-question' : 'lock'}>
+              {stop.kind === 'judgment' ? 'Needs judgment' : 'Needs approval'}
+            </Badge>
+          </p>
+          <p className="cycle__move-lead">{stop.why}</p>
+          <ul className="cycle__choices" role="list">
+            {stop.answers.map((a) => (
+              <Choice key={a.id} name={a.name} says={a.means} recommended={a.recommended} chosen={cycle.answer === a.id} onChoose={() => cycleDo({ type: 'answer', answer: a.id })} />
+            ))}
+          </ul>
+          {answered ? <Consequence>The agent applied “{answered.name.toLowerCase()}”. The build is under the checks.</Consequence> : null}
+        </Move>
+      ) : (
+        <Move title="Hand it to the agent?">
+          <p className="cycle__move-lead">The brief is written from your choices. The agent works inside the boundaries and stops where they say.</p>
+          <Button variant="primary" leadingIcon="send" onClick={() => cycleDo({ type: 'delegate' })}>
+            Send the brief
+          </Button>
+        </Move>
+      )}
+
       <div className="cycle__main">
         <article className="cycle__brief" aria-labelledby="cycle-sent">
           <p className="cycle__brief-kicker">{cycle.delegated ? 'Sent to the agent' : 'Ready to send'}</p>
@@ -654,30 +682,6 @@ export function Delegate() {
           </Section>
         ) : null}
       </div>
-
-      {cycle.delegated ? (
-        <Move title={stop.question}>
-          <p className="cycle__move-kind">
-            <Badge tone="warning" icon={stop.kind === 'judgment' ? 'message-question' : 'lock'}>
-              {stop.kind === 'judgment' ? 'Needs judgment' : 'Needs approval'}
-            </Badge>
-          </p>
-          <p className="cycle__move-lead">{stop.why}</p>
-          <ul className="cycle__choices" role="list">
-            {stop.answers.map((a) => (
-              <Choice key={a.id} name={a.name} says={a.means} recommended={a.recommended} chosen={cycle.answer === a.id} onChoose={() => cycleDo({ type: 'answer', answer: a.id })} />
-            ))}
-          </ul>
-          {answered ? <Consequence>The agent applied “{answered.name.toLowerCase()}”. The build is under the checks.</Consequence> : null}
-        </Move>
-      ) : (
-        <Move title="Hand it to the agent?">
-          <p className="cycle__move-lead">The brief is written from your choices. The agent works inside the boundaries and stops where they say.</p>
-          <Button variant="primary" leadingIcon="send" onClick={() => cycleDo({ type: 'delegate' })}>
-            Send the brief
-          </Button>
-        </Move>
-      )}
     </div>
   );
 }
@@ -695,6 +699,29 @@ export function Learn() {
 
   return (
     <div className="cycle__work">
+      <Move title="Keep this for the next agent?">
+        <p className="cycle__move-lead">A rule the next agent reads before it builds a bulk action. It exists only if you make it.</p>
+        <blockquote className="cycle__rule">{outcome.guidance}</blockquote>
+        <Checkbox label="Keep it as guidance, for customer screens" checked={cycle.kept} onChange={(e) => cycleDo({ type: 'keep', on: e.currentTarget.checked })} />
+        {cycle.kept ? <Consequence>Kept, with your reason as its why. You can revoke it; what it made stays.</Consequence> : null}
+        {/* The cycle's one way out (since 2026-10-26, when the bar stopped
+            offering the product's other places on the cycle): the two runs,
+            for whoever wants to see the agent stop again, and the case
+            study most readers came from. */}
+        <h3 className="cycle__h3">Where the agent stops, in two other runs</h3>
+        <ul className="cycle__links" role="list">
+          <li>
+            <a href={href({ name: 'delegation' })}>A cancel link the checks can’t judge</a>
+          </li>
+          <li>
+            <a href={href({ name: 'delegation', run: 'shared-table' })}>A fix in a table 40 screens share</a>
+          </li>
+          <li>
+            <a href="https://adamhickey.com/lab/agent-review.html">How it was made, in the case study</a>
+          </li>
+        </ul>
+      </Move>
+
       <div className="cycle__main">
         <Section title="What you decided">
           <dl className="cycle__facts cycle__facts--record">
@@ -781,22 +808,6 @@ export function Learn() {
           </Section>
         </div>
       </div>
-
-      <Move title="Keep this for the next agent?">
-        <p className="cycle__move-lead">A rule the next agent reads before it builds a bulk action. It exists only if you make it.</p>
-        <blockquote className="cycle__rule">{outcome.guidance}</blockquote>
-        <Checkbox label="Keep it as guidance, for customer screens" checked={cycle.kept} onChange={(e) => cycleDo({ type: 'keep', on: e.currentTarget.checked })} />
-        {cycle.kept ? <Consequence>Kept, with your reason as its why. You can revoke it; what it made stays.</Consequence> : null}
-        <h3 className="cycle__h3">Where the agent stops, in two other runs</h3>
-        <ul className="cycle__links" role="list">
-          <li>
-            <a href={href({ name: 'delegation' })}>A cancel link the checks can’t judge</a>
-          </li>
-          <li>
-            <a href={href({ name: 'delegation', run: 'shared-table' })}>A fix in a table 40 screens share</a>
-          </li>
-        </ul>
-      </Move>
     </div>
   );
 }
