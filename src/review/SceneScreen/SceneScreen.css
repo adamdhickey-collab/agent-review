@@ -1,0 +1,189 @@
+/* A scene is a fixed picture, 800 by 450 (16:9): the app's bar, the stage
+   rail, and one stage's point under it. The sizes are the frame's, a layout
+   fact like a column's width; everything inside is the app's own tokens. */
+.scene {
+  display: flex;
+  flex-direction: column;
+  width: 800px;
+  height: 450px;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+}
+
+.scene__bar {
+  flex: none;
+  justify-content: space-between;
+}
+
+.scene__scenario {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.scene__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+  padding: var(--space-3) var(--space-4);
+}
+
+.scene__work {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  align-items: start;
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+.scene__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.scene__move {
+  position: static;
+}
+
+/* The rail is the stages in one row, as on a wide screen: the frame is
+   narrower than the stage's own two-row break, and a picture is not a phone. */
+.scene__rail ol {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+/* An answer the scene leaves its meaning off, because the stage's point is
+   elsewhere in the picture. */
+.scene .cycle__choice-says:empty {
+  display: none;
+}
+
+/* The move's two grounds a step tighter than the stage's, so the panel and
+   its two answers fit the frame's height. */
+.scene__move .cycle__move-head,
+.scene__move .cycle__move-body {
+  padding: var(--space-3) var(--space-4);
+}
+
+/* Relay framed inside a scene: the frame fills what the rail leaves, and
+   the table is cut off at the frame's foot rather than scrolled. */
+.scene__product {
+  flex: 1;
+  min-height: 0;
+}
+
+.scene__product .cycle__product-frame {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-3);
+  overflow: hidden;
+}
+
+.scene__brief {
+  min-width: 0;
+}
+
+.scene__explore {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.scene__direction {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-4);
+  padding-top: var(--space-3);
+}
+
+.scene__direction .cycle__tradeoff {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* The three directions, one column each: a name, the screen after its next
+   step, and what it costs. A column is too narrow for the table's numbers,
+   so it keeps the company and its status. */
+.scene__three {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--space-3);
+  min-height: 0;
+}
+
+.scene__way {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.scene__way-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.scene__way .cycle__product-frame {
+  padding: var(--space-2);
+  overflow: hidden;
+}
+
+.scene__way th:nth-child(n + 4),
+.scene__way td:nth-child(n + 4) {
+  display: none;
+}
+
+.scene__way-cost {
+  color: var(--color-text-secondary);
+  line-height: var(--leading-ui);
+}
+
+.scene__checks li {
+  grid-template-columns: 7rem minmax(0, 1fr);
+}
+
+/* An answer not chosen is its name only (Answers, in SceneScreen.tsx). */
+.scene .cycle__choice:not([data-chosen]) .cycle__choice-pick {
+  display: none;
+}
+
+.scene__way .cycle__product-frame {
+  flex: 1;
+  min-height: 0;
+}
+
+/* A move whose question runs to three lines takes a wider column. */
+.scene__work--long-move {
+  grid-template-columns: minmax(0, 1fr) 22rem;
+}
+
+.scene__brief {
+  padding: var(--space-3) var(--space-4);
+}
+
+.scene__brief .cycle__facts > div {
+  grid-template-columns: 7rem minmax(0, 1fr);
+}
+
+/* A table in a scene wraps its cells rather than scrolling them away. */
+.scene .table th,
+.scene .table td {
+  white-space: normal;
+}

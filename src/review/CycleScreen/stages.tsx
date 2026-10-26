@@ -86,7 +86,7 @@ function Move({ stage, title, children }: { stage: StageId; title: string; child
 /* An answer, as the delegated work draws one: what it is and means, and a
    Button that says whether it is chosen (aria-pressed), because a card is
    not a control and the Button is the system's one way to press. */
-function Choice({ name, says, chosen, recommended, onChoose, children }: { name: string; says: ReactNode; chosen: boolean; recommended?: boolean; onChoose: () => void; children?: ReactNode }) {
+export function Choice({ name, says, chosen, recommended, onChoose, children }: { name: string; says: ReactNode; chosen: boolean; recommended?: boolean; onChoose: () => void; children?: ReactNode }) {
   return (
     <li className="cycle__choice" data-chosen={chosen || undefined}>
       <p className="cycle__choice-name">

@@ -6,6 +6,7 @@ import { QueueScreen } from '../review/QueueScreen/QueueScreen';
 import { DelegationScreen } from '../review/DelegationScreen/DelegationScreen';
 import { ChangeScreen } from '../review/ChangeScreen/ChangeScreen';
 import { CycleScreen } from '../review/CycleScreen/CycleScreen';
+import { SceneScreen } from '../review/SceneScreen/SceneScreen';
 import { EmptyState } from '../components';
 
 /* The store has to be above anything that reads it, and the route effects
@@ -13,6 +14,7 @@ import { EmptyState } from '../components';
 function Screens() {
   const { route, arrival } = useRoute();
   useRouteEffects(route, arrival);
+  if (route.name === 'scene') return <SceneScreen id={route.id} />;
   return (
     <Shell route={route}>
       {route.name === 'delegation' ? <DelegationScreen run={route.run ?? 'billing'} /> : null}
