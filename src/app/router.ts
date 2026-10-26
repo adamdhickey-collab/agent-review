@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom';
 
 import type { RunId } from '../data/delegation';
 import { isStage, type StageId } from '../data/cycle';
+import { isScene, type SceneId } from '../review/SceneScreen/scenes';
 
 /* A hash router in fifty lines. Five routes, one hook. The hash is the
    state, so a URL names a screen and a finding, and the back button
@@ -17,7 +18,9 @@ import { isStage, type StageId } from '../data/cycle';
    The review queue the experiment was built around is at "/queue". The
    design cycle (since 2026-10-25) is six addresses, "/cycle/discover" to
    "/cycle/learn", one a stage, so a stage can be linked to and the back
-   button steps between them; "/cycle" is its first. A route
+   button steps between them; "/cycle" is its first. "/scenes/evaluate" and
+   its siblings (since 2026-10-26) are the stages drawn as one 16:9 picture
+   each, for the case study to capture. A route
    with parameters beyond an id and a finding is when a dependency earns its
    place. */
 
@@ -25,6 +28,7 @@ export type Route =
   | { name: 'delegation'; run?: RunId }
   | { name: 'queue' }
   | { name: 'cycle'; stage: StageId }
+  | { name: 'scene'; id: SceneId }
   | { name: 'change'; id: string; findingId?: string }
   | { name: 'not-found'; path: string };
 
@@ -37,6 +41,8 @@ export function parse(hash: string): Route {
   if (path === '/cycle' || path === '/cycle/') return { name: 'cycle', stage: 'discover' };
   const c = path.match(/^\/cycle\/([a-z]+)\/?$/);
   if (c && isStage(c[1])) return { name: 'cycle', stage: c[1] };
+  const sc = path.match(/^\/scenes\/([a-z]+)\/?$/);
+  if (sc && isScene(sc[1])) return { name: 'scene', id: sc[1] };
   const m = path.match(/^\/changes\/([\w-]+)(?:\/findings\/([\w-]+))?\/?$/);
   if (m) return { name: 'change', id: m[1], findingId: m[2] };
   return { name: 'not-found', path };
@@ -50,6 +56,8 @@ export function href(route: Route): string {
       return '#/queue';
     case 'cycle':
       return `#/cycle/${route.stage}`;
+    case 'scene':
+      return `#/scenes/${route.id}`;
     case 'change':
       return route.findingId ? `#/changes/${route.id}/findings/${route.findingId}` : `#/changes/${route.id}`;
     case 'not-found':
@@ -146,6 +154,7 @@ function stamp(key: string) {
 export function screenOf(route: Route): string {
   if (route.name === 'delegation' && route.run && route.run !== 'billing') return `delegation:${route.run}`;
   if (route.name === 'cycle') return `cycle:${route.stage}`;
+  if (route.name === 'scene') return `scene:${route.id}`;
   return route.name === 'change' ? `change:${route.id}` : route.name;
 }
 

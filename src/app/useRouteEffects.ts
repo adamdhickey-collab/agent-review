@@ -65,7 +65,9 @@ export function useRouteEffects(route: Route, arrival: Arrival) {
         ? 'Review queue'
         : route.name === 'change'
           ? (store.find(route.id)?.title ?? 'No change with that id')
-          : 'Not found';
+          : route.name === 'scene'
+            ? `Scene: ${stageOf(route.id).name}`
+            : 'Not found';
 
   useEffect(() => {
     document.title = `${screen} · ${NAME}`;
