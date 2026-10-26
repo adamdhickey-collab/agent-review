@@ -9,6 +9,7 @@ import {
   buildOf,
   BUILT_IN,
   CONSTRAINTS,
+  decided,
   criteriaOf,
   DIRECTIONS,
   directionOf,
@@ -30,6 +31,8 @@ import {
   recommendedFor,
   REQUIREMENT,
   SHOWED,
+  STAGES,
+  stageIndex,
   stageOf,
   stopOf,
   type CycleState,
@@ -49,18 +52,33 @@ import { ArchiveFlow, type ArchiveFeatures } from '../../product/customers/Archi
 
 /* ---------- parts ---------- */
 
-/** The person's move: the one raised panel on a stage, as the decision is on the desk. */
-function Move({ title, children }: { title: string; children: ReactNode }) {
+/** The person's move: the one raised panel on a stage, as the decision is on
+    the desk, and like the desk's its question sits on the band, the one solid
+    ground the light scheme has, so it is the first thing the eye finds. Once
+    the stage's call is made, the way on is here too, where the eye already
+    is, rather than only at the foot of a long page. */
+function Move({ stage, title, children }: { stage: StageId; title: string; children: ReactNode }) {
+  const { cycle } = useStore();
+  const next = STAGES[stageIndex(stage) + 1];
   return (
     <aside className="cycle__move" aria-labelledby="cycle-move">
-      <p className="cycle__move-kicker">
-        <Icon name="user" size={14} />
-        Your move
-      </p>
-      <h2 id="cycle-move" className="cycle__move-title">
-        {title}
-      </h2>
-      {children}
+      <div className="cycle__move-head">
+        <p className="cycle__move-kicker">
+          <Icon name="user" size={14} />
+          Your move
+        </p>
+        <h2 id="cycle-move" className="cycle__move-title">
+          {title}
+        </h2>
+      </div>
+      <div className="cycle__move-body">
+        {children}
+        {next && decided(cycle, stage) ? (
+          <Button className="cycle__move-next" variant="primary" trailingIcon="arrow-right" onClick={() => (location.hash = href({ name: 'cycle', stage: next.id }))}>
+            Continue to {next.name}
+          </Button>
+        ) : null}
+      </div>
     </aside>
   );
 }
@@ -81,7 +99,7 @@ function Choice({ name, says, chosen, recommended, onChoose, children }: { name:
       </p>
       <p className="cycle__choice-says">{says}</p>
       {children}
-      <Button className="cycle__choice-pick" size="compact" variant="secondary" aria-pressed={chosen} leadingIcon={chosen ? 'check' : undefined} onClick={onChoose}>
+      <Button className="cycle__choice-pick" variant="secondary" aria-pressed={chosen} leadingIcon={chosen ? 'check' : undefined} onClick={onChoose}>
         {chosen ? 'Chosen' : 'Choose'}
         <span className="visually-hidden"> {name}</span>
       </Button>
@@ -163,7 +181,7 @@ export function Discover() {
 
   return (
     <div className="cycle__work">
-      <Move title="The summary says archiving deletes data. Does that hold up?">
+      <Move stage="discover" title="The summary says archiving deletes data. Does that hold up?">
         <p className="cycle__move-lead">
           It rests on one ticket. Read the <Button size="compact" variant="ghost" onClick={() => show(DISPUTED.by)}>engineering note</Button> before you answer.
         </p>
@@ -232,7 +250,7 @@ export function Define() {
   const criteria = criteriaOf(cycle.priority, cycle.reading);
   return (
     <div className="cycle__work">
-      <Move title="When speed and safety pull apart, which wins?">
+      <Move stage="define" title="When speed and safety pull apart, which wins?">
         <p className="cycle__move-lead">The operations lead wants fewer steps. The account manager wants a guard. Both are in the evidence.</p>
         <ul className="cycle__choices" role="list">
           {(Object.keys(PRIORITY) as Priority[]).map((p) => (
@@ -347,7 +365,7 @@ export function Explore() {
 
   return (
     <div className="cycle__work">
-      <Move title="Archive the same batch three ways">
+      <Move stage="explore" title="Archive the same batch three ways">
         <p className="cycle__move-lead">
           Each direction opens with five customers selected: three active, a trial, and one that can’t be archived. Press Archive, finish what it asks, and see what
           it tells you, and when.
@@ -470,7 +488,7 @@ export function Evaluate() {
   const chosen = cycle.direction;
   return (
     <div className="cycle__work">
-      <Move title="Which direction, and why?">
+      <Move stage="evaluate" title="Which direction, and why?">
         {cycle.priority ? (
           <p className="cycle__move-lead">
             The agent recommends <strong>{directionOf(recommended).name}</strong>, because you set “{PRIORITY[cycle.priority].name.toLowerCase()}”. It read the brief, not the
@@ -554,7 +572,7 @@ export function Delegate() {
   return (
     <div className="cycle__work">
       {cycle.delegated ? (
-        <Move title={stop.question}>
+        <Move stage="delegate" title={stop.question}>
           <p className="cycle__move-kind">
             <Badge tone="warning" icon={stop.kind === 'judgment' ? 'message-question' : 'lock'}>
               {stop.kind === 'judgment' ? 'Needs judgment' : 'Needs approval'}
@@ -569,7 +587,7 @@ export function Delegate() {
           {answered ? <Consequence>The agent applied “{answered.name.toLowerCase()}”. The build is under the checks.</Consequence> : null}
         </Move>
       ) : (
-        <Move title="Hand it to the agent?">
+        <Move stage="delegate" title="Hand it to the agent?">
           <p className="cycle__move-lead">The brief is written from your choices. The agent works inside the boundaries and stops where they say.</p>
           <Button variant="primary" leadingIcon="send" onClick={() => cycleDo({ type: 'delegate' })}>
             Send the brief
@@ -699,7 +717,7 @@ export function Learn() {
 
   return (
     <div className="cycle__work">
-      <Move title="Keep this for the next agent?">
+      <Move stage="learn" title="Keep this for the next agent?">
         <p className="cycle__move-lead">A rule the next agent reads before it builds a bulk action. It exists only if you make it.</p>
         <blockquote className="cycle__rule">{outcome.guidance}</blockquote>
         <Checkbox label="Keep it as guidance, for customer screens" checked={cycle.kept} onChange={(e) => cycleDo({ type: 'keep', on: e.currentTarget.checked })} />
