@@ -74,7 +74,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The table primitives: a real table with a caption, sortable headers that announce their direction, numeric cells that align right in tabular figures, a control column for a checkbox, and two densities. A row can be selected, and the row\'s ground says so along with aria-selected. Nothing here fetches, sorts or pages; those belong to the screen, because a table that did them would be a different component for every screen. The wrapper scrolls sideways when the columns are wider than the frame, which is the one width behaviour a table needs.',
+          'The table primitives: a real table with a caption, sortable headers that announce their direction, numeric cells that align right in tabular figures, a control column for a checkbox, and two densities. A row can be selected: aria-selected and the filled checkbox say so, and the row keeps its white ground. Nothing here fetches, sorts or pages; those belong to the screen, because a table that did them would be a different component for every screen. The wrapper scrolls sideways when the columns are wider than the frame, which is the one width behaviour a table needs.',
       },
     },
   },
@@ -175,7 +175,7 @@ export const SelectedRows: Story = {
     );
   },
   parameters: {
-    docs: { description: { story: 'Two rows selected through control cells. The row says it with aria-selected and a tinted ground; the checkbox says it too, and the select-all box is indeterminate while the selection is partial.' } },
+    docs: { description: { story: 'Two rows selected through control cells. The row says it with aria-selected and the checkbox shows it; the ground stays white, and the select-all box is indeterminate while the selection is partial.' } },
   },
 };
 
