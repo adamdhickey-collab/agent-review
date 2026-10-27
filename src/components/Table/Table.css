@@ -127,12 +127,11 @@ th.table__td {
   background: var(--color-surface-hover);
 }
 
+/* A selected row keeps the surface. The filled checkbox is the mark: a
+   tinted ground beside the sunken head and the selection bar read as one
+   wash, and every row in it lost contrast for nothing. */
 .table__tr.is-selected {
-  background: var(--color-accent-subtle);
-}
-
-.table__tr.is-selected .table__td {
-  border-bottom-color: var(--color-border);
+  background: var(--color-surface);
 }
 
 .table__tr:focus-visible {

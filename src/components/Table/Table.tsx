@@ -5,8 +5,8 @@ import './Table.css';
 /* Table primitives. A real <table>, with a caption (visually hidden when
    the heading above it already says what it is), sortable headers that
    announce their sort, numeric cells that align right in tabular figures,
-   and two densities. Rows can be selected (aria-selected) and the row's
-   ground says so; the checkbox says so too.
+   and two densities. Rows can be selected (aria-selected), and the
+   checkbox says so; the row keeps the surface's white ground.
 
    Nothing here fetches, sorts or pages. Those belong to the screen using
    the table, and a table that did them would be a different component for
