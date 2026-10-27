@@ -10,7 +10,7 @@ import './CycleScreen.css';
    followed through six stages, each its own address under "/cycle". The
    question the screen exists to answer is the one the delegated runs left
    open: if an agent can build the interface, what does the designer spend
-   the day doing? So every stage says, before its content, what Alex does in
+   the day doing? So every stage says, before its content, what Adam does in
    it and what the agent does, and asks for one choice that a later stage
    reads (data/cycle.ts has the chain).
 
@@ -129,7 +129,7 @@ export function CycleScreen({ stage }: { stage: StageId }) {
         </h1>
         {stage === 'discover' ? (
           <p className="cycle__setup">
-            You’re Alex, a product designer, taking one feature in Relay from a support ticket to what ships. An agent does the building. You make one call in each of
+            You’re Adam, a product designer, taking one feature in Relay from a support ticket to what ships. An agent does the building. You make one call in each of
             six stages, about three minutes in all.
           </p>
         ) : null}
@@ -137,7 +137,7 @@ export function CycleScreen({ stage }: { stage: StageId }) {
           <div className="cycle__role cycle__role--designer">
             <dt>
               <Icon name="user" size={14} />
-              Alex, the designer
+              Adam, the designer
             </dt>
             <dd>{s.designer}</dd>
           </div>

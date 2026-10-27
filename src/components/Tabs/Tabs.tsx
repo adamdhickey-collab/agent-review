@@ -3,7 +3,13 @@ import './Tabs.css';
 
 /* Tabs over one region. The WAI pattern: a tablist with one tab stop,
    arrow keys to move, the panel labelled by its tab. A tab can carry a
-   count, which is where "Findings 5" lives. */
+   count, which is where "Findings 5" lives.
+
+   Two looks. "line" is the default: words on a rule, for switching views
+   of one thing. "options" draws each tab as a bordered option, for a
+   choice between alternatives a person is meant to try in turn (the
+   cycle's directions), where words on a rule read as a heading and were
+   missed. */
 
 export interface Tab<T extends string> {
   value: T;
@@ -19,9 +25,10 @@ export interface TabsProps<T extends string> {
   /** The content of the selected panel. */
   children: ReactNode;
   className?: string;
+  variant?: 'line' | 'options';
 }
 
-export function Tabs<T extends string>({ label, tabs, value, onChange, children, className }: TabsProps<T>) {
+export function Tabs<T extends string>({ label, tabs, value, onChange, children, className, variant = 'line' }: TabsProps<T>) {
   const id = useId();
   const index = tabs.findIndex((t) => t.value === value);
 
@@ -35,7 +42,7 @@ export function Tabs<T extends string>({ label, tabs, value, onChange, children,
   }
 
   return (
-    <div className={['tabs', className].filter(Boolean).join(' ')}>
+    <div className={['tabs', variant === 'options' && 'tabs--options', className].filter(Boolean).join(' ')}>
       <div role="tablist" aria-label={label} className="tabs__list" onKeyDown={onKeyDown}>
         {tabs.map((t) => {
           const selected = t.value === value;

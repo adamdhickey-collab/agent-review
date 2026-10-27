@@ -29,7 +29,7 @@ import type { Boundary, Check, DelegationState, Option, Question, Reach, Work, W
    The arithmetic: the request names three fixes. Two are made on the
    customer screen on the agent's own authority; the third is the question. */
 
-const alex = { name: 'Alex Whitfield', role: 'Product design' };
+const adam = { name: 'Adam Hickey', role: 'Product design' };
 const priya = { name: 'Priya Raman', role: 'Design systems' };
 const AREA = 'src/product/customers/';
 const LOCAL = `${AREA}CustomerTable.css`;
@@ -350,7 +350,7 @@ export function initialTableRun(): DelegationState {
       title: 'Fix the cramped customer table',
       request:
         'Support says the customer table feels cramped: the rows are tight, email addresses are cut off at 768, and the toolbar squeezes the title. Fix it on the customer screen. Merge what moves only that screen, and ask me about anything wider.',
-      by: alex,
+      by: adam,
       agent: { name: 'Claude Code', run: 'run_01K6P9' },
       repo: 'relay/web',
       area: AREA,

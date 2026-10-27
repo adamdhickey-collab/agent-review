@@ -14,7 +14,7 @@ import type { Change, Finding } from './types';
    own screen say so on the row, because a reader who follows the case
    study here should not have to guess which rows are a record. */
 
-const alex = { name: 'Alex Whitfield', role: 'Product design' };
+const adam = { name: 'Adam Hickey', role: 'Product design' };
 const tomas = { name: 'Tomas Reyes', role: 'Engineering' };
 const priya = { name: 'Priya Natarajan', role: 'Product' };
 
@@ -145,7 +145,7 @@ export const bulkActionsWithRules: Change = {
   base: 'main',
   commit: 'e50a20e',
   agent: { name: 'Claude Code', run: 'run 1, with the rules' },
-  requester: alex,
+  requester: adam,
   openedAt: '2026-10-01T11:46:00-05:00',
   state: 'needs-review',
   componentsTouched: ['CustomerTable', 'Checkbox', 'Toolbar', 'Button', 'EmptyState', 'Table'],
@@ -363,7 +363,7 @@ export const bulkActionsWithoutRules: Change = {
   base: 'main',
   commit: 'b643e08',
   agent: { name: 'Claude Code', run: 'run 2, without the rules' },
-  requester: alex,
+  requester: adam,
   openedAt: '2026-10-01T12:05:00-05:00',
   state: 'needs-review',
   componentsTouched: ['CustomerTable', 'Checkbox', 'Toolbar', 'Button'],
@@ -584,7 +584,7 @@ export const bulkActionsDrift: Change = {
   base: 'main',
   commit: '62578ab',
   agent: { name: 'By hand', run: 'seeded, not an agent’s run' },
-  requester: alex,
+  requester: adam,
   openedAt: '2026-10-01T12:40:00-05:00',
   state: 'needs-review',
   componentsTouched: ['CustomerTable', 'Checkbox', 'Button'],
@@ -759,7 +759,7 @@ export const queue: Change[] = [
     },
     decision: {
       action: 'return',
-      by: alex,
+      by: adam,
       at: '2026-09-30T17:05:00-05:00',
       message: 'Single-key shortcuts are a new pattern (rule 12). Keep the Kbd component; show the shortcuts in a visible legend rather than a hover hint, and add a story for the focused row.',
     },
@@ -831,7 +831,7 @@ export const queue: Change[] = [
     },
     decision: {
       action: 'reject',
-      by: alex,
+      by: adam,
       at: '2026-09-29T16:40:00-05:00',
       message: 'Density is the screen’s decision, not the Table’s (the Table already takes it as a prop). Two tables lost their caption to the toggle. Closing this; the request needs a design first.',
     },

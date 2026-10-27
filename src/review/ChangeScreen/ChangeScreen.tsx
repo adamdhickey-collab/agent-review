@@ -21,7 +21,7 @@ import './ChangeScreen.css';
    the left, and the evidence on the right: the preview, which follows the
    selected finding, and the diff, which marks the finding's lines.
 
-   The reviewer is Alex Whitfield, who requested the change; in a real
+   The reviewer is Adam Hickey, who requested the change; in a real
    deployment that is whoever is signed in. */
 
 const STORYBOOK = 'storybook/';
@@ -129,8 +129,8 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
         </div>
         <DecisionBar
           change={change}
-          onAccept={() => store.decide(change.id, { action: 'accept', by: { name: 'Alex Whitfield', role: 'Product design' }, at: new Date().toISOString() })}
-          onReject={(reason) => store.decide(change.id, { action: 'reject', by: { name: 'Alex Whitfield', role: 'Product design' }, at: new Date().toISOString(), message: reason })}
+          onAccept={() => store.decide(change.id, { action: 'accept', by: { name: 'Adam Hickey', role: 'Product design' }, at: new Date().toISOString() })}
+          onReject={(reason) => store.decide(change.id, { action: 'reject', by: { name: 'Adam Hickey', role: 'Product design' }, at: new Date().toISOString(), message: reason })}
           onReturn={() => setReturning(true)}
           onUndo={() => store.undo(change.id)}
           canUndo={store.last?.id === change.id}
@@ -250,7 +250,7 @@ export function ChangeScreen({ id, findingId }: { id: string; findingId?: string
           initiallyIncluded={included}
           onClose={() => setReturning(false)}
           onSend={(message, ids) => {
-            store.decide(change.id, { action: 'return', by: { name: 'Alex Whitfield', role: 'Product design' }, at: new Date().toISOString(), message, findingIds: ids });
+            store.decide(change.id, { action: 'return', by: { name: 'Adam Hickey', role: 'Product design' }, at: new Date().toISOString(), message, findingIds: ids });
             setReturning(false);
           }}
         />

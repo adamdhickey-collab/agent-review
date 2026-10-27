@@ -266,7 +266,7 @@ export function Define() {
 
       <div className="cycle__main">
         <article className="cycle__brief" aria-labelledby="cycle-brief">
-          <p className="cycle__brief-kicker">Brief · drafted by the agent, edited by Alex</p>
+          <p className="cycle__brief-kicker">Brief · drafted by the agent, edited by Adam</p>
           <h2 id="cycle-brief" className="cycle__brief-title">
             Archiving customers without losing control
           </h2>
@@ -354,6 +354,17 @@ export function Explore() {
     cycleDo({ type: 'explore', direction: id });
     setSeed(seed + 1);
   }
+  const triedCount = DIRECTIONS.filter((x) => tried(x.id)).length;
+  /* Which run of which direction the move has pressed Archive in: once it
+     has, the next press is the product's own question, not the move's. */
+  const [pressed, setPressed] = useState<string | null>(null);
+  const run = `${d.id}-${seed}`;
+  function toArchive() {
+    const archive = [...document.querySelectorAll<HTMLButtonElement>('.cycle__direction .cycle__product button')].find((b) => b.textContent?.trim() === 'Archive');
+    archive?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    archive?.click();
+    setPressed(run);
+  }
 
   const rows: { label: string; matters?: Priority; values: Record<DirectionId, string> }[] = [
     { label: 'Presses to archive a page', matters: 'pace', values: { undo: '2', confirm: '3', review: '3' } },
@@ -387,12 +398,24 @@ export function Explore() {
             );
           })}
         </ol>
-        {upNext ? (
-          tried(d.id) ? (
-            <Button variant="primary" trailingIcon="arrow-right" onClick={() => go(upNext.id)}>
-              Try {upNext.name.toLowerCase()}
-            </Button>
-          ) : null
+        <p className="cycle__tries-count">
+          {triedCount} of {DIRECTIONS.length} tried
+          {triedCount < DIRECTIONS.length ? ' · Evaluate opens once all three are' : ''}
+        </p>
+        {!tried(d.id) && pressed === run ? (
+          <Consequence>It’s asking something. Finish it in the screen.</Consequence>
+        ) : !tried(d.id) ? (
+          /* The press that moves the stage is in the product beside it, and
+             was easy to miss there, so the move makes it too: it brings the
+             screen into view and presses that Archive, and the product
+             answers as it would have. */
+          <Button variant="primary" trailingIcon="arrow-right" onClick={toArchive}>
+            Archive in direction {DIRECTIONS.indexOf(d) + 1}
+          </Button>
+        ) : upNext ? (
+          <Button variant="primary" trailingIcon="arrow-right" onClick={() => go(upNext.id)}>
+            Try {upNext.name.toLowerCase()}
+          </Button>
         ) : tried(d.id) ? (
           <Consequence>You’ve tried all three. Evaluate lines up what came back.</Consequence>
         ) : null}
@@ -406,6 +429,7 @@ export function Explore() {
       <div className="cycle__main">
         <Tabs
           className="cycle__tabs"
+          variant="options"
           label="Directions"
           tabs={DIRECTIONS.map((x, i) => ({ value: x.id, label: `${i + 1}. ${x.name}` }))}
           value={cycle.exploring}

@@ -142,10 +142,10 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
           )}
           <span className="shell__user">
             <span className="shell__avatar" aria-hidden="true">
-              AW
+              AH
             </span>
             <span className="visually-hidden">Signed in as </span>
-            <span className="shell__user-name">Alex Whitfield</span>
+            <span className="shell__user-name">Adam Hickey</span>
           </span>
         </div>
       </header>

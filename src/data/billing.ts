@@ -22,7 +22,7 @@ import { cleanChecks, type Boundary, type Check, type DelegationState, type Gath
 /** The two cases an action built by hand can be; the shared-table run has the third. */
 type ByHand = Exclude<Pattern, 'shared'>;
 
-const alex = { name: 'Alex Whitfield', role: 'Product design' };
+const adam = { name: 'Adam Hickey', role: 'Product design' };
 const AREA = 'src/product/billing/';
 const file = (name: string) => `${AREA}${name}`;
 
@@ -718,7 +718,7 @@ const meterRadius: Work = {
   history: [{ at: '13:26', who: 'agent', text: 'Stopped: no token is 999px (boundary 6), and adding one is outside this delegation (boundary 7).' }],
 };
 
-/* The reason Alex gives for her decision, in her words, as the stories and
+/* The reason Adam gives for his decision, in his words, as the stories and
    the case study play it: the agent's draft, with the one thing the agent
    could not know written in front of it. Simulated context, like the rest of
    the run; nothing here claims a real retention test. */
@@ -732,7 +732,7 @@ export function initialDelegation(): DelegationState {
       title: 'Bring the billing screens onto the design system',
       request:
         'The token lint reports 36 literals in src/product/billing/, the screens that came over from the old billing app, and some of their controls are built by hand. Move the values onto tokens and the controls onto the system’s components. Nothing should look different: merge what doesn’t move a pixel, and ask me about the rest.',
-      by: alex,
+      by: adam,
       agent: { name: 'Claude Code', run: 'run_01K6M4' },
       repo: 'relay/web',
       area: AREA,
