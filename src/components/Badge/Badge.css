@@ -75,12 +75,19 @@
   --badge-ground: var(--color-danger-subtle);
 }
 
-/* On the review's surface a tinted badge is drawn as Stripe draws a status:
-   the ground, an edge a step darker than it in the same hue, and the word
-   in semibold. The product's badges, inside the preview frame, are the
-   product's (a review rule names the surface and stops at the product's;
-   app/global.css). */
-:where([data-surface='review']) .badge--tint:not(:where([data-surface='product'] *)) {
+/* A tinted badge has an edge a step darker than its ground, in the same
+   hue, on both surfaces. Without it a tint is all the badge has, and a tint
+   is a step off the grey it sits on: the product's warning tint on its
+   sunken ground measured 1.00:1, so "Can't archive" was a word with no
+   pill around it (2026-10-26). */
+.badge--tint {
   border-color: var(--badge-edge, var(--color-border));
+}
+
+/* On the review's surface the word is semibold too, as Stripe draws a
+   status. The product's badges, inside the preview frame, keep the
+   product's weight (a review rule names the surface and stops at the
+   product's; app/global.css). */
+:where([data-surface='review']) .badge--tint:not(:where([data-surface='product'] *)) {
   font-weight: var(--weight-semibold);
 }
