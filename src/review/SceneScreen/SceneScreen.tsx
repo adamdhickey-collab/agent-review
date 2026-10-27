@@ -98,11 +98,11 @@ function Frame({ at, label, rail = true, children }: { at: StageId; label: strin
           Archiving customers without losing control
         </span>
       </header>
-      <div className="scene__body">
+      <main className="scene__body">
         {rail ? <Rail at={at} /> : null}
         <h1 className="visually-hidden">{label}</h1>
         {children}
-      </div>
+      </main>
     </div>
   );
 }

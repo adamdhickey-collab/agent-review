@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Badge, Button, Cell, Checkbox, EmptyState, HeaderCell, Row, SegmentedControl, Table, Toolbar, type BadgeTone } from '../../components';
 import { customers as allCustomers, formatMrr, STATUS_LABEL, type Customer, type CustomerStatus } from './customers';
 import './ArchiveFlow.css';
@@ -211,14 +211,18 @@ export function ArchiveFlow({
   }
 
   const archivedCount = gone.length;
+  /* Ids from React, not written: a scene shows the flow three times side by
+     side, and a written id named all three sections by the first one's title. */
+  const titleId = useId();
+  const reviewId = useId();
 
   return (
-    <section className="archive-flow" aria-labelledby="archive-flow-title">
+    <section className="archive-flow" aria-labelledby={titleId}>
       <Toolbar
         label="Customers"
         start={
           <>
-            <h2 id="archive-flow-title" className="archive-flow__title">
+            <h2 id={titleId} className="archive-flow__title">
               Customers
             </h2>
             <span className="archive-flow__count">{visible.length}</span>
@@ -301,7 +305,7 @@ export function ArchiveFlow({
       {view === 'current' && step && direction === 'review' ? (
         <section
           className="archive-flow__review"
-          aria-labelledby="archive-flow-review"
+          aria-labelledby={reviewId}
           onKeyDown={(e) => {
             if (e.key === 'Escape') {
               e.preventDefault();
@@ -309,7 +313,7 @@ export function ArchiveFlow({
             }
           }}
         >
-          <h3 id="archive-flow-review" className="archive-flow__review-title">
+          <h3 id={reviewId} className="archive-flow__review-title">
             Review {plural(count)} before archiving
           </h3>
           {blocked.length ? (
