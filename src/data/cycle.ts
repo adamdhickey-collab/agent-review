@@ -1,6 +1,6 @@
 /* THE DESIGN CYCLE (2026-10-25): one feature followed from a support ticket
    to what ships and what to measure, so the designer's work is visible
-   before and after the moments an agent stops for her.
+   before and after the moments an agent stops for him.
 
    The two delegated runs (billing.ts, table.ts) show where an agent should
    stop. They made the designer look like someone who comes by to approve

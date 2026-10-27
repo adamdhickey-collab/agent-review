@@ -767,6 +767,11 @@
   color: var(--color-success);
 }
 
+.cycle__tries-count {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
 .cycle__try-showed {
   color: var(--color-text-secondary);
   font-size: var(--text-sm);

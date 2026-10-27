@@ -61,7 +61,7 @@ export const Discover: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('Something is wrong with archiving');
-    await expect(canvasElement.querySelector('.cycle__setup')).toHaveTextContent('You’re Alex, a product designer');
+    await expect(canvasElement.querySelector('.cycle__setup')).toHaveTextContent('You’re Adam, a product designer');
     await expect(canvas.queryByRole('link', { name: /Next/ })).toBeNull();
     await expect(canvasElement.querySelector('.cycle__pager-wait')).toHaveTextContent('Define opens after your move');
     await expect(canvas.queryByRole('link', { name: /Define/ })).toBeNull();

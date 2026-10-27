@@ -126,3 +126,17 @@ export const OnTheReviewSurface: Story = {
     await expect(getComputedStyle(selected).color).toBe(accent);
   },
 };
+
+/* A choice between alternatives to try in turn: each tab a bordered option,
+   the selected one in the accent. The cycle's Explore stage uses it. */
+export const Options: Story = {
+  args: {
+    label: 'Directions',
+    variant: 'options',
+    tabs: [
+      { value: 'findings', label: '1. Archive now, undo after' },
+      { value: 'stories', label: '2. Confirm first, naming who' },
+      { value: 'rationale', label: '3. Review batch, then archive' },
+    ],
+  },
+};

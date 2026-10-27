@@ -45,7 +45,7 @@ test('the front door is the first stage, and a run’s own address is the run', 
   await open(page, '#/');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Something is wrong with archiving. What, exactly?');
   await expect(page).toHaveTitle('Design cycle: Discover · Agent Review');
-  await expect(page.locator('.cycle__setup')).toContainText('You’re Alex, a product designer');
+  await expect(page.locator('.cycle__setup')).toContainText('You’re Adam, a product designer');
   await expect(page.getByRole('navigation', { name: 'Primary' })).toHaveCount(0);
 
   for (const [hash, title] of [

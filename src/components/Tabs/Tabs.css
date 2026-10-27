@@ -73,6 +73,58 @@
   color: var(--color-accent);
 }
 
+/* ---------- Options ----------
+   Each tab is a bordered option with the control's edge, so it reads as a
+   thing to press before anyone points at it. Hover tints it and darkens the
+   edge; the selected one takes the accent as a full ring, a tint and its
+   ink, never a line on one side (a rounded shape). They share the width
+   and wrap rather than scroll. */
+.tabs--options .tabs__list {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  overflow: visible;
+  border-bottom: 0;
+}
+
+.tabs--options .tabs__tab {
+  flex: 1 1 0;
+  min-width: max-content;
+  justify-content: flex-start;
+  height: auto;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: 0;
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-control);
+  color: var(--color-text);
+  text-align: left;
+  transition:
+    color var(--motion-fast) var(--ease),
+    background-color var(--motion-fast) var(--ease),
+    border-color var(--motion-fast) var(--ease);
+}
+
+.tabs--options .tabs__tab:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-text-muted);
+}
+
+.tabs--options .tabs__tab[aria-selected='true'],
+[data-surface='review'] .tabs--options .tabs__tab[aria-selected='true'] {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 var(--border-width) var(--color-accent);
+  color: var(--color-accent);
+}
+
+.tabs--options .tabs__tab:focus-visible {
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-md);
+}
+
 .tabs__panel {
   flex: 1 1 auto;
   min-height: 0;
