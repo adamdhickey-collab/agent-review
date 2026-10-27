@@ -45,6 +45,11 @@
   --font-ui-review: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono-review: 'Geist Mono', var(--font-mono-system);
   --font-features-review: normal;
+  /* The review's one serif, since 2026-10-27: Crimson Text, adamhickey.com's
+     display face, for a scene's title and its one large figure, and the
+     cycle stage's title. Nothing else is set in it: a control, a label and
+     a row stay in Geist. */
+  --font-display-review: 'Crimson Text', Georgia, 'Times New Roman', serif;
   --text-xs: 0.6875rem; /* 11 */
   --text-sm: 0.75rem;   /* 12 */
   --text-md-product: 0.8125rem; /* 13 */
@@ -60,6 +65,11 @@
      product never uses it; the sizes above are still the product's whole
      scale. */
   --text-2xl: 1.5rem;   /* 24 */
+  /* The serif's sizes (--font-display-review): Crimson sets about a fifth
+     smaller than Geist at the same number, so a title in it is a step up to
+     read as the same rank, and a scene's figure two. */
+  --text-3xl: 1.875rem; /* 30 */
+  --text-4xl: 2.75rem;  /* 44 */
   --leading-tight: 1.25;
   --leading-ui: 1.45;
   --leading-body: 1.55;
@@ -217,8 +227,11 @@
               person
      red      failures only
 
-   Grounds sit between white and the site's warm, with warm-grey lines; the
-   dark scheme is the site's charcoal band with warm white ink. Every ink
+   Grounds sit between white and the site's warm, with warm-grey lines. The
+   dark scheme, the default since 2026-10-27, is Night sage: a green-black
+   ground (#121512) a step off pure black, the site's warm white ink, its
+   on-dark sage for the primary and success, a pale slate (#9db3c8) for the
+   review and the agent, and its on-dark caution for a stop. Every ink
    clears 4.5:1 on every ground it sits on and every mark and control edge
    3:1, in both schemes, but for the light warning solid on the page
    (3.42:1, and 3.22:1 on the sunken fill), computed before writing a value.
@@ -243,33 +256,33 @@
      block inside a panel (the subtle fill: a step under white in the light
      and a step over the panel in the dark, so it reads as a fill in both),
      hover a row under the pointer. */
-  --color-canvas: light-dark(#f7f7f3, #1b1b1a);
-  --color-surface: light-dark(#ffffff, #252524);
-  --color-surface-chrome: light-dark(#fbfbf8, #20201f);
-  --color-surface-sunken: light-dark(#f0f0eb, #2d2d2b);
-  --color-surface-hover: light-dark(#f3f3ee, #2a2a28);
+  --color-canvas: light-dark(#f7f7f3, #121512);
+  --color-surface: light-dark(#ffffff, #1a1e1a);
+  --color-surface-chrome: light-dark(#fbfbf8, #161916);
+  --color-surface-sunken: light-dark(#f0f0eb, #232823);
+  --color-surface-hover: light-dark(#f3f3ee, #1f241f);
   /* A row under the pointer in a list a reviewer scans (the queue): one step
      further than hover, as far as muted text allows (4.64:1 on it in the
      light, 5.8:1 in the dark). */
-  --color-surface-hover-strong: light-dark(#e9e9e2, #333331);
+  --color-surface-hover-strong: light-dark(#e9e9e2, #2a302a);
 
   /* Lines. The border is a panel's edge; the divider is the line between the
      rows inside one, a step fainter. Neither is enough to find a control by:
      the control border is the one boundary a reader has to find, an input,
      a checkbox, a secondary button, and it clears 3:1 on every ground (3.2:1
      on the page and 3.6:1 on white; 3.4:1 on the dark fill), WCAG 1.4.11. */
-  --color-border: light-dark(#e3e3dc, #383835);
-  --color-divider: light-dark(#ecece6, #30302e);
-  --color-border-control: light-dark(#7d817b, #83837c);
+  --color-border: light-dark(#e3e3dc, #30362f);
+  --color-divider: light-dark(#ecece6, #262b26);
+  --color-border-control: light-dark(#7d817b, #7c8579);
 
   /* Ink. The brief's two, and one between them: text for headings and
      anything read first, secondary for running text inside a card, muted for
      a label, a time, a path. Muted clears 4.5:1 on every ground above,
      hover-strong included (4.64:1). */
   --color-text: light-dark(#252525, #f5f5f0);
-  --color-text-secondary: light-dark(#3f423f, #d6d6ce);
-  --color-text-muted: light-dark(#5c5f5c, #b3b3ab);
-  --color-text-on-accent: light-dark(#ffffff, #1b1b1a);
+  --color-text-secondary: light-dark(#3f423f, #d3d7cd);
+  --color-text-muted: light-dark(#5c5f5c, #a9afa5);
+  --color-text-on-accent: light-dark(#ffffff, #121512);
 
   /* The accent: slate, the review's own color, for the place a person is
      in, the direction they have selected, a link, the focus ring, the
@@ -277,11 +290,11 @@
      element a decision is about. The act itself is the primary's (below).
      Hover and pressed are a step and two darker in the light and lighter in
      the dark; the ink on each clears 6:1. */
-  --color-accent: light-dark(#4a5bb8, #a3b1f5);
-  --color-accent-hover: light-dark(#3e4da0, #b8c3f8);
-  --color-accent-active: light-dark(#343f86, #ccd4fa);
-  --color-accent-subtle: light-dark(#edf0fa, #262b45);
-  --color-accent-border: light-dark(#cfd6f2, #3a4270);
+  --color-accent: light-dark(#4a5bb8, #9db3c8);
+  --color-accent-hover: light-dark(#3e4da0, #b4c6d7);
+  --color-accent-active: light-dark(#343f86, #c9d7e4);
+  --color-accent-subtle: light-dark(#edf0fa, #1d2630);
+  --color-accent-border: light-dark(#cfd6f2, #344452);
 
   /* The primary: sage, the site's primary button and its "goes through"
      lane, for the one act a screen asks for (Continue, Approve, Send). The
@@ -289,7 +302,7 @@
   --color-primary: light-dark(#556b51, #9dbe95);
   --color-primary-hover: light-dark(#445a41, #b2cdab);
   --color-primary-active: light-dark(#3a4d37, #c4d9bf);
-  --color-text-on-primary: light-dark(#ffffff, #1b1b1a);
+  --color-text-on-primary: light-dark(#ffffff, #121512);
 
   /* Meaning: an ink, a tint for its ground (the ink clears 4.7:1 on it or
      better), a solid for a mark or a bar (3:1 on the panel, but for the
@@ -298,24 +311,24 @@
      tint. Nothing is ever only a color: every use carries a word or an icon
      with a name. */
   --color-success: light-dark(#4a5f46, #9dbe95);
-  --color-success-subtle: light-dark(#e8ede5, #26301f);
+  --color-success-subtle: light-dark(#e8ede5, #1f2a1c);
   --color-success-solid: light-dark(#5f7a5a, #7fa676);
-  --color-success-border: light-dark(#c7d3c2, #3c4b36);
+  --color-success-border: light-dark(#c7d3c2, #3a4935);
   --color-warning: light-dark(#96482a, #e39a77);
-  --color-warning-subtle: light-dark(#f6e4dc, #3a2820);
+  --color-warning-subtle: light-dark(#f6e4dc, #33241c);
   --color-warning-solid: light-dark(#c0714e, #d98e6a);
-  --color-warning-border: light-dark(#e8c3b2, #5e3d2e);
+  --color-warning-border: light-dark(#e8c3b2, #5a3b2c);
   --color-danger: light-dark(#b42a2a, #ff9a92);
-  --color-danger-subtle: light-dark(#fcecea, #3d2120);
+  --color-danger-subtle: light-dark(#fcecea, #3a1f1e);
   --color-danger-solid: light-dark(#d64541, #e5655c);
-  --color-danger-border: light-dark(#f2c4bf, #663330);
-  --color-neutral-solid: light-dark(#7f827c, #85857e);
+  --color-danger-border: light-dark(#f2c4bf, #63322f);
+  --color-neutral-solid: light-dark(#7f827c, #858c82);
 
   /* Diff. A line added and a line removed, on the meanings' hues, a step
      lighter than a status's tint so a page of them stays readable. */
-  --color-diff-add: light-dark(#eef3eb, #222b1d);
+  --color-diff-add: light-dark(#eef3eb, #1d261b);
   --color-diff-add-ink: light-dark(#4a5f46, #9dbe95);
-  --color-diff-remove: light-dark(#fcefed, #33201f);
+  --color-diff-remove: light-dark(#fcefed, #2f1d1c);
   --color-diff-remove-ink: light-dark(#b42a2a, #ff9a92);
 
   /* Elevation, kept subtle: a hairline of shadow under a control you press,
@@ -338,14 +351,14 @@
      the menu's shadow so the question is still the first thing the eye
      finds. Raised is a control or a row on it. On the band the ink clears
      12.9:1 and the muted ink 5.7:1; raised, 10.8:1 and 4.56:1. In the dark
-     the band is the sunken step of the charcoal: 12.4:1 and 6.5:1, raised
-     9.6:1 and 4.6:1. On-warning is the ink on the warning's solid, where the
+     the band is the sunken step of Night sage: 13.7:1 and 6.7:1, raised
+     10.2:1 and 5.0:1. On-warning is the ink on the warning's solid, where the
      desk's counts and the band's kind sit: 5.1:1 in the light and 6.7:1 in
      the dark. */
-  --color-band: light-dark(#f0f0eb, #2d2d2b);
-  --color-band-raised: light-dark(#d9d9d1, #44443f);
+  --color-band: light-dark(#f0f0eb, #232823);
+  --color-band-raised: light-dark(#d9d9d1, #363d35);
   --color-text-on-band: light-dark(#252525, #f5f5f0);
-  --color-text-on-band-muted: light-dark(#5c5f5c, #b3b3ab);
+  --color-text-on-band-muted: light-dark(#5c5f5c, #a9afa5);
   --color-text-on-warning-solid: light-dark(#1f0e05, #2b1408);
 
   --focus-ring-color: var(--color-accent);

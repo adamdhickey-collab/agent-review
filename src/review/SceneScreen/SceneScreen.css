@@ -140,6 +140,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+  min-height: var(--space-5);
   font-size: var(--text-md);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-tight);
@@ -161,6 +162,38 @@
 .scene__way th:nth-child(n + 4),
 .scene__way td:nth-child(n + 4) {
   display: none;
+}
+
+/* The chosen direction: its name in the primary with a filled check, and
+   its screen ringed all the way round in the primary. */
+.scene__way[data-chosen] .scene__way-name {
+  color: var(--color-primary);
+}
+
+.scene__way-pick {
+  display: inline-grid;
+  place-items: center;
+  width: var(--space-5);
+  height: var(--space-5);
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+}
+
+/* The ring is on the screen's holder, on the review's surface: the frame
+   inside is the product's, always light, where the primary would resolve to
+   its light step. */
+.scene__way-screen {
+  display: grid;
+  border-radius: var(--radius-md);
+}
+
+.scene__way[data-chosen] .scene__way-screen {
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.scene__way[data-chosen] .scene__way-cost {
+  color: var(--color-text);
 }
 
 .scene__way-cost {
@@ -195,4 +228,336 @@
 .scene .table th,
 .scene .table td {
   white-space: normal;
+}
+
+/* ---------- the stages, simplified (2026-10-27) ----------
+   A bar with the cycle as six dots, a title in the serif, and at most two
+   blocks under it. The person's answer is the one filled element, in the
+   primary; the agent's is an outline in the review's slate; a stop is the
+   warning's. Every color is a token, so a scene is Night sage in the dark
+   and the light palette in the light. */
+.stage-scene {
+  background: var(--color-canvas);
+}
+
+.stage-scene__bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-surface-chrome);
+}
+
+.stage-scene__rail {
+  display: flex;
+  flex: 1;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  list-style: none;
+}
+
+.stage-scene__rail li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stage-scene__dot {
+  flex: none;
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: 50%;
+  background: var(--color-border-control);
+}
+
+.stage-scene__rail [data-state='later'] .stage-scene__dot {
+  background: var(--color-border);
+}
+
+.stage-scene__rail [data-state='now'] {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.stage-scene__rail [data-state='now'] .stage-scene__dot {
+  background: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-success-border);
+}
+
+.stage-scene__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-height: 0;
+  padding: var(--space-6) var(--space-8);
+}
+
+.stage-scene__title,
+.stage-scene__says,
+.stage-scene__figure {
+  font-family: var(--font-display-review);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.stage-scene__title {
+  font-size: var(--text-3xl);
+  text-wrap: balance;
+}
+
+/* A chip: who holds the position. Quiet is a label with no owner. */
+.stage-scene__chip {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  width: max-content;
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.stage-scene__chip[data-who='agent'] {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.stage-scene__chip[data-who='you'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+}
+
+.stage-scene__chip[data-who='stop'] {
+  border-color: var(--color-warning-solid);
+  color: var(--color-warning);
+}
+
+.stage-scene__versus {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.stage-scene__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+/* The person's side is ringed all the way round, never striped down one. */
+.stage-scene__side[data-who='you'] {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 var(--border-width) var(--color-primary);
+}
+
+.stage-scene__says {
+  font-size: var(--text-2xl);
+  text-wrap: balance;
+}
+
+.stage-scene__says[data-struck] {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.stage-scene__why {
+  color: var(--color-text-muted);
+  line-height: var(--leading-ui);
+}
+
+.stage-scene__fact {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  margin-top: auto;
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: var(--text-lg);
+}
+
+.stage-scene__fact--open {
+  align-items: center;
+}
+
+.stage-scene__figure {
+  flex: none;
+  color: var(--color-text);
+  font-size: var(--text-4xl);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Explore: each direction's next step drawn as its shape on one table. */
+.stage-scene__trio {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage-scene__way {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.stage-scene__way-name {
+  margin-top: var(--space-1);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-lg);
+}
+
+.stage-scene__shape {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  aspect-ratio: 16 / 10;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+  overflow: hidden;
+}
+
+.stage-scene__shape i {
+  display: block;
+  height: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-border);
+}
+
+.stage-scene__shape i:nth-child(2) {
+  width: 70%;
+}
+
+.stage-scene__shape i:nth-child(3) {
+  width: 85%;
+}
+
+.stage-scene__shape::after {
+  position: absolute;
+  content: '';
+}
+
+/* Undo: a bar along the foot, after the press. */
+.stage-scene__shape[data-shape='bar']::after {
+  right: var(--space-3);
+  bottom: var(--space-3);
+  left: var(--space-3);
+  height: var(--space-5);
+  border-radius: var(--radius-sm);
+  background: var(--color-text-muted);
+}
+
+/* Confirm: a question over the table. */
+.stage-scene__shape[data-shape='question']::after {
+  inset: 24% 20%;
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-menu);
+}
+
+/* Review: a panel beside it. */
+.stage-scene__shape[data-shape='panel']::after {
+  top: var(--space-2);
+  right: var(--space-2);
+  bottom: var(--space-2);
+  width: 38%;
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.stage-scene__note {
+  margin-top: auto;
+}
+
+/* Delegate: three counts, and the stop given the rest of the frame. */
+.stage-scene__tally {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage-scene__tally li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.stage-scene__tally [data-state='passed'] .stage-scene__dot {
+  background: var(--color-success-solid);
+}
+
+.stage-scene__tally [data-state='changed'] .stage-scene__dot {
+  background: var(--color-warning-solid);
+}
+
+.stage-scene__tally [data-state='inconclusive'] .stage-scene__dot {
+  border: 2px solid var(--color-neutral-solid);
+  background: transparent;
+}
+
+.stage-scene__ask {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-warning-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.stage-scene__answers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.stage-scene__answer {
+  padding: var(--space-2) var(--space-4);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius-md);
+  font-weight: var(--weight-medium);
+}
+
+.stage-scene__answer[data-chosen] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+}
+
+.stage-scene__rule .stage-scene__says {
+  font-size: var(--text-3xl);
 }

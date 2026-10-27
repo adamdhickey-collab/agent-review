@@ -10,13 +10,15 @@
     />
     <meta name="color-scheme" content="light dark" />
     <script>
-      /* A remembered appearance, before the first paint (src/app/useTheme.ts).
-         Light or Dark is put on the root; System, or no choice yet, is the
-         root's own default, the operating system's scheme (app/global.css). */
+      /* The appearance, before the first paint (src/app/useTheme.ts). Dark
+         until a person chooses; a remembered Light or Dark is put on the
+         root; System leaves it bare, the operating system's scheme
+         (app/global.css). */
+      var t = 'dark';
       try {
-        var t = localStorage.getItem('agent-review:theme');
-        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+        t = localStorage.getItem('agent-review:theme') || 'dark';
       } catch (e) {}
+      if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
       /* The router puts a reloaded or revisited page back where it was,
          once the screen is there to scroll (src/app/router.ts); the browser
          would try before that, against an empty page. */
@@ -27,7 +29,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&family=Inter:opsz,wght@14..32,400..700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&family=Inter:opsz,wght@14..32,400..700&display=swap"
     />
   </head>
   <body>
