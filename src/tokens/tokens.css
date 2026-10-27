@@ -134,12 +134,17 @@
   --color-danger-product: #b42318;
   --color-danger-subtle-product: #fdeceb;
   --color-success-solid-product: oklch(0.62 0.15 150);
-  --color-success-border-product: oklch(0.86 0.07 150);
+  /* The four edges are the one exception to the freeze. Success, danger and
+     accent were 0.86 and drew a badge's edge at 1.3 to 1.5:1 on the
+     product's grounds, too faint to hold the pill; they were taken to the
+     warning edge's weight, 2.1 to 2.6:1 on white, canvas and sunken
+     (2026-10-26). Nothing but a tinted badge reads them on this surface. */
+  --color-success-border-product: oklch(0.71 0.1 150);
   --color-warning-solid-product: oklch(0.8 0.155 78);
   --color-warning-border-product: oklch(0.72 0.12 75);
   --color-danger-solid-product: oklch(0.62 0.19 28);
-  --color-danger-border-product: oklch(0.86 0.07 25);
-  --color-accent-border-product: oklch(0.86 0.06 264);
+  --color-danger-border-product: oklch(0.72 0.12 25);
+  --color-accent-border-product: oklch(0.72 0.1 264);
   --color-neutral-solid-product: oklch(0.62 0.012 285);
   --color-diff-add-product: #e6f4ea;
   --color-diff-add-ink-product: #1f7a3f;
