@@ -20,6 +20,7 @@ export const TOKEN_GROUPS = {
   line: ['--color-border', '--color-divider', '--color-border-control'],
   ink: ['--color-text', '--color-text-secondary', '--color-text-muted', '--color-text-on-accent', '--color-text-on-band', '--color-text-on-band-muted', '--color-text-on-warning-solid'],
   accent: ['--color-accent', '--color-accent-hover', '--color-accent-active', '--color-accent-subtle', '--color-accent-border'],
+  primary: ['--color-primary', '--color-primary-hover', '--color-primary-active', '--color-text-on-primary'],
   meaning: [
     '--color-success', '--color-success-subtle',
     '--color-warning', '--color-warning-subtle',

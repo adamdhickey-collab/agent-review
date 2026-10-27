@@ -900,6 +900,7 @@
 
 .desk__band .icon-btn:hover:not(:disabled) {
   background: var(--color-accent);
+  color: var(--color-text-on-accent);
 }
 
 .desk__band .icon-btn:disabled {
