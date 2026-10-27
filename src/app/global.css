@@ -30,8 +30,8 @@ html {
    remembers it; choosing System takes the attribute off again
    (app/useTheme.ts). data-theme works on any element, which is how a story
    renders one screen in the other theme without the rest of the Storybook
-   following it. Following the system since 2026-10-24; dark by default from
-   later on 2026-10-11, following the system when Preview Studio opened that
+   following it. Dark by default since 2026-10-27; following the system from
+   2026-10-24; dark by default from later on 2026-10-11, following the system when Preview Studio opened that
    day, light from earlier that day, and dark from 2026-10-05. */
 [data-theme='dark'] {
   color-scheme: dark;

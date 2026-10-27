@@ -11,12 +11,12 @@
     <meta name="color-scheme" content="light dark" />
     <script>
       /* A remembered appearance, before the first paint (src/app/useTheme.ts).
-         Light or Dark is put on the root; System, or no choice yet, is the
-         root's own default, the operating system's scheme (app/global.css). */
-      try {
-        var t = localStorage.getItem('agent-review:theme');
-        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
-      } catch (e) {}
+         Light or Dark is put on the root; System is the root's own default,
+         the operating system's scheme (app/global.css); no choice yet is
+         Dark, the review's default since 2026-10-27. */
+      var t = null;
+      try { t = localStorage.getItem('agent-review:theme'); } catch (e) {}
+      if (t !== 'system') document.documentElement.dataset.theme = t === 'light' ? 'light' : 'dark';
       /* The router puts a reloaded or revisited page back where it was,
          once the screen is there to scroll (src/app/router.ts); the browser
          would try before that, against an empty page. */

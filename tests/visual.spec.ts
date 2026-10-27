@@ -8,12 +8,12 @@ import { FRAMED, seedCycle } from './seed';
 
 const WIDTHS = [1280, 768] as const;
 
-/* The review follows the operating system until a person chooses
-   otherwise (app/useTheme.ts, since 2026-10-24). The baselines not named
+/* The review is dark until a person chooses otherwise (app/useTheme.ts,
+   since 2026-10-27). The baselines not named
    -dark are of the light theme and the -dark ones of the dark, and each set
    makes its choice first, the way the bar's control does, by remembering
-   it, so a baseline never depends on the machine's own setting; a first
-   visit is checked on its own below, in both of the system's schemes. */
+   it, so a baseline never depends on the default; a first visit is checked
+   on its own below, in both of the system's schemes. */
 const chooseDark = () => localStorage.setItem('agent-review:theme', 'dark');
 const chooseLight = () => localStorage.setItem('agent-review:theme', 'light');
 
@@ -165,18 +165,17 @@ test.describe('in the dark theme, chosen, at 1280', () => {
   });
 });
 
-/* A first visit, with nothing remembered: the system's scheme, with the
-   root's own color-scheme and nothing on it. Light on a light system and
-   dark on a dark one, read from a token rather than a screenshot; the
-   baselines above are the pictures of each. */
+/* A first visit, with nothing remembered: dark, on a light system as on a
+   dark one, read from the root rather than a screenshot; the -dark
+   baselines above are the picture of it. */
 for (const scheme of ['light', 'dark'] as const) {
-  test(`a first visit on a ${scheme} system is ${scheme}`, async ({ page }) => {
+  test(`a first visit on a ${scheme} system is dark`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme });
     await page.goto('#/runs/billing');
     await settle(page);
-    expect(await page.evaluate(() => [document.documentElement.dataset.theme ?? null, getComputedStyle(document.documentElement).colorScheme])).toEqual([null, 'light dark']);
+    expect(await page.evaluate(() => [document.documentElement.dataset.theme ?? null, getComputedStyle(document.documentElement).colorScheme])).toEqual(['dark', 'dark']);
     expect(await page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches)).toBe(scheme === 'dark');
-    await expect(page.getByRole('radio', { name: 'System' })).toHaveAttribute('aria-checked', 'true');
+    await expect(page.getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true');
   });
 }
 
