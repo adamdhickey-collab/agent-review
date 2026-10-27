@@ -277,9 +277,83 @@ function Define() {
   );
 }
 
-/** Each direction's next step, drawn as its shape: a bar after the press, a
-    question over the table, a panel beside it. */
-const SHAPE: Record<DirectionId, string> = { undo: 'bar', confirm: 'question', review: 'panel' };
+/** Each direction's next step, drawn as a small screen of the batch: the
+    five customers as rows (a box, a name as a bar, a status chip), and over
+    them the bar after the press, the question, or the panel beside the
+    table. The words are the few the step itself shows. Since 2026-10-27, where
+    each was an abstract shape. */
+const MINI_ROWS: { w: number; status: 'active' | 'trial' | 'due'; blocked?: boolean }[] = [
+  { w: 72, status: 'active' },
+  { w: 58, status: 'active' },
+  { w: 46, status: 'trial' },
+  { w: 78, status: 'due', blocked: true },
+  { w: 54, status: 'active' },
+];
+
+function MiniRows({ gone, checked }: { gone?: boolean; checked?: (n: number) => boolean | null }) {
+  return (
+    <span className="mini__rows">
+      {MINI_ROWS.map((r, n) => {
+        const box = checked ? checked(n) : undefined;
+        return (
+          <span key={n} className="mini__row" data-gone={(gone && !r.blocked) || undefined}>
+            {box === undefined ? null : <span className="mini__box" data-on={box || undefined} data-no={box === null || undefined} />}
+            <span className="mini__name" style={{ width: `${r.w}%` }} />
+            <span className="mini__chip" data-status={r.status} />
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
+function Mini({ direction }: { direction: DirectionId }) {
+  if (direction === 'undo')
+    return (
+      <span className="mini" aria-hidden="true">
+        <MiniRows gone />
+        <span className="mini__toast">
+          <span>4 archived</span>
+          <span className="mini__link">Undo</span>
+        </span>
+      </span>
+    );
+  if (direction === 'confirm')
+    return (
+      <span className="mini" aria-hidden="true">
+        <MiniRows checked={() => true} />
+        <span className="mini__dialog">
+          <span className="mini__dialog-title">Archive 5 customers?</span>
+          <span className="mini__dialog-says">3 are active.</span>
+          <span className="mini__buttons">
+            <span className="mini__btn">Cancel</span>
+            <span className="mini__btn" data-act>
+              Archive
+            </span>
+          </span>
+        </span>
+      </span>
+    );
+  return (
+    <span className="mini mini--split" aria-hidden="true">
+      <MiniRows checked={(n) => (MINI_ROWS[n].blocked ? null : n !== 1)} />
+      <span className="mini__panel">
+        <span className="mini__panel-title">Check each</span>
+        <span className="mini__panel-rows">
+          {MINI_ROWS.map((r, n) => (
+            <span key={n} className="mini__panel-row">
+              <span className="mini__box" data-on={(!r.blocked && n !== 1) || undefined} data-no={r.blocked || undefined} />
+              <span className="mini__name" style={{ width: `${r.w}%` }} />
+            </span>
+          ))}
+        </span>
+        <span className="mini__btn" data-act>
+          Archive 3
+        </span>
+      </span>
+    </span>
+  );
+}
 const SHORT_COST: Record<DirectionId, string> = {
   undo: 'Fast, but relies on noticing',
   confirm: 'People press through it',
@@ -293,10 +367,8 @@ function Explore() {
       <ul className="stage-scene__trio" role="list">
         {DIRECTIONS.map((d) => (
           <li key={d.id} className="stage-scene__way">
-            <span className="stage-scene__shape" data-shape={SHAPE[d.id]} aria-hidden="true">
-              <i />
-              <i />
-              <i />
+            <span className="stage-scene__shape">
+              <Mini direction={d.id} />
             </span>
             <span className="stage-scene__way-name">{d.name}</span>
             <span className="stage-scene__why">{SHORT_COST[d.id]}</span>

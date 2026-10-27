@@ -423,73 +423,213 @@
   background: var(--color-surface);
 }
 
+/* Each name on one line: the longest, "Review the batch, then archive",
+   wrapped at the large size and pushed its cost down out of line with the
+   other two. */
 .stage-scene__way-name {
   margin-top: var(--space-1);
   font-weight: var(--weight-semibold);
-  font-size: var(--text-lg);
+  font-size: var(--text-md);
+  white-space: nowrap;
 }
 
 .stage-scene__shape {
-  position: relative;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   aspect-ratio: 16 / 10;
-  padding: var(--space-3);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface-sunken);
   overflow: hidden;
 }
 
-.stage-scene__shape i {
-  display: block;
+/* A direction's small screen: the batch's five rows, and the step drawn
+   over them. Sizes are the picture's, a step under the app's own, so the
+   five rows and the step fit the tile. */
+.mini {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-xs);
+  line-height: var(--leading-tight);
+}
+
+.mini__rows {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--space-1) 0;
+}
+
+.mini__row {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-2);
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.mini__row:first-child {
+  border-top: 0;
+}
+
+/* Archived and gone from the list: the row is left as a faint gap, so the
+   one that stayed (Monarch, which can't be archived) reads at a glance. */
+.mini__row[data-gone] > * {
+  visibility: hidden;
+}
+
+.mini__row[data-gone] {
+  background: var(--color-surface-chrome);
+}
+
+.mini__box {
+  flex: none;
+  width: var(--space-2);
   height: var(--space-2);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: 2px;
+}
+
+.mini__box[data-on] {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.mini__box[data-no] {
+  border-style: dashed;
+}
+
+.mini__name {
+  flex: none;
+  height: var(--space-1);
+  max-width: 55%;
   border-radius: var(--radius-sm);
-  background: var(--color-border);
+  background: var(--color-border-control);
 }
 
-.stage-scene__shape i:nth-child(2) {
-  width: 70%;
+.mini__chip {
+  flex: none;
+  width: var(--space-5);
+  height: var(--space-2);
+  margin-left: auto;
+  border: var(--border-width) solid var(--color-neutral-solid);
+  border-radius: var(--radius-lg);
 }
 
-.stage-scene__shape i:nth-child(3) {
-  width: 85%;
+.mini__chip[data-status='active'] {
+  border-color: var(--color-success-solid);
+  background: var(--color-success-subtle);
 }
 
-.stage-scene__shape::after {
+.mini__chip[data-status='trial'] {
+  border-color: var(--color-accent);
+  background: var(--color-accent-subtle);
+}
+
+/* Undo: the bar after the press, along the foot. */
+.mini__toast {
   position: absolute;
-  content: '';
-}
-
-/* Undo: a bar along the foot, after the press. */
-.stage-scene__shape[data-shape='bar']::after {
-  right: var(--space-3);
-  bottom: var(--space-3);
-  left: var(--space-3);
-  height: var(--space-5);
+  right: var(--space-2);
+  bottom: var(--space-2);
+  left: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
-  background: var(--color-text-muted);
+  background: var(--color-text);
+  color: var(--color-canvas);
+  font-weight: var(--weight-medium);
 }
 
-/* Confirm: a question over the table. */
-.stage-scene__shape[data-shape='question']::after {
-  inset: 24% 20%;
+.mini__link {
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+}
+
+/* Confirm: the question over the table. */
+.mini__dialog {
+  position: absolute;
+  inset: 18% 12%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
   border: var(--border-width) solid var(--color-border-control);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   box-shadow: var(--shadow-menu);
 }
 
-/* Review: a panel beside it. */
-.stage-scene__shape[data-shape='panel']::after {
-  top: var(--space-2);
-  right: var(--space-2);
-  bottom: var(--space-2);
-  width: 38%;
+.mini__dialog-title,
+.mini__panel-title {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.mini__dialog-says {
+  color: var(--color-text-muted);
+}
+
+.mini__buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  margin-top: auto;
+}
+
+.mini__btn {
+  padding: 0 var(--space-2);
   border: var(--border-width) solid var(--color-border-control);
   border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.mini__btn[data-act] {
+  border-color: var(--color-warning-solid);
+  color: var(--color-warning);
+  font-weight: var(--weight-semibold);
+}
+
+/* Review: the table narrows, and the panel beside it lists each one. */
+.mini--split .mini__chip {
+  display: none;
+}
+
+.mini__panel {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 46%;
+  padding: var(--space-2);
+  border-left: var(--border-width) solid var(--color-border-control);
   background: var(--color-surface);
+}
+
+.mini__panel-rows {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.mini__panel-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.mini__panel-row .mini__name {
+  max-width: 70%;
+}
+
+.mini__panel .mini__btn {
+  align-self: flex-end;
 }
 
 .stage-scene__note {
