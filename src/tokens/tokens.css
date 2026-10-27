@@ -47,7 +47,8 @@
   --font-features-review: normal;
   /* The review's one serif, since 2026-10-27: Crimson Text, adamhickey.com's
      display face, for a scene's title and its one large figure, and the
-     cycle stage's title. Nothing else is set in it: a control, a label and
+     cycle stage's title, at 400 only: the app loads no other cut, as
+     the site doesn't. Nothing else is set in it: a control, a label and
      a row stay in Geist. */
   --font-display-review: 'Crimson Text', Georgia, 'Times New Roman', serif;
   --text-xs: 0.6875rem; /* 11 */

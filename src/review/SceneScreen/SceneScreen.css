@@ -302,7 +302,7 @@
 .stage-scene__says,
 .stage-scene__figure {
   font-family: var(--font-display-review);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-regular); /* Crimson is regular only, as on adamhickey.com */
   line-height: var(--leading-tight);
 }
 
