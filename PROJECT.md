@@ -767,8 +767,9 @@ the review's half. The full list with values is in the file; the names in
   a static scenario; the shape of the data is what a real integration would
   produce, and the README says what it would take.
 - A dark scheme for the product. The review has had one since 2026-10-05,
-  and follows the system by default, light unless it is set to dark, with
-  Light and Dark on request; Relay has
+  and is dark by default since 2026-10-27, in Night sage (a green-black
+  ground, sage for the person's act, pale slate for the agent), with Light
+  and System on request; Relay has
   a light canvas by decision and stays light inside the review's preview,
   as it would in a real one.
 - An Archived view and undo for the bulk archive. Both runs listed it;

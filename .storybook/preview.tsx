@@ -67,7 +67,7 @@ const preview: Preview = {
       document.documentElement.dataset.theme = product ? 'light' : context.globals.theme === 'dark' ? 'dark' : 'light';
       return (
         <>
-          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&family=Inter:opsz,wght@14..32,400..700&display=swap" />
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Geist:wght@400..700&family=Geist+Mono:wght@400;500&family=Inter:opsz,wght@14..32,400..700&display=swap" />
           <div style={{ display: 'contents' }} data-surface={product ? 'product' : 'review'}>
             <IconSetContext.Provider value={product ? 'product' : 'review'}>
               <Story />

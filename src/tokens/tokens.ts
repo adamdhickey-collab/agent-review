@@ -8,8 +8,8 @@
 
 export const TOKEN_GROUPS = {
   type: [
-    '--font-ui', '--font-ui-product', '--font-ui-review', '--font-mono', '--font-mono-system', '--font-mono-review', '--font-features-review',
-    '--text-xs', '--text-sm', '--text-md', '--text-md-product', '--text-md-review', '--text-lg', '--text-xl', '--text-2xl',
+    '--font-ui', '--font-ui-product', '--font-ui-review', '--font-mono', '--font-mono-system', '--font-mono-review', '--font-features-review', '--font-display-review',
+    '--text-xs', '--text-sm', '--text-md', '--text-md-product', '--text-md-review', '--text-lg', '--text-xl', '--text-2xl', '--text-3xl', '--text-4xl',
     '--leading-tight', '--leading-ui', '--leading-body',
     '--weight-regular', '--weight-medium', '--weight-semibold', '--weight-bold',
   ],

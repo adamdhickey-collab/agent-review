@@ -1,31 +1,22 @@
 import { useEffect, useRef, type ReactNode } from 'react';
-import { Badge, Cell, Checkbox, HeaderCell, Icon, IconSetContext, Row, Table, Tabs, TestStatus } from '../../components';
+import { Badge, Icon, IconSetContext } from '../../components';
 import {
   buildOf,
   DIRECTIONS,
   directionOf,
   DISPUTED,
-  EVIDENCE,
-  EVIDENCE_KIND,
-  FINDING_SOURCE,
-  FINDINGS,
   outcomeOf,
   PRIORITY,
-  problemOf,
-  READING_KIND,
   READINGS,
   REQUIREMENT,
   STAGES,
   stageIndex,
   stopOf,
-  criteriaOf,
   type DirectionId,
-  type Priority,
   type StageId,
 } from '../../data/cycle';
 import { ArchiveFlow } from '../../product/customers/ArchiveFlow';
 import { customers } from '../../product/customers/customers';
-import { Choice } from '../CycleScreen/stages';
 import { STORY, type SceneId } from './scenes';
 import '../Shell/Shell.css';
 import '../CycleScreen/CycleScreen.css';
@@ -107,44 +98,6 @@ function Frame({ at, label, rail = true, children }: { at: StageId; label: strin
   );
 }
 
-/** The move, as a stage draws it, without the way on. */
-function Move({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <aside className="cycle__move scene__move">
-      <div className="cycle__move-head">
-        <p className="cycle__move-kicker">
-          <Icon name="user" size={14} />
-          Your move
-        </p>
-        <h2 className="cycle__move-title">{title}</h2>
-      </div>
-      <div className="cycle__move-body">{children}</div>
-    </aside>
-  );
-}
-
-/** Two answers, the story's chosen. The other shows its name only: its
-    meaning and its press are left off, because the picture is the call
-    made, not the call to make. */
-function Answers({ items }: { items: { name: string; says?: string; chosen?: boolean; recommended?: boolean }[] }) {
-  return (
-    <ul className="cycle__choices" role="list">
-      {items.map((x) => (
-        <Choice key={x.name} name={x.name} says={x.says ?? null} chosen={!!x.chosen} recommended={x.recommended} onChoose={() => {}} />
-      ))}
-    </ul>
-  );
-}
-
-function Consequence({ children }: { children: ReactNode }) {
-  return (
-    <p className="cycle__consequence">
-      <Icon name="arrow-right" size={14} />
-      <span>{children}</span>
-    </p>
-  );
-}
-
 /** Relay inside the review, as a stage frames it. */
 function Product({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -187,129 +140,31 @@ function Batch() {
   );
 }
 
-/* Discover: the summary's claims, the one the move asks about on its
-   warning ground, and the note that settles it. */
-function Discover() {
-  const shown = READINGS.filter((r) => r.id === 'r-batch' || r.id === DISPUTED.reading);
-  const note = EVIDENCE.find((e) => e.id === DISPUTED.by)!;
-  return (
-    <div className="scene__work scene__work--long-move">
-      <section className="scene__main">
-        <h2 className="cycle__h2">The agent’s summary</h2>
-        <ul className="cycle__readings" role="list">
-          {shown.map((r) => (
-            <li key={r.id} className="cycle__reading" data-kind={r.kind} data-disputed={r.id === DISPUTED.reading || undefined}>
-              <Badge tone={r.kind === 'observation' ? 'neutral' : r.kind === 'interpretation' ? 'accent' : 'warning'} variant="outline">
-                {READING_KIND[r.kind]}
-              </Badge>
-              <p className="cycle__reading-says">{r.says}</p>
-            </li>
-          ))}
-        </ul>
-        <div className="cycle__ev" data-opened>
-          <p className="cycle__ev-kind">
-            {EVIDENCE_KIND[note.kind]} <span>· {note.from}</span>
-          </p>
-          <p className="cycle__ev-says">{note.says}</p>
-        </div>
-      </section>
-      <Move title="The summary says archiving deletes data. Does that hold up?">
-        <Answers
-          items={[
-            { name: 'Correct it', says: 'Archived records are kept for 90 days. The problem is that nobody can see them or put them back.', chosen: true },
-            { name: 'Keep it' },
-          ]}
-        />
-      </Move>
-    </div>
-  );
-}
-
-/* Define: the brief the call writes, and the priority that sets it. */
-function Define() {
-  const criteria = criteriaOf(STORY.priority, STORY.reading);
-  const order: Priority[] = ['pace', 'recovery'];
-  return (
-    <div className="scene__work">
-      <article className="cycle__brief scene__brief">
-        <p className="cycle__brief-kicker">Brief · drafted by the agent, edited by Alex</p>
-        <dl className="cycle__facts">
-          <div>
-            <dt>The problem</dt>
-            <dd>{problemOf(STORY.reading)}</dd>
-          </div>
-          <div>
-            <dt>Success looks like</dt>
-            <dd>
-              <ul className="cycle__list" role="list">
-                {criteria.map((c) => (
-                  <li key={c.id}>{c.says}</li>
-                ))}
-              </ul>
-            </dd>
-          </div>
-        </dl>
-      </article>
-      <Move title="When speed and safety pull apart, which wins?">
-        <Answers items={order.map((p) => ({ name: PRIORITY[p].name, says: p === STORY.priority ? PRIORITY[p].says : undefined, chosen: p === STORY.priority }))} />
-      </Move>
-    </div>
-  );
-}
-
-/* Explore: one direction working, the first, after the press: four gone at
-   once, Monarch refused after it, and Undo. */
-function Explore() {
-  const d = directionOf('undo');
-  return (
-    <div className="scene__explore">
-      <Tabs className="cycle__tabs" label="Directions" tabs={DIRECTIONS.map((x, i) => ({ value: x.id, label: `${i + 1}. ${x.name}` }))} value="undo" onChange={() => {}}>
-        <div className="scene__direction">
-          <dl className="cycle__tradeoff">
-            <div>
-              <dt>
-                <Icon name="plus" size={14} />
-                Gains
-              </dt>
-              <dd>{d.gains}</dd>
-            </div>
-            <div>
-              <dt>
-                <Icon name="minus" size={14} />
-                Costs
-              </dt>
-              <dd>{d.costs}</dd>
-            </div>
-          </dl>
-          <Product label="Relay · customers · direction 1, working">
-            <Tried direction="undo" />
-          </Product>
-        </div>
-      </Tabs>
-    </div>
-  );
-}
-
 /* The three directions side by side, each after its own next step, with
-   the one the designer chose marked: the homepage card. Three columns need
+   the one the designer chose marked in the primary: a check beside its name
+   and a ring round its screen, so the three names stay on one line (a chip
+   above the first screen pushed it down, 2026-10-27): the homepage card. Three columns need
    the rail's height, so this one scene goes without it. */
 function Three() {
   return (
     <div className="scene__three">
       {DIRECTIONS.map((x, i) => (
-        <section key={x.id} className="scene__way">
+        <section key={x.id} className="scene__way" data-chosen={x.id === STORY.direction || undefined}>
           <h2 className="scene__way-name">
-            {i + 1}. {x.name}
             {x.id === STORY.direction ? (
-              <Badge tone="accent" variant="quiet" icon="check">
-                Chosen
-              </Badge>
+              <span className="scene__way-pick">
+                <Icon name="check" size={14} />
+                <span className="visually-hidden">Chosen: </span>
+              </span>
             ) : null}
+            {i + 1}. {x.name}
           </h2>
-          <div className="cycle__product-frame" data-surface="product">
-            <IconSetContext.Provider value="product">
-              <Tried direction={x.id} />
-            </IconSetContext.Provider>
+          <div className="scene__way-screen">
+            <div className="cycle__product-frame" data-surface="product">
+              <IconSetContext.Provider value="product">
+                <Tried direction={x.id} />
+              </IconSetContext.Provider>
+            </div>
           </div>
           <p className="scene__way-cost">{x.costs}</p>
         </section>
@@ -318,129 +173,232 @@ function Three() {
   );
 }
 
-/* Evaluate: what came back on the left, the two sessions that decided it,
-   and the call on the right, made against the agent's recommendation. What
-   the call did sits under the findings, where the picture has room for it. */
-function Evaluate() {
-  const shown = FINDINGS.filter((f) => f.id === 'f-active' || f.id === 'f-bulk');
+/* ---------- the stages, simplified (2026-10-27) ----------
+
+   A stage scene is read in the three seconds a case-study figure gets, so it
+   carries three things: where the stage sits in the cycle (the bar), the one
+   decision, as the title, and the one fact behind it. Everything else the
+   stage says is in the case study's text, where it can be read. The rules:
+   one question per screen; the person's answer is the only filled element,
+   in the primary, and the agent's is an outline in the review's slate; a
+   number set large replaces a paragraph. Words come from the cycle's data
+   where it has them short enough; the few shorter labels are written here,
+   beside the scene that uses them. */
+
+function StageBar({ at }: { at: StageId }) {
+  const i = stageIndex(at);
   return (
-    <div className="scene__work">
-      <section className="scene__main">
-        <h2 className="cycle__h2">What came back</h2>
-        <ul className="cycle__findings" role="list">
-          {shown.map((f) => (
-            <li key={f.id} className="cycle__finding">
-              <p className="cycle__finding-head">
-                <Badge tone="warning" variant="outline">
-                  {FINDING_SOURCE[f.source]}
-                </Badge>
-                {f.about ? <span className="cycle__finding-about">About {directionOf(f.about[0]).name.toLowerCase()}</span> : null}
-              </p>
-              <p className="cycle__finding-says">{f.says}</p>
-              {f.becomes ? <Checkbox label={`Require: ${REQUIREMENT[f.becomes]}`} checked={STORY.required[f.becomes]} readOnly /> : null}
-            </li>
-          ))}
-        </ul>
-        <Consequence>You chose against the agent’s recommendation, and your reason says why.</Consequence>
-      </section>
-      <Move title="Which direction, and why?">
-        <Answers
-          items={(['undo', 'review'] as const).map((id) => ({
-            name: directionOf(id).name,
-            says: id === STORY.direction ? directionOf(id).costs : undefined,
-            chosen: id === STORY.direction,
-            recommended: id === 'review',
-          }))}
-        />
-      </Move>
+    <header className="stage-scene__bar">
+      <span className="shell__mark" aria-hidden="true">
+        <Icon name="check" size={14} />
+      </span>
+      <ol className="stage-scene__rail" role="list" aria-label="Stages">
+        {STAGES.map((st, n) => (
+          <li key={st.id} data-state={n < i ? 'done' : n === i ? 'now' : 'later'} aria-current={n === i ? 'step' : undefined}>
+            <span className="stage-scene__dot" aria-hidden="true" />
+            {st.name}
+          </li>
+        ))}
+      </ol>
+      <span className="stage-scene__chip">Simulated</span>
+    </header>
+  );
+}
+
+function StageFrame({ at, title, children }: { at: StageId; title: string; children: ReactNode }) {
+  return (
+    <div className="scene stage-scene" data-surface="review">
+      <StageBar at={at} />
+      <main className="stage-scene__body">
+        <h1 className="stage-scene__title">{title}</h1>
+        {children}
+      </main>
     </div>
   );
 }
 
-/* Delegate: what the checks established on the agent's build, and the one
-   place it stopped. */
+type Who = 'agent' | 'you' | 'stop' | 'quiet';
+
+function Chip({ who, children }: { who: Who; children: ReactNode }) {
+  return (
+    <span className="stage-scene__chip" data-who={who}>
+      {children}
+    </span>
+  );
+}
+
+/** One side of a call: who holds it, the position in the serif, and a line. */
+function Side({ who, label, says, why, struck }: { who: Who; label: string; says: string; why?: string; struck?: boolean }) {
+  return (
+    <div className="stage-scene__side" data-who={who}>
+      <Chip who={who}>{label}</Chip>
+      <p className="stage-scene__says" data-struck={struck || undefined}>
+        {says}
+      </p>
+      {why ? <p className="stage-scene__why">{why}</p> : null}
+    </div>
+  );
+}
+
+/** The one fact behind the call: a figure set large, and a line under it. */
+function Fact({ figure, children }: { figure: string; children: ReactNode }) {
+  return (
+    <p className="stage-scene__fact">
+      <span className="stage-scene__figure">{figure}</span>
+      <span>{children}</span>
+    </p>
+  );
+}
+
+/* Discover: the agent's claim, struck, against the correction. */
+function Discover() {
+  const claim = READINGS.find((r) => r.id === DISPUTED.reading)!;
+  return (
+    <StageFrame at="discover" title="Does the agent’s summary hold up?">
+      <div className="stage-scene__versus">
+        <Side who="agent" label="Agent’s summary" says={claim.says} struck />
+        <Side who="you" label="You corrected it" says="Records are kept for 90 days." why="Nobody can see them or put them back." />
+      </div>
+      <Fact figure="6 of 9">archive tickets ask to get a record back</Fact>
+    </StageFrame>
+  );
+}
+
+/* Define: the two priorities, and the one that leads the brief. */
+function Define() {
+  return (
+    <StageFrame at="define" title="Speed or safety: which one wins?">
+      <div className="stage-scene__versus">
+        <Side who="quiet" label="Option" says={PRIORITY.pace.name} why="Fewer presses for bulk cleanup" />
+        <Side who="you" label="You chose" says={PRIORITY.recovery.name} why="Even if it costs a press" />
+      </div>
+      <Fact figure="1 in 14">archived customers was Active, almost always swept up in a batch</Fact>
+    </StageFrame>
+  );
+}
+
+/** Each direction's next step, drawn as its shape: a bar after the press, a
+    question over the table, a panel beside it. */
+const SHAPE: Record<DirectionId, string> = { undo: 'bar', confirm: 'question', review: 'panel' };
+const SHORT_COST: Record<DirectionId, string> = {
+  undo: 'Fast, but relies on noticing',
+  confirm: 'People press through it',
+  review: 'The most steps',
+};
+
+/* Explore: the three directions, each tried on the same batch. */
+function Explore() {
+  return (
+    <StageFrame at="explore" title="Three ways to archive, tried on one batch">
+      <ul className="stage-scene__trio" role="list">
+        {DIRECTIONS.map((d) => (
+          <li key={d.id} className="stage-scene__way">
+            <span className="stage-scene__shape" data-shape={SHAPE[d.id]} aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
+            <span className="stage-scene__way-name">{d.name}</span>
+            <span className="stage-scene__why">{SHORT_COST[d.id]}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="stage-scene__note">
+        <Chip who="quiet">Tried all three</Chip>
+      </p>
+    </StageFrame>
+  );
+}
+
+/* Evaluate: the agent's recommendation against the call, and why. */
+function Evaluate() {
+  return (
+    <StageFrame at="evaluate" title="Which direction ships?">
+      <div className="stage-scene__versus">
+        <Side who="agent" label="Agent recommends" says={directionOf('review').name} why="Fits the brief: recovery first" />
+        <Side who="you" label="You chose" says={directionOf(STORY.direction!).name} why={`Plus: ${REQUIREMENT['names-active'].replace(/\.$/, '').toLowerCase()}`} />
+      </div>
+      <Fact figure="2×">the review step doubled the quarterly cleanup</Fact>
+    </StageFrame>
+  );
+}
+
+const TALLY: { state: 'passed' | 'changed' | 'inconclusive'; say: (n: number) => string }[] = [
+  { state: 'passed', say: (n) => `${n} passed` },
+  { state: 'changed', say: (n) => `${n} changed, as intended` },
+  { state: 'inconclusive', say: (n) => `${n} can’t tell yet` },
+];
+
+/* Delegate: the checks as three counts, and the one stop. */
 function Delegate() {
   const build = buildOf(STORY)!;
   const stop = stopOf(STORY.direction!);
   return (
-    <div className="scene__work scene__work--long-move">
-      <section className="scene__main">
-        <h2 className="cycle__h2">What the checks established</h2>
-        <ul className="cycle__checks scene__checks" role="list">
-          {build.verified.map((v) => (
-            <li key={v.says}>
-              <TestStatus state={v.state} />
-              <span>{v.says}</span>
+    <StageFrame at="delegate" title="The agent built it. One stop for you.">
+      <ul className="stage-scene__tally" role="list">
+        {TALLY.map((t) => {
+          const n = build.verified.filter((v) => v.state === t.state).length;
+          return n ? (
+            <li key={t.state} data-state={t.state}>
+              <span className="stage-scene__dot" aria-hidden="true" />
+              {t.say(n)}
             </li>
+          ) : null;
+        })}
+      </ul>
+      <div className="stage-scene__ask">
+        <Chip who="stop">Needs you</Chip>
+        <p className="stage-scene__says">{stop.question}</p>
+        <p className="stage-scene__answers">
+          {stop.answers.map((a) => (
+            <span key={a.id} className="stage-scene__answer" data-chosen={a.id === STORY.answer || undefined}>
+              {a.name}
+            </span>
           ))}
-        </ul>
-      </section>
-      <Move title={stop.question}>
-        <p className="cycle__move-kind">
-          <Badge tone="warning" icon="lock">
-            Needs approval
-          </Badge>
         </p>
-        <Answers items={stop.answers.map((a) => ({ name: a.name, chosen: a.id === STORY.answer, recommended: a.recommended }))} />
-      </Move>
-    </div>
+      </div>
+    </StageFrame>
   );
 }
 
-/* Learn: what to measure once it ships, and the rule kept for the next agent. */
+/* Learn: the rule kept for the next agent, and what is still unknown. */
 function Learn() {
   const outcome = outcomeOf(STORY)!;
   return (
-    <div className="scene__work">
-      <section className="scene__main">
-        <h2 className="cycle__h2">What to measure once it ships</h2>
-        <Table caption="Measures and the direction each should move" density="compact">
-          <thead>
-            <tr>
-              <HeaderCell>Measure</HeaderCell>
-              <HeaderCell>What would count as working</HeaderCell>
-            </tr>
-          </thead>
-          <tbody>
-            {outcome.measures
-              .filter((m) => !m.what.startsWith('Restores'))
-              .map((m) => (
-                <Row key={m.what}>
-                  <Cell rowHeader>{m.what}</Cell>
-                  <Cell>{m.target}</Cell>
-                </Row>
-              ))}
-          </tbody>
-        </Table>
-        <p className="cycle__from">Targets, not results. Nothing has shipped.</p>
-        <h2 className="cycle__h2">What isn’t known</h2>
-        <ul className="cycle__list cycle__list--open" role="list">
-          {outcome.unknowns.map((u) => (
-            <li key={u}>{u}</li>
-          ))}
-        </ul>
-      </section>
-      <Move title="Keep this for the next agent?">
-        <blockquote className="cycle__rule">{outcome.guidance}</blockquote>
-        <Checkbox label="Keep it as guidance, for customer screens" checked={STORY.kept} readOnly />
-      </Move>
-    </div>
+    <StageFrame at="learn" title="Keep this rule for the next agent?">
+      <div className="stage-scene__side stage-scene__rule" data-who="you">
+        <Chip who="you">Kept, for customer screens</Chip>
+        <p className="stage-scene__says">{outcome.guidance}</p>
+      </div>
+      <p className="stage-scene__fact stage-scene__fact--open">
+        <Chip who="stop">Not known yet</Chip>
+        <span>Whether people notice the undo bar. Nothing here was tested with people.</span>
+      </p>
+    </StageFrame>
   );
 }
 
-const DRAWN: Record<SceneId, { at: StageId; label: string; rail?: boolean; Body: () => ReactNode }> = {
-  batch: { at: 'explore', label: 'Relay’s customers, five selected', Body: Batch },
-  discover: { at: 'discover', label: 'Discover', Body: Discover },
-  define: { at: 'define', label: 'Define', Body: Define },
-  explore: { at: 'explore', label: 'Explore', Body: Explore },
-  three: { at: 'evaluate', label: 'Three ways to archive', rail: false, Body: Three },
-  evaluate: { at: 'evaluate', label: 'Evaluate', Body: Evaluate },
-  delegate: { at: 'delegate', label: 'Delegate', Body: Delegate },
-  learn: { at: 'learn', label: 'Learn', Body: Learn },
+const DRAWN: Record<SceneId, () => ReactNode> = {
+  batch: () => (
+    <Frame at="explore" label="Relay’s customers, five selected">
+      <Batch />
+    </Frame>
+  ),
+  three: () => (
+    <Frame at="evaluate" label="Three ways to archive" rail={false}>
+      <Three />
+    </Frame>
+  ),
+  discover: Discover,
+  define: Define,
+  explore: Explore,
+  evaluate: Evaluate,
+  delegate: Delegate,
+  learn: Learn,
 };
 
 export function SceneScreen({ id }: { id: SceneId }) {
-  const { at, label, rail, Body } = DRAWN[id];
+  const Drawn = DRAWN[id];
   /* A press or a next step puts focus on a button, which rings it and
      scrolls its frame; a picture has no focus, and starts at the top. It
      waits for the press's own focus, which lands a render later. */
@@ -452,9 +410,5 @@ export function SceneScreen({ id }: { id: SceneId }) {
     }, 100);
     return () => clearTimeout(settle);
   }, [id]);
-  return (
-    <Frame at={at} label={label} rail={rail}>
-      <Body />
-    </Frame>
-  );
+  return <Drawn />;
 }
