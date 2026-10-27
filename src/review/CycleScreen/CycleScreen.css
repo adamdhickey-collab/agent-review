@@ -197,7 +197,14 @@
   line-height: var(--leading-body);
 }
 
+/* The person in ink, on white with an ink edge; the agent in slate, the
+   review's color for what the agent says. */
 .cycle__role--designer {
+  border-color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.cycle__role--agent {
   border-color: var(--color-accent-border);
   background: var(--color-accent-subtle);
 }
@@ -212,6 +219,10 @@
 }
 
 .cycle__role--designer dt {
+  color: var(--color-text);
+}
+
+.cycle__role--agent dt {
   color: var(--color-accent);
 }
 
@@ -292,7 +303,7 @@
   top: var(--space-4);
   display: flex;
   flex-direction: column;
-  border: var(--border-width) solid var(--color-band);
+  border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: var(--shadow-menu);
@@ -300,7 +311,7 @@
 }
 
 /* The question, on the band: who it is for in the band's muted ink, the
-   question itself in white. */
+   question itself in the band's ink. */
 .cycle__move-head {
   display: flex;
   flex-direction: column;

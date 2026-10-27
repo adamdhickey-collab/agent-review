@@ -49,3 +49,7 @@ before changing the component, and to run a story's tests after.
   only when it does not.
 - A screen owns data and behaviour; a component owns markup and states.
 - Commit messages say what changed for a reader, in a sentence.
+- Never mark a rounded shape with an edge on one side only (a `border-left`
+  stripe, an `inset 3px 0 0` shadow). Show selected, current or recommended
+  with a full ring, a tint, a badge or elevation. A one-sided line is for
+  square rows and diff lines only.

@@ -781,11 +781,12 @@
   min-width: 0;
 }
 
-/* The decision in view: lifted off the queue's ground, with the warning's
-   solid down its edge. */
+/* The decision in view: lifted off the queue's ground on the warning's tint,
+   ringed all the way round in the warning's edge. Never a stripe down one
+   side: a one-sided edge on a rounded shape bends at the corners. */
 .desk__queue .desk__item[aria-current='true'] {
-  background: var(--color-surface);
-  box-shadow: inset 3px 0 0 var(--color-warning-solid), 0 0 0 var(--border-width) var(--color-border), var(--shadow-raised); /* the edge, so it lifts in the dark too, where the shadow is all but gone */
+  background: var(--color-warning-subtle);
+  box-shadow: 0 0 0 var(--border-width) var(--color-warning-border), var(--shadow-raised); /* the ring, so it lifts in the dark too, where the shadow is all but gone */
 }
 
 .desk__mark {
@@ -900,6 +901,7 @@
 
 .desk__band .icon-btn:hover:not(:disabled) {
   background: var(--color-accent);
+  color: var(--color-text-on-accent);
 }
 
 .desk__band .icon-btn:disabled {

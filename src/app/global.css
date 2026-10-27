@@ -95,6 +95,10 @@ html {
   --color-accent: var(--color-accent-product);
   --color-accent-hover: var(--color-accent-hover-product);
   --color-accent-subtle: var(--color-accent-subtle-product);
+  --color-primary: var(--color-accent-product); /* the product's primary is its accent */
+  --color-primary-hover: var(--color-accent-hover-product);
+  --color-primary-active: var(--color-accent-hover-product);
+  --color-text-on-primary: var(--color-text-on-accent-product);
   --color-success: var(--color-success-product);
   --color-success-subtle: var(--color-success-subtle-product);
   --color-warning: var(--color-warning-product);
