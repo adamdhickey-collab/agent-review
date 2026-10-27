@@ -295,7 +295,7 @@ export const DIRECTIONS: readonly Direction[] = [
   },
   {
     id: 'review',
-    name: 'Review the batch, then archive',
+    name: 'Review batch, then archive',
     does: 'Archive opens a review of the selection, sorted into what’s blocked, what’s active and what’s routine.',
     gains: 'Catches blocked and active rows before the press, and suits a large batch.',
     costs: 'The most steps, and a new pattern for the system to own.',

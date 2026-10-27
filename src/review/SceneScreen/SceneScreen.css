@@ -423,7 +423,7 @@
   background: var(--color-surface);
 }
 
-/* Each name on one line: the longest, "Review the batch, then archive",
+/* Each name on one line: the longest, once "Review the batch, then archive",
    wrapped at the large size and pushed its cost down out of line with the
    other two. */
 .stage-scene__way-name {

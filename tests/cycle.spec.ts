@@ -112,13 +112,13 @@ test('the cycle can be done from the keyboard, and its choices survive a reload'
   await press(page, 'Try confirm first, naming who');
   await press(page, 'Archive');
   await press(page, 'Archive 5 customers');
-  await press(page, 'Try review the batch, then archive');
+  await press(page, 'Try review batch, then archive');
   await press(page, 'Archive');
   await press(page, 'Archive 4 customers');
   await expect(page.locator('.cycle__tries li[data-done]')).toHaveCount(3);
   await press(page, /Next Evaluate/, 'link');
 
-  await expect(page.locator('.cycle__move-lead')).toContainText('The agent recommends Review the batch, then archive');
+  await expect(page.locator('.cycle__move-lead')).toContainText('The agent recommends Review batch, then archive');
   await press(page, 'Choose Confirm first, naming who');
   await press(page, /Next Delegate/, 'link');
   await press(page, 'Send the brief');
