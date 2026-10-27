@@ -112,21 +112,26 @@
 }
 
 /* The three directions, one column each: a name, the screen after its next
-   step, and what it costs. A column is too narrow for the table's numbers,
-   so it keeps the company and its status. */
+   step, and what it costs. Each screen is 16:9, like every picture of the
+   app, and the three rows line up across the columns (a subgrid), so the
+   Chosen badge lifts its name rather than pushing its screen down. The
+   block sits in the middle of the frame. A column is too narrow for the
+   table's numbers, so it keeps the company and its status. */
 .scene__three {
   display: grid;
   flex: 1;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: minmax(0, 1fr);
-  gap: var(--space-3);
+  grid-template-rows: auto auto auto;
+  align-content: center;
+  gap: var(--space-2) var(--space-3);
   min-height: 0;
 }
 
 .scene__way {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  align-items: end;
   min-width: 0;
 }
 
@@ -141,8 +146,16 @@
 }
 
 .scene__way .cycle__product-frame {
+  aspect-ratio: 16 / 9;
   padding: var(--space-2);
   overflow: hidden;
+}
+
+/* The screen a step smaller than the app's own, a frame's scale like the
+   frame's size, so each one's next step (Undo, the question's two buttons,
+   the reason it can't archive) clears the 16:9 frame's foot. */
+.scene__way .cycle__product-frame > div {
+  zoom: 0.85;
 }
 
 .scene__way th:nth-child(n + 4),
@@ -151,6 +164,7 @@
 }
 
 .scene__way-cost {
+  align-self: start;
   color: var(--color-text-secondary);
   line-height: var(--leading-ui);
 }
@@ -162,11 +176,6 @@
 /* An answer not chosen is its name only (Answers, in SceneScreen.tsx). */
 .scene .cycle__choice:not([data-chosen]) .cycle__choice-pick {
   display: none;
-}
-
-.scene__way .cycle__product-frame {
-  flex: 1;
-  min-height: 0;
 }
 
 /* A move whose question runs to three lines takes a wider column. */
