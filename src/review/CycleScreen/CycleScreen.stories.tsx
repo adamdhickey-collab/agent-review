@@ -85,7 +85,7 @@ export const Define: Story = {
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Archive now, undo after');
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Nothing leaves without a way back' }));
     await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('No active customer is archived without being named first.');
-    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Review the batch, then archive');
+    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Review batch, then archive');
   },
 };
 
@@ -121,9 +121,9 @@ export const Evaluate: Story = {
   parameters: { docs: { description: { story: 'The findings, each with its source, and the choice of direction. A requirement the chosen direction already meets says so instead of offering a box.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvasElement.querySelector('.cycle__move-lead')).toHaveTextContent('The agent recommends Review the batch, then archive');
-    await userEvent.click(canvas.getByRole('button', { name: 'Choose Review the batch, then archive' }));
-    await expect(canvas.getAllByText('Review the batch, then archive does this already.')).toHaveLength(2);
+    await expect(canvasElement.querySelector('.cycle__move-lead')).toHaveTextContent('The agent recommends Review batch, then archive');
+    await userEvent.click(canvas.getByRole('button', { name: 'Choose Review batch, then archive' }));
+    await expect(canvas.getAllByText('Review batch, then archive does this already.')).toHaveLength(2);
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Archive now, undo after' }));
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('You chose against its recommendation');
   },
