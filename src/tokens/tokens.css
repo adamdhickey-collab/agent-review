@@ -347,9 +347,10 @@
   --color-scrim: light-dark(rgba(16, 24, 32, 0.36), rgba(0, 0, 0, 0.6)); /* behind a dialog */
 
   /* The band, since 2026-10-24, a light one since 2026-10-26: the head of
-     the decision a person is asked (DelegationScreen.tsx, THE DESK, and the
-     cycle's move), a warm-grey fill over the white card, which is raised on
-     the menu's shadow so the question is still the first thing the eye
+     the decision a person is asked (DelegationScreen.tsx, THE DESK; the
+     cycle's move sat on it until 2026-10-28, and is on the accent's tint
+     now), a warm-grey fill over the white card, which is raised on the
+     menu's shadow so the question is still the first thing the eye
      finds. Raised is a control or a row on it. On the band the ink clears
      12.9:1 and the muted ink 5.7:1; raised, 10.8:1 and 4.56:1. In the dark
      the band is the sunken step of Night sage: 13.7:1 and 6.7:1, raised
