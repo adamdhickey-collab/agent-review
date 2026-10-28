@@ -381,9 +381,14 @@
   background: var(--color-accent-subtle);
 }
 
-/* The press, the card's width, so an answer reads as a thing to press. */
+/* The press, the card's width, so an answer reads as a thing to press. Its
+   edge is the accent rather than the control grey: on the card's own
+   hairline a grey edge read as one more rectangle, and this is the one in
+   the card a person is meant to press. Chosen adds the ink and the card's
+   tint, so the two still differ by more than the edge. */
 .cycle__choice-pick {
   align-self: stretch;
+  border-color: var(--color-accent);
 }
 
 .cycle__choice[data-chosen] .cycle__choice-pick {
