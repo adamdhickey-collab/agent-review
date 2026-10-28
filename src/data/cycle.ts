@@ -407,10 +407,10 @@ export function stopOf(direction: DirectionId): Stop {
       return {
         kind: 'approval',
         question: 'The undo bar is a new pattern. Keep it on this screen, or propose it to the system?',
-        why: 'Rule 12: a new interaction pattern isn’t the agent’s to add to the system. The system is Priya’s.',
+        why: 'Rule 12: a new interaction pattern isn’t the agent’s to add to the system. The system belongs to the design systems lead.',
         answers: [
           { id: 'local', name: 'Keep it on this screen', means: 'Within the agent’s authority. Other screens don’t get it yet.', recommended: true },
-          { id: 'system', name: 'Propose it to the system', means: 'The agent drafts a component and a story, and Priya decides.' },
+          { id: 'system', name: 'Propose it to the system', means: 'The agent drafts a component and a story, and the design systems lead decides.' },
         ],
       };
     case 'confirm':
@@ -430,7 +430,7 @@ export function stopOf(direction: DirectionId): Stop {
         why: 'Rule 10: a new component needs a reason in writing, and a shared one needs its owner.',
         answers: [
           { id: 'inline', name: 'Build it inline', means: 'Within the agent’s authority, from parts the system has.', recommended: true },
-          { id: 'panel', name: 'Propose a Panel', means: 'The agent drafts it with stories, and Priya decides. The screen uses the inline version until she does.' },
+          { id: 'panel', name: 'Propose a Panel', means: 'The agent drafts it with stories, and the design systems lead decides. The screen uses the inline version until they do.' },
         ],
       };
   }
