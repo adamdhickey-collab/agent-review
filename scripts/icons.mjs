@@ -74,7 +74,7 @@ const MAP = {
   play: ['play', 'fill'],
   book: ['book-open', 'fill'],
   contrast: ['circle-half', 'fill'],
-  bot: ['robot', 'fill'],
+  bot: ['terminal-window', 'fill'],
   user: ['user', 'fill'],
   clock: ['clock', 'fill'],
   send: ['paper-plane-tilt', 'fill'],
