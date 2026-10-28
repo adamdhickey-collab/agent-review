@@ -7,11 +7,10 @@ import { EXPLORED, seedCycle } from './seed';
    1. "/" is the cycle's first stage, with no screen in front of it, and the
       bar there offers no other place in the product. A run's own address
       is that run. The product's name goes to the first stage from anywhere.
-   2. The cycle is a script: the way on waits for the stage's move (Continue
-      in the move; wide, that is the only one, and under 64rem the foot's
-      Next as well, since 2026-10-28), the rail links only the stages that
-      are open, and an address further on than the reader has come sends
-      them to the first open stage.
+   2. The cycle is a script: the way on, Continue in the move, waits for
+      the stage's move (the foot offers only Back since 2026-10-28), the
+      rail links only the stages that are open, and an address further on
+      than the reader has come sends them to the first open stage.
    3. Each open stage is an address, and back and forward step between them.
    4. The whole cycle can be done from the keyboard, Explore included, and a
       choice made in one stage is what a later stage shows. The choices
@@ -68,12 +67,11 @@ test('the product’s name goes to the first stage', async ({ page }) => {
   await arrived(page, 'Something is wrong with archiving. What, exactly?');
 });
 
-test('the way on waits for the move, and a stage further on sends the reader back to the open one', async ({ page }) => {
+test('Continue waits for the move, and a stage further on sends the reader back to the open one', async ({ page }) => {
   await open(page, '#/cycle/discover');
   await expect(page.getByRole('button', { name: /Continue to/ })).toHaveCount(0);
   await expect(page.getByRole('link', { name: /Next/ })).toHaveCount(0);
-  /* Wide, the foot says nothing about the way on: the move beside the work is it. */
-  await expect(page.locator('.cycle__pager-wait')).toBeHidden();
+  await expect(page.locator('.cycle__pager')).toHaveCount(0);
   await expect(page.locator('.cycle__rail a')).toHaveCount(1);
 
   await open(page, '#/cycle/evaluate');
@@ -87,18 +85,7 @@ test('the way on waits for the move, and a stage further on sends the reader bac
   await page.getByRole('button', { name: 'Continue to Define' }).click();
   await expect(page).toHaveURL(/#\/cycle\/define$/);
   await arrived(page, 'What are we solving, and what wins when the goals pull apart?');
-});
-
-test('under 64rem the foot’s Next is a second way on, and waits with the move', async ({ page }) => {
-  await page.setViewportSize({ width: 1000, height: 900 });
-  await open(page, '#/cycle/discover');
-  await expect(page.getByRole('link', { name: /Next/ })).toHaveCount(0);
-  await expect(page.locator('.cycle__pager-wait')).toHaveText('Define opens after your move');
-  await page.getByRole('button', { name: 'Choose Correct it' }).click();
-  await expect(page.getByRole('button', { name: 'Continue to Define' })).toBeVisible();
-  await page.getByRole('link', { name: /Next Define/ }).click();
-  await expect(page).toHaveURL(/#\/cycle\/define$/);
-  await arrived(page, 'What are we solving, and what wins when the goals pull apart?');
+  await expect(page.getByRole('link', { name: 'Back Discover' })).toBeVisible();
 });
 
 test('an open stage is an address, and back and forward step between them', async ({ page }) => {

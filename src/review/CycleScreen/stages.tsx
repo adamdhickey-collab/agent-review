@@ -57,8 +57,9 @@ import { drawMarkOn } from '../ComponentPreview/mark';
 /** The person's move: the one raised panel on a stage, as the decision is on
     the desk, and like the desk's its question sits on the band, the one solid
     ground the light scheme has, so it is the first thing the eye finds. Once
-    the stage's call is made, the way on is here too, where the eye already
-    is, rather than only at the foot of a long page. */
+    the stage's call is made, the way on is here, where the eye already is;
+    the foot offers only Back (since 2026-10-28; its Next was a second
+    button for the same step). */
 function Move({ stage, title, children }: { stage: StageId; title: string; children: ReactNode }) {
   const { cycle } = useStore();
   const next = STAGES[stageIndex(stage) + 1];

@@ -88,7 +88,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
       <header className="shell__bar">
         <a className="shell__brand" href={href({ name: 'cycle', stage: 'discover' })} aria-label="Agent Review, start of the design cycle">
           <span className="shell__mark" aria-hidden="true">
-            <Icon name="check" size={14} />
+            <Icon name="bot" size={14} />
           </span>
           <span>Agent Review</span>
         </a>

@@ -57,18 +57,18 @@ type Story = StoryObj<typeof meta>;
 export const Discover: Story = {
   args: { stage: 'discover' },
   decorators: [inStore(initialCycle())],
-  parameters: { docs: { description: { story: 'The front door: the scenario in one line under the question, the evidence and the agent’s summary, each line marked observation, interpretation or assumption. The way on waits for the move (Continue in the move; the foot’s Next too, under 64rem), and the rail links only the stages that are open. Correcting the assumption changes the brief’s problem.' } } },
+  parameters: { docs: { description: { story: 'The front door: the scenario in one line under the question, the evidence and the agent’s summary, each line marked observation, interpretation or assumption. Continue, in the move, waits for the move, and the rail links only the stages that are open; the foot offers only Back. Correcting the assumption changes the brief’s problem.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('Something is wrong with archiving');
     await expect(canvasElement.querySelector('.cycle__setup')).toHaveTextContent('You’re Adam, a product designer');
     await expect(canvas.queryByRole('button', { name: /Continue to/ })).toBeNull();
     await expect(canvas.queryByRole('link', { name: /Next/ })).toBeNull();
-    /* The foot’s note is in the markup for the narrow layout; the story renders wide, where it is hidden. */
-    await expect(canvasElement.querySelector('.cycle__pager-wait')).toHaveTextContent('Define opens after your move');
+    await expect(canvasElement.querySelector('.cycle__pager')).toBeNull();
     await expect(canvas.queryByRole('link', { name: /Define/ })).toBeNull();
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Correct it' }));
     await expect(canvas.getByRole('button', { name: 'Continue to Define' })).toBeVisible();
+    await expect(canvas.queryByRole('link', { name: /Next/ })).toBeNull();
     await expect(canvas.getByRole('link', { name: 'Define' })).toBeVisible();
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('People can’t see or undo an archive.');
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Keep it' }));
