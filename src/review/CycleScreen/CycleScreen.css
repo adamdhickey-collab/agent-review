@@ -148,11 +148,13 @@
 
 /* ---------- the stage's question, and who does what ---------- */
 
+/* The intro takes the column's whole width, so the two role tiles under
+   the question run edge to edge with the brief below them; the question
+   and the setup keep a reading measure of their own. */
 .cycle__intro {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  max-width: 52rem;
 }
 
 /* Where the reader is, as a tag in the accent's tint over the question. */
@@ -172,6 +174,7 @@
   font-size: var(--text-3xl);
   font-weight: var(--weight-regular); /* Crimson is regular only, as on adamhickey.com */
   line-height: var(--leading-tight);
+  max-width: 52rem;
 }
 
 .cycle__title:focus-visible {
@@ -179,12 +182,15 @@
 }
 
 /* Who does what: two short tiles, the designer's first, each under its
-   mark, both in the reading ink on the page's surface with an ink edge.
-   Until 2026-10-28 the agent's sat on the accent's tint with an accent
-   edge, the same blue as a chosen correction below, so on Discover the
-   eye went to the agent's tile and to "Correct it" at once and could not
-   tell which was the thing to act on. The tiles are an aside about who
-   does what; the accent is for the move, and these two take none of it. */
+   mark, both in the reading ink on the page's surface, on the hairline
+   the brief under them sits on, so the three read as one set. Until
+   2026-10-28 the agent's sat on the accent's tint with an accent edge,
+   the same blue as a chosen correction below, so on Discover the eye
+   went to the agent's tile and to "Correct it" at once and could not tell
+   which was the thing to act on; and both had an ink edge for a day,
+   which made the pair louder than the brief they introduce, a white
+   outline in the dark theme. The tiles are an aside about who does what;
+   the accent is for the move, and these two take none of it. */
 .cycle__roles {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -197,7 +203,7 @@
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-3) var(--space-4);
-  border: var(--border-width) solid var(--color-text);
+  border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text);
@@ -213,6 +219,7 @@
 }
 
 .cycle__setup {
+  max-width: 52rem;
   color: var(--color-text-secondary);
   font-size: var(--text-md);
   line-height: var(--leading-body);
