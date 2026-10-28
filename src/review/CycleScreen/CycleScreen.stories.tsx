@@ -92,14 +92,31 @@ export const Define: Story = {
 export const Explore: Story = {
   args: { stage: 'explore' },
   decorators: [inStore(framed)],
-  parameters: { a11y: { test: 'error' }, docs: { description: { story: 'Three working directions, a tab each, and the comparison. Each opens with the same batch selected, so the move is to press Archive and watch; once a direction is tried the move says what it showed and offers the next one.' } } },
+  parameters: {
+    a11y: { test: 'error' },
+    docs: {
+      description: {
+        story:
+          'Three working directions, a tab each, and the comparison. Each opens with the same batch selected, and the move carries one press at a time: its button presses the screen’s next control, which is marked in the screen, so the question a direction asks is answered from the same place Archive was pressed. Once a direction is tried the move says what it showed and offers the next one.',
+      },
+    },
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Archive' }));
+    const mark = canvasElement.querySelector<HTMLElement>('.cycle__next-mark')!;
+    await expect(mark).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Press Archive' }));
     await expect(canvasElement.querySelector('.cycle__tries li[data-done]')).toHaveTextContent('nothing named them first');
-    await userEvent.click(canvas.getByRole('button', { name: 'Try confirm first, naming who' }));
+    await expect(mark).not.toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: /^Try direction 2/ }));
     await expect(canvasElement.querySelector('.cycle__direction-does')).toHaveTextContent('Archive asks first');
     await expect(canvas.getByText('5 selected')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Press Archive' }));
+    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Relay asks before anything leaves');
+    await expect(mark).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Press Archive 5 customers' }));
+    await expect(canvasElement.querySelectorAll('.cycle__tries li[data-done]')).toHaveLength(2);
+    await expect(canvas.getByRole('button', { name: /^Try direction 3/ })).toBeVisible();
   },
 };
 

@@ -622,6 +622,30 @@ whole cycle from the keyboard, Explore's three directions included.
 `tests/seed.ts` seeds the choices that open a later stage, for the phone
 check and the visual baseline that start there.
 
+### Explore, one press at a time (2026-10-28)
+
+A reader stuck in Explore said where: after the move pressed Archive in
+the second direction, it said "It's asking something. Finish it in the
+screen", and the question's own button, a compact red one in the bar, or
+under the review's list below the fold, was nowhere they thought to look.
+The move's job on this stage is to be the one obvious place to press, and
+it had handed that job to the screen halfway through.
+
+Now `ArchiveFlow` says where it is (`onPhase`: the batch selected, the
+question open, the review open, done) with the label of the one press
+that moves it on, marks that control with `data-next`, and presses it on
+`next()` through its ref. Explore reads all three. Until a direction is
+tried, the move's primary is that press ("Press Archive", then "Press
+Archive 5 customers"), with one line on what Relay did in between
+(`ASKING` in `data/cycle.ts`); the screen's control is marked with the
+preview's own mark (`mark.ts`, "Press this"), drawn in the frame above
+the screen and in the ink, not the accent, for the preview's reason; and
+each press brings what it opened into view. The screen stays working: a
+box cleared in the review moves the label to "Press Archive 3
+customers", and a selection cleared offers the batch again. Once tried,
+the move offers the next direction by number, and after all three,
+Continue.
+
 ## Exploration: three information architectures
 
 Pencil is not available here (no MCP server, no application), so the

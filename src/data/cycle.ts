@@ -313,6 +313,15 @@ export const SHOWED: Record<DirectionId, string> = {
   review: 'Monarch Dental Group was set aside before the press, and the three active customers were named, each one yours to keep out. It took the most steps.',
 };
 
+/** What a direction says once Archive is pressed and before anything leaves,
+    for the two that ask: the move says it beside the screen, with the press
+    that answers. Undo asks nothing, so it says nothing. */
+export const ASKING: Record<DirectionId, string | null> = {
+  undo: null,
+  confirm: 'Relay asks before anything leaves, and names the three active customers.',
+  review: 'Relay sorted the five before anything leaves: one it can’t archive, three to check. Clear a box to keep a customer.',
+};
+
 export function directionOf(id: DirectionId): Direction {
   return DIRECTIONS.find((d) => d.id === id) ?? DIRECTIONS[0];
 }
