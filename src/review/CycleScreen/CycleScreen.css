@@ -649,19 +649,45 @@
   line-height: var(--leading-body);
 }
 
+/* Gains and costs: two tiles under the sentence, built as the role tiles
+   over the brief are (the hairline, the panel's radius, a step of fill),
+   so the trade-off reads as one set rather than four loose lines over the
+   product. Each label carries its meaning's ink with its mark, the plus
+   in success and the minus in warning, and the word beside the mark says
+   what the ink means. Neither direction is free, so neither tile is
+   louder than the other: the same fill, the same edge, the body in the
+   reading ink on both. */
 .cycle__tradeoff {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
+  gap: var(--space-3);
+}
+
+.cycle__tradeoff-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
 }
 
 .cycle__tradeoff dt {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  color: var(--color-text-secondary);
+  gap: var(--space-2);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
+  line-height: var(--leading-ui);
+}
+
+.cycle__tradeoff-item--gains dt {
+  color: var(--color-success);
+}
+
+.cycle__tradeoff-item--costs dt {
+  color: var(--color-warning);
 }
 
 .cycle__tradeoff dd {
