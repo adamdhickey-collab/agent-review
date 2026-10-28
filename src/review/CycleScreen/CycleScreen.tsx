@@ -22,9 +22,12 @@ import './CycleScreen.css';
    being followed: Next walked a reader through four stages without a
    choice, each saying what it would show once one was made, and then
    Delegate sent them back to Evaluate. Now a stage opens once every stage
-   before it is decided. The rail links only those; Next waits for the
-   stage's move and says so; and an address further on than the reader has
-   come shows the stage's question and sends them to the first open one.
+   before it is decided. The rail links only those; the way on is Continue,
+   in the move, which appears once the stage's call is made (since
+   2026-10-28 the foot offers only Back: its own Next was a second button
+   for the same step, and a reader asked why there were two); and an
+   address further on than the reader has come shows the stage's question
+   and sends them to the first open one.
 
    The cycle is the front door (since 2026-10-26), so Discover carries the
    scenario's setup in one line, under its question, where the start screen
@@ -38,10 +41,8 @@ export function CycleScreen({ stage }: { stage: StageId }) {
   const at = stageIndex(stage);
   const s = stageOf(stage);
   const prev = STAGES[at - 1];
-  const next = STAGES[at + 1];
   const open = firstOpen(cycle);
   const locked = at > open;
-  const done = decided(cycle, stage);
   const [resetting, setResetting] = useState(false);
 
   const body: Record<StageId, ReactNode> = {
@@ -153,35 +154,16 @@ export function CycleScreen({ stage }: { stage: StageId }) {
 
       {locked ? <Needs stage={STAGES[open].id} what={`Start with ${STAGES[open].name}`} description="Each stage opens once you’ve made the call in the one before it." /> : body[stage]}
 
-      <nav className="cycle__pager" aria-label="Stage">
-        {prev && at - 1 <= open ? (
+      {prev && at - 1 <= open ? (
+        <nav className="cycle__pager" aria-label="Stage">
           <a className="cycle__pager-link" href={href({ name: 'cycle', stage: prev.id })}>
             <Icon name="arrow-left" size={14} />
             <span>
               <span className="cycle__pager-dir">Back</span> {prev.name}
             </span>
           </a>
-        ) : (
-          <span />
-        )}
-        {next && !locked ? (
-          done ? (
-            <a className="cycle__pager-link cycle__pager-link--next" href={href({ name: 'cycle', stage: next.id })}>
-              <span>
-                <span className="cycle__pager-dir">Next</span> {next.name}
-              </span>
-              <Icon name="arrow-right" size={14} />
-            </a>
-          ) : (
-            <p className="cycle__pager-wait">
-              <Icon name="lock" size={14} />
-              <span>
-                {next.name} opens after your move
-              </span>
-            </p>
-          )
-        ) : null}
-      </nav>
+        </nav>
+      ) : null}
     </div>
   );
 }

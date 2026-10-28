@@ -1,6 +1,6 @@
 /* THE DESIGN CYCLE (CycleScreen.tsx, stages.tsx). The head (the scenario
    and the stages as a rail), the stage's question and who does what in it,
-   then the work and the person's move side by side, and the pager.
+   then the work and the person's move side by side, and the foot's Back.
 
    The work sits on the page's own ground in white sections; the move is
    the one raised panel, its question on the accent's tint (since
@@ -927,6 +927,8 @@
 
 /* ---------- the pager ---------- */
 
+/* Back only, since 2026-10-28: the way on is Continue in the move, and a
+   Next here was a second button for the same step. */
 .cycle__pager {
   display: flex;
   justify-content: space-between;
@@ -947,33 +949,6 @@
 
 .cycle__pager-link:hover {
   color: var(--color-accent);
-}
-
-/* The foot's Next is the second way on; Continue in the move is the first,
-   so this one is drawn as an ordinary action. */
-.cycle__pager-link--next {
-  margin-left: auto;
-  padding: 0 var(--space-3);
-  border: var(--border-width) solid var(--color-border-control);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-control);
-  color: var(--color-text);
-}
-
-.cycle__pager-link--next:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text);
-}
-
-.cycle__pager-wait {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--control-height);
-  margin-left: auto;
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
 }
 
 .cycle__pager-dir {
@@ -1000,7 +975,7 @@
   }
 
   /* The foot stays under the work: the move sticks inside the whole page
-     (its own box is gone), so in the second column it would ride over Next. */
+     (its own box is gone), so in the second column it would ride over Back. */
   .cycle__pager {
     grid-column: 1;
   }

@@ -595,9 +595,11 @@ study found three things that made it read as unscripted.
   product's name goes to Discover.
 - **Next ran ahead of the reader.** Pressed without a choice, it walked
   through four stages, each saying what it would show once one was made,
-  and then Delegate sent the reader back to Evaluate. Next waits now ("Define
-  opens after your move"), and so does the rail (above, Order is
-  enforced).
+  and then Delegate sent the reader back to Evaluate. The way on waits
+  now: Continue, in the move, appears once the stage's call is made, and
+  so does the rail (above, Order is enforced). The foot's own Next, and
+  the "Define opens after your move" note that held its place, came off
+  on 2026-10-28: two buttons for one step, and a reader asked why.
 - **Explore was a sandbox in a script.** "Select a few customers and
   archive them" across three tabs, with a checklist of four events per
   direction and a tally, left the reader to invent the task. Each

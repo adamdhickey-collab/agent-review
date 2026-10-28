@@ -7,9 +7,10 @@ import { EXPLORED, seedCycle } from './seed';
    1. "/" is the cycle's first stage, with no screen in front of it, and the
       bar there offers no other place in the product. A run's own address
       is that run. The product's name goes to the first stage from anywhere.
-   2. The cycle is a script: Next waits for the stage's move, the rail links
-      only the stages that are open, and an address further on than the
-      reader has come sends them to the first open stage.
+   2. The cycle is a script: the way on, Continue in the move, waits for
+      the stage's move (the foot offers only Back since 2026-10-28), the
+      rail links only the stages that are open, and an address further on
+      than the reader has come sends them to the first open stage.
    3. Each open stage is an address, and back and forward step between them.
    4. The whole cycle can be done from the keyboard, Explore included, and a
       choice made in one stage is what a later stage shows. The choices
@@ -66,10 +67,11 @@ test('the product’s name goes to the first stage', async ({ page }) => {
   await arrived(page, 'Something is wrong with archiving. What, exactly?');
 });
 
-test('Next waits for the move, and a stage further on sends the reader back to the open one', async ({ page }) => {
+test('Continue waits for the move, and a stage further on sends the reader back to the open one', async ({ page }) => {
   await open(page, '#/cycle/discover');
+  await expect(page.getByRole('button', { name: /Continue to/ })).toHaveCount(0);
   await expect(page.getByRole('link', { name: /Next/ })).toHaveCount(0);
-  await expect(page.locator('.cycle__pager-wait')).toHaveText('Define opens after your move');
+  await expect(page.locator('.cycle__pager')).toHaveCount(0);
   await expect(page.locator('.cycle__rail a')).toHaveCount(1);
 
   await open(page, '#/cycle/evaluate');
@@ -80,9 +82,10 @@ test('Next waits for the move, and a stage further on sends the reader back to t
 
   await page.getByRole('button', { name: 'Choose Correct it' }).click();
   await expect(page.locator('.cycle__rail a')).toHaveCount(2);
-  await page.getByRole('link', { name: /Next Define/ }).click();
+  await page.getByRole('button', { name: 'Continue to Define' }).click();
   await expect(page).toHaveURL(/#\/cycle\/define$/);
   await arrived(page, 'What are we solving, and what wins when the goals pull apart?');
+  await expect(page.getByRole('link', { name: 'Back Discover' })).toBeVisible();
 });
 
 test('an open stage is an address, and back and forward step between them', async ({ page }) => {
@@ -90,7 +93,7 @@ test('an open stage is an address, and back and forward step between them', asyn
   await open(page, '#/cycle/evaluate');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Which direction, and what has to be true of it?');
   await expect(page).toHaveTitle('Design cycle: Evaluate · Agent Review');
-  await page.getByRole('link', { name: /Next Delegate/ }).click();
+  await page.getByRole('button', { name: 'Continue to Delegate' }).click();
   await expect(page).toHaveURL(/#\/cycle\/delegate$/);
   await page.goBack();
   await expect(page).toHaveURL(/#\/cycle\/evaluate$/);
@@ -102,9 +105,9 @@ test('an open stage is an address, and back and forward step between them', asyn
 test('the cycle can be done from the keyboard, and its choices survive a reload', async ({ page }) => {
   await open(page, '#/');
   await press(page, 'Choose Correct it');
-  await press(page, /Next Define/, 'link');
+  await press(page, 'Continue to Define');
   await press(page, 'Choose Nothing leaves without a way back');
-  await press(page, /Next Explore/, 'link');
+  await press(page, 'Continue to Explore');
 
   /* Explore: the same batch, three ways, every press made from the move
      (since 2026-10-28), which presses the screen's marked control. */
@@ -118,11 +121,11 @@ test('the cycle can be done from the keyboard, and its choices survive a reload'
   await press(page, 'Press Archive');
   await press(page, 'Press Archive 4 customers');
   await expect(page.locator('.cycle__tries li[data-done]')).toHaveCount(3);
-  await press(page, /Next Evaluate/, 'link');
+  await press(page, 'Continue to Evaluate');
 
   await expect(page.locator('.cycle__move-lead')).toContainText('The agent recommends Review batch, then archive');
   await press(page, 'Choose Confirm first, naming who');
-  await press(page, /Next Delegate/, 'link');
+  await press(page, 'Continue to Delegate');
   await press(page, 'Send the brief');
   await expect(page.getByText('Needs judgment')).toBeVisible();
   await press(page, 'Choose Status is Active');
