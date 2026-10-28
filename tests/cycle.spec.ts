@@ -106,15 +106,17 @@ test('the cycle can be done from the keyboard, and its choices survive a reload'
   await press(page, 'Choose Nothing leaves without a way back');
   await press(page, /Next Explore/, 'link');
 
-  /* Explore: the same batch, three ways, each started from the move. */
-  await press(page, 'Archive');
+  /* Explore: the same batch, three ways, every press made from the move
+     (since 2026-10-28), which presses the screen's marked control. */
+  await press(page, 'Press Archive');
   await expect(page.locator('.cycle__tries li[data-done]')).toHaveCount(1);
-  await press(page, 'Try confirm first, naming who');
-  await press(page, 'Archive');
-  await press(page, 'Archive 5 customers');
-  await press(page, 'Try review batch, then archive');
-  await press(page, 'Archive');
-  await press(page, 'Archive 4 customers');
+  await press(page, /Try direction 2/);
+  await press(page, 'Press Archive');
+  await expect(page.locator('.cycle__next-mark')).toBeVisible();
+  await press(page, 'Press Archive 5 customers');
+  await press(page, /Try direction 3/);
+  await press(page, 'Press Archive');
+  await press(page, 'Press Archive 4 customers');
   await expect(page.locator('.cycle__tries li[data-done]')).toHaveCount(3);
   await press(page, /Next Evaluate/, 'link');
 

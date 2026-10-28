@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useId, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Badge, Button, Cell, Checkbox, EmptyState, HeaderCell, Row, SegmentedControl, Table, Toolbar, type BadgeTone } from '../../components';
 import { customers as allCustomers, formatMrr, STATUS_LABEL, type Customer, type CustomerStatus } from './customers';
 import './ArchiveFlow.css';
@@ -29,7 +29,15 @@ import './ArchiveFlow.css';
    customer table is the one the experiment's runs changed and its history
    is frozen against it (history/); this one is built from the same parts
    and reports what a person did through onEvent, which is how the cycle
-   knows what was tried. */
+   knows what was tried.
+
+   Since 2026-10-28 it also says where it is and what one press moves it
+   on: onPhase reports the phase (the batch selected, the question open,
+   the review open, done) with the label of that press, the button for it
+   carries data-next, and next() on the ref presses it. The cycle's Explore
+   reads all three, so its move can offer the same press beside the screen
+   and mark the control here, after a reader pressed Archive from the move
+   and then could not find the question's button in the screen. */
 
 export type ArchiveDirection = 'undo' | 'confirm' | 'review';
 
@@ -46,6 +54,16 @@ export interface ArchiveFeatures {
 
 export type ArchiveEvent = 'archived' | 'undone' | 'restored' | 'blocked' | 'active-archived';
 
+/** Where the flow is: idle (nothing selected, or the Archived view),
+    selected (the bar offers Archive), asking (the confirm question is open),
+    reviewing (the review is open), done (the last action's bar shows). */
+export type ArchivePhase = 'idle' | 'selected' | 'asking' | 'reviewing' | 'done';
+
+export interface ArchiveFlowHandle {
+  /** Presses the one control that moves the flow on, if there is one. */
+  next(): boolean;
+}
+
 export interface ArchiveFlowProps {
   direction: ArchiveDirection;
   features?: Partial<ArchiveFeatures>;
@@ -60,6 +78,8 @@ export interface ArchiveFlowProps {
   initialArchived?: string[];
   initialView?: 'current' | 'archived';
   onEvent?: (event: ArchiveEvent) => void;
+  /** The phase, and the label of the press that moves it on, or null when none does. */
+  onPhase?: (phase: ArchivePhase, next: string | null) => void;
 }
 
 const STATUS_TONE: Record<CustomerStatus, BadgeTone> = {
@@ -91,17 +111,10 @@ interface Result {
   undoable: boolean;
 }
 
-export function ArchiveFlow({
-  direction,
-  features = {},
-  activeRule = 'status',
-  customers = allCustomers,
-  initialSelection = [],
-  initialStep = false,
-  initialArchived = [],
-  initialView = 'current',
-  onEvent,
-}: ArchiveFlowProps) {
+export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(function ArchiveFlow(
+  { direction, features = {}, activeRule = 'status', customers = allCustomers, initialSelection = [], initialStep = false, initialArchived = [], initialView = 'current', onEvent, onPhase },
+  ref,
+) {
   const f: ArchiveFeatures = {
     namesActive: direction !== 'undo' || !!features.namesActive,
     blockedFirst: direction === 'review' || !!features.blockedFirst,
@@ -117,6 +130,7 @@ export function ArchiveFlow({
   const [view, setView] = useState<'current' | 'archived'>(initialView);
   const [status, setStatus] = useState('');
 
+  const root = useRef<HTMLElement>(null);
   const selectAll = useRef<HTMLInputElement>(null);
   const stepButton = useRef<HTMLButtonElement>(null);
   const undoButton = useRef<HTMLButtonElement>(null);
@@ -133,6 +147,20 @@ export function ArchiveFlow({
   /* What the question offers to archive: without blocked-first, the screen
      doesn't know yet that one will fail, so it offers the whole selection. */
   const offered = f.blockedFirst ? going.length : chosen.length;
+
+  /* Where the flow is, and the one press that moves it on. */
+  const phase: ArchivePhase = view !== 'current' ? 'idle' : step && direction === 'confirm' ? 'asking' : step && direction === 'review' ? 'reviewing' : count > 0 ? 'selected' : result ? 'done' : 'idle';
+  const next = phase === 'selected' ? 'Archive' : phase === 'asking' && offered > 0 ? `Archive ${plural(offered)}` : phase === 'reviewing' && going.length > 0 ? `Archive ${plural(going.length)}` : null;
+  useEffect(() => {
+    onPhase?.(phase, next);
+  }, [phase, next, onPhase]);
+  useImperativeHandle(ref, () => ({
+    next() {
+      const button = root.current?.querySelector<HTMLButtonElement>('[data-next]');
+      button?.click();
+      return !!button;
+    },
+  }));
 
   useEffect(() => {
     if (step) {
@@ -217,7 +245,7 @@ export function ArchiveFlow({
   const reviewId = useId();
 
   return (
-    <section className="archive-flow" aria-labelledby={titleId}>
+    <section ref={root} className="archive-flow" aria-labelledby={titleId}>
       <Toolbar
         label="Customers"
         start={
@@ -248,7 +276,7 @@ export function ArchiveFlow({
 
       {view === 'current' && count > 0 && !step ? (
         <Toolbar label="Selected customers" tone="accent" start={<span className="archive-flow__selected">{count} selected</span>}>
-          <Button size="compact" variant="danger" onClick={press}>
+          <Button size="compact" variant="danger" data-next="" onClick={press}>
             Archive
           </Button>
           <Button size="compact" variant="ghost" onClick={() => toggleAll(false)}>
@@ -296,7 +324,7 @@ export function ArchiveFlow({
           <Button size="compact" variant="ghost" onClick={cancel}>
             Cancel
           </Button>
-          <Button ref={stepButton} size="compact" variant="danger" onClick={archive} disabled={offered === 0}>
+          <Button ref={stepButton} size="compact" variant="danger" data-next={offered > 0 ? '' : undefined} onClick={archive} disabled={offered === 0}>
             Archive {plural(offered)}
           </Button>
         </Toolbar>
@@ -360,7 +388,7 @@ export function ArchiveFlow({
             <Button size="compact" variant="ghost" onClick={cancel}>
               Cancel
             </Button>
-            <Button ref={stepButton} size="compact" variant="danger" onClick={archive} disabled={going.length === 0}>
+            <Button ref={stepButton} size="compact" variant="danger" data-next={going.length > 0 ? '' : undefined} onClick={archive} disabled={going.length === 0}>
               Archive {plural(going.length)}
             </Button>
           </div>
@@ -449,7 +477,7 @@ export function ArchiveFlow({
       </p>
     </section>
   );
-}
+});
 
 function sentence(out: Customer[], stopped: Customer[]): string {
   const a = out.length ? `${plural(out.length)} archived.` : 'Nothing archived.';
