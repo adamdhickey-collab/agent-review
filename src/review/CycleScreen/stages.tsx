@@ -488,14 +488,14 @@ export function Explore() {
           <div className="cycle__direction">
             <p className="cycle__direction-does">{d.does}</p>
             <dl className="cycle__tradeoff">
-              <div>
+              <div className="cycle__tradeoff-item cycle__tradeoff-item--gains">
                 <dt>
                   <Icon name="plus" size={14} />
                   Gains
                 </dt>
                 <dd>{d.gains}</dd>
               </div>
-              <div>
+              <div className="cycle__tradeoff-item cycle__tradeoff-item--costs">
                 <dt>
                   <Icon name="minus" size={14} />
                   Costs
