@@ -134,14 +134,14 @@ export function CycleScreen({ stage }: { stage: StageId }) {
           </p>
         ) : null}
         <dl className="cycle__roles">
-          <div className="cycle__role cycle__role--designer">
+          <div className="cycle__role">
             <dt>
               <Icon name="user" size={14} />
               Adam, the designer
             </dt>
             <dd>{s.designer}</dd>
           </div>
-          <div className="cycle__role cycle__role--agent">
+          <div className="cycle__role">
             <dt>
               <Icon name="bot" size={14} />
               The agent
