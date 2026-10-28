@@ -1,9 +1,10 @@
-import { useState, type ReactNode } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState, type ReactNode, type Ref } from 'react';
 import { Badge, Button, Cell, Checkbox, EmptyState, HeaderCell, Icon, IconSetContext, Row, Table, Tabs, TestStatus, TextArea } from '../../components';
 import { href } from '../../app/router';
 import { useStore } from '../../app/store';
 import {
   activeRule,
+  ASKING,
   BOUNDARIES,
   briefOf,
   buildOf,
@@ -42,7 +43,8 @@ import {
   type ReadingCall,
   type StageId,
 } from '../../data/cycle';
-import { ArchiveFlow, type ArchiveFeatures } from '../../product/customers/ArchiveFlow';
+import { ArchiveFlow, type ArchiveFeatures, type ArchiveFlowHandle, type ArchivePhase } from '../../product/customers/ArchiveFlow';
+import { drawMarkOn } from '../ComponentPreview/mark';
 
 /* The six stages' content (CycleScreen.tsx frames them). Each is the work
    on the left, large, and the person's move on the right: one choice, said
@@ -126,16 +128,19 @@ export function Needs({ stage, what, description }: { stage: StageId; what: stri
   );
 }
 
-/** Relay, inside the review: the product's surface and icons, always light. */
-function Product({ label, children }: { label: string; children: ReactNode }) {
+/** Relay, inside the review: the product's surface and icons, always light.
+    A stage that marks something in the screen draws the mark in the frame,
+    over the screen, as the preview does (mark.ts). */
+function Product({ label, frameRef, mark, children }: { label: string; frameRef?: Ref<HTMLDivElement>; mark?: ReactNode; children: ReactNode }) {
   return (
     <figure className="cycle__product">
       <figcaption className="cycle__product-label">
         <Icon name="monitor" size={14} />
         {label}
       </figcaption>
-      <div className="cycle__product-frame" data-surface="product">
+      <div ref={frameRef} className="cycle__product-frame" data-surface="product">
         <IconSetContext.Provider value="product">{children}</IconSetContext.Provider>
+        {mark}
       </div>
     </figure>
   );
@@ -355,16 +360,62 @@ export function Explore() {
     setSeed(seed + 1);
   }
   const triedCount = DIRECTIONS.filter((x) => tried(x.id)).length;
-  /* Which run of which direction the move has pressed Archive in: once it
-     has, the next press is the product's own question, not the move's. */
-  const [pressed, setPressed] = useState<string | null>(null);
+
+  /* Where the open direction's screen is and the one press that moves it
+     on, as ArchiveFlow reports them (since 2026-10-28). Until the direction
+     is tried, the move offers that press as its own button and the screen's
+     control is marked, so the way on is always in the one place a reader
+     has learned to look, and they can see where it lands. Before this the
+     move pressed Archive and then said to finish the question in the
+     screen, and a reader could not find its button. */
+  const flow = useRef<ArchiveFlowHandle>(null);
+  const frame = useRef<HTMLDivElement>(null);
+  const mark = useRef<HTMLDivElement>(null);
+  const [phase, setPhase] = useState<ArchivePhase>('selected');
+  const [next, setNext] = useState<string | null>('Archive');
+  const onPhase = useCallback((p: ArchivePhase, label: string | null) => {
+    setPhase(p);
+    setNext(label);
+  }, []);
+  const guiding = !tried(d.id);
   const run = `${d.id}-${seed}`;
-  function toArchive() {
-    const archive = [...document.querySelectorAll<HTMLButtonElement>('.cycle__direction .cycle__product button')].find((b) => b.textContent?.trim() === 'Archive');
-    archive?.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-    archive?.click();
-    setPressed(run);
+  function pressNext() {
+    flow.current?.next();
+    /* What the press opened is in the screen beside the move: bring its own
+       next press, or what it said, into view. */
+    requestAnimationFrame(() => {
+      frame.current?.querySelector<HTMLElement>('[data-next], .archive-flow__result')?.scrollIntoView({ block: 'center', behavior: reduced() ? 'auto' : 'smooth' });
+    });
   }
+  useLayoutEffect(() => {
+    const el = frame.current;
+    const m = mark.current;
+    const screen = el?.querySelector<HTMLElement>('.archive-flow');
+    if (!el || !m || !screen) return;
+    let live = true;
+    let queued = 0;
+    const draw = () => {
+      queued = 0;
+      if (live) drawMarkOn(el, m, guiding ? screen.querySelector<HTMLElement>('[data-next]') : null);
+    };
+    const later = () => {
+      if (live && !queued) queued = requestAnimationFrame(draw);
+    };
+    draw();
+    const ro = new ResizeObserver(later);
+    ro.observe(el);
+    /* The screen, not the frame: the mark is in the frame too, and drawing it
+       is a mutation. */
+    const mo = new MutationObserver(later);
+    mo.observe(screen, { childList: true, subtree: true, characterData: true, attributes: true });
+    document.fonts.ready.then(later);
+    return () => {
+      live = false;
+      cancelAnimationFrame(queued);
+      ro.disconnect();
+      mo.disconnect();
+    };
+  }, [guiding, run]);
 
   const rows: { label: string; matters?: Priority; values: Record<DirectionId, string> }[] = [
     { label: 'Presses to archive a page', matters: 'pace', values: { undo: '2', confirm: '3', review: '3' } },
@@ -378,8 +429,8 @@ export function Explore() {
     <div className="cycle__work">
       <Move stage="explore" title="Archive the same batch three ways">
         <p className="cycle__move-lead">
-          Each direction opens with five customers selected: three active, a trial, and one that can’t be archived. Press Archive, finish what it asks, and see what
-          it tells you, and when.
+          Each direction opens with the same five customers selected: three active, a trial, and one that can’t be archived. One press at a time: the next one is always the
+          button here, and marked in the screen.
         </p>
         <ol className="cycle__tries" role="list">
           {DIRECTIONS.map((x, i) => {
@@ -402,24 +453,23 @@ export function Explore() {
           {triedCount} of {DIRECTIONS.length} tried
           {triedCount < DIRECTIONS.length ? ' · Evaluate opens once all three are' : ''}
         </p>
-        {!tried(d.id) && pressed === run ? (
-          <Consequence>It’s asking something. Finish it in the screen.</Consequence>
-        ) : !tried(d.id) ? (
-          /* The press that moves the stage is in the product beside it, and
-             was easy to miss there, so the move makes it too: it brings the
-             screen into view and presses that Archive, and the product
-             answers as it would have. */
-          <Button variant="primary" trailingIcon="arrow-right" onClick={toArchive}>
-            Archive in direction {DIRECTIONS.indexOf(d) + 1}
+        {guiding && ASKING[d.id] && (phase === 'asking' || phase === 'reviewing') ? <Consequence>{ASKING[d.id]}</Consequence> : null}
+        {guiding && next ? (
+          <Button className="cycle__move-next" variant="primary" trailingIcon="arrow-right" onClick={pressNext}>
+            Press {next}
+          </Button>
+        ) : guiding ? (
+          <Button className="cycle__move-next" variant="primary" leadingIcon="undo" onClick={() => setSeed(seed + 1)}>
+            Select the batch again
           </Button>
         ) : upNext ? (
-          <Button variant="primary" trailingIcon="arrow-right" onClick={() => go(upNext.id)}>
-            Try {upNext.name.toLowerCase()}
+          <Button className="cycle__move-next" variant="primary" trailingIcon="arrow-right" onClick={() => go(upNext.id)}>
+            Try direction {DIRECTIONS.indexOf(upNext) + 1}<span className="visually-hidden">, {upNext.name}</span>
           </Button>
-        ) : tried(d.id) ? (
+        ) : (
           <Consequence>You’ve tried all three. Evaluate lines up what came back.</Consequence>
-        ) : null}
-        {tried(d.id) ? (
+        )}
+        {!guiding ? (
           <Button size="compact" variant="ghost" leadingIcon="undo" onClick={() => setSeed(seed + 1)}>
             Run this one again
           </Button>
@@ -453,12 +503,18 @@ export function Explore() {
                 <dd>{d.costs}</dd>
               </div>
             </dl>
-            <Product label={`Relay · customers · direction ${DIRECTIONS.indexOf(d) + 1}, working`}>
+            <Product
+              label={`Relay · customers · direction ${DIRECTIONS.indexOf(d) + 1}, working`}
+              frameRef={frame}
+              mark={<div ref={mark} className="cycle__next-mark" hidden aria-hidden="true" />}
+            >
               <ArchiveFlow
-                key={`${d.id}-${seed}`}
+                ref={flow}
+                key={run}
                 direction={d.id}
                 initialSelection={BATCH}
                 onEvent={(event) => cycleDo({ type: 'try', direction: d.id, event })}
+                onPhase={onPhase}
               />
             </Product>
           </div>

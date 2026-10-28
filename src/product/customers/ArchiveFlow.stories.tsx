@@ -24,11 +24,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Undo: Story = {
-  args: { direction: 'undo', initialSelection: BATCH, onEvent: fn() },
-  parameters: { docs: { description: { story: 'Archive acts at once. The bar says what left and that Monarch Dental Group didn’t, and Undo takes focus; Undo puts the four back.' } } },
+  args: { direction: 'undo', initialSelection: BATCH, onEvent: fn(), onPhase: fn() },
+  parameters: { docs: { description: { story: 'Archive acts at once. The bar says what left and that Monarch Dental Group didn’t, and Undo takes focus; Undo puts the four back. onPhase reports the batch selected with Archive as the next press, then done with none.' } } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
+    await expect(args.onPhase).toHaveBeenCalledWith('selected', 'Archive');
+    await expect(canvas.getByRole('button', { name: 'Archive' })).toHaveAttribute('data-next');
     await userEvent.click(canvas.getByRole('button', { name: 'Archive' }));
+    await expect(args.onPhase).toHaveBeenCalledWith('done', null);
     await expect(canvasElement.querySelector('.archive-flow__result')).toHaveTextContent('4 customers archived. Monarch Dental Group wasn’t: it has an open invoice.');
     await expect(canvas.getByRole('button', { name: 'Undo' })).toHaveFocus();
     await expect(args.onEvent).toHaveBeenCalledWith('archived');
@@ -71,15 +74,17 @@ export const ConfirmRecentlyActive: Story = {
 };
 
 export const Review: Story = {
-  args: { direction: 'review', initialSelection: BATCH, initialStep: true },
-  parameters: { docs: { description: { story: 'The review: Monarch Dental Group can’t be archived and stays, the three active customers each have a box, and clearing one keeps it out of the batch.' } } },
-  play: async ({ canvasElement }) => {
+  args: { direction: 'review', initialSelection: BATCH, initialStep: true, onPhase: fn() },
+  parameters: { docs: { description: { story: 'The review: Monarch Dental Group can’t be archived and stays, the three active customers each have a box, and clearing one keeps it out of the batch. The next press is the review’s Archive, and its label follows the boxes.' } } },
+  play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { name: 'Review 5 customers before archiving' })).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'Archive 4 customers' })).toHaveFocus();
+    await expect(args.onPhase).toHaveBeenCalledWith('reviewing', 'Archive 4 customers');
     const review = within(canvasElement.querySelector<HTMLElement>('.archive-flow__review')!);
     await userEvent.click(review.getByRole('checkbox', { name: /Halvorsen Freight/ }));
-    await expect(canvas.getByRole('button', { name: 'Archive 3 customers' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Archive 3 customers' })).toHaveAttribute('data-next');
+    await expect(args.onPhase).toHaveBeenCalledWith('reviewing', 'Archive 3 customers');
   },
 };
 
