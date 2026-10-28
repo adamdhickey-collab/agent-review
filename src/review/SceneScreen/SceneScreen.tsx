@@ -78,7 +78,7 @@ function Frame({ at, label, rail = true, children }: { at: StageId; label: strin
       <header className="shell__bar scene__bar">
         <span className="shell__brand">
           <span className="shell__mark" aria-hidden="true">
-            <Icon name="check" size={14} />
+            <Icon name="bot" size={14} />
           </span>
           <span>Agent Review</span>
         </span>
@@ -190,7 +190,7 @@ function StageBar({ at }: { at: StageId }) {
   return (
     <header className="stage-scene__bar">
       <span className="shell__mark" aria-hidden="true">
-        <Icon name="check" size={14} />
+        <Icon name="bot" size={14} />
       </span>
       <ol className="stage-scene__rail" role="list" aria-label="Stages">
         {STAGES.map((st, n) => (
