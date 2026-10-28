@@ -923,7 +923,11 @@
 }
 
 /* The foot's Next is the second way on; Continue in the move is the first,
-   so this one is drawn as an ordinary action. */
+   so this one is drawn as an ordinary action. It is the narrow layout's:
+   there the move sits under the question and the work runs on below it, so
+   a reader at the foot of a stage wants the way on where they are. Wide,
+   the move is beside the work the whole way down, and the foot's Next and
+   its waiting note said the same thing twice (since 2026-10-28). */
 .cycle__pager-link--next {
   margin-left: auto;
   padding: 0 var(--space-3);
@@ -976,6 +980,19 @@
      (its own box is gone), so in the second column it would ride over Next. */
   .cycle__pager {
     grid-column: 1;
+  }
+
+  /* Wide, the move's Continue is the way on, beside the work the whole way
+     down; the foot keeps Back alone. */
+  .cycle__pager-link--next,
+  .cycle__pager-wait {
+    display: none;
+  }
+
+  /* And on the first stage, which has no Back, the foot would be a bare
+     hairline, so it goes too. */
+  .cycle__pager:not(:has(.cycle__pager-link:not(.cycle__pager-link--next))) {
+    display: none;
   }
 
   .cycle__intro {
