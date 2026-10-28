@@ -3,12 +3,14 @@
    then the work and the person's move side by side, and the pager.
 
    The work sits on the page's own ground in white sections; the move is
-   the one raised panel, its question on the band, as the desk's decision
-   is (since 2026-10-26, when a reader said they did not know where to look:
-   the move had been one white card among many, its answers the smallest
-   controls on the page and the way on only at the foot). Teal is spent on
-   what the person does: the move, the current stage, the chosen answer and
-   Continue. Relay inside it keeps its own palette (Product, below). */
+   the one raised panel, its question on the accent's tint (since
+   2026-10-26, when a reader said they did not know where to look: the move
+   had been one white card among many, its answers the smallest controls on
+   the page and the way on only at the foot; on the band until 2026-10-28,
+   when the warm grey read as one more step of the ground in the dark and
+   the eye did not land on it). Teal is spent on what the person does: the
+   move, the current stage, the chosen answer and Continue. Relay inside it
+   keeps its own palette (Product, below). */
 .cycle {
   display: flex;
   flex-direction: column;
@@ -286,28 +288,34 @@
   overflow: hidden;
 }
 
-/* The question, on the band: who it is for in the band's muted ink, the
-   question itself in the band's ink. */
+/* The question, on the accent's tint, the same ground the current stage's
+   tag sits on, so the two things that are the person's share one color:
+   who it is for in the accent, the question itself in the reading ink. The
+   tint is the loudest the head may be: the accent solid is Continue's, and
+   the accent is spent once on the page (the act, not its frame). A hairline
+   in the accent's border closes the head over the body, as a chosen answer's
+   edge does, so the tint reads as a band and not as a bleed. */
 .cycle__move-head {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-4);
-  background: var(--color-band);
-  color: var(--color-text-on-band);
+  border-bottom: var(--border-width) solid var(--color-accent-border);
+  background: var(--color-accent-subtle);
+  color: var(--color-text);
 }
 
 .cycle__move-kicker {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-text-on-band-muted);
+  color: var(--color-accent);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
 }
 
 .cycle__move-title {
-  color: var(--color-text-on-band);
+  color: var(--color-text);
   font-size: var(--text-xl);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-tight);
