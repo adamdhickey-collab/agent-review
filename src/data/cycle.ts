@@ -128,7 +128,7 @@ export const EVIDENCE: readonly Evidence[] = [
     id: 'ticket-okafor',
     kind: 'ticket',
     from: 'Account manager',
-    says: 'I archived Okafor Logistics by accident while clearing out old trials. It’s one of our biggest accounts. How do I get it back?',
+    says: 'I archived Gnarlwick & Thrupp Transitory Holdings by accident while clearing out old trials. It’s one of our biggest accounts. How do I get it back?',
   },
   {
     id: 'ticket-quarterly',
