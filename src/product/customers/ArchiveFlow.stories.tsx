@@ -45,11 +45,13 @@ export const Undo: Story = {
 
 export const UndoNamingActive: Story = {
   args: { direction: 'undo', initialSelection: BATCH, features: { namesActive: true, blockedFirst: true } },
-  parameters: { docs: { description: { story: 'Undo with two requirements added: the active customers and the blocked one are named under the bar, before the press.' } } },
+  parameters: { docs: { description: { story: 'Undo with two requirements added, before the press: the active customers’ rows are shaded, and the blocked one is named under the bar with its reason.' } } },
   play: async ({ canvasElement }) => {
     const notes = canvasElement.querySelector('.archive-flow__notes');
-    await expect(notes).toHaveTextContent('Halvorsen Freight, Brightwater Clinics and Saltmarsh Studio are in this selection.');
+    await expect(notes).not.toHaveTextContent('in this selection');
     await expect(notes).toHaveTextContent('Monarch Dental Group: it has an open invoice.');
+    const shaded = [...canvasElement.querySelectorAll('.archive-flow__row--active th')].map((th) => th.textContent);
+    await expect(shaded).toEqual(['Halvorsen Freight', 'Brightwater Clinics', 'Saltmarsh Studio']);
   },
 };
 

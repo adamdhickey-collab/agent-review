@@ -48,6 +48,13 @@
   line-height: var(--leading-ui);
 }
 
+/* The active customers in an undo selection, before the press: the row
+   itself takes the success ground, so the badge it already carries is the
+   name, and nothing is said twice. */
+.archive-flow .table__tr.archive-flow__row--active {
+  background: var(--color-success-subtle);
+}
+
 /* The review: the batch sorted by what a person should look at, on the
    sunken ground under the toolbar, so it reads as the toolbar's next step
    and not as a dialog over the table. */
