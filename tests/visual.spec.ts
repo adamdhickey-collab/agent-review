@@ -165,7 +165,7 @@ test.describe('in the dark theme, chosen, at 1280', () => {
   });
 });
 
-/* A first visit, with nothing remembered: Dark, Night sage, whatever the
+/* A first visit, with nothing remembered: Dark, the charcoal, whatever the
    system's scheme (since 2026-10-27), read from the root rather than a
    screenshot; the -dark baselines above are the picture of it. */
 for (const scheme of ['light', 'dark'] as const) {
