@@ -57,6 +57,23 @@ const APPEARANCES: SegmentedOption<Appearance>[] = [
   { value: 'system', label: 'System', icon: 'monitor', iconOnly: true },
 ];
 
+/* The product's mark, as its favicon draws it: Phosphor's terminal window
+   (the agent's icon, fill weight) grown to be the whole tile, with the
+   prompt it cut out drawn on it at .15 of Phosphor's 256 grid, centred.
+   The corner is an app icon's, 7 of 32, in the drawing's own viewBox. */
+export function AppMark() {
+  return (
+    <svg className="shell__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <rect className="shell__mark-tile" width="32" height="32" rx="7" />
+      <path
+        className="shell__mark-glyph"
+        transform="translate(-3.2 -3.2) scale(.15)"
+        d="M125,134.25l-40,32a8,8,0,1,1-10-12.5L107.19,128,75,102.25a8,8,0,1,1,10-12.5l40,32a8,8,0,0,1,0,12.5ZM176,168H136a8,8,0,0,1,0-16h40a8,8,0,0,1,0,16Z"
+      />
+    </svg>
+  );
+}
+
 export function Shell({ route, children }: { route: Route; children: ReactNode }) {
   const { appearance, setAppearance } = useTheme();
   const singleKeys = useSingleKeys();
@@ -87,9 +104,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
       </a>
       <header className="shell__bar">
         <a className="shell__brand" href={href({ name: 'cycle', stage: 'discover' })} aria-label="Agent Review, start of the design cycle">
-          <span className="shell__mark" aria-hidden="true">
-            <Icon name="bot" size={14} />
-          </span>
+          <AppMark />
           <span>Agent Review</span>
         </a>
         <div className="shell__where">

@@ -49,17 +49,21 @@
   text-decoration: none;
 }
 
-/* The product's mark is a tile of the ink, as an app's icon is. */
+/* The product's mark is an app's icon: the terminal window is the tile,
+   in the ink, and the prompt is cut in the surface (AppMark in Shell.tsx).
+   Until 2026-10-29 it was a smaller window glyph set inside a tile of the
+   ink, a rounded rectangle in a rounded rectangle. */
 .shell__mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  flex: none;
   width: 1.5rem;
   height: 1.5rem;
-  border-radius: var(--radius-sm);
-  background: var(--color-text);
-  color: var(--color-surface);
-  box-shadow: var(--shadow-control);
+}
+.shell__mark-tile {
+  fill: var(--color-text);
+}
+.shell__mark-glyph {
+  fill: var(--color-surface);
 }
 
 /* The places. Each is the bar's full height, so the line under the one you

@@ -18,6 +18,7 @@ import {
 import { ArchiveFlow } from '../../product/customers/ArchiveFlow';
 import { customers } from '../../product/customers/customers';
 import { STORY, type SceneId } from './scenes';
+import { AppMark } from '../Shell/Shell';
 import '../Shell/Shell.css';
 import '../CycleScreen/CycleScreen.css';
 import './SceneScreen.css';
@@ -77,9 +78,7 @@ function Frame({ at, label, rail = true, children }: { at: StageId; label: strin
     <div className="scene" data-surface="review">
       <header className="shell__bar scene__bar">
         <span className="shell__brand">
-          <span className="shell__mark" aria-hidden="true">
-            <Icon name="bot" size={14} />
-          </span>
+          <AppMark />
           <span>Agent Review</span>
         </span>
         <span className="scene__scenario">
@@ -189,9 +188,7 @@ function StageBar({ at }: { at: StageId }) {
   const i = stageIndex(at);
   return (
     <header className="stage-scene__bar">
-      <span className="shell__mark" aria-hidden="true">
-        <Icon name="bot" size={14} />
-      </span>
+      <AppMark />
       <ol className="stage-scene__rail" role="list" aria-label="Stages">
         {STAGES.map((st, n) => (
           <li key={st.id} data-state={n < i ? 'done' : n === i ? 'now' : 'later'} aria-current={n === i ? 'step' : undefined}>
