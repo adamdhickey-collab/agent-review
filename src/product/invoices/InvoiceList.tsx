@@ -10,7 +10,7 @@ const invoices = [
   { id: 'INV-20418', company: 'Halvorsen Freight', amount: '$3,840.00', due: 'Oct 15', status: 'Open' },
   { id: 'INV-20417', company: 'Pinecrest Credit Union', amount: '$8,800.00', due: 'Oct 12', status: 'Open' },
   { id: 'INV-20409', company: 'Monarch Dental Group', amount: '$1,020.00', due: 'Sep 30', status: 'Overdue' },
-  { id: 'INV-20402', company: 'Okafor Logistics', amount: '$5,040.00', due: 'Sep 28', status: 'Paid' },
+  { id: 'INV-20402', company: 'Birch Logistics', amount: '$5,040.00', due: 'Sep 28', status: 'Paid' },
   { id: 'INV-20395', company: 'Northgate Properties', amount: '$540.00', due: 'Sep 24', status: 'Overdue' },
 ];
 

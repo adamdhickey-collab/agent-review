@@ -27,7 +27,7 @@ export const customers: Customer[] = [
   { id: 'c_01HZK7', company: 'Brightwater Clinics', owner: 'Tomas Reyes', plan: 'Growth', status: 'active', seats: 22, mrr: 1320, lastActive: '14 min ago' },
   { id: 'c_01HZKB', company: 'Alder & Finch', owner: 'Priya Natarajan', plan: 'Starter', status: 'trial', seats: 5, mrr: 0, lastActive: '1 h ago' },
   { id: 'c_01HZKF', company: 'Monarch Dental Group', owner: 'Dana Whitfield', plan: 'Growth', status: 'past-due', seats: 17, mrr: 1020, lastActive: '3 h ago' },
-  { id: 'c_01HZKJ', company: 'Okafor Logistics', owner: 'Tomas Reyes', plan: 'Scale', status: 'active', seats: 63, mrr: 5040, lastActive: '5 h ago' },
+  { id: 'c_01HZKJ', company: 'Birch Logistics', owner: 'Tomas Reyes', plan: 'Scale', status: 'active', seats: 63, mrr: 5040, lastActive: '5 h ago' },
   { id: 'c_01HZKN', company: 'Saltmarsh Studio', owner: 'Dana Whitfield', plan: 'Starter', status: 'active', seats: 3, mrr: 87, lastActive: 'Yesterday' },
   { id: 'c_01HZKR', company: 'Pinecrest Credit Union', owner: 'Priya Natarajan', plan: 'Scale', status: 'active', seats: 110, mrr: 8800, lastActive: 'Yesterday' },
   { id: 'c_01HZKV', company: 'Verity Labs', owner: 'Tomas Reyes', plan: 'Growth', status: 'trial', seats: 12, mrr: 0, lastActive: '2 days ago' },
