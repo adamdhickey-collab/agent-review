@@ -143,6 +143,8 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
   const all = visible.length > 0 && count === visible.length;
   const blocked = chosen.filter((c) => BLOCKED[c.id]);
   const active = chosen.filter((c) => !BLOCKED[c.id] && isActive(c, activeRule));
+  /* Undo names the active customers by shading their rows until the press. */
+  const shaded = new Set(view === 'current' && !step && direction === 'undo' && f.namesActive ? active.map((c) => c.id) : []);
   const going = chosen.filter((c) => !BLOCKED[c.id] && !(direction === 'review' && keptOut.has(c.id)));
   /* What the question offers to archive: without blocked-first, the screen
      doesn't know yet that one will fail, so it offers the whole selection. */
@@ -285,21 +287,17 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
         </Toolbar>
       ) : null}
 
-      {/* Before the press, what the person should know: the active customers
-          and the blocked ones, where the direction or a requirement says so.
-          The question and the review say it themselves. */}
-      {view === 'current' && count > 0 && !step && direction === 'undo' && (f.namesActive || f.blockedFirst) && ((f.namesActive && active.length) || (f.blockedFirst && blocked.length)) ? (
+      {/* Before the press, what the person should know, where the direction
+          or a requirement says so. The active customers are named by their
+          own rows, shaded below (a line naming them, until 2026-10-29, said
+          again what each row's badge says); the blocked one gets a note,
+          because the reason is nowhere in its row. The question and the
+          review say both themselves. */}
+      {view === 'current' && count > 0 && !step && direction === 'undo' && f.blockedFirst && blocked.length ? (
         <div className="archive-flow__notes">
-          {f.namesActive && active.length ? (
-            <p className="archive-flow__note">
-              <Badge tone="success">Active</Badge> {list(active.map((c) => c.company))} {active.length === 1 ? 'is' : 'are'} in this selection.
-            </p>
-          ) : null}
-          {f.blockedFirst && blocked.length ? (
-            <p className="archive-flow__note">
-              <Badge tone="warning">Can’t archive</Badge> {list(blocked.map((c) => c.company))}: {BLOCKED[blocked[0].id]}.
-            </p>
-          ) : null}
+          <p className="archive-flow__note">
+            <Badge tone="warning">Can’t archive</Badge> {list(blocked.map((c) => c.company))}: {BLOCKED[blocked[0].id]}.
+          </p>
         </div>
       ) : null}
 
@@ -422,7 +420,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
             </thead>
             <tbody>
               {visible.map((c) => (
-                <Row key={c.id} selected={selected.has(c.id)}>
+                <Row key={c.id} selected={selected.has(c.id)} className={shaded.has(c.id) ? 'archive-flow__row--active' : undefined}>
                   <Cell control>
                     <Checkbox label={`Select ${c.company}`} hideLabel checked={selected.has(c.id)} onChange={(e) => toggleRow(c.id, e.currentTarget.checked)} />
                   </Cell>
