@@ -23,7 +23,7 @@ html {
 /* The appearance. Every color token is light-dark(light, dark) (tokens.css),
    so a theme is nothing but a color-scheme, and native controls (a
    scrollbar, a text field's caret) follow it too. The review follows the
-   A first visit is Dark, Night sage: index.html puts data-theme="dark" on
+   A first visit is Dark, the charcoal: index.html puts data-theme="dark" on
    the root before the first paint. Choosing Light or Dark in the bar's
    appearance control puts data-theme on the root and remembers it;
    choosing System takes the attribute off, and "light dark" on the root

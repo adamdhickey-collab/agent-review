@@ -234,34 +234,13 @@
    A bar with the cycle as six dots, a title in the serif, and at most two
    blocks under it. The person's answer is the one filled element, in the
    primary; the agent's is an outline in the review's slate; a stop is the
-   warning's. Every color is a token, so a scene is Night sage in the dark
-   and the light palette in the light. */
+   warning's. Every color is a token, so a scene is the charcoal in the dark
+   and the light palette in the light. A scene had a medium-dark sage frame
+   of its own (#2b3a2f, 2026-10-28 to 2026-10-29) to sit with the site's
+   pale sage page; it left with Night sage, because the dark is the black
+   everywhere, pictures included. */
 .stage-scene {
   background: var(--color-canvas);
-}
-
-/* A scene is a picture on the site's pale sage page, so in the dark its
-   ground is a medium-dark sage (#2b3a2f) where the app's Night sage is a
-   green-black. Every ink the app draws on a scene clears 4.5:1 on every
-   step here (text 8.6:1 or better; muted, lifted to #b9c0b4, 5.0:1 on the
-   hover step; the primary 4.6:1 on it, 5.9:1 on the ground; slate 4.3:1 on
-   hover, which no scene sets under a row; a control's edge 3.4:1 or
-   better). Scoped to the scenes: the app itself stays Night sage, and the
-   light scheme is untouched. */
-.stage-scene[data-surface='review'] {
-  --color-canvas: light-dark(#f7f7f3, #2b3a2f);
-  --color-surface: light-dark(#ffffff, #334538);
-  --color-surface-chrome: light-dark(#fbfbf8, #26332a);
-  --color-surface-sunken: light-dark(#f0f0eb, #243127);
-  --color-surface-hover: light-dark(#f3f3ee, #384b3d);
-  --color-border: light-dark(#e3e3dc, #4a5d4d);
-  --color-divider: light-dark(#ecece6, #3d4f40);
-  --color-border-control: light-dark(#7d817b, #8fa08b);
-  --color-text-muted: light-dark(#5c5f5c, #b9c0b4);
-  --color-accent-subtle: light-dark(#edf0fa, #2f4046);
-  --color-accent-border: light-dark(#cfd6f2, #4b6068);
-  --color-success-subtle: light-dark(#e8ede5, #34503a);
-  --color-success-border: light-dark(#c7d3c2, #55775a);
 }
 
 .stage-scene__bar {

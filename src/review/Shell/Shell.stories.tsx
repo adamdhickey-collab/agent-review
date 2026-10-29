@@ -64,7 +64,7 @@ export const Appearance: Story = {
     docs: {
       description: {
         story:
-          'Light, Dark and System, one tab stop with arrow keys between them, each an icon named by its tooltip. A first visit is Dark, Night sage: data-theme="dark" on the root. Choosing Light or Dark puts data-theme on the root and remembers it; choosing System takes the attribute off, so the root’s own color-scheme, "light dark", follows the operating system live, and remembers that. Dark by default since 2026-10-27; following the system from 2026-10-24; dark by default from later on 2026-10-11, following the system when Preview Studio opened, and it was a light/dark toggle before. The remembered choice is cleared at the end, and the Storybook’s own theme put back, so the next story starts as it should.',
+          'Light, Dark and System, one tab stop with arrow keys between them, each an icon named by its tooltip. A first visit is Dark, the charcoal: data-theme="dark" on the root. Choosing Light or Dark puts data-theme on the root and remembers it; choosing System takes the attribute off, so the root’s own color-scheme, "light dark", follows the operating system live, and remembers that. Dark by default since 2026-10-27; following the system from 2026-10-24; dark by default from later on 2026-10-11, following the system when Preview Studio opened, and it was a light/dark toggle before. The remembered choice is cleared at the end, and the Storybook’s own theme put back, so the next story starts as it should.',
       },
     },
   },
