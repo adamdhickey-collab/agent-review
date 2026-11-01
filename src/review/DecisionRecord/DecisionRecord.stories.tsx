@@ -42,7 +42,7 @@ export const QuietVariant: Story = {
     await expect(canvas.getByRole('heading', { name: 'Add a quiet variant' })).toBeInTheDocument();
     const did = canvas.getByRole('list', { name: 'What the agent did' });
     await expect(did.children).toHaveLength(5);
-    await expect(did).toHaveTextContent(/Applied it to the 2 changes your rule covers, on the plan card\./);
+    await expect(did).toHaveTextContent(/Applied the decision to the 2 changes your rule covers, on the plan card\./);
     await expect(canvas.getByText('The agent’s draft, kept as written')).toBeInTheDocument();
     await expect(canvas.getByText('Open')).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'See the rule' }));
@@ -70,7 +70,7 @@ export const OnceWithoutAReason: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('None given.')).toBeInTheDocument();
-    await expect(canvas.getByText(/Not kept for similar cases/)).toBeInTheDocument();
+    await expect(canvas.getByText(/Not kept as a rule/)).toBeInTheDocument();
     await expect(canvas.queryByRole('button', { name: 'See the rule' })).toBeNull();
   },
 };

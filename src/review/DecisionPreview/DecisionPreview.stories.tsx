@@ -75,11 +75,11 @@ export const Current: Story = {
     await expect(canvas.getByRole('button', { name: 'Change plan' })).toHaveAttribute('data-twin');
     /* The captions, under the screen, each led by its mark's own tag. */
     const marked = canvas.getByRole('list', { name: 'What each marked element is' });
-    await expect(marked).toHaveTextContent(/^Decision 1\s*Hand-built action · Billing settings\s*Small gray text, built by hand\. The system would make it a Button\.\s*A link built by hand, from the old billing app/);
-    await expect(marked).toHaveTextContent(/The system’s Button\s*System Button · Billing settings\s*Every other action on the billing settings is the system’s Button\.\s*<Button variant="secondary">$/);
+    await expect(marked).toHaveTextContent(/^Decision 1\s*Hand-built action · Billing settings\s*Small gray text, where the design system draws a Button\.\s*A link built by hand, from the old billing app/);
+    await expect(marked).toHaveTextContent(/Design system Button\s*Button · Billing settings\s*Every other action on the billing settings is a Button\.\s*<Button variant="secondary">$/);
     const [decision, twinCap] = within(marked).getAllByRole('listitem');
     await expect(within(decision).getByText('Decision 1')).toHaveClass('studio-tag');
-    await expect(within(twinCap).getByText('The system’s Button')).toHaveAttribute('data-tone', 'twin');
+    await expect(within(twinCap).getByText('Design system Button')).toHaveAttribute('data-tone', 'twin');
     await waitFor(() => expect(canvasElement.querySelector('.studio-mark')).not.toHaveAttribute('hidden'));
     await expect(canvasElement.querySelector('.studio-mark')).toHaveAttribute('data-label', 'Decision 1');
     await expect(getComputedStyle(canvasElement.querySelector('.studio-preview__frame')!).colorScheme).toBe('light');

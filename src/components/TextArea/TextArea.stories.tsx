@@ -32,7 +32,7 @@ export const Empty: Story = {
 };
 
 export const Filled: Story = {
-  args: { defaultValue: 'How easy it is to cancel is a product decision, so it gets its own change. A quiet variant would let any agent make any action this hard to find.' },
+  args: { defaultValue: 'How easy it is to cancel is a product decision, and belongs in its own change. A quiet variant would let any agent make any action this hard to find.' },
 };
 
 export const WithoutHint: Story = {

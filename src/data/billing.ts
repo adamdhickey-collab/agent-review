@@ -29,10 +29,10 @@ const file = (name: string) => `${AREA}${name}`;
 export const boundaries: Boundary[] = [
   { n: 1, group: 'own', text: 'Replace a literal with the token of the same value, and a control built by hand with the component that draws it the same way, on the billing screens.' },
   { n: 2, group: 'own', text: 'Where two tokens share a value, choose by what the element is, and say why.' },
-  { n: 3, group: 'own', text: 'Run the checks, and fix a check its own change broke.' },
+  { n: 3, group: 'own', text: 'Run the checks, and fix any check the agent’s change broke.' },
   { n: 4, group: 'own', text: 'Merge to main when the token lint passes and no frame moves a pixel.' },
   { n: 5, group: 'asks', text: 'When it’s unclear what an element is for, or the evidence for what it means conflicts.' },
-  { n: 6, group: 'asks', text: 'When no token or component draws it as it is.' },
+  { n: 6, group: 'asks', text: 'When no token or component draws an element as built.' },
   { n: 7, group: 'outside', text: 'Changing the token layer, or how a shared component draws, which every screen reads.' },
 ];
 
@@ -128,7 +128,7 @@ const paymentFailed: Work = {
   lines: [{ selector: '.payments__status--failed', property: 'color', before: '#b42318', after: 'var(--color-danger)' }],
   basis: { kind: 'boundary', boundaries: [2, 4] },
   reason:
-    'Two tokens are #b42318: --color-danger and --color-diff-remove-ink. This element is the status “Payment failed”, and tokens.css says danger is a failure, so it chose --color-danger.',
+    'Two tokens are #b42318: --color-danger and --color-diff-remove-ink. This element is the status “Payment failed”, and tokens.css says danger is a failure, so the agent chose --color-danger.',
   checks: cleanChecks(2, 3),
   unchecked: 'Which of the two names is right. Both draw the same red, so no check can tell them apart; the agent chose by what the element says.',
   commit: '5a0c3e7',
@@ -158,7 +158,7 @@ const planRoutine: Work = {
     { selector: '.plan__caption', property: 'color', before: '#6a6a76', after: 'var(--color-text-muted)' },
   ],
   basis: { kind: 'boundary', boundaries: [1, 3, 4] },
-  reason: 'Each value is exactly one token’s value. Its first try named a token that doesn’t exist; the checks caught it, and it corrected the name.',
+  reason: 'Each value is exactly one token’s value. A first try named a token that doesn’t exist, which the checks caught and the agent fixed.',
   checks: [
     {
       name: 'Token lint',
@@ -213,17 +213,17 @@ const meterRoutine: Work = {
       name: 'Stories with axe',
       state: 'inconclusive',
       label: 'Inconclusive on 1 of 3',
-      established: 'The stories render, and axe found no violation it could measure. On the Full story it couldn’t tell what is behind “47 of 50 seats”, which crosses the meter’s fill. It said the same on main.',
+      established: 'The stories render, and axe found no violation it could measure. On the Full story it couldn’t tell what is behind “47 of 50 seats”, which crosses the meter’s fill. Axe said the same on main.',
     },
   ],
-  unchecked: 'Whether “47 of 50 seats” clears 4.5:1 where it crosses the fill. Nothing in this change could have altered it, and nothing has measured it.',
+  unchecked: 'Whether “47 of 50 seats” clears 4.5:1 where it crosses the fill. This change couldn’t have altered that contrast, and nothing has measured it.',
   commit: '2b7d8c1',
   frames: 2,
   stories: 3,
   history: [
     { at: '13:26', who: 'agent', text: 'Replaced 3 values with their tokens.' },
     { at: '13:27', who: 'agent', text: 'Ran the checks: the token lint passed, 0 of 2 frames moved. The axe check was inconclusive on 1 of 3 stories: it can’t tell what is behind the seat count. Same result on main.' },
-    { at: '13:28', who: 'agent', text: 'Merged to main as 2b7d8c1. An inconclusive check doesn’t stop a change that moved no pixel; it’s listed as unresolved instead.' },
+    { at: '13:28', who: 'agent', text: 'Merged to main as 2b7d8c1. An inconclusive check doesn’t stop a change that moved no pixel; the result is listed as unresolved instead.' },
   ],
 };
 
@@ -347,7 +347,7 @@ const GATHERED: Gathered = {
     'Why cancel was made quiet. The old billing app’s history has the style in one commit, with no reason given.',
     'How many people look for cancel and give up. There is no usage data in the repository.',
   ],
-  validation: 'Ask whoever owns cancelling why it is quiet, and count how many people open billing settings and then write to support about cancelling.',
+  validation: 'Ask whoever owns cancelling why the action is quiet, and count how many people open billing settings and then write to support about cancelling.',
 };
 
 /* The checks, run with each direction in place in turn. Neither moves a
@@ -373,32 +373,32 @@ function directions(c: Case, gathered: boolean): Option[] {
     label: 'Add a quiet variant',
     recommended: true,
     outcome: `The Button gains a quiet variant that matches the gray text. “${c.action}” becomes a Button, and looks exactly as it does now.`,
-    effect: `It adds a quiet variant to the Button, with a story, leaves the other four as they are, and makes “${c.action}” a quiet Button on its tokens. Nothing moves.`,
+    effect: `The agent adds a quiet variant to the Button, with a story, leaves the other four as they are, and makes “${c.action}” a quiet Button on its tokens. Nothing moves.`,
     after: after(lines),
     draws: { as: 'quiet' },
     adds: [
       { file: 'src/components/Button/Button.tsx', header: 'a new variant', text: "export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'quiet';" },
       { file: markup(c), header: 'the markup', text: `<Button variant="quiet">${c.action}</Button>` },
     ],
-    benefits: ['Nothing visible changes, as the job asked.', 'Every action on the billing screens is the system’s.', 'Rule 9 allows it: a new variant, with a story, and the others untouched.'],
-    risks: ['Any later agent can make any action this quiet.', `“${c.action}” stays hard to find, now as a supported style.`, 'Nobody decides how easy it should be to find.'],
+    benefits: ['Nothing visible changes, as the job asked.', 'Every action on the billing screens is the design system’s.', 'Rule 9 allows it: a new variant, with a story, and the others untouched.'],
+    risks: ['Any later agent can make any action this quiet.', `“${c.action}” stays hard to find, now as a supported style.`, `Nobody decides how easy “${c.action}” should be to find.`],
     plan: [
       'Add a quiet variant to the Button, with a story, and leave the other four as they are.',
       `Make “${c.action}” a quiet Button, so it looks exactly as it does now.`,
-      'Move its values onto tokens.',
+      'Move the link’s values onto tokens.',
       'Record your decision and your reason.',
     ],
     done: [
       'Added a quiet variant to the Button, with a story; the other four are as they were.',
       `Made “${c.action}” a quiet Button; it looks exactly as it did.`,
-      'Moved its values onto tokens.',
+      'Moved the link’s values onto tokens.',
       'Recorded your decision and your reason.',
     ],
     decision: {
-      tradeoff: 'A job that changes nothing visible, over a system with no way to make an action hard to find.',
+      tradeoff: 'Nothing visible changes, at the cost of a variant that can make any action hard to find.',
       risk: `Any later agent can make an action this quiet, and “${c.action}” stays hard to find.`,
-      followUp: `Decide with whoever owns it how easy “${c.action}” should be to find.`,
-      reason: 'The job was to change nothing visible. A quiet variant keeps that promise, and rule 9 allows it.',
+      followUp: `Decide with product design how easy “${c.action}” should be to find.`,
+      reason: 'The job was to change nothing visible, and rule 9 allows a quiet variant that keeps that promise.',
     },
     then: {
       history: ['Added a quiet variant to the Button, with its story; the other four are as they were.', `Made “${c.action}” a quiet Button on its tokens.`, ran, 'Recorded your decision and your reason.'],
@@ -411,13 +411,13 @@ function directions(c: Case, gathered: boolean): Option[] {
     id: 'own-change',
     title: 'Make it a Button in its own change',
     label: 'Make it a Button in its own change',
-    outcome: `“${c.action}” stays as built in this change, under an exception that ends on ${DUE}. A separate change makes it a Button, owned by product design.`,
-    effect: `It moves the link’s values onto tokens, leaves it as built under an exception that ends on ${DUE}, and opens the change that makes it a Button. Nothing moves in this change.`,
+    outcome: `“${c.action}” stays as built in this change, under an exception that ends on ${DUE}. A separate change, owned by product design, makes the action a Button.`,
+    effect: `The agent moves the link’s values onto tokens, leaves the link as built under an exception that ends on ${DUE}, and opens the change that makes the link a Button. Nothing moves in this change.`,
     after: after(lines),
     draws: { as: 'button', note: 'As its own change will draw it' },
     adds: [{ file: EXCEPTIONS, header: 'an exception', text: `- Billing: “${c.action}” stays a link built by hand until ${DUE}, when its own change makes it a Button. No quiet variant.` }],
     benefits: ['No action gets a supported way to be hard to find.', `How easy it is to ${c.verb} becomes a decision someone owns.`, 'This job still changes nothing visible.'],
-    risks: [`“${c.action}” stays hard to find until its own change ships, on ${DUE}.`, 'One action stays outside the system for two weeks.', `Its own change may change how many people ${c.verb}.`],
+    risks: [`“${c.action}” stays hard to find until its own change ships, on ${DUE}.`, 'One action stays outside the design system for two weeks.', `A Button may change how many people ${c.verb}.`],
     plan: [
       'Move the link’s values onto tokens, and leave it as built.',
       `Write the exception down, ending ${DUE}.`,
@@ -433,13 +433,13 @@ function directions(c: Case, gathered: boolean): Option[] {
       'Recorded your decision and your reason.',
     ],
     decision: {
-      tradeoff: 'A system with no way to make an action hard to find, over finishing every control in this job.',
+      tradeoff: `One control stays unfinished until ${DUE}, so no variant can make an action hard to find.`,
       risk: `“${c.action}” stays hard to find until its own change ships, on ${DUE}.`,
       followUp: `Make “${c.action}” a Button in its own change, by ${DUE}. Product design owns it; growth counts ${c.measure} before and after, and it ships either way.`,
-      reason: `How easy it is to ${c.verb} is a product decision, so it gets its own change. A quiet variant would let any agent make any action this hard to find.`,
+      reason: `How easy it is to ${c.verb} is a product decision, and belongs in its own change. A quiet variant would let any agent make any action this hard to find.`,
     },
     then: {
-      unchecked: `Whether making “${c.action}” a Button changes how many people ${c.verb}. No check can tell; growth counts it in its own change.`,
+      unchecked: `Whether making “${c.action}” a Button changes how many people ${c.verb}. No check can tell; growth counts ${c.measure} in that change.`,
       open: `Make “${c.action}” a Button, by ${DUE}.`,
       history: [
         'Moved the link’s values onto tokens, and left it as built.',
@@ -448,7 +448,7 @@ function directions(c: Case, gathered: boolean): Option[] {
         `Opened a follow-up: make “${c.action}” a Button, owned by product design, due ${DUE}. Growth counts ${c.measure} before and after; it ships either way.`,
         'Recorded your decision and your reason.',
       ],
-      ruled: [`Moved the link’s values onto tokens and left it as built, under your rule: an exception ending ${DUE}, and its own change to make it a Button.`, ran],
+      ruled: [`Moved the link’s values onto tokens and left it as built, under your rule: an exception ending ${DUE}, and a separate change to make the link a Button.`, ran],
     },
     rule: OWN_CHANGE,
   };
@@ -461,7 +461,7 @@ function directions(c: Case, gathered: boolean): Option[] {
       id: 'evidence',
       title: 'Request evidence',
       label: 'Request evidence',
-      effect: 'It looks up every action built by hand on the billing screens, what each direction would change and what it can’t verify, and asks again. Nothing changes in the code.',
+      effect: 'The agent looks up every action built by hand on the billing screens, what each direction would change and what it can’t verify, and asks again. Nothing changes in the code.',
       after: [],
       asks: actionQuestion(c, true),
       then: {
@@ -469,7 +469,7 @@ function directions(c: Case, gathered: boolean): Option[] {
           'Searched the billing screens for actions built by hand, and listed what each direction would change.',
           'Looked for a reason in the old billing app’s history, and for usage data. Found neither in the repository.',
         ],
-        notice: 'Nothing decided yet. The evidence doesn’t settle it: nothing in the repository says why the action is quiet. It’s asking again, with what it found.',
+        notice: 'Nothing decided yet. Nothing in the repository says why the action is quiet, so the agent is asking again with what it found.',
       },
     },
   ];
@@ -490,10 +490,10 @@ const QUIET: RuleDraft = {
 };
 const OWN_CHANGE: RuleDraft = {
   where: 'On the billing screens',
-  does: 'never gets a quiet variant: it stays as built, under an exception with an end date, until its own change makes it a Button.',
+  does: 'never gets a quiet variant. The action stays as built, under an exception with an end date, until a separate change makes the action a Button.',
   scope: SCOPE,
   excludes: EXCLUDES,
-  why: 'How easy it is to leave is a product decision. A quiet variant would let any agent make any action this hard to find.',
+  why: 'How easy it is to end or reduce a subscription is a product decision. A quiet variant would let any agent make any action this hard to find.',
 };
 
 /* The screens as the preview draws them (delegation.ts, WHAT THE PREVIEW
@@ -557,10 +557,10 @@ const SKETCHES = {
    about, so a person sees the two side by side before reading a line. */
 const besideOf = (c: Case): Twin => ({
   text: c.beside,
-  means: 'System Button',
-  tag: 'The system’s Button',
+  means: 'Button',
+  tag: 'Design system Button',
   screen: c.screen,
-  says: `Every other action on the ${c.screen.toLowerCase()} is the system’s Button.`,
+  says: `Every other action on the ${c.screen.toLowerCase()} is a Button.`,
   token: '<Button variant="secondary">',
 });
 
@@ -575,20 +575,20 @@ function actionQuestion(c: Case, gathered = false): Question {
   const n = linesOf(c).length;
   return {
     kind: 'intent',
-    ask: `Keep “${c.action}” looking as it does, or make it a Button on purpose?`,
-    found: `The lint reported ${n} literals on “${c.action}”, and each is exactly a token’s value. But it is a link built by hand, small and gray, where every other action on the ${c.screen.toLowerCase()} is the system’s Button, and rule 1 of the agent’s skill says an action is a Button. As a Button it would be as easy to find as “${c.beside}”, in a job meant to change nothing visible. Kept as it looks, it needs a variant the Button doesn’t have.`,
+    ask: `Keep “${c.action}” small and gray, or make it a Button?`,
+    found: `The lint reported ${n} literals on “${c.action}”, and each is exactly a token’s value. But “${c.action}” is a link built by hand, small and gray, where every other action on the ${c.screen.toLowerCase()} is a Button, and rule 1 of the agent’s skill says an action is a Button. As a Button, “${c.action}” would be as easy to find as “${c.beside}”, in a job meant to change nothing visible. Keeping the look needs a Button variant that doesn’t exist yet.`,
     gap: `The checks pass either way, and neither direction moves a pixel in this change. Whether “${c.action}” should be easy to find is a product decision, which no check can see.`,
     means: 'Hand-built action',
-    says: 'Small gray text, built by hand. The system would make it a Button.',
+    says: 'Small gray text, where the design system draws a Button.',
     evidence: [
-      { for: 'Quiet on purpose', says: 'It is styled to be less visible than every other action on the screen, which looks deliberate.' },
-      { for: 'Left over', says: 'It came over from the old billing app as it was. Its history has one commit, and no reason.' },
-      { for: 'An action', says: `It ${c.does} when pressed, and rule 1 says an action is the system’s Button, not a raw element.` },
+      { for: 'Quiet on purpose', says: `“${c.action}” is styled less visible than every other action on the screen, which looks deliberate.` },
+      { for: 'Left over', says: `“${c.action}” came over unchanged from the old billing app, in one commit with no reason given.` },
+      { for: 'An action', says: `Pressing “${c.action}” ${c.does}, and rule 1 says an action is a Button, not a raw element.` },
     ],
     recommendation:
-      'The job is to change nothing visible, and rule 9 allows a new variant with a story that leaves the others as they are. Ghost, the nearest, is a full-height control in darker ink, so it would still change what people see.',
-    unknown: `Whether “${c.action}” is quiet on purpose, and who decides how easy it is to find. That could change this recommendation.`,
-    inferred: 'It came over from the old billing app with these screens, so it may be quiet for a reason nobody wrote down.',
+      'The job is to change nothing visible, and rule 9 allows a new variant with a story that leaves the others as they are. Ghost, the nearest variant, is a full-height control in darker ink, which people would notice.',
+    unknown: `Whether “${c.action}” is quiet on purpose, and who decides how easy it is to find. The answer could change this recommendation.`,
+    inferred: `“${c.action}” came over from the old billing app with these screens, and may be quiet for a reason nobody wrote down.`,
     origin: 'A link built by hand, from the old billing app',
     start: 'Compare the two actions',
     triedSays: 'All 3 checks pass with either direction, and neither moves a pixel.',
@@ -628,8 +628,8 @@ const cancelAction: Work = {
   frames: CANCEL.frames,
   stories: CANCEL.stories,
   history: [
-    { at: '13:34', who: 'agent', text: 'Its 3 values are each a token’s, but the link is built by hand, and no component draws it this way. Tried both directions: the lint, axe and the visual check pass with each, and nothing moves.' },
-    { at: '13:34', who: 'agent', text: 'Asked: the system makes an action a Button, and this one is quiet (boundaries 5 and 6).' },
+    { at: '13:34', who: 'agent', text: 'The 3 values are each a token’s, but the link is built by hand, and no component draws a link this way. Tried both directions: the lint, axe and the visual check pass with each, and nothing moves.' },
+    { at: '13:34', who: 'agent', text: 'Asked: the design system makes an action a Button, and “Cancel subscription” is quiet (boundaries 5 and 6).' },
   ],
 };
 
@@ -653,7 +653,7 @@ function held(c: Case, sketch: Sketch, at: string): Work {
     stories: c.stories,
     history: [
       { at, who: 'agent', text: 'Tried both directions: the lint, axe and the visual check pass with each. Nothing moves.' },
-      { at, who: 'agent', text: 'Held: the same question as “Cancel subscription”. The decision there may settle it.' },
+      { at, who: 'agent', text: 'Held: the decision on “Cancel subscription” may settle this question too.' },
     ],
   };
 }
@@ -692,8 +692,8 @@ const meterRadius: Work = {
     kind: 'scope',
     ask: 'Add a token for a fully round corner?',
     found: 'The meter’s track has round ends, written as 999px. No token has that value. The fix is clear: add --radius-full: 999px to tokens.css and tokens.ts, and use it here. Nothing would move.',
-    gap: 'A token belongs to the system, not to this screen: every screen, and every agent after this one, will reach for it. The token layer is outside this delegation.',
-    recommendation: 'A fully round end is a shape Relay draws and has no name for, and the lint will report this line until it has one.',
+    gap: 'A token belongs to the design system, not to this screen: every screen, and every later agent, will use the token. The token layer is outside this delegation.',
+    recommendation: 'Relay draws fully round ends with no token, so the lint will report this line until --radius-full exists.',
     paused: [6, 7],
     options: [
       {
@@ -701,16 +701,16 @@ const meterRadius: Work = {
         grants: true,
         label: 'Add --radius-full, this once',
         after: ['var(--radius-full)'],
-        effect: 'It adds --radius-full: 999px to tokens.css and tokens.ts, uses it here, runs the checks, and merges.',
+        effect: 'The agent adds --radius-full: 999px to tokens.css and tokens.ts, uses the token here, runs the checks, and merges.',
         recommended: true,
         adds: [
           { file: 'src/tokens/tokens.css', text: '--radius-full: 999px;' },
           { file: 'src/tokens/tokens.ts', text: "'--radius-full'," },
         ],
       },
-      { id: 'leave', label: 'Leave it as written', after: ['999px'], effect: 'The line stays as it is, and the lint keeps reporting it.', leaves: true },
+      { id: 'leave', label: 'Leave it as written', after: ['999px'], effect: 'The lint keeps reporting the line as written.', leaves: true },
     ],
-    note: 'Allowing this once doesn’t widen the delegation. The next token it needs, it will ask about.',
+    note: 'Allowing this once doesn’t widen the delegation. The agent will ask about the next token it needs.',
     edge: 'it needs a new token',
   },
   frames: 2,
@@ -723,7 +723,7 @@ const meterRadius: Work = {
    could not know written in front of it. Simulated context, like the rest of
    the run; nothing here claims a real retention test. */
 export const DANAS_REASON =
-  'The gray link is from a retention test last year that ended without a decision, and nobody turned it off. How easy it is to cancel is a product decision, so it gets its own change. A quiet Button would let any agent make any action this hard to find.';
+  'The gray link is from a retention test last year that ended without a decision, and nobody turned it off. How easy it is to cancel is a product decision, and belongs in its own change. A quiet Button would let any agent make any action this hard to find.';
 
 export function initialDelegation(): DelegationState {
   return {
@@ -731,7 +731,7 @@ export function initialDelegation(): DelegationState {
       id: 'billing',
       title: 'Bring the billing screens onto the design system',
       request:
-        'The token lint reports 36 literals in src/product/billing/, the screens that came over from the old billing app, and some of their controls are built by hand. Move the values onto tokens and the controls onto the system’s components. Nothing should look different: merge what doesn’t move a pixel, and ask me about the rest.',
+        'The token lint reports 36 literals in src/product/billing/, the screens that came over from the old billing app, and some of their controls are built by hand. Move the values onto tokens and the controls onto the design system’s components. Nothing should look different: merge what doesn’t move a pixel, and ask me about the rest.',
       by: adam,
       agent: { name: 'Claude Code', run: 'run_01K6M4' },
       repo: 'relay/web',
