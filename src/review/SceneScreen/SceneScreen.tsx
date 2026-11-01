@@ -251,12 +251,12 @@ function Fact({ figure, children }: { figure: string; children: ReactNode }) {
 function Discover() {
   const claim = READINGS.find((r) => r.id === DISPUTED.reading)!;
   return (
-    <StageFrame at="discover" title="Does the agent’s summary hold up?">
+    <StageFrame at="discover" title="Does archiving really delete customer data?">
       <div className="stage-scene__versus">
         <Side who="agent" label="Agent’s summary" says={claim.says} struck />
-        <Side who="you" label="You corrected it" says="Records are kept for 90 days." why="Nobody can see them or put them back." />
+        <Side who="you" label="You corrected the summary" says="Relay keeps archived customers for 90 days." why="No screen lets anyone see or restore an archived customer." />
       </div>
-      <Fact figure="6 of 9">archive tickets ask to get a record back</Fact>
+      <Fact figure="6 of 9">archiving tickets ask to restore a customer</Fact>
     </StageFrame>
   );
 }
@@ -384,7 +384,7 @@ function Evaluate() {
   return (
     <StageFrame at="evaluate" title="Which direction ships?">
       <div className="stage-scene__versus">
-        <Side who="agent" label="Agent recommends" says={directionOf('review').name} why="Fits the brief: recovery first" />
+        <Side who="agent" label="Agent recommends" says={directionOf('review').name} why="Fits the brief: safety first" />
         <Side who="you" label="You chose" says={directionOf(STORY.direction!).name} why={`Plus: ${REQUIREMENT['names-active'].replace(/\.$/, '').toLowerCase()}`} />
       </div>
       <Fact figure="2×">the review step doubled the quarterly cleanup</Fact>
@@ -434,14 +434,14 @@ function Delegate() {
 function Learn() {
   const outcome = outcomeOf(STORY)!;
   return (
-    <StageFrame at="learn" title="Keep this rule for the next agent?">
+    <StageFrame at="learn" title="Save this rule for the next agent?">
       <div className="stage-scene__side stage-scene__rule" data-who="you">
-        <Chip who="you">Kept, for customer screens</Chip>
+        <Chip who="you">Saved, for customer screens</Chip>
         <p className="stage-scene__says">{outcome.guidance}</p>
       </div>
       <p className="stage-scene__fact stage-scene__fact--open">
         <Chip who="stop">Not known yet</Chip>
-        <span>Whether people notice the undo bar. Nothing here was tested with people.</span>
+        <span>Whether people notice the Undo bar. Nothing here was tested with people.</span>
       </p>
     </StageFrame>
   );

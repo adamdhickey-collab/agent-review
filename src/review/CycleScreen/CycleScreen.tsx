@@ -130,8 +130,8 @@ export function CycleScreen({ stage }: { stage: StageId }) {
         </h1>
         {stage === 'discover' ? (
           <p className="cycle__setup">
-            You’re Adam, a product designer, taking one feature in Relay from a support ticket to what ships. An agent does the building. You make one call in each of
-            six stages, about three minutes in all.
+            You’re Adam, a product designer, taking one feature in Relay from a support ticket to a finished build. An agent does the building. You make one decision in
+            each of six stages, about three minutes in all.
           </p>
         ) : null}
         <dl className="cycle__roles">
@@ -152,7 +152,7 @@ export function CycleScreen({ stage }: { stage: StageId }) {
         </dl>
       </div>
 
-      {locked ? <Needs stage={STAGES[open].id} what={`Start with ${STAGES[open].name}`} description="Each stage opens once you’ve made the call in the one before it." /> : body[stage]}
+      {locked ? <Needs stage={STAGES[open].id} what={`Start with ${STAGES[open].name}`} description="Each stage opens after you decide the stage before it." /> : body[stage]}
 
       {prev && at - 1 <= open ? (
         <nav className="cycle__pager" aria-label="Stage">

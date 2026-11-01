@@ -342,14 +342,9 @@
   align-self: stretch;
 }
 
-.cycle__move-lead,
-.cycle__move-note {
+.cycle__move-lead {
   color: var(--color-text-secondary);
   line-height: var(--leading-body);
-}
-
-.cycle__move-note {
-  font-size: var(--text-sm);
 }
 
 /* An answer: what it is, what it means, and the press. */

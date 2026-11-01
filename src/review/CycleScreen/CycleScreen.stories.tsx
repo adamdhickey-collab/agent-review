@@ -45,7 +45,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The design cycle: one feature, archiving customers in Relay, from the evidence to what to measure, in six stages. Each says what the designer does and what the agent does, and asks for one choice a later stage reads: whether the agent’s summary holds up, what wins when speed and safety pull apart, which of three working directions to build and what it must do, the agent’s one question, and whether to keep the guidance. Simulated: data/cycle.ts plays it back through one reducer.',
+          'The design cycle: one feature, archiving customers in Relay, from the evidence to what to measure, in six stages. Each says what the designer does and what the agent does, and asks for one choice a later stage reads: whether archiving really deletes data, whether speed or safety comes first, which of three working directions to build and what it must do, the agent’s one question, and whether to save a rule for the next agent. Simulated: data/cycle.ts plays it back through one reducer.',
       },
     },
   },
@@ -66,13 +66,13 @@ export const Discover: Story = {
     await expect(canvas.queryByRole('link', { name: /Next/ })).toBeNull();
     await expect(canvasElement.querySelector('.cycle__pager')).toBeNull();
     await expect(canvas.queryByRole('link', { name: /Define/ })).toBeNull();
-    await userEvent.click(canvas.getByRole('button', { name: 'Choose Correct it' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Choose Correct the summary' }));
     await expect(canvas.getByRole('button', { name: 'Continue to Define' })).toBeVisible();
     await expect(canvas.queryByRole('link', { name: /Next/ })).toBeNull();
     await expect(canvas.getByRole('link', { name: 'Define' })).toBeVisible();
-    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('People can’t see or undo an archive.');
-    await userEvent.click(canvas.getByRole('button', { name: 'Choose Keep it' }));
-    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Archiving can permanently lose customer data');
+    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Nobody can see or restore an archived customer.');
+    await userEvent.click(canvas.getByRole('button', { name: 'Choose Keep the summary' }));
+    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Archiving deletes customer data for good');
   },
 };
 
@@ -82,10 +82,10 @@ export const Define: Story = {
   parameters: { docs: { description: { story: 'The brief. The priority sets two success criteria and the direction the agent will recommend.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Choose Routine cleanup stays fast' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Choose Speed comes first' }));
     await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('Archiving a page of churned customers takes two presses.');
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Archive now, undo after');
-    await userEvent.click(canvas.getByRole('button', { name: 'Choose Nothing leaves without a way back' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Choose Safety comes first' }));
     await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('No active customer is archived without being named first.');
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Review batch, then archive');
   },
@@ -108,13 +108,13 @@ export const Explore: Story = {
     const mark = canvasElement.querySelector<HTMLElement>('.cycle__next-mark')!;
     await expect(mark).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Press Archive' }));
-    await expect(canvasElement.querySelector('.cycle__tries li[data-done]')).toHaveTextContent('nothing named them first');
+    await expect(canvasElement.querySelector('.cycle__tries li[data-done]')).toHaveTextContent('with no warning');
     await expect(mark).not.toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: /^Try direction 2/ }));
     await expect(canvasElement.querySelector('.cycle__direction-does')).toHaveTextContent('Archive asks first');
     await expect(canvas.getByText('5 selected')).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Press Archive' }));
-    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Relay asks before anything leaves');
+    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Relay asks before archiving');
     await expect(mark).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Press Archive 5 customers' }));
     await expect(canvasElement.querySelectorAll('.cycle__tries li[data-done]')).toHaveLength(2);
@@ -129,7 +129,7 @@ export const ExploreAllTried: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvasElement.querySelectorAll('.cycle__tries li[data-done]')).toHaveLength(3);
-    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('You’ve tried all three.');
+    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('You’ve tried all three directions.');
     await expect(canvas.getByRole('button', { name: 'Continue to Evaluate' })).toBeVisible();
   },
 };
@@ -144,7 +144,7 @@ export const Evaluate: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Review batch, then archive' }));
     await expect(canvas.getAllByText('Review batch, then archive does this already.')).toHaveLength(2);
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Archive now, undo after' }));
-    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('You chose against its recommendation');
+    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('You went against the agent’s recommendation');
   },
 };
 
@@ -156,7 +156,7 @@ export const DelegateReady: Story = {
     const canvas = within(canvasElement);
     await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('Name any active customer before it’s archived.');
     await userEvent.click(canvas.getByRole('button', { name: 'Send the brief' }));
-    await expect(canvas.getByRole('heading', { level: 2, name: /The undo bar is a new pattern/ })).toBeVisible();
+    await expect(canvas.getByRole('heading', { level: 2, name: /The Undo bar is a new pattern/ })).toBeVisible();
   },
 };
 
@@ -193,8 +193,8 @@ export const Learn: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvasElement.querySelector('.cycle__list--open')).toHaveTextContent('Restoring is still a support ticket.');
-    await expect(canvasElement.querySelector('.cycle__rule')).toHaveTextContent('names what’s at risk before the press');
-    await userEvent.click(canvas.getByRole('checkbox', { name: /Keep it as guidance/ }));
+    await expect(canvasElement.querySelector('.cycle__rule')).toHaveTextContent('names the records at risk before the press');
+    await userEvent.click(canvas.getByRole('checkbox', { name: /Save the rule/ }));
     await expect(canvas.getByRole('link', { name: /Learn.*decided/ })).toBeVisible();
   },
 };
@@ -204,7 +204,7 @@ export const LearnOnAWrongPremise: Story = {
   decorators: [inStore(play({ type: 'read', call: 'keep' }, { type: 'prioritize', priority: 'pace' }, ...TRIED, { type: 'choose', direction: 'undo' }, { type: 'delegate' }, { type: 'answer', answer: 'local' }))],
   parameters: { docs: { description: { story: 'Keeping the summary’s claim in Discover follows the work to the end: Learn says the brief rested on data loss the engineering note contradicts.' } } },
   play: async ({ canvasElement }) => {
-    await expect(canvasElement.querySelector('.cycle__list--open')).toHaveTextContent('The brief rested on data loss');
+    await expect(canvasElement.querySelector('.cycle__list--open')).toHaveTextContent('The brief assumed data loss');
   },
 };
 
