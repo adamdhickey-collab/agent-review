@@ -32,7 +32,7 @@ export const Undo: Story = {
     await expect(canvas.getByRole('button', { name: 'Archive' })).toHaveAttribute('data-next');
     await userEvent.click(canvas.getByRole('button', { name: 'Archive' }));
     await expect(args.onPhase).toHaveBeenCalledWith('done', null);
-    await expect(canvasElement.querySelector('.archive-flow__result')).toHaveTextContent('4 customers archived. Monarch Dental Group wasn’t: it has an open invoice.');
+    await expect(canvasElement.querySelector('.archive-flow__result')).toHaveTextContent('4 customers archived. Monarch Dental Group has an open invoice and stays.');
     await expect(canvas.getByRole('button', { name: 'Undo' })).toHaveFocus();
     await expect(args.onEvent).toHaveBeenCalledWith('archived');
     await expect(args.onEvent).toHaveBeenCalledWith('blocked');
@@ -49,7 +49,7 @@ export const UndoNamingActive: Story = {
   play: async ({ canvasElement }) => {
     const notes = canvasElement.querySelector('.archive-flow__notes');
     await expect(notes).not.toHaveTextContent('in this selection');
-    await expect(notes).toHaveTextContent('Monarch Dental Group: it has an open invoice.');
+    await expect(notes).toHaveTextContent('Monarch Dental Group has an open invoice.');
     const shaded = [...canvasElement.querySelectorAll('.archive-flow__row--active th')].map((th) => th.textContent);
     await expect(shaded).toEqual(['Halvorsen Freight', 'Brightwater Clinics', 'Saltmarsh Studio']);
   },
@@ -60,7 +60,7 @@ export const Confirm: Story = {
   parameters: { docs: { description: { story: 'The question names the active customers. It offers all five, because without the blocked-first requirement the screen learns about Monarch Dental Group only when the archive fails.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvasElement.querySelector('.archive-flow__question')).toHaveTextContent('Archive 5 customers? Halvorsen Freight, Brightwater Clinics and Saltmarsh Studio are active.');
+    await expect(canvasElement.querySelector('.archive-flow__question')).toHaveTextContent('Archive 5 customers? Halvorsen Freight, Brightwater Clinics, and Saltmarsh Studio are active.');
     await expect(canvas.getByRole('button', { name: 'Archive 5 customers' })).toHaveFocus();
     await userEvent.keyboard('{Escape}');
     await expect(canvas.getByRole('button', { name: 'Archive' })).toBeVisible();

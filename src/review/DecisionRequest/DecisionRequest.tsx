@@ -240,7 +240,7 @@ import { Inline } from '../Inline';
    within its authority is the only kind that can become a rule. Leaving a
    line as written says so in its own effect, and gets no second line. */
 function consequence(o: Option): { icon: IconName; text: string } | undefined {
-  if (o.asks) return { icon: 'search', text: 'Decides nothing yet. The question comes back with what it finds.' };
+  if (o.asks) return { icon: 'search', text: 'Decides nothing yet. The agent asks again with what it finds.' };
   if (o.grants) return { icon: 'lock', text: 'Allowed once. The boundary stays where it is.' };
   if (o.rule) return { icon: 'circle-check', text: `Within the agent’s authority. Can become a rule for ${o.rule.scope.charAt(0).toLowerCase()}${o.rule.scope.slice(1)}.` };
   return undefined;
@@ -284,7 +284,7 @@ function GatheredEvidence({ g, id }: { g: Gathered; id: string }) {
       </p>
       <dl className="ask__brief">
         <div>
-          <dt>Where it is used</dt>
+          <dt>Actions on these screens</dt>
           <dd>
             <ul className="ask__gathered-list">
               {g.uses.map((u) => (
@@ -299,7 +299,7 @@ function GatheredEvidence({ g, id }: { g: Gathered; id: string }) {
           </dd>
         </div>
         <div>
-          <dt>What each would change</dt>
+          <dt>What each direction would change</dt>
           <dd>
             <ul className="ask__gathered-list">
               {g.changes.map((c) => (
@@ -311,7 +311,7 @@ function GatheredEvidence({ g, id }: { g: Gathered; id: string }) {
           </dd>
         </div>
         <div>
-          <dt>What depends on it</dt>
+          <dt>What else is affected</dt>
           <dd>{list(g.depends)}</dd>
         </div>
         <div>
@@ -368,7 +368,7 @@ function ReachCase({ work, reach, id }: { work: Work; reach: Reach; id: string }
 
       <div className="ask__reach" role="group" aria-labelledby={`${id}-reach`}>
         <p className="ask__label" id={`${id}-reach`}>
-          Who else it reaches
+          Who else the change reaches
         </p>
         <p className="ask__reach-lead">
           <strong>{screens} screens</strong> draw the shared {reach.component}, which {reach.owner.name} ({reach.owner.role}) owns.
@@ -603,14 +603,14 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                 ? 'a case that matches doesn’t ask you. The agent follows the rule, and its record names the decision the rule came from.'
                 : 'a case that matches doesn’t ask you. The agent follows the rule and says so in its record.'}
             </p>
-            <p>You can {p.fixed ? 'revoke' : 'edit or revoke'} it under the boundaries. Revoking it doesn’t undo what it already did.</p>
+            <p>{p.fixed ? 'Revoke' : 'Edit or revoke'} the rule under the boundaries. Revoking keeps the changes the rule made.</p>
           </div>
         ) : (
           <p className="ask__once">{tradeoff ? 'This decision applies to this change only.' : 'This answer applies to this change only.'}</p>
         )}
       </div>
     ) : p.offer === 'conflict' ? (
-      <p className="ask__once">Your rule gives a different answer for cases like this, so this one applies to this change only. To change the rule, edit or revoke it.</p>
+      <p className="ask__once">Your rule answers cases like this differently, so this answer applies to this change only. To change the rule, edit or revoke it.</p>
     ) : null
   ) : null;
 
@@ -692,8 +692,8 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
       {tradeoff ? (
         <>
           <div className="ask__options" role="group" aria-labelledby={`${id}-if`} tabIndex={-1}>
-            <p className="ask__if" id={`${id}-if`}>
-              Which trade-off is acceptable?
+            <p className="visually-hidden" id={`${id}-if`}>
+              The two directions
             </p>
             <ul className="ask__choices ask__choices--tradeoff" data-count={directions.length}>
               {directions.map((o) => {
@@ -792,8 +792,8 @@ export function DecisionRequest({ work, why, boundaries, waiting = [], preview, 
                   label="Your reason"
                   hint={
                     reasonOf(option) === option.decision.reason
-                      ? 'Drafted by the agent from the direction you chose. Change it to what you know; the decision record keeps your words.'
-                      : 'In your words. The decision record keeps them.'
+                      ? 'Drafted by the agent. Rewrite the reason with what you know; the decision record keeps your words.'
+                      : 'The decision record keeps your words.'
                   }
                   rows={3}
                   value={reasonOf(option)}
@@ -923,7 +923,7 @@ export function DecisionRead({ work, waiting = [], onAnswer }: DecisionReadProps
   const tradeoff = q.options.some((o) => o.benefits);
   const recommended = q.options.find((o) => o.recommended);
   const evidence = q.options.find((o) => o.asks);
-  const moreLabel = q.kind === 'intent' ? (q.evidence ? 'The evidence and the code' : 'The code') : q.reach ? 'What it found' : 'Why it stopped';
+  const moreLabel = q.kind === 'intent' ? (q.evidence ? 'The evidence and the code' : 'The code') : q.reach ? 'What the agent found' : 'Why the agent stopped';
 
   return (
     <section className="ask ask--read" aria-label="What the agent read">
@@ -946,7 +946,7 @@ export function DecisionRead({ work, waiting = [], onAnswer }: DecisionReadProps
           <li className="ask__tile ask__unknown">
             <p className="ask__label">
               <Icon name="message-question" size={16} />
-              What I can’t determine
+              What the agent can’t tell
             </p>
             <p className="ask__tile-means">{q.unknown}</p>
             {q.inferred ? (
@@ -972,7 +972,7 @@ export function DecisionRead({ work, waiting = [], onAnswer }: DecisionReadProps
           <li className="ask__tile ask__unknown">
             <p className="ask__label">
               <Icon name="lock" size={16} />
-              Outside what it may do
+              Outside what the agent may do
             </p>
             <p className="ask__tile-means">
               <Inline text={q.found} />
@@ -1014,7 +1014,7 @@ export function DecisionRead({ work, waiting = [], onAnswer }: DecisionReadProps
               {q.reach ? null : (
                 <dl className="ask__facts">
                   <div>
-                    <dt>Why it stopped</dt>
+                    <dt>Why the agent stopped</dt>
                     <dd>
                       <Inline text={q.gap} />
                     </dd>
@@ -1042,7 +1042,7 @@ export function DecisionRead({ work, waiting = [], onAnswer }: DecisionReadProps
               <div>
                 <dt>Also waiting</dt>
                 <dd>
-                  {plural(waiting.length, 'change')} {waiting.length === 1 ? 'is' : 'are'} held until you decide, because the same decision may settle {waiting.length === 1 ? 'it' : 'them'}:
+                  The same decision may settle {plural(waiting.length, 'held change')}:
                   <ul className="ask__list">
                     {waiting.map((w) => (
                       <li key={w.id}>

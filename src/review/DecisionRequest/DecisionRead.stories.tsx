@@ -44,13 +44,13 @@ export const TradeOff: Story = {
     const canvas = within(canvasElement);
     const read = canvas.getByRole('list', { name: 'The agent’s read' });
     await expect(read).toHaveTextContent(/^Recommended\s*Add a quiet variant/);
-    await expect(read).toHaveTextContent(/Ghost, the nearest, is a full-height control/);
-    await expect(read).toHaveTextContent(/What I can’t determine\s*Whether “Cancel subscription” is quiet on purpose, and who decides how easy it is to find/);
-    await expect(read).toHaveTextContent('That could change this recommendation.');
+    await expect(read).toHaveTextContent(/Ghost, the nearest variant, is a full-height control/);
+    await expect(read).toHaveTextContent(/What the agent can’t tell\s*Whether “Cancel subscription” is quiet on purpose, and who decides how easy it is to find/);
+    await expect(read).toHaveTextContent('The answer could change this recommendation.');
     await expect(read).toHaveTextContent(/Inferred, not checked:/);
-    await expect(canvas.getByText(/3 changes are held until you decide/)).not.toBeVisible();
+    await expect(canvas.getByText(/The same decision may settle 3 held changes/)).not.toBeVisible();
     await userEvent.click(canvas.getByText('The evidence and the code'));
-    await expect(canvas.getByText(/3 changes are held until you decide/)).toBeVisible();
+    await expect(canvas.getByText(/The same decision may settle 3 held changes/)).toBeVisible();
     await expect(canvas.getByText(/Plan card: “Downgrade plan”/)).toBeVisible();
   },
 };
@@ -94,7 +94,7 @@ export const OutsideTheDelegation: Story = {
     const canvas = within(canvasElement);
     const read = canvas.getByRole('list', { name: 'The agent’s read' });
     await expect(read).toHaveTextContent(/Recommended\s*Add --radius-full, this once/);
-    await expect(read).toHaveTextContent(/Outside what it may do/);
+    await expect(read).toHaveTextContent(/Outside what the agent may do/);
     await expect(read).toHaveTextContent('.meter__track { border-radius: 999px; }');
     await expect(canvasElement.querySelector('details')).toBeNull();
   },
@@ -115,7 +115,7 @@ export const SharedComponent: Story = {
     await expect(canvas.getByRole('list', { name: 'The agent’s read' })).toHaveTextContent(/Recommended\s*This screen only/);
     await expect(canvas.getByText('Asked')).toBeInTheDocument();
     await expect(canvas.getByText('Proposes')).toBeInTheDocument();
-    await expect(canvas.getByRole('group', { name: 'Who else it reaches' })).toHaveTextContent(/40 screens draw the shared Table, which Priya Raman \(Design systems\) owns\./);
+    await expect(canvas.getByRole('group', { name: 'Who else the change reaches' })).toHaveTextContent(/40 screens draw the shared Table, which Priya Raman \(Design systems\) owns\./);
     await expect(canvas.getByRole('list', { name: 'Screens by area' }).children).toHaveLength(6);
     const known = canvas.getByRole('list', { name: 'What is known' });
     await expect(known).toHaveTextContent(/Checked.*12 of the 40 screens have one/);
@@ -129,7 +129,7 @@ export const SharedComponentAfterEvidence: Story = {
     docs: { description: { story: 'After the agent rendered all forty: five cut off their last row, and what is still not known.' } },
   },
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('list', { name: 'What is known' })).toHaveTextContent(/On 5, a panel of fixed height now cuts off the last row/);
+    await expect(within(canvasElement).getByRole('list', { name: 'What is known' })).toHaveTextContent(/On 5 screens, a panel of fixed height now cuts off the last row/);
   },
 };
 

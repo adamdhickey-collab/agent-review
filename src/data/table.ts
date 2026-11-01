@@ -44,7 +44,7 @@ export const TABLE_WORDS: Words = {
 
 export const tableBoundaries: Boundary[] = [
   { n: 1, group: 'own', text: 'Change the customer screen’s own files, in src/product/customers/.' },
-  { n: 2, group: 'own', text: 'Run the checks, and fix a check its own change broke.' },
+  { n: 2, group: 'own', text: 'Run the checks, and fix any check the agent’s change broke.' },
   { n: 3, group: 'own', text: 'Merge when every check passes and no screen but the customer list moves.' },
   { n: 4, group: 'asks', text: 'When a fix would change what a column shows, not only how it fits.' },
   { n: 5, group: 'outside', text: 'Changing a shared component or the token layer, which other screens read.' },
@@ -109,7 +109,7 @@ const SCREENS: Reach['areas'] = [
 ];
 
 const FIXED = SCREENS.flatMap((a) => a.screens.filter((s) => s.fixed).map((s) => s.name));
-const fixedList = `${FIXED.slice(0, -1).join(', ')} and ${FIXED[FIXED.length - 1]}`;
+const fixedList = `${FIXED.slice(0, -1).join(', ')}, and ${FIXED[FIXED.length - 1]}`;
 
 /* The checks on a fix that moves the customer list and nothing else, which
    is what boundary 3 lets the agent merge on its own. */
@@ -125,7 +125,7 @@ function localChecks(stories: number, moved: string): Check[] {
    What it did on its own
    ------------------------------------------------------------------------ */
 
-const UNDO = 'Reverting adds a commit to main that undoes it, and the agent won’t redo it.';
+const UNDO = 'Reverting undoes the fix in a commit to main. The agent won’t try again.';
 
 const toolbarRoutine: Work = {
   id: 'customers-toolbar',
@@ -135,7 +135,7 @@ const toolbarRoutine: Work = {
   status: 'made',
   lines: [{ selector: '.customers__toolbar', property: 'flex-wrap', before: 'nowrap', after: 'wrap' }],
   basis: { kind: 'boundary', boundaries: [1, 3] },
-  reason: 'At 768 the search field squeezed the title onto two lines. Letting the toolbar wrap gives the title its line back.',
+  reason: 'At 768 the search field squeezed the title onto two lines. Letting the toolbar wrap keeps the title on one line.',
   checks: localChecks(12, 'the toolbar sits under the title at 768'),
   commit: '3e8a1c4',
   frames: 2,
@@ -177,7 +177,7 @@ const LOCAL_RULE = {
   text: 'On the customer screens, when a fix would change a shared component, make it on the screen instead, and tell the component’s owner.',
   scope: 'The customer screens',
   excludes: 'Other screens, a bug in a shared component itself, and any change a component’s owner asks for.',
-  why: 'A shared component is its owner’s to change. A fix on the screen answers the request without deciding for 39 others.',
+  why: 'A shared component is its owner’s to change. A fix on the screen answers the request without deciding for 39 other screens.',
 };
 
 /* Keep it to the screen asked about: within the agent's own boundaries, so
@@ -187,15 +187,15 @@ const keepLocal: Option = {
   title: 'This screen only',
   label: 'Fix this screen only',
   recommended: true,
-  effect: 'It sets --table-pad-y to --space-3 on the customer table alone, in CustomerTable.css, and leaves the shared Table as it is.',
-  outcome: 'Only the customer list moves. The other 39 keep their rows, and the Table’s owner gets a note.',
+  effect: 'The agent sets --table-pad-y to --space-3 on the customer table alone, in CustomerTable.css, and leaves the shared Table as it is.',
+  outcome: 'Only the customer list moves, and the Table’s owner gets a note.',
   file: LOCAL,
   lines: [{ selector: '.customers .table', property: '--table-pad-y', before: 'var(--space-2)' }],
   after: ['var(--space-3)'],
   record: 'Rows 8px taller, on the customer table only',
   then: {
     checks: localChecks(12, 'rows 8px taller'),
-    unchecked: 'Whether the customer table should differ from the other 39 screens. It does now, by one line, until the shared table’s owner decides.',
+    unchecked: 'Whether the customer table should differ from the other 39 screens, as it now does. The shared Table’s owner decides.',
     open: 'The other 39 screens keep their tighter rows. Priya Raman, who owns the shared Table, has the agent’s note.',
     history: [
       'Ran the checks: the token lint passed, only the customer list’s 2 frames moved, 12 of 12 stories passed.',
@@ -206,7 +206,7 @@ const keepLocal: Option = {
 };
 
 const APPROVE_NOTE =
-  'This approves one change. Letting an agent change the shared Table without asking is a standing permission only its owner, Priya Raman (Design systems), can give, and this doesn’t ask her.';
+  'This approves one change. Only the Table’s owner, Priya Raman (Design systems), can let an agent change the shared Table without asking.';
 
 /* Approve the shared change, once: past boundary 5, for this change only.
    What follows says exactly what was and wasn't looked at. */
@@ -217,11 +217,11 @@ function approve(seen: boolean): Option {
     title: 'All 40 screens',
     label: 'Approve, this once',
     effect: seen
-      ? 'It sets --table-pad-y to --space-3 in the shared Table. All 40 screens get rows 8px taller, and 5 cut off their last row until their panels are fixed.'
-      : 'It sets --table-pad-y to --space-3 in the shared Table. All 40 screens get rows 8px taller.',
+      ? 'The agent sets --table-pad-y to --space-3 in the shared Table. All 40 screens get rows 8px taller, and 5 cut off their last row until their panels are fixed.'
+      : 'The agent sets --table-pad-y to --space-3 in the shared Table. All 40 screens get rows 8px taller.',
     outcome: seen
-      ? 'All 40 get taller rows, and 5 cut off a row. Those 5 are listed as unresolved.'
-      : 'All 40 get taller rows. The 28 nobody has looked at are listed as unresolved.',
+      ? 'All 40 screens get taller rows. 5 cut off a row and are listed as unresolved.'
+      : 'All 40 screens get taller rows, and 28 unchecked screens are listed as unresolved.',
     after: ['var(--space-3)'],
     record: 'Rows 8px taller in the shared Table, on all 40 screens',
     screen: 'Shared Table',
@@ -237,7 +237,7 @@ function approve(seen: boolean): Option {
         { name: 'Stories with axe', state: 'passed', label: '9 of 9 passed', established: 'Every Table story renders, and axe found no violation.' },
       ],
       unchecked: seen
-        ? `Whether the 5 panels that now cut off a row (${fixedList}) should grow or scroll. That is each screen’s decision.`
+        ? `Whether the 5 panels that now cut off a row (${fixedList}) should grow or scroll, which each screen decides.`
         : 'How the 28 screens without a baseline look with taller rows, including 5 that hold the table in a panel of fixed height.',
       open: seen
         ? `5 screens cut off their last row in a panel of fixed height: ${fixedList}.`
@@ -250,13 +250,13 @@ function approve(seen: boolean): Option {
 
 const COMMON = {
   kind: 'scope' as const,
-  ask: 'The fix is in a table 40 screens share. Change it for all of them?',
+  ask: 'Change the shared Table for all 40 screens?',
   asked: 'Fix the cramped customer table, on the customer screen.',
   proposes: 'Pad every table row by --space-3 instead of --space-2, in the shared Table: rows 8px taller.',
   found:
     'The customer table’s rows are 32px because the shared Table pads every cell by --table-pad-y, which is --space-2. Making it --space-3 gives 40px rows, here and on every screen that draws a table.',
   gap: 'The agent knows how to make the change, and the checks it could run pass. But the Table belongs to the design system, and this delegation covers the customer screen.',
-  verdict: 'So this isn’t a technical problem. It’s a permission decision.',
+  verdict: 'So this is a permission decision, not a technical problem.',
   paused: [5],
   pattern: 'shared' as const,
   edge: 'the fix is in a shared component',
@@ -266,7 +266,7 @@ const COMMON = {
    found, and without the answer that asked for it. */
 const seenQuestion: Question = {
   ...COMMON,
-  recommendation: 'Five screens would cut off a row, and the request was the customer screen. Fix it here, and let the Table’s owner decide about the rest.',
+  recommendation: 'Five screens would cut off a row. Fix only the customer screen, and let the Table’s owner decide for the other 39.',
   reach: {
     component: 'Table',
     owner: priya,
@@ -276,16 +276,16 @@ const seenQuestion: Question = {
       { state: 'passed', text: 'Axe: 9 of 9 Table stories passed.' },
       { state: 'changed', text: 'Visual baselines: all 12 screens that have one moved, by the row height only.' },
       { state: 'passed', text: 'All 40 screens rendered before and after, at 1280 and 768: 35 only get taller rows.' },
-      { state: 'failed', text: `On 5, a panel of fixed height now cuts off the last row: ${fixedList}.` },
+      { state: 'failed', text: `On 5 screens, a panel of fixed height now cuts off the last row: ${fixedList}.` },
     ],
-    unknown: ['Whether those 5 panels should grow or scroll. That depends on each screen, not on the table.', 'How the 40 look on a phone. It rendered at 1280 and 768 only.'],
+    unknown: ['Whether those 5 panels should grow or scroll, which depends on each screen, not on the Table.', 'How the 40 look on a phone. It rendered at 1280 and 768 only.'],
   },
   options: [keepLocal, approve(true)],
 };
 
 const firstQuestion: Question = {
   ...COMMON,
-  recommendation: 'The request was the customer screen, and 28 of the 40 screens haven’t been looked at. Fix it here, and let the Table’s owner decide about the rest.',
+  recommendation: 'Nobody has looked at 28 of the 40 screens. Fix only the customer screen, and let the Table’s owner decide for the other 39.',
   reach: {
     component: 'Table',
     owner: priya,
@@ -297,7 +297,7 @@ const firstQuestion: Question = {
     ],
     unknown: [
       '28 screens have no visual baseline. Nobody has looked at them with taller rows.',
-      '5 hold the table in a panel of fixed height, from their CSS, not from looking. There, a taller row may push the last one out of view.',
+      '5 screens hold the table in a panel of fixed height, so a taller row may hide the last row. Known from their CSS, not from looking.',
     ],
   },
   options: [
@@ -307,8 +307,8 @@ const firstQuestion: Question = {
       id: 'evidence',
       title: 'More evidence first',
       label: 'Show me the 40 screens',
-      effect: 'It renders all 40 screens before and after the change, at 1280 and 768, and asks again with what it finds. Nothing changes in the code.',
-      outcome: 'Nothing changes yet. It renders all 40 screens and asks again with what it finds.',
+      effect: 'The agent renders all 40 screens before and after the change, at 1280 and 768, and asks again with what it finds. Nothing changes in the code.',
+      outcome: 'The agent renders all 40 screens before and after, at 1280 and 768.',
       after: [],
       asks: seenQuestion,
       then: {
