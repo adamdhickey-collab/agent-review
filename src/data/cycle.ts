@@ -21,7 +21,7 @@
 
    The causal chain, each link read by a function below:
      Discover  the agent's summary says archiving loses data; the engineering
-               note says it doesn't. Correct it or keep it (readingOf).
+               note says it doesn't. Correct the summary or keep it (readingOf).
      Define    which wins when pace and safety pull apart (priority). Sets
                the success criteria and what the agent recommends later.
      Explore   three working directions. What the person tried is kept.
@@ -51,15 +51,15 @@ export const STAGES: readonly Stage[] = [
     id: 'discover',
     name: 'Discover',
     question: 'Something is wrong with archiving. What, exactly?',
-    designer: 'Reads the evidence and decides which of the agent’s readings hold up.',
-    agent: 'Gathers the tickets, signals and notes, and drafts a summary.',
+    designer: 'Checks the agent’s summary against the evidence.',
+    agent: 'Collects the tickets, usage data, and engineering note, and writes a summary.',
   },
   {
     id: 'define',
     name: 'Define',
-    question: 'What are we solving, and what wins when the goals pull apart?',
-    designer: 'Frames the problem and sets the priority the later choices follow.',
-    agent: 'Drafts the brief from what was kept.',
+    question: 'What problem are we solving?',
+    designer: 'Writes down the problem and picks the priority every later choice follows.',
+    agent: 'Drafts the brief from the summary.',
   },
   {
     id: 'explore',
@@ -71,23 +71,23 @@ export const STAGES: readonly Stage[] = [
   {
     id: 'evaluate',
     name: 'Evaluate',
-    question: 'Which direction, and what has to be true of it?',
+    question: 'Which direction, and what must it do?',
     designer: 'Weighs the findings, chooses a direction, and turns findings into requirements.',
-    agent: 'Ran the checks and lined the findings up against the brief.',
+    agent: 'Ran the checks and compared the findings with the brief.',
   },
   {
     id: 'delegate',
     name: 'Delegate',
-    question: 'The agent builds it. What does it still need from you?',
-    designer: 'Sets the boundaries and answers the one thing the agent can’t decide.',
-    agent: 'Builds inside the boundaries, runs the checks, and stops where it should.',
+    question: 'What does the agent need from you while it builds?',
+    designer: 'Sets the boundaries and answers the one question the agent can’t.',
+    agent: 'Builds inside the boundaries, runs the checks, and asks before crossing one.',
   },
   {
     id: 'learn',
     name: 'Learn',
-    question: 'It’s built. What do you know, and what don’t you?',
-    designer: 'Decides what to measure, what to research next, and what guidance to keep.',
-    agent: 'Assembles what was verified and what wasn’t.',
+    question: 'The feature is built. What do you know, and what don’t you?',
+    designer: 'Decides what to measure, what to research, and which rule to save.',
+    agent: 'Lists what was verified and what wasn’t.',
   },
 ];
 
@@ -140,13 +140,13 @@ export const EVIDENCE: readonly Evidence[] = [
     id: 'request-audit',
     kind: 'request',
     from: 'Administrator',
-    says: 'Our auditor asked who archived Pinecrest Credit Union, and when. I couldn’t tell them.',
+    says: 'Our auditor asked who archived Pinecrest Credit Union, and when. I couldn’t answer.',
   },
   {
     id: 'signal-tickets',
     kind: 'signal',
     from: 'Support, last quarter',
-    says: '9 tickets mention archiving. 6 of them ask to get a record back.',
+    says: '9 tickets mention archiving. 6 ask to restore an archived customer.',
   },
   {
     id: 'signal-active',
@@ -158,7 +158,7 @@ export const EVIDENCE: readonly Evidence[] = [
     id: 'note-retention',
     kind: 'note',
     from: 'Engineering',
-    says: 'Archived customers stay in the database for 90 days. There’s no screen to restore them, so support does it by hand.',
+    says: 'Archived customers stay in the database for 90 days. There’s no screen for restoring, so support restores each customer by hand.',
   },
 ];
 
@@ -183,8 +183,8 @@ export interface Reading {
 }
 
 export const READINGS: readonly Reading[] = [
-  { id: 'r-back', kind: 'observation', says: 'Most archive tickets ask to get a record back.', from: ['signal-tickets', 'ticket-okafor'] },
-  { id: 'r-support', kind: 'observation', says: 'Restoring is a support task today. There’s no screen for it.', from: ['note-retention'] },
+  { id: 'r-back', kind: 'observation', says: 'Most archiving tickets ask to restore a customer.', from: ['signal-tickets', 'ticket-okafor'] },
+  { id: 'r-support', kind: 'observation', says: 'Only support can restore a customer today. There’s no screen for restoring.', from: ['note-retention'] },
   { id: 'r-batch', kind: 'interpretation', says: 'Mistakes happen in batches: an active customer gets swept up with churned ones.', from: ['signal-active', 'ticket-okafor'] },
   { id: 'r-loss', kind: 'assumption', says: 'Archiving deletes customer data, so a mistake is permanent.', from: ['ticket-okafor'] },
 ];
@@ -202,12 +202,12 @@ export type Priority = 'pace' | 'recovery';
 
 export const PRIORITY: Record<Priority, { name: string; says: string }> = {
   pace: {
-    name: 'Routine cleanup stays fast',
-    says: 'A mistake gets fixed after it happens, not prevented before. Fewer presses for the people who archive in bulk.',
+    name: 'Speed comes first',
+    says: 'Fewer presses for people who archive in bulk. A mistake gets fixed after it happens, not prevented.',
   },
   recovery: {
-    name: 'Nothing leaves without a way back',
-    says: 'An active customer is never archived unseen, even if that costs a press. Recovery doesn’t need support.',
+    name: 'Safety comes first',
+    says: 'Relay names every active customer before archiving, even if that adds a press.',
   },
 };
 
@@ -219,28 +219,28 @@ export interface Person {
 export const PEOPLE: readonly Person[] = [
   { who: 'Account manager', needs: 'Clear out old trials without worrying about the big accounts.' },
   { who: 'Operations lead', needs: 'Archive hundreds a quarter without extra steps.' },
-  { who: 'Administrator', needs: 'Know who archived what, and put it back.' },
+  { who: 'Administrator', needs: 'See who archived each customer, and restore archived customers.' },
   { who: 'Relay’s product team', needs: 'Keep routine work quick.' },
-  { who: 'Engineering', needs: 'One accessible pattern the system can reuse.' },
+  { who: 'Engineering', needs: 'One accessible pattern the design system can reuse.' },
 ];
 
 export const CONSTRAINTS: readonly string[] = [
-  'Archived records are kept for 90 days. That isn’t ours to change.',
-  'Built from the system’s components: Table, Toolbar, Button, Badge.',
+  'Archived customers are kept for 90 days. We can’t change that.',
+  'Built from the design system’s components: Table, Toolbar, Button, Badge.',
   'Works with a keyboard and a screen reader.',
-  'A destructive action has a second step or a way back (rule 6).',
+  'A destructive action needs a confirmation step or an Undo (rule 6).',
 ];
 
 export const NOT_SOLVING: readonly string[] = ['Deleting data for good', 'Who is allowed to archive', 'Archiving from a customer’s own page'];
 
-export const OPEN_QUESTIONS: readonly string[] = ['How often does someone archive more than a page at a time?', 'Does an administrator need to restore, or only to see the record?'];
+export const OPEN_QUESTIONS: readonly string[] = ['How often does someone archive more than a page at a time?', 'Does an administrator need to restore, or only to see who archived?'];
 
 /* The problem statement, as the Discover call leaves it. Keeping the
    disputed reading frames the work around data loss, which the engineering
    note says does not happen; correcting it frames it around what does. */
 export function problemOf(call: ReadingCall | null): string {
-  if (call === 'keep') return 'Archiving can permanently lose customer data, so one wrong press is a disaster.';
-  return 'People can’t see or undo an archive. A routine cleanup feels risky, and a mistake costs a support ticket.';
+  if (call === 'keep') return 'Archiving deletes customer data for good, so one wrong press can’t be undone.';
+  return 'Nobody can see or restore an archived customer. Cleanup feels risky, and mistakes become support tickets.';
 }
 
 export interface Criterion {
@@ -254,9 +254,9 @@ export function criteriaOf(priority: Priority | null, call: ReadingCall | null):
   const shared: Criterion = { id: 'c-who', says: 'An administrator can see who archived a customer, and when.' };
   const loss: Criterion[] = call === 'keep' ? [{ id: 'c-loss', says: 'No archive can lose data.' }] : [];
   if (priority === 'pace')
-    return [...loss, { id: 'c-presses', says: 'Archiving a page of churned customers takes two presses.' }, { id: 'c-self', says: 'Whoever archived by mistake can put it back without support.' }, shared];
+    return [...loss, { id: 'c-presses', says: 'Archiving a page of churned customers takes two presses.' }, { id: 'c-self', says: 'A person who archives by mistake can restore without calling support.' }, shared];
   if (priority === 'recovery')
-    return [...loss, { id: 'c-named', says: 'No active customer is archived without being named first.' }, { id: 'c-restore', says: 'Any archive can be restored from the table for 90 days.' }, shared];
+    return [...loss, { id: 'c-named', says: 'No active customer is archived without being named first.' }, { id: 'c-restore', says: 'Any archived customer can be restored from the table for 90 days.' }, shared];
   return [...loss, shared];
 }
 
@@ -280,9 +280,9 @@ export const DIRECTIONS: readonly Direction[] = [
   {
     id: 'undo',
     name: 'Archive now, undo after',
-    does: 'Archive acts at once. A bar says what left and offers Undo until the next action.',
+    does: 'Archive acts at once. A bar names what was archived and offers Undo until the next action.',
     gains: 'Fastest for routine cleanup. Nothing to read before the press.',
-    costs: 'A mistake is only caught if someone notices the bar.',
+    costs: 'A mistake is caught only if someone notices the Undo bar.',
     presses: 2,
   },
   {
@@ -290,15 +290,15 @@ export const DIRECTIONS: readonly Direction[] = [
     name: 'Confirm first, naming who',
     does: 'Archive asks first, and names any active customer in the selection.',
     gains: 'An active customer is named before anything happens. Closest to what ships today.',
-    costs: 'A question every time. People learn to press through it.',
+    costs: 'People see the question every time and stop reading it.',
     presses: 3,
   },
   {
     id: 'review',
     name: 'Review batch, then archive',
-    does: 'Archive opens a review of the selection, sorted into what’s blocked, what’s active and what’s routine.',
-    gains: 'Catches blocked and active rows before the press, and suits a large batch.',
-    costs: 'The most steps, and a new pattern for the system to own.',
+    does: 'Archive opens a review of the selection, sorted into blocked, active, and routine customers.',
+    gains: 'Catches blocked and active customers before the press. Suits a large batch.',
+    costs: 'The most steps, and a new pattern for the design system to maintain.',
     presses: 3,
   },
 ];
@@ -308,9 +308,9 @@ export const DIRECTIONS: readonly Direction[] = [
     said once it has been tried. Read off ArchiveFlow, not written beside it:
     if a direction changes what it says, this changes with it. */
 export const SHOWED: Record<DirectionId, string> = {
-  undo: 'Four left at once, three of them active, and nothing named them first. Monarch Dental Group was refused after the press. Undo stayed until the next action.',
-  confirm: 'The question named the three active customers before anything left. It offered all five, and only said after the press that Monarch Dental Group can’t be archived.',
-  review: 'Monarch Dental Group was set aside before the press, and the three active customers were named, each one yours to keep out. It took the most steps.',
+  undo: 'Archived four customers at once, including the three active ones, with no warning. Refused Monarch Dental Group only after the press. Undo lasted until the next action.',
+  confirm: 'Named the three active customers before archiving. Offered to archive all five, and only after the press said Monarch Dental Group can’t be archived.',
+  review: 'Set Monarch Dental Group aside before the press and named the three active customers, with a box to keep each one. Took the most steps.',
 };
 
 /** What a direction says once Archive is pressed and before anything leaves,
@@ -318,8 +318,8 @@ export const SHOWED: Record<DirectionId, string> = {
     that answers. Undo asks nothing, so it says nothing. */
 export const ASKING: Record<DirectionId, string | null> = {
   undo: null,
-  confirm: 'Relay asks before anything leaves, and names the three active customers.',
-  review: 'Relay sorted the five before anything leaves: one it can’t archive, three to check. Clear a box to keep a customer.',
+  confirm: 'Relay asks before archiving and names the three active customers.',
+  review: 'Relay sorts the five first: one can’t be archived, and three are active. To keep an active customer, clear its box.',
 };
 
 export function directionOf(id: DirectionId): Direction {
@@ -360,7 +360,7 @@ export interface Finding {
 
 export const REQUIREMENT: Record<FeatureId, string> = {
   'names-active': 'Name any active customer before it’s archived.',
-  restore: 'An Archived view, where whoever archived can restore for 90 days.',
+  restore: 'An Archived view where archived customers can be restored for 90 days.',
   who: 'The Archived view says who archived each customer, and when.',
   'blocked-first': 'Say which customers can’t be archived before the press, not after.',
 };
@@ -369,7 +369,7 @@ export const FINDINGS: readonly Finding[] = [
   { id: 'f-active', source: 'session', says: 'In 2 of 5 sessions, someone archived an active customer in a batch of churned ones and didn’t notice.', becomes: 'names-active', about: ['undo'] },
   { id: 'f-habit', source: 'session', says: 'By the third batch, people pressed through the question without reading it.', about: ['confirm'] },
   { id: 'f-bulk', source: 'session', says: 'The operations lead’s quarterly cleanup took twice as long with the review step.', about: ['review'] },
-  { id: 'f-back', source: 'evidence', says: '6 of 9 archive tickets ask to get a record back.', becomes: 'restore' },
+  { id: 'f-back', source: 'evidence', says: '6 of 9 archiving tickets ask to restore a customer.', becomes: 'restore' },
   { id: 'f-audit', source: 'evidence', says: 'An auditor asked who archived a customer. Nobody could say.', becomes: 'who' },
   { id: 'f-blocked', source: 'trying', says: 'Monarch Dental Group can’t be archived: it has an open invoice. Two directions only say so after the press.', becomes: 'blocked-first', about: ['undo', 'confirm'] },
   { id: 'f-axe', source: 'check', says: 'All three pass the accessibility checks and work with a keyboard. No check can say whether people notice what changed.' },
@@ -415,31 +415,31 @@ export function stopOf(direction: DirectionId): Stop {
     case 'undo':
       return {
         kind: 'approval',
-        question: 'The undo bar is a new pattern. Keep it on this screen, or propose it to the system?',
-        why: 'Rule 12: a new interaction pattern isn’t the agent’s to add to the system. The system belongs to the design systems lead.',
+        question: 'The Undo bar is a new pattern. Keep the bar on this screen, or propose it for the design system?',
+        why: 'The agent can’t add a new pattern to the design system (rule 12). The design systems lead decides.',
         answers: [
-          { id: 'local', name: 'Keep it on this screen', means: 'Within the agent’s authority. Other screens don’t get it yet.', recommended: true },
-          { id: 'system', name: 'Propose it to the system', means: 'The agent drafts a component and a story, and the design systems lead decides.' },
+          { id: 'local', name: 'Keep the bar on this screen', means: 'The agent can do this alone. Other screens don’t get the Undo bar yet.', recommended: true },
+          { id: 'system', name: 'Propose the bar for the design system', means: 'The agent drafts a component and a story. The design systems lead decides.' },
         ],
       };
     case 'confirm':
       return {
         kind: 'judgment',
         question: 'Who counts as an active customer for the warning?',
-        why: 'The brief says “active”. The table has a status called Active, and a “Last active” date. Both readings pass every check.',
+        why: 'The brief says “active.” The table has an Active status and a Last active date. Either reading passes every check.',
         answers: [
-          { id: 'status', name: 'Status is Active', means: 'Names 6 of the 12. Matches the badge people already see.', recommended: true },
-          { id: 'recent', name: 'Active in the last week', means: 'Names 9 of the 12, trials included. Catches more, warns more often.' },
+          { id: 'status', name: 'Status is Active', means: 'Warns about 6 of the 12. Matches the Active badge people already see.', recommended: true },
+          { id: 'recent', name: 'Active in the last week', means: 'Warns about 9 of the 12, trials included. Catches more, but warns more often.' },
         ],
       };
     case 'review':
       return {
         kind: 'approval',
-        question: 'The review needs a panel. Build it inline from the Toolbar and Table, or add a Panel to the system?',
-        why: 'Rule 10: a new component needs a reason in writing, and a shared one needs its owner.',
+        question: 'The review step needs a panel. Build the panel from existing parts, or add a Panel component to the design system?',
+        why: 'A new shared component needs a written reason and the design systems lead’s approval (rule 10).',
         answers: [
-          { id: 'inline', name: 'Build it inline', means: 'Within the agent’s authority, from parts the system has.', recommended: true },
-          { id: 'panel', name: 'Propose a Panel', means: 'The agent drafts it with stories, and the design systems lead decides. The screen uses the inline version until they do.' },
+          { id: 'inline', name: 'Build from existing parts', means: 'The agent can do this alone, with the Toolbar and Table.', recommended: true },
+          { id: 'panel', name: 'Propose a Panel', means: 'The agent drafts a Panel with stories. The design systems lead decides, and until then the screen uses existing parts.' },
         ],
       };
   }
@@ -447,8 +447,8 @@ export function stopOf(direction: DirectionId): Stop {
 
 /** The agent's boundaries for this delegation, in three groups, as the runs write them. */
 export const BOUNDARIES = {
-  own: ['Change the customer table and its stories', 'Add an Archived view to the customers screen', 'Use any component the system has'],
-  judgment: ['Anything the brief doesn’t say the product means'],
+  own: ['Change the customer table and its stories', 'Add an Archived view to the customers screen', 'Use any design system component'],
+  judgment: ['Any question the brief doesn’t answer'],
   approval: ['A change to a shared component in src/components', 'A new interaction pattern (rule 12)'],
 } as const;
 
@@ -546,24 +546,24 @@ export function outcomeOf(state: CycleState): Outcome | null {
   if (!state.direction) return null;
   const f = featuresOf(state.direction, state.required);
   const unknowns: string[] = [];
-  if (state.reading === 'keep') unknowns.push('The brief rested on data loss, and the engineering note says archived records are kept 90 days. Part of what was built solves a problem nobody has.');
-  if (!f['names-active']) unknowns.push('Nothing stops an active customer being archived in a batch. The undo is the only guard.');
+  if (state.reading === 'keep') unknowns.push('The brief assumed data loss, but the engineering note says archived customers are kept 90 days. Part of the build solves a problem nobody has.');
+  if (!f['names-active']) unknowns.push('Nothing stops an active customer being archived in a batch. The Undo bar is the only protection.');
   if (!f.restore) unknowns.push('Restoring is still a support ticket.');
-  if (f.restore && !f.who) unknowns.push('The auditor’s question, who archived it, still has no answer on screen.');
+  if (f.restore && !f.who) unknowns.push('The auditor’s question, who archived a customer, still has no answer on screen.');
   if (state.direction === 'confirm') unknowns.push('Whether people read the question by the third batch. The session notes say they don’t.');
   if (state.direction === 'review') unknowns.push('Whether the operations lead tolerates the review for a couple of hundred rows a quarter.');
   unknowns.push('Whether any of this holds with real people. Nothing here was tested with anyone.');
 
   const pace = state.priority !== 'recovery';
   const measures: Measure[] = [
-    { what: 'Archive tickets asking for a record back', target: 'Fewer than the 6 of 9 last quarter' },
+    { what: 'Tickets asking to restore a customer', target: 'Fewer than the 6 of 9 last quarter' },
     { what: 'Active customers archived', target: pace ? 'No higher than 1 in 14' : 'Down from 1 in 14' },
-    { what: 'Restores within a week of an archive', target: f.restore ? 'Counted, to see how often mistakes happen' : 'Not measurable: there’s no restore' },
+    { what: 'Restores within a week of an archive', target: f.restore ? 'Counted, to see how often mistakes happen' : 'Not measurable: there’s no Restore' },
     { what: 'Time to archive a page of churned customers', target: pace ? 'No slower than today' : 'Accept a few seconds more' },
   ];
 
   const research = ['Watch five operations leads do a real quarterly cleanup.', 'Ask two administrators what an auditor actually needs to see.'];
-  if (state.direction === 'undo') research.push('Check whether people notice the undo bar after archiving from the bottom of a long list.');
+  if (state.direction === 'undo') research.push('Check whether people notice the Undo bar after archiving from the bottom of a long list.');
 
   const nextTime: string[] = [];
   if (state.direction === 'undo') nextTime.push('Try naming active customers in the bar before the press, if the measure moves the wrong way.');
@@ -572,12 +572,12 @@ export function outcomeOf(state: CycleState): Outcome | null {
   if (state.reading === 'keep') nextTime.push('Check the summary against the engineering note before writing the brief.');
 
   const guidance = f['names-active'] && f.restore
-    ? 'A bulk action that removes records names what’s at risk before the press and offers a way back after it.'
+    ? 'A bulk action that removes records names the records at risk before the press, and offers Restore after.'
     : f.restore
-      ? 'A bulk action that removes records offers a way back after it.'
+      ? 'A bulk action that removes records offers Restore after.'
       : f['names-active']
-        ? 'A bulk action that removes records names what’s at risk before the press.'
-        : 'A bulk action that removes records says what left, and offers Undo until the next action.';
+        ? 'A bulk action that removes records names the records at risk before the press.'
+        : 'A bulk action that removes records names what was removed, and offers Undo until the next action.';
 
   return { unknowns, measures, research, nextTime, guidance };
 }
@@ -670,7 +670,7 @@ export function reduceCycle(s: CycleState, a: CycleAction): CycleState {
 export function draftReason(direction: DirectionId, priority: Priority | null): string {
   const d = directionOf(direction);
   const p = priority ? PRIORITY[priority].name.toLowerCase() : 'it fits the brief';
-  return `Because ${p}. The cost, accepted: ${d.costs.charAt(0).toLowerCase()}${d.costs.slice(1)}`;
+  return `Because ${p}. The trade-off: ${d.costs.charAt(0).toLowerCase()}${d.costs.slice(1)}`;
 }
 
 /** Whether a stage has had its decision, for the rail. */

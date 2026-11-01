@@ -10,7 +10,7 @@ import type { Page } from '@playwright/test';
 
 const KEY = 'agent-review:cycle';
 
-/** Discover and Define decided: the summary corrected, recovery first. */
+/** Discover and Define decided: the summary corrected, safety first. */
 export const FRAMED = { reading: 'correct', priority: 'recovery' };
 
 /** And each direction in Explore tried, so Evaluate is open. */
