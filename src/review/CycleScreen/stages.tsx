@@ -9,6 +9,7 @@ import {
   briefOf,
   buildOf,
   BUILT_IN,
+  buildNameOf,
   CONSTRAINTS,
   decided,
   criteriaOf,
@@ -160,7 +161,7 @@ function Section({ title, children, id }: { title: string; children: ReactNode; 
 }
 
 function toFlow(f: Record<FeatureId, boolean>): ArchiveFeatures {
-  return { namesActive: f['names-active'], blockedFirst: f['blocked-first'], restore: f.restore, who: f.who };
+  return { namesActive: f['names-active'], blockedFirst: f['blocked-first'], restore: f.restore, who: f.who, onlyWhenActive: f['only-active'] };
 }
 
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -580,7 +581,7 @@ export function Evaluate() {
               onChange={(e) => cycleDo({ type: 'reason', text: e.currentTarget.value })}
             />
             <Consequence>
-              The agent will build “{directionOf(chosen).name}” with {requirementCount(cycle)} requirement{requirementCount(cycle) === 1 ? '' : 's'}.{' '}
+              The agent will build “{buildNameOf(chosen, featuresOf(chosen, cycle.required))}” with {requirementCount(cycle)} requirement{requirementCount(cycle) === 1 ? '' : 's'}.{' '}
               {chosen !== recommended && cycle.priority ? 'You went against the agent’s recommendation, and your reason says why.' : ''}
             </Consequence>
           </>
@@ -680,7 +681,7 @@ export function Delegate() {
             <div>
               <dt>Build</dt>
               <dd>
-                <strong>{brief.direction.name}.</strong> {brief.direction.does}
+                <strong>{buildNameOf(cycle.direction, f)}.</strong> {brief.direction.does}
               </dd>
             </div>
             <div>
@@ -825,7 +826,7 @@ export function Learn() {
             <div>
               <dt>Evaluate</dt>
               <dd>
-                <strong>{directionOf(cycle.direction).name}.</strong> {cycle.reason ?? draftReason(cycle.direction, cycle.priority)}
+                <strong>{buildNameOf(cycle.direction, featuresOf(cycle.direction, cycle.required))}.</strong> {cycle.reason ?? draftReason(cycle.direction, cycle.priority)}
               </dd>
             </div>
             <div>

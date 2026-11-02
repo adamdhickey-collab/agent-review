@@ -280,9 +280,9 @@ export const DIRECTIONS: readonly Direction[] = [
   {
     id: 'undo',
     name: 'Archive now, undo after',
-    does: 'Archive acts at once. A bar names what was archived and offers Undo until the next action.',
+    does: 'Archive acts at once. A bar says how many were archived and offers Undo until the next action.',
     gains: 'Fastest for routine cleanup. Nothing to read before the press.',
-    costs: 'A mistake is caught only if someone notices the Undo bar.',
+    costs: 'The Undo bar names no customer, so an active one archived by mistake is caught only if someone notices.',
     presses: 2,
   },
   {
@@ -333,11 +333,11 @@ export type Trials = Record<DirectionId, TrialEvent[]>;
 
 /* ---------- EVALUATE: findings that can become requirements ---------- */
 
-export type FeatureId = 'names-active' | 'restore' | 'who' | 'blocked-first';
+export type FeatureId = 'names-active' | 'restore' | 'who' | 'blocked-first' | 'only-active';
 
 export type Features = Record<FeatureId, boolean>;
 
-export const NO_FEATURES: Features = { 'names-active': false, restore: false, who: false, 'blocked-first': false };
+export const NO_FEATURES: Features = { 'names-active': false, restore: false, who: false, 'blocked-first': false, 'only-active': false };
 
 export type FindingSource = 'evidence' | 'session' | 'trying' | 'check';
 
@@ -363,21 +363,40 @@ export const REQUIREMENT: Record<FeatureId, string> = {
   restore: 'An Archived view where archived customers can be restored for 90 days.',
   who: 'The Archived view says who archived each customer, and when.',
   'blocked-first': 'Say which customers can’t be archived before the press, not after.',
+  'only-active': 'Stop only for a batch with an active customer. A batch with none archives in one press.',
 };
 
+/* The condition (2026-11-02). Adam's call in the case study is the agent's
+   review, kept, stopping only when the batch has an active customer: the
+   review on every batch doubled the quarterly cleanup and got pressed
+   through, and undo's bar names nobody. It is a requirement on a direction,
+   not a fourth direction, because it changes when a direction stops, not
+   what it does when it does; the three names stay, as the site quotes
+   them. A direction that stops, built with it, takes this name. */
+const ONLY_ACTIVE_NAME: Partial<Record<DirectionId, string>> = {
+  confirm: 'Confirm only when someone’s active',
+  review: 'Review only when someone’s active',
+};
+
+/** What the build is called: the direction's name, or the conditional one when the condition applies. */
+export function buildNameOf(direction: DirectionId, f: Features): string {
+  return (f['only-active'] && ONLY_ACTIVE_NAME[direction]) || directionOf(direction).name;
+}
+
 export const FINDINGS: readonly Finding[] = [
-  { id: 'f-active', source: 'session', says: 'In 2 of 5 sessions, someone archived an active customer in a batch of churned ones and didn’t notice.', becomes: 'names-active', about: ['undo'] },
+  { id: 'f-active', source: 'session', says: 'In 2 of 5 sessions, someone archived an active customer in a batch of churned ones and didn’t notice. The Undo bar said how many were archived, not who.', becomes: 'names-active', about: ['undo'] },
   { id: 'f-habit', source: 'session', says: 'By the third batch, people pressed through the question without reading it.', about: ['confirm'] },
-  { id: 'f-bulk', source: 'session', says: 'The operations lead’s quarterly cleanup took twice as long with the review step.', about: ['review'] },
+  { id: 'f-bulk', source: 'session', says: 'The operations lead’s quarterly cleanup took twice as long with the review step, and not one of those batches had an active customer.', becomes: 'only-active', about: ['review'] },
   { id: 'f-back', source: 'evidence', says: '6 of 9 archiving tickets ask to restore a customer.', becomes: 'restore' },
   { id: 'f-audit', source: 'evidence', says: 'An auditor asked who archived a customer. Nobody could say.', becomes: 'who' },
   { id: 'f-blocked', source: 'trying', says: 'Monarch Dental Group can’t be archived: it has an open invoice. Two directions only say so after the press.', becomes: 'blocked-first', about: ['undo', 'confirm'] },
   { id: 'f-axe', source: 'check', says: 'All three pass the accessibility checks and work with a keyboard. No check can say whether people notice what changed.' },
 ];
 
-/** What each direction already does, before any requirement is added. */
+/** What each direction already does, before any requirement is added.
+    Undo never stops, so a batch with no active customer is one press already. */
 export const BUILT_IN: Record<DirectionId, Partial<Features>> = {
-  undo: {},
+  undo: { 'only-active': true },
   confirm: { 'names-active': true },
   review: { 'names-active': true, 'blocked-first': true },
 };
@@ -468,6 +487,7 @@ export function featuresOf(direction: DirectionId, required: Features): Features
     restore: required.restore,
     who: required.who && required.restore,
     'blocked-first': required['blocked-first'] || !!builtIn['blocked-first'],
+    'only-active': required['only-active'] || !!builtIn['only-active'],
   };
 }
 
@@ -490,9 +510,9 @@ export interface Build {
 export function buildOf(state: CycleState): Build | null {
   if (!state.direction) return null;
   const f = featuresOf(state.direction, state.required);
-  const d = directionOf(state.direction);
   const changes = [
-    `CustomerTable: ${d.name.toLowerCase()}`,
+    `CustomerTable: ${buildNameOf(state.direction, f).toLowerCase()}`,
+    ...(f['only-active'] && !BUILT_IN[state.direction]['only-active'] ? ['A batch with no active customer archives at once'] : []),
     ...(f['names-active'] && !BUILT_IN[state.direction]['names-active'] ? ['The bulk bar names active customers before the press'] : []),
     ...(f['blocked-first'] && !BUILT_IN[state.direction]['blocked-first'] ? ['Blocked customers are named before the press'] : []),
     ...(f.restore ? ['An Archived view with Restore'] : []),
@@ -550,8 +570,12 @@ export function outcomeOf(state: CycleState): Outcome | null {
   if (!f['names-active']) unknowns.push('Nothing stops an active customer being archived in a batch. The Undo bar is the only protection.');
   if (!f.restore) unknowns.push('Restoring is still a support ticket.');
   if (f.restore && !f.who) unknowns.push('The auditor’s question, who archived a customer, still has no answer on screen.');
-  if (state.direction === 'confirm') unknowns.push('Whether people read the question by the third batch. The session notes say they don’t.');
-  if (state.direction === 'review') unknowns.push('Whether the operations lead tolerates the review for a couple of hundred rows a quarter.');
+  /* What the direction stops with, for the lines that ask whether it's read. */
+  const step = state.direction === 'confirm' ? 'question' : 'review';
+  const conditional = state.direction !== 'undo' && f['only-active'];
+  if (conditional) unknowns.push(`Whether people read the ${step} when it does appear, or press straight through it.`);
+  else if (state.direction === 'confirm') unknowns.push('Whether people read the question by the third batch. The session notes say they don’t.');
+  else if (state.direction === 'review') unknowns.push('Whether the operations lead tolerates the review for a couple of hundred rows a quarter.');
   unknowns.push('Whether any of this holds with real people. Nothing here was tested with anyone.');
 
   const pace = state.priority !== 'recovery';
@@ -559,7 +583,13 @@ export function outcomeOf(state: CycleState): Outcome | null {
     { what: 'Tickets asking to restore a customer', target: 'Fewer than the 6 of 9 last quarter' },
     { what: 'Active customers archived', target: pace ? 'No higher than 1 in 14' : 'Down from 1 in 14' },
     { what: 'Restores within a week of an archive', target: f.restore ? 'Counted, to see how often mistakes happen' : 'Not measurable: there’s no Restore' },
-    { what: 'Time to archive a page of churned customers', target: pace ? 'No slower than today' : 'Accept a few seconds more' },
+    { what: 'Time to archive a page of churned customers', target: pace || conditional ? 'No slower than today' : 'Accept a few seconds more' },
+    ...(conditional
+      ? [
+          { what: `How often the ${step} appears`, target: 'Only for batches with an active customer' },
+          { what: `${step === 'review' ? 'Reviews' : 'Questions'} pressed straight through`, target: `Few: a ${step} that’s rare should get read` },
+        ]
+      : []),
   ];
 
   const research = ['Watch five operations leads do a real quarterly cleanup.', 'Ask two administrators what an auditor actually needs to see.'];
@@ -567,16 +597,18 @@ export function outcomeOf(state: CycleState): Outcome | null {
 
   const nextTime: string[] = [];
   if (state.direction === 'undo') nextTime.push('Try naming active customers in the bar before the press, if the measure moves the wrong way.');
-  if (state.direction === 'confirm') nextTime.push('Ask only when the batch holds an active customer, so the question means something.');
-  if (state.direction === 'review') nextTime.push('Skip the review when the batch is all churned, to give the operations lead back their speed.');
+  if (state.direction === 'confirm' && !conditional) nextTime.push('Ask only when the batch holds an active customer, so the question means something.');
+  if (state.direction === 'review' && !conditional) nextTime.push('Skip the review when the batch is all churned, to give the operations lead back their speed.');
+  if (conditional) nextTime.push(`Put the condition in the brief. The agent read the brief, not the session notes, so it recommended a ${step} on every batch.`);
   if (state.reading === 'keep') nextTime.push('Check the summary against the engineering note before writing the brief.');
 
-  const guidance = f['names-active'] && f.restore
-    ? 'A bulk action that removes records names the records at risk before the press, and offers Restore after.'
+  const before = conditional && f['names-active'] ? 'stops only when the batch holds a record at risk, and names those records' : f['names-active'] ? 'names the records at risk before the press' : null;
+  const guidance = before && f.restore
+    ? `A bulk action that removes records ${before}, and offers Restore after.`
     : f.restore
       ? 'A bulk action that removes records offers Restore after.'
-      : f['names-active']
-        ? 'A bulk action that removes records names the records at risk before the press.'
+      : before
+        ? `A bulk action that removes records ${before}.`
         : 'A bulk action that removes records names what was removed, and offers Undo until the next action.';
 
   return { unknowns, measures, research, nextTime, guidance };

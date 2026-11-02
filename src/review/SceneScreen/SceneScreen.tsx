@@ -1,14 +1,15 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Badge, Icon, IconSetContext } from '../../components';
 import {
+  buildNameOf,
   buildOf,
   DIRECTIONS,
   directionOf,
   DISPUTED,
+  featuresOf,
   outcomeOf,
   PRIORITY,
   READINGS,
-  REQUIREMENT,
   STAGES,
   stageIndex,
   stopOf,
@@ -134,7 +135,7 @@ function Tried({ direction }: { direction: DirectionId }) {
 function Batch() {
   return (
     <Product label="Relay · customers · five selected">
-      <ArchiveFlow direction="undo" customers={customers.slice(0, 7)} initialSelection={BATCH} />
+      <ArchiveFlow direction={STORY.direction!} customers={customers.slice(0, 7)} initialSelection={BATCH} />
     </Product>
   );
 }
@@ -379,13 +380,15 @@ function Explore() {
   );
 }
 
-/* Evaluate: the agent's recommendation against the call, and why. */
+/* Evaluate: the agent's recommendation against the call, and why. Since
+   2026-11-02 the call is the recommendation with a condition, so the
+   person's side names the build and says the condition. */
 function Evaluate() {
   return (
     <StageFrame at="evaluate" title="Which direction ships?">
       <div className="stage-scene__versus">
         <Side who="agent" label="Agent recommends" says={directionOf('review').name} why="Fits the brief: safety first" />
-        <Side who="you" label="You chose" says={directionOf(STORY.direction!).name} why={`Plus: ${REQUIREMENT['names-active'].replace(/\.$/, '').toLowerCase()}`} />
+        <Side who="you" label="You chose" says={buildNameOf(STORY.direction!, featuresOf(STORY.direction!, STORY.required))} why="A batch with no one active archives in one press" />
       </div>
       <Fact figure="2×">the review step doubled the quarterly cleanup</Fact>
     </StageFrame>
@@ -441,7 +444,7 @@ function Learn() {
       </div>
       <p className="stage-scene__fact stage-scene__fact--open">
         <Chip who="stop">Not known yet</Chip>
-        <span>Whether people notice the Undo bar. Nothing here was tested with people.</span>
+        <span>Whether people read the review when it appears. Nothing here was tested with people.</span>
       </p>
     </StageFrame>
   );

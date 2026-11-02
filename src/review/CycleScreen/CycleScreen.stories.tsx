@@ -32,9 +32,11 @@ const TRIED: CycleAction[] = [
   { type: 'try', direction: 'review', event: 'archived' },
 ];
 const explored = TRIED.reduce(reduceCycle, framed);
-const chosen = reduceCycle(reduceCycle(explored, { type: 'choose', direction: 'undo' }), { type: 'require', feature: 'names-active', on: true });
+/* The case study's path since 2026-11-02: the agent's review, kept, with
+   the condition that it stops only for a batch with an active customer. */
+const chosen = reduceCycle(reduceCycle(explored, { type: 'choose', direction: 'review' }), { type: 'require', feature: 'only-active', on: true });
 const sent = reduceCycle(chosen, { type: 'delegate' });
-const built = reduceCycle(sent, { type: 'answer', answer: 'local' });
+const built = reduceCycle(sent, { type: 'answer', answer: 'inline' });
 
 const meta = {
   title: 'Review/CycleScreen',
@@ -137,13 +139,17 @@ export const ExploreAllTried: Story = {
 export const Evaluate: Story = {
   args: { stage: 'evaluate' },
   decorators: [inStore(explored)],
-  parameters: { docs: { description: { story: 'The findings, each with its source, and the choice of direction. A requirement the chosen direction already meets says so instead of offering a box.' } } },
+  parameters: { docs: { description: { story: 'The findings, each with its source, and the choice of direction. A requirement the chosen direction already meets says so instead of offering a box. Requiring the review to stop only for an active customer renames the build, and keeps the agent’s recommendation.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvasElement.querySelector('.cycle__move-lead')).toHaveTextContent('The agent recommends Review batch, then archive');
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Review batch, then archive' }));
     await expect(canvas.getAllByText('Review batch, then archive does this already.')).toHaveLength(2);
+    await userEvent.click(canvas.getByRole('checkbox', { name: /Require: Stop only for a batch with an active customer/ }));
+    await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('The agent will build “Review only when someone’s active” with 3 requirements.');
+    await expect(canvasElement.querySelector('.cycle__consequence')).not.toHaveTextContent('against');
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Archive now, undo after' }));
+    await expect(canvas.getByText('Archive now, undo after does this already.')).toBeVisible();
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('You went against the agent’s recommendation');
   },
 };
@@ -151,12 +157,24 @@ export const Evaluate: Story = {
 export const DelegateReady: Story = {
   args: { stage: 'delegate' },
   decorators: [inStore(chosen)],
-  parameters: { docs: { description: { story: 'The brief written from the choices, ready to send: the direction, the reason, the requirement added in Evaluate, and the boundaries.' } } },
+  parameters: { docs: { description: { story: 'The brief written from the choices, ready to send: the build, the reason, the requirement added in Evaluate, and the boundaries.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('Name any active customer before it’s archived.');
+    await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('Review only when someone’s active.');
+    await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('Stop only for a batch with an active customer. A batch with none archives in one press.');
     await userEvent.click(canvas.getByRole('button', { name: 'Send the brief' }));
-    await expect(canvas.getByRole('heading', { level: 2, name: /The Undo bar is a new pattern/ })).toBeVisible();
+    await expect(canvas.getByRole('heading', { level: 2, name: /The review step needs a panel/ })).toBeVisible();
+  },
+};
+
+export const DelegateAsBuilt: Story = {
+  args: { stage: 'delegate' },
+  decorators: [inStore(built)],
+  parameters: { docs: { description: { story: 'The build with the agent’s stop answered. The five customers hold three active ones, so Archive opens the review with them flagged.' } } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Archive' }));
+    await expect(canvas.getByRole('heading', { name: 'Review 5 customers before archiving' })).toBeVisible();
   },
 };
 
@@ -189,11 +207,15 @@ export const AStageNotOpenYet: Story = {
 export const Learn: Story = {
   args: { stage: 'learn' },
   decorators: [inStore(built)],
-  parameters: { docs: { description: { story: 'What was decided, verified and still unknown, what to measure, and the guidance to keep. With no Archived view required, the unknowns say restoring is still a support ticket.' } } },
+  parameters: { docs: { description: { story: 'What was decided, verified and still unknown, what to measure, and the guidance to keep. With no Archived view required, the unknowns say restoring is still a support ticket; with the review stopping only for an active customer, what to measure is how often it appears and whether people read it.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    await expect(canvasElement.querySelector('.cycle__facts--record')).toHaveTextContent('Review only when someone’s active.');
     await expect(canvasElement.querySelector('.cycle__list--open')).toHaveTextContent('Restoring is still a support ticket.');
-    await expect(canvasElement.querySelector('.cycle__rule')).toHaveTextContent('names the records at risk before the press');
+    await expect(canvasElement.querySelector('.cycle__list--open')).toHaveTextContent('Whether people read the review when it does appear');
+    await expect(canvas.getByRole('rowheader', { name: 'How often the review appears' })).toBeVisible();
+    await expect(canvas.getByRole('rowheader', { name: 'Reviews pressed straight through' })).toBeVisible();
+    await expect(canvasElement.querySelector('.cycle__rule')).toHaveTextContent('stops only when the batch holds a record at risk, and names those records');
     await userEvent.click(canvas.getByRole('checkbox', { name: /Save the rule/ }));
     await expect(canvas.getByRole('link', { name: /Learn.*decided/ })).toBeVisible();
   },
