@@ -21,6 +21,59 @@
   padding: var(--space-6);
 }
 
+/* ---------- what the experiment showed (Discover only) ---------- */
+
+/* The real experiment, above the simulated scenario and closed off from it
+   by a hairline: a line of setup and three findings side by side, each a
+   short heading and a sentence or two, on the page's own ground, no cards. */
+.cycle__outcomes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-6);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.cycle__outcomes-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.cycle__outcomes-setup {
+  max-width: 52rem;
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+.cycle__outcomes-setup a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-accent);
+  font-weight: var(--weight-medium);
+}
+
+.cycle__outcomes-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-6);
+  margin-top: var(--space-1);
+}
+
+.cycle__outcomes-list li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.cycle__outcomes-list p {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
 /* ---------- the head ---------- */
 
 .cycle__head {
@@ -977,7 +1030,8 @@
   }
 
   .cycle__head,
-  .cycle__needs {
+  .cycle__needs,
+  .cycle__outcomes {
     grid-column: 1 / -1;
   }
 
@@ -1004,6 +1058,20 @@
   .cycle__work > .cycle__main {
     grid-column: 1;
     grid-row: 3;
+  }
+
+  /* On Discover the findings take the first row, so the stage starts a
+     row down. */
+  .cycle--front .cycle__intro {
+    grid-row: 3;
+  }
+
+  .cycle--front .cycle__work > .cycle__move {
+    grid-row: 3 / span 2;
+  }
+
+  .cycle--front .cycle__work > .cycle__main {
+    grid-row: 4;
   }
 }
 
@@ -1038,6 +1106,7 @@
   }
 
   .cycle__roles,
+  .cycle__outcomes-list,
   .cycle__tradeoff,
   .cycle__pair {
     grid-template-columns: minmax(0, 1fr);
@@ -1076,6 +1145,15 @@
 
 /* Where the pointer is a finger, the tabs between directions are a
    fingertip tall too: the Tabs keep their own height elsewhere. */
+/* The record's link, on a line of its own at a fingertip's height. */
+@media (pointer: coarse) {
+  .cycle__outcomes-setup a {
+    display: flex;
+    width: fit-content;
+    min-height: var(--control-height-touch);
+  }
+}
+
 @media (pointer: coarse) {
   .cycle__tabs .tabs__tab {
     min-height: var(--control-height-touch);
