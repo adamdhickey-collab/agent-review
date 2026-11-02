@@ -31,7 +31,10 @@ import './CycleScreen.css';
 
    The cycle is the front door (since 2026-10-26), so Discover carries the
    scenario's setup in one line, under its question, where the start screen
-   used to spend a page on it.
+   used to spend a page on it. Since 2026-11-02 that line also says what
+   the agent does and that the cycle is a simplified simulation, so the
+   six stages read as a demonstration of where a person decides, not as a
+   method being claimed.
 
    Simulated, said once, in the head, beside the scenario's name, rather
    than on every card. */
@@ -130,8 +133,8 @@ export function CycleScreen({ stage }: { stage: StageId }) {
         </h1>
         {stage === 'discover' ? (
           <p className="cycle__setup">
-            You’re Adam, a product designer, taking one feature in Relay from a support ticket to a finished build. An agent does the building. You make one decision in
-            each of six stages, about three minutes in all.
+            You’re Adam, a product designer, taking one feature in Relay from a support ticket to a finished build. An agent gathers evidence, explores solutions, and
+            builds the feature. In each of six stages, you make the decision that needs a person. It’s a simplified simulation, about three minutes in all.
           </p>
         ) : null}
         <dl className="cycle__roles">
