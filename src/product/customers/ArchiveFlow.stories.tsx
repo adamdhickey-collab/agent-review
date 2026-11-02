@@ -6,6 +6,9 @@ import { ArchiveFlow } from './ArchiveFlow';
    customers, a trial, and Monarch Dental Group, which can't be archived. */
 const BATCH = ['c_01HZK3', 'c_01HZK7', 'c_01HZKB', 'c_01HZKF', 'c_01HZKN'];
 
+/* A quarterly cleanup with no active customer: two trials and two churned. */
+const CLEANUP = ['c_01HZKB', 'c_01HZKV', 'c_01HZL3', 'c_01HZLB'];
+
 const meta = {
   title: 'Product/ArchiveFlow',
   component: ArchiveFlow,
@@ -14,7 +17,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Archiving customers, three ways: the design cycle’s three directions as working screens. Undo archives at once and offers Undo until the next action; Confirm asks first and names any active customer; Review sorts the selection into what can’t be archived, the active customers and the rest before anything happens. Four requirements can be added to any of them: name active customers first, name blocked ones first, an Archived view with Restore, and who archived each one. Monarch Dental Group has an open invoice and can’t be archived, so each direction meets a partial failure.',
+          'Archiving customers, three ways: the design cycle’s three directions as working screens. Undo archives at once and offers Undo until the next action; Confirm asks first and names any active customer; Review sorts the selection into what can’t be archived, the active customers and the rest before anything happens. Five requirements can be added to any of them: name active customers first, name blocked ones first, an Archived view with Restore, who archived each one, and stop only for a batch with an active customer. Monarch Dental Group has an open invoice and can’t be archived, so each direction meets a partial failure.',
       },
     },
   },
@@ -64,6 +67,35 @@ export const Confirm: Story = {
     await expect(canvas.getByRole('button', { name: 'Archive 5 customers' })).toHaveFocus();
     await userEvent.keyboard('{Escape}');
     await expect(canvas.getByRole('button', { name: 'Archive' })).toBeVisible();
+  },
+};
+
+export const ReviewOnlyWhenActive: Story = {
+  args: { direction: 'review', features: { onlyWhenActive: true }, initialSelection: BATCH, onEvent: fn(), onPhase: fn() },
+  parameters: { docs: { description: { story: 'The case study’s call: the review, stopping only for a batch with an active customer. This batch has three, so Archive opens the review with them flagged, and Monarch Dental Group set aside.' } } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Archive' }));
+    await expect(args.onPhase).toHaveBeenCalledWith('reviewing', 'Archive 4 customers');
+    const review = within(canvasElement.querySelector<HTMLElement>('.archive-flow__review')!);
+    await expect(review.getAllByRole('checkbox')).toHaveLength(3);
+    await expect(review.getByText(/Monarch Dental Group/)).toBeVisible();
+    await expect(args.onEvent).not.toHaveBeenCalled();
+  },
+};
+
+export const ReviewSkippedForACleanup: Story = {
+  args: { direction: 'review', features: { onlyWhenActive: true }, initialSelection: [...CLEANUP, 'c_01HZKF'], onEvent: fn() },
+  parameters: { docs: { description: { story: 'The same build with a cleanup of two trial and two churned customers, and Monarch Dental Group. Nobody is active, so there is no review: the note names Monarch before the press, and one press archives the four. There is no Undo; the review is the protection, and it stops only when it has something to say.' } } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await expect(canvasElement.querySelector('.archive-flow__notes')).toHaveTextContent('Monarch Dental Group: it has an open invoice.');
+    await userEvent.click(canvas.getByRole('button', { name: 'Archive' }));
+    await expect(canvasElement.querySelector('.archive-flow__review')).toBeNull();
+    await expect(canvasElement.querySelector('.archive-flow__result')).toHaveTextContent('4 customers archived. Monarch Dental Group wasn’t: it has an open invoice.');
+    await expect(canvas.queryByRole('button', { name: 'Undo' })).toBeNull();
+    await expect(args.onEvent).toHaveBeenCalledWith('archived');
+    await expect(args.onEvent).not.toHaveBeenCalledWith('active-archived');
   },
 };
 

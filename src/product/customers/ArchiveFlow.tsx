@@ -17,9 +17,12 @@ import './ArchiveFlow.css';
               what can't be archived and why, the active customers each with
               a box to keep them out, and the routine rest as a count.
 
-   And four features a designer can require of any of them (Evaluate):
+   And five features a designer can require of any of them (Evaluate):
    naming active customers before the press, naming blocked ones before the
-   press, an Archived view with Restore, and who archived each one.
+   press, an Archived view with Restore, who archived each one, and, since
+   2026-11-02, stopping only for a batch with an active customer: confirm
+   and review then archive a batch with none in one press, as undo does,
+   and ask or review only when one is in it.
 
    One customer can't be archived, Monarch Dental Group, because it has an
    open invoice, so every direction meets a partial failure; the question
@@ -50,6 +53,8 @@ export interface ArchiveFeatures {
   restore: boolean;
   /** Who archived each customer, and when, in the Archived view. */
   who: boolean;
+  /** Ask or review only when the batch has an active customer; a batch with none archives in one press. */
+  onlyWhenActive: boolean;
 }
 
 export type ArchiveEvent = 'archived' | 'undone' | 'restored' | 'blocked' | 'active-archived';
@@ -120,10 +125,11 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
     blockedFirst: direction === 'review' || !!features.blockedFirst,
     restore: !!features.restore,
     who: !!features.who,
+    onlyWhenActive: direction === 'undo' || !!features.onlyWhenActive,
   };
   const [selected, setSelected] = useState<Set<string>>(() => new Set(initialSelection));
   const [archived, setArchived] = useState<string[]>(initialArchived);
-  const [step, setStep] = useState(initialStep && initialSelection.length > 0);
+  const [step, setStep] = useState(() => initialStep && initialSelection.length > 0 && !(f.onlyWhenActive && !customers.some((c) => initialSelection.includes(c.id) && !BLOCKED[c.id] && isActive(c, activeRule))));
   /* In the review, the active customers a person has kept out of the batch. */
   const [keptOut, setKeptOut] = useState<Set<string>>(() => new Set());
   const [result, setResult] = useState<Result | null>(null);
@@ -143,6 +149,9 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
   const all = visible.length > 0 && count === visible.length;
   const blocked = chosen.filter((c) => BLOCKED[c.id]);
   const active = chosen.filter((c) => !BLOCKED[c.id] && isActive(c, activeRule));
+  /* Whether Archive archives at once: always for undo, and for the others
+     when they stop only for an active customer and the batch has none. */
+  const immediate = f.onlyWhenActive && (direction === 'undo' || active.length === 0);
   /* Undo names the active customers by shading their rows until the press. */
   const shaded = new Set(view === 'current' && !step && direction === 'undo' && f.namesActive ? active.map((c) => c.id) : []);
   const going = chosen.filter((c) => !BLOCKED[c.id] && !(direction === 'review' && keptOut.has(c.id)));
@@ -219,7 +228,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
 
   function press() {
     act();
-    if (direction === 'undo') archive();
+    if (immediate) archive();
     else setStep(true);
   }
 
@@ -291,9 +300,9 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
           or a requirement says so. The active customers are named by their
           own rows, shaded below (a line naming them, until 2026-10-29, said
           again what each row's badge says); the blocked one gets a note,
-          because the reason is nowhere in its row. The question and the
-          review say both themselves. */}
-      {view === 'current' && count > 0 && !step && direction === 'undo' && f.blockedFirst && blocked.length ? (
+          because the reason is nowhere in its row, wherever Archive acts at
+          once. The question and the review say both themselves. */}
+      {view === 'current' && count > 0 && !step && immediate && f.blockedFirst && blocked.length ? (
         <div className="archive-flow__notes">
           <p className="archive-flow__note">
             <Badge tone="warning">Can’t archive</Badge> {list(blocked.map((c) => c.company))}: {BLOCKED[blocked[0].id]}.

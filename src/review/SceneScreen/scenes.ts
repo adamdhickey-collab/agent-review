@@ -12,17 +12,19 @@ export function isScene(id: string): id is SceneId {
 }
 
 /** The case study's run through the cycle: the summary corrected, recovery
-    first, all three tried, undo chosen against the recommendation with
-    active customers named, the agent's stop answered, the rule kept. Every
-    scene reads its words from this, through the cycle's own functions. */
+    first, all three tried, the agent's review kept with a condition (it
+    stops only for a batch with an active customer; until 2026-11-02 this
+    was undo, chosen against the recommendation), the agent's stop
+    answered, the rule kept. Every scene reads its words from this,
+    through the cycle's own functions. */
 export const STORY: CycleState = {
   ...initialCycle(),
   reading: 'correct',
   priority: 'recovery',
   trials: { undo: ['archived'], confirm: ['archived'], review: ['archived'] },
-  direction: 'undo',
-  required: { ...initialCycle().required, 'names-active': true },
+  direction: 'review',
+  required: { ...initialCycle().required, 'only-active': true },
   delegated: true,
-  answer: 'local',
+  answer: 'inline',
   kept: true,
 };

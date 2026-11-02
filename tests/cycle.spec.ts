@@ -145,3 +145,30 @@ test('the cycle can be done from the keyboard, and its choices survive a reload'
   await open(page, '#/cycle/learn');
   await expect(page.getByText('Start with Discover')).toBeVisible();
 });
+
+/* The case study's call since 2026-11-02: the agent's review, kept, stopping
+   only for a batch with an active customer. The as-built screen meets the
+   five with three active and opens the review; the record names the build. */
+test('the review with its condition is a call the cycle can make and build', async ({ page }) => {
+  await seedCycle(page, EXPLORED);
+  await open(page, '#/cycle/evaluate');
+  await page.getByRole('button', { name: 'Choose Review batch, then archive' }).click();
+  await page.getByRole('checkbox', { name: /Require: Stop only for a batch with an active customer/ }).check({ force: true });
+  await expect(page.locator('.cycle__consequence')).toContainText('The agent will build “Review only when someone’s active”');
+  await page.getByRole('button', { name: 'Continue to Delegate' }).click();
+  await page.getByRole('button', { name: 'Send the brief' }).click();
+  await page.getByRole('button', { name: 'Choose Build from existing parts' }).click();
+  const built = page.locator('.cycle__product-frame');
+  await built.getByRole('button', { name: 'Archive', exact: true }).click();
+  await expect(built.getByRole('heading', { name: 'Review 5 customers before archiving' })).toBeVisible();
+  await open(page, '#/cycle/learn');
+  await expect(page.locator('.cycle__facts--record')).toContainText('Review only when someone’s active.');
+  await expect(page.getByRole('rowheader', { name: 'How often the review appears' })).toBeVisible();
+});
+
+test('the scenes tell the case study’s call', async ({ page }) => {
+  await open(page, '#/scenes/evaluate');
+  await expect(page.locator('.stage-scene__side[data-who="you"]')).toContainText('Review only when someone’s active');
+  await open(page, '#/scenes/three');
+  await expect(page.locator('.scene__way[data-chosen]')).toContainText('Review batch, then archive');
+});
