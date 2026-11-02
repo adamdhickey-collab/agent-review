@@ -34,7 +34,55 @@ import './CycleScreen.css';
    used to spend a page on it.
 
    Simulated, said once, in the head, beside the scenario's name, rather
-   than on every card. */
+   than on every card.
+
+   WHAT THE EXPERIMENT SHOWED, since 2026-11-02: on Discover, above the
+   scenario, the real experiment's three findings, so a visitor has the
+   outcome before the first stage (as the case study at adamhickey.com
+   leads with them, in its words). Each traces to docs/experiment/README.md.
+   It is marked Real and closed by a hairline, apart from the Simulated
+   scenario under it, and it says nothing about which direction Adam
+   picks: the third finding is the question the cycle hands the reader. */
+
+const RECORD = 'https://github.com/adamdhickey-collab/agent-review/blob/main/docs/experiment/README.md';
+
+function Outcomes() {
+  return (
+    <section className="cycle__outcomes" aria-labelledby="cycle-outcomes">
+      <div className="cycle__outcomes-head">
+        <Badge variant="quiet" icon="circle-check">
+          Real
+        </Badge>
+        <h2 id="cycle-outcomes" className="cycle__h2">
+          What the experiment showed
+        </h2>
+      </div>
+      <p className="cycle__outcomes-setup">
+        Claude Code built one feature, bulk actions on a customer table, twice: once with twelve design rules and once without. A third version was written by hand,
+        with mistakes planted in it, to test the checks.{' '}
+        <a href={RECORD} target="_blank" rel="noopener">
+          The full record
+          <Icon name="arrow-up-right" size={12} />
+          <span className="visually-hidden"> (opens in a new tab)</span>
+        </a>
+      </p>
+      <ol className="cycle__outcomes-list" role="list">
+        <li>
+          <h3 className="cycle__h3">The agents already built good screens.</h3>
+          <p>Both runs reused the components, kept every value on the tokens, and every story passed axe.</p>
+        </li>
+        <li>
+          <h3 className="cycle__h3">The rules made the work complete.</h3>
+          <p>With them, the agent rendered EmptyState for the emptied table and wrote down why it changed Table.css. Without them, it left the emptied table blank and only flagged the Table.css fix.</p>
+        </li>
+        <li>
+          <h3 className="cycle__h3">Passing the checks didn’t settle what ships.</h3>
+          <p>The checks caught the planted mistakes. They couldn’t decide whether archiving should ask first or offer undo after. The simulated cycle below plays out that decision.</p>
+        </li>
+      </ol>
+    </section>
+  );
+}
 
 export function CycleScreen({ stage }: { stage: StageId }) {
   const { cycle, cycleDo } = useStore();
@@ -55,7 +103,8 @@ export function CycleScreen({ stage }: { stage: StageId }) {
   };
 
   return (
-    <div className="cycle">
+    <div className={stage === 'discover' ? 'cycle cycle--front' : 'cycle'}>
+      {stage === 'discover' ? <Outcomes /> : null}
       <header className="cycle__head">
         <div className="cycle__scenario">
           <Badge variant="quiet" icon="play">

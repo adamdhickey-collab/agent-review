@@ -59,11 +59,20 @@ type Story = StoryObj<typeof meta>;
 export const Discover: Story = {
   args: { stage: 'discover' },
   decorators: [inStore(initialCycle())],
-  parameters: { docs: { description: { story: 'The front door: the scenario in one line under the question, the evidence and the agent’s summary, each line marked observation, interpretation or assumption. Continue, in the move, waits for the move, and the rail links only the stages that are open; the foot offers only Back. Correcting the assumption changes the brief’s problem.' } } },
+  parameters: { docs: { description: { story: 'The front door: above the simulated scenario, the real experiment’s three findings, marked Real and closed by a hairline, naming no direction. Then the scenario in one line under the question, the evidence and the agent’s summary, each line marked observation, interpretation or assumption. Continue, in the move, waits for the move, and the rail links only the stages that are open; the foot offers only Back. Correcting the assumption changes the brief’s problem.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('Something is wrong with archiving');
     await expect(canvasElement.querySelector('.cycle__setup')).toHaveTextContent('You’re Adam, a product designer');
+    const outcomes = within(canvas.getByRole('region', { name: 'What the experiment showed' }));
+    await expect(outcomes.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual([
+      'The agents already built good screens.',
+      'The rules made the work complete.',
+      'Passing the checks didn’t settle what ships.',
+    ]);
+    await expect(outcomes.getByText('Real')).toBeVisible();
+    await expect(outcomes.queryByText('Simulated')).toBeNull();
+    await expect(outcomes.queryByText(/Review batch|Confirm first|Archive now/)).toBeNull();
     await expect(canvas.queryByRole('button', { name: /Continue to/ })).toBeNull();
     await expect(canvas.queryByRole('link', { name: /Next/ })).toBeNull();
     await expect(canvasElement.querySelector('.cycle__pager')).toBeNull();
@@ -84,6 +93,7 @@ export const Define: Story = {
   parameters: { docs: { description: { story: 'The brief. The priority sets two success criteria and the direction the agent will recommend.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('region', { name: 'What the experiment showed' })).toBeNull();
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Speed comes first' }));
     await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('Archiving a page of churned customers takes two presses.');
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Archive now, undo after');
