@@ -180,7 +180,7 @@ function Three() {
    decision, as the title, and the one fact behind it. Everything else the
    stage says is in the case study's text, where it can be read. The rules:
    one question per screen; the person's answer is the only filled element,
-   in the primary, and the agent's is an outline in the review's slate; a
+   in the primary, and the agent's is an outline in the same sage; a
    number set large replaces a paragraph. Words come from the cycle's data
    where it has them short enough; the few shorter labels are written here,
    beside the scene that uses them. */

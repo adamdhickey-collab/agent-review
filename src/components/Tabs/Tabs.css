@@ -78,7 +78,8 @@
    thing to press before anyone points at it; the control grey read as one
    more panel among the panels around it. Hover tints it and steps the edge
    to the accent's hover; the selected one adds a second ring, a tint and
-   the accent's ink, never a line on one side (a rounded shape). They share the width
+   the reading ink (the accent's read fainter than the tabs beside it),
+   never a line on one side (a rounded shape). They share the width
    and wrap rather than scroll. */
 .tabs--options .tabs__list {
   flex-wrap: wrap;
@@ -118,7 +119,7 @@
   background: var(--color-accent-subtle);
   border-color: var(--color-accent);
   box-shadow: 0 0 0 var(--border-width) var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-text);
 }
 
 .tabs--options .tabs__tab:focus-visible {
