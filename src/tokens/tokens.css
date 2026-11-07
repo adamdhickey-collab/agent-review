@@ -212,18 +212,20 @@
   --zoom-wide: 1.125;
 }
 
-/* THE REVIEW'S PALETTE, since 2026-10-26: sage, slate and ink. Its colors
+/* THE REVIEW'S PALETTE, since 2026-10-26: sage and ink. Its colors
    are adamhickey.com's (color.css there), so the prototype and the site it
    is shown on read as one family; its structure is the agent tools'
    (Cursor, Devin, Replit, Relevance AI on Mobbin): quiet grounds, one color
-   per job, status as a pale pill with a strong ink. Five jobs:
+   per job, status as a pale pill with a strong ink. Four jobs:
 
      ink      the site's charcoal: text, the band's question
-     slate    the site's slate turned up: the review's own color, for the
-              place a person is in, a link, the focus ring, the agent's
-              recommendation and the marks drawn on the preview
-     sage     the site's primary and its "goes through" lane: the primary
-              button and success
+     sage     the site's one brand color, in its two values (#556b51 on
+              light, #9dbe95 on dark): the place a person is in, a link, the
+              focus ring, the agent's recommendation, the marks drawn on the
+              preview, the primary button, and success. It was two colors
+              until 2026-11-07, with a periwinkle slate for everything but
+              the primary and success; a mark, a word or a fill now says which
+              job a given sage is doing.
      caution  the site's caution ink and ground: the warning, a stop for a
               person
      red      failures only
@@ -238,11 +240,10 @@
    (3.42:1, and 3.22:1 on the sunken fill), computed before writing a value.
    The stories run axe on the light screens and the dark ones.
 
-   Slate is the review's colour, never the product's: the reds and greens
-   in the preview are Relay's own (the frozen palette above), so a mark the
-   review draws on the preview cannot be mistaken for, or quietly settle,
-   the meaning of a colour the product is asking about. Relay's blue is
-   brighter and greener than slate (#2f5fd6 against #4a5bb8).
+   Relay keeps its own frozen blue, red and green (the block above), so a
+   sage mark on the preview is the review's and a blue one is the product's.
+   The review's success and Relay's are different greens, and the review's
+   mark always has its label beside it.
 
    It is declared on the root, so the page and anything outside a surface
    take it, and again on the review's surface, so a piece of the review drawn
@@ -285,17 +286,19 @@
   --color-text-muted: light-dark(#5c5f5c, #b3b3ab);
   --color-text-on-accent: light-dark(#ffffff, #1b1b1a);
 
-  /* The accent: slate, the review's own color, for the place a person is
-     in, the direction they have selected, a link, the focus ring, the
-     agent's recommendation, and the annotation the preview draws around the
-     element a decision is about. The act itself is the primary's (below).
-     Hover and pressed are a step and two darker in the light and lighter in
-     the dark; the ink on each clears 6:1. */
-  --color-accent: light-dark(#4a5bb8, #a3b1f5);
-  --color-accent-hover: light-dark(#3e4da0, #b8c3f8);
-  --color-accent-active: light-dark(#343f86, #ccd4fa);
-  --color-accent-subtle: light-dark(#edf0fa, #262b45);
-  --color-accent-border: light-dark(#cfd6f2, #3a4270);
+  /* The accent: sage, adamhickey.com's one brand color, since 2026-11-07,
+     for the place a person is in, the direction they have selected, a link,
+     the focus ring, the agent's recommendation, and the annotation the
+     preview draws around the element a decision is about. It holds the
+     primary's values, because the site has one sage, and the words and
+     marks beside each use say which job it is doing. Hover and pressed are
+     a step and two darker in the light and lighter in the dark; the ink on
+     each clears 5.8:1. */
+  --color-accent: light-dark(#556b51, #9dbe95);
+  --color-accent-hover: light-dark(#445a41, #b2cdab);
+  --color-accent-active: light-dark(#3a4d37, #c4d9bf);
+  --color-accent-subtle: light-dark(#e8ede5, #2a3327);
+  --color-accent-border: light-dark(#c7d3c2, #4a5a44);
 
   /* The primary: sage, the site's primary button and its "goes through"
      lane, for the one act a screen asks for (Continue, Approve, Send). The

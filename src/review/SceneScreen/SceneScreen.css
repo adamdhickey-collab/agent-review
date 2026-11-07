@@ -233,7 +233,7 @@
 /* ---------- the stages, simplified (2026-10-27) ----------
    A bar with the cycle as six dots, a title in the serif, and at most two
    blocks under it. The person's answer is the one filled element, in the
-   primary; the agent's is an outline in the review's slate; a stop is the
+   primary; the agent's is an outline in the same sage; a stop is the
    warning's. Every color is a token, so a scene is the charcoal in the dark
    and the light palette in the light. A scene had a medium-dark sage frame
    of its own (#2b3a2f, 2026-10-28 to 2026-10-29) to sit with the site's
@@ -528,8 +528,8 @@
 }
 
 .mini__chip[data-status='trial'] {
-  border-color: var(--color-accent);
-  background: var(--color-accent-subtle);
+  border-color: var(--color-neutral-solid);
+  background: var(--color-surface-sunken);
 }
 
 /* Undo: the bar after the press, along the foot. */
