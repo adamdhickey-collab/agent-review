@@ -532,6 +532,11 @@
   background: var(--color-surface-sunken);
 }
 
+.mini__chip[data-status='churned'] {
+  border-color: var(--color-neutral-solid);
+  background: transparent;
+}
+
 /* Undo: the bar after the press, along the foot. */
 .mini__toast {
   position: absolute;

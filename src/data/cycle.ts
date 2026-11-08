@@ -303,14 +303,29 @@ export const DIRECTIONS: readonly Direction[] = [
   },
 ];
 
-/** What each direction showed with the batch Explore selects (three active
-    customers, a trial, and Monarch Dental Group, which can't be archived),
-    said once it has been tried. Read off ArchiveFlow, not written beside it:
+/* THE BATCH (2026-11-08): the case study's three. Alder & Finch on trial,
+   Northside Trucking, active and paying $5,040 a month, and Juniper Foods,
+   churned: the batch the story's account manager archives by accident, the
+   one the site's opener and its "Which fix would you ship?" draw. Until
+   today Explore selected the first five rows, three of them active, with
+   Monarch Dental Group, which can't be archived, so a reader who came from
+   the case study met a different batch than the one they had just read.
+   Monarch stays in the table a row away for anyone who wants to see what a
+   direction says about a customer it can't archive. */
+export const STORY_BATCH = ['c_01HZKB', 'c_01HZKJ', 'c_01HZL3'];
+
+/** The five rows the case study's opener shows, the batch first: the three
+    selected, then two active customers left alone. */
+export const STORY_ROWS = [...STORY_BATCH, 'c_01HZK3', 'c_01HZK7'];
+
+/** What each direction showed with the batch Explore selects (STORY_BATCH:
+    Northside Trucking, active, with a trial and a churned customer), said
+    once it has been tried. Read off ArchiveFlow, not written beside it:
     if a direction changes what it says, this changes with it. */
 export const SHOWED: Record<DirectionId, string> = {
-  undo: 'Archived four customers at once, including the three active ones, with no warning. Refused Monarch Dental Group only after the press. Undo lasted until the next action.',
-  confirm: 'Named the three active customers before archiving. Offered to archive all five, and only after the press said Monarch Dental Group can’t be archived.',
-  review: 'Set Monarch Dental Group aside before the press and named the three active customers, with a box to keep each one. Took the most steps.',
+  undo: 'Archived all three at once, Northside Trucking with the rest, with no warning. Undo lasted until the next action.',
+  confirm: 'Named Northside Trucking as active before archiving, and offered to archive all three.',
+  review: 'Named Northside Trucking before the press, with a box to keep it. Took the most steps.',
 };
 
 /** What a direction says once Archive is pressed and before anything leaves,
@@ -318,8 +333,8 @@ export const SHOWED: Record<DirectionId, string> = {
     that answers. Undo asks nothing, so it says nothing. */
 export const ASKING: Record<DirectionId, string | null> = {
   undo: null,
-  confirm: 'Relay asks before archiving and names the three active customers.',
-  review: 'Relay sorts the five first: one can’t be archived, and three are active. To keep an active customer, clear its box.',
+  confirm: 'Relay asks before archiving and names Northside Trucking, the active customer.',
+  review: 'Relay sorts the three first: Northside Trucking is active. To keep it, clear its box.',
 };
 
 export function directionOf(id: DirectionId): Direction {
@@ -512,7 +527,7 @@ export function buildOf(state: CycleState): Build | null {
   const f = featuresOf(state.direction, state.required);
   const changes = [
     `CustomerTable: ${buildNameOf(state.direction, f).toLowerCase()}`,
-    ...(f['only-active'] && !BUILT_IN[state.direction]['only-active'] ? ['A batch with no active customer archives at once'] : []),
+    ...(f['only-active'] && !BUILT_IN[state.direction]['only-active'] ? ['A batch with no active customer archives at once, with Undo until the next action'] : []),
     ...(f['names-active'] && !BUILT_IN[state.direction]['names-active'] ? ['The bulk bar names active customers before the press'] : []),
     ...(f['blocked-first'] && !BUILT_IN[state.direction]['blocked-first'] ? ['Blocked customers are named before the press'] : []),
     ...(f.restore ? ['An Archived view with Restore'] : []),

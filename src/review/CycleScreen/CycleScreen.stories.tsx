@@ -114,11 +114,11 @@ export const Explore: Story = {
     await expect(mark).not.toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: /^Try direction 2/ }));
     await expect(canvasElement.querySelector('.cycle__direction-does')).toHaveTextContent('Archive asks first');
-    await expect(canvas.getByText('5 selected')).toBeVisible();
+    await expect(canvas.getByText('3 selected')).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Press Archive' }));
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Relay asks before archiving');
     await expect(mark).toBeVisible();
-    await userEvent.click(canvas.getByRole('button', { name: 'Press Archive 5 customers' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Press Archive 3 customers' }));
     await expect(canvasElement.querySelectorAll('.cycle__tries li[data-done]')).toHaveLength(2);
     await expect(canvas.getByRole('button', { name: /^Try direction 3/ })).toBeVisible();
   },
@@ -170,11 +170,11 @@ export const DelegateReady: Story = {
 export const DelegateAsBuilt: Story = {
   args: { stage: 'delegate' },
   decorators: [inStore(built)],
-  parameters: { docs: { description: { story: 'The build with the agent’s stop answered. The five customers hold three active ones, so Archive opens the review with them flagged.' } } },
+  parameters: { docs: { description: { story: 'The build with the agent’s stop answered. The story’s three hold Northside Trucking, active, so Archive opens the review with it flagged.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Archive' }));
-    await expect(canvas.getByRole('heading', { name: 'Review 5 customers before archiving' })).toBeVisible();
+    await expect(canvas.getByRole('heading', { name: 'Review 3 customers before archiving' })).toBeVisible();
   },
 };
 

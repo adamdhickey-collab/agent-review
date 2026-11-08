@@ -13,6 +13,8 @@ import {
   STAGES,
   stageIndex,
   stopOf,
+  STORY_BATCH,
+  STORY_ROWS,
   type DirectionId,
   type StageId,
 } from '../../data/cycle';
@@ -38,10 +40,11 @@ import './SceneScreen.css';
    size, 800 by 450, which is below the first zoom step, so the root is
    never scaled. */
 
-/** The batch every direction meets: three active customers, a trial, and
-    Monarch Dental Group, which can't be archived (stages.tsx has the same). */
-const BATCH = ['c_01HZK3', 'c_01HZK7', 'c_01HZKB', 'c_01HZKF', 'c_01HZKN'];
+/** The batch every direction meets: the case study's three (data/cycle.ts,
+    STORY_BATCH), and the five rows its opener shows. */
+const BATCH = STORY_BATCH;
 const BATCH_ROWS = customers.filter((c) => BATCH.includes(c.id));
+const OPENER_ROWS = STORY_ROWS.map((id) => customers.find((c) => c.id === id)!);
 
 function Rail({ at }: { at: StageId }) {
   const i = stageIndex(at);
@@ -134,8 +137,8 @@ function Tried({ direction }: { direction: DirectionId }) {
    Archive button one press away. */
 function Batch() {
   return (
-    <Product label="Relay · customers · five selected">
-      <ArchiveFlow direction={STORY.direction!} customers={customers.slice(0, 7)} initialSelection={BATCH} />
+    <Product label="Relay · customers · three selected">
+      <ArchiveFlow direction={STORY.direction!} customers={OPENER_ROWS} initialSelection={BATCH} />
     </Product>
   );
 }
@@ -276,16 +279,14 @@ function Define() {
 }
 
 /** Each direction's next step, drawn as a small screen of the batch: the
-    five customers as rows (a box, a name as a bar, a status chip), and over
+    three customers as rows (a box, a name as a bar, a status chip), and over
     them the bar after the press, the question, or the panel beside the
     table. The words are the few the step itself shows. Since 2026-10-27, where
     each was an abstract shape. */
-const MINI_ROWS: { w: number; status: 'active' | 'trial' | 'due'; blocked?: boolean }[] = [
-  { w: 72, status: 'active' },
-  { w: 58, status: 'active' },
+const MINI_ROWS: { w: number; status: 'active' | 'trial' | 'churned'; blocked?: boolean }[] = [
   { w: 46, status: 'trial' },
-  { w: 78, status: 'due', blocked: true },
-  { w: 54, status: 'active' },
+  { w: 72, status: 'active' },
+  { w: 54, status: 'churned' },
 ];
 
 function MiniRows({ gone, checked }: { gone?: boolean; checked?: (n: number) => boolean | null }) {
@@ -311,7 +312,7 @@ function Mini({ direction }: { direction: DirectionId }) {
       <span className="mini" aria-hidden="true">
         <MiniRows gone />
         <span className="mini__toast">
-          <span>4 archived</span>
+          <span>3 archived</span>
           <span className="mini__link">Undo</span>
         </span>
       </span>
@@ -321,8 +322,8 @@ function Mini({ direction }: { direction: DirectionId }) {
       <span className="mini" aria-hidden="true">
         <MiniRows checked={() => true} />
         <span className="mini__dialog">
-          <span className="mini__dialog-title">Archive 5 customers?</span>
-          <span className="mini__dialog-says">3 are active.</span>
+          <span className="mini__dialog-title">Archive 3 customers?</span>
+          <span className="mini__dialog-says">1 is active.</span>
           <span className="mini__buttons">
             <span className="mini__btn">Cancel</span>
             <span className="mini__btn" data-act>
@@ -346,7 +347,7 @@ function Mini({ direction }: { direction: DirectionId }) {
           ))}
         </span>
         <span className="mini__btn" data-act>
-          Archive 3
+          Archive 2
         </span>
       </span>
     </span>

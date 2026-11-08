@@ -538,8 +538,10 @@ real experiment stopped.
   safety pull apart; it sets two success criteria and the direction the
   agent recommends. Explore: three working directions (archive now and
   undo; confirm first, naming active customers; review the batch), tried
-  on a batch holding three active customers and one that can't be
-  archived; what a person does in each is kept. Evaluate: findings from
+  on the case study's three (since 2026-11-08: Northside Trucking, active,
+  with a trial and a churned customer; until then the first five rows,
+  three of them active and one that can't be archived); what a person
+  does in each is kept. Evaluate: findings from
   four sources (the evidence, simulated session notes, trying it, the
   checks), each able to become a requirement, and a direction with a
   reason, the agent's draft until the person writes their own. Delegate:
@@ -638,7 +640,7 @@ question open, the review open, done) with the label of the one press
 that moves it on, marks that control with `data-next`, and presses it on
 `next()` through its ref. Explore reads all three. Until a direction is
 tried, the move's primary is that press ("Press Archive", then "Press
-Archive 5 customers"), with one line on what Relay did in between
+Archive 3 customers"), with one line on what Relay did in between
 (`ASKING` in `data/cycle.ts`); the screen's control is marked with the
 preview's own mark (`mark.ts`, "Press this"), drawn in the frame above
 the screen and in the ink, not the accent, for the preview's reason; and

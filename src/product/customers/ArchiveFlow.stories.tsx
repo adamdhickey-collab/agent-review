@@ -2,8 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { ArchiveFlow } from './ArchiveFlow';
 
-/* The batch every direction is tried with in the design cycle: three active
-   customers, a trial, and Monarch Dental Group, which can't be archived. */
+/* A batch that meets everything a direction can say: three active
+   customers, a trial, and Monarch Dental Group, which can't be archived.
+   The cycle's own batch is the case study's three (data/cycle.ts,
+   STORY_BATCH); this one is wider so every state shows in one story. */
 const BATCH = ['c_01HZK3', 'c_01HZK7', 'c_01HZKB', 'c_01HZKF', 'c_01HZKN'];
 
 /* A quarterly cleanup with no active customer: two trials and two churned. */
@@ -86,14 +88,14 @@ export const ReviewOnlyWhenActive: Story = {
 
 export const ReviewSkippedForACleanup: Story = {
   args: { direction: 'review', features: { onlyWhenActive: true }, initialSelection: [...CLEANUP, 'c_01HZKF'], onEvent: fn() },
-  parameters: { docs: { description: { story: 'The same build with a cleanup of two trial and two churned customers, and Monarch Dental Group. Nobody is active, so there is no review: the note names Monarch before the press, and one press archives the four. There is no Undo; the review is the protection, and it stops only when it has something to say.' } } },
+  parameters: { docs: { description: { story: 'The same build with a cleanup of two trial and two churned customers, and Monarch Dental Group. Nobody is active, so there is no review: the note names Monarch before the press, and one press archives the four, and the bar offers Undo, as undo’s does: a press that asked nothing needs a way back (rule 6). The review is the protection when there is something to say.' } } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvasElement.querySelector('.archive-flow__notes')).toHaveTextContent('Monarch Dental Group: it has an open invoice.');
     await userEvent.click(canvas.getByRole('button', { name: 'Archive' }));
     await expect(canvasElement.querySelector('.archive-flow__review')).toBeNull();
     await expect(canvasElement.querySelector('.archive-flow__result')).toHaveTextContent('4 customers archived. Monarch Dental Group wasn’t: it has an open invoice.');
-    await expect(canvas.queryByRole('button', { name: 'Undo' })).toBeNull();
+    await expect(canvas.getByRole('button', { name: 'Undo' })).toHaveFocus();
     await expect(args.onEvent).toHaveBeenCalledWith('archived');
     await expect(args.onEvent).not.toHaveBeenCalledWith('active-archived');
   },
