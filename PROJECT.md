@@ -152,6 +152,15 @@ should open well in it, and Claude Code stays the agent).
   workspace is as it was. Five tokens came with it: `--color-band`,
   `--color-band-raised`, `--color-text-on-band`,
   `--color-text-on-band-muted` and `--color-text-on-warning-solid`.
+- **Who you are is a demo role, and the case study is a project link.**
+  Since 2026-11-08 the bar says "Demo role" over the name where it had
+  said "Signed in as Adam Hickey", and "Case study" leads the project
+  links, in the same tab, so the way back to the narrative is in the bar
+  rather than only where the cycle ends. An outside review of the case
+  study that day read the sign-in as entering someone's account, and found
+  the return late. The same review read "People see the question every
+  time and stop reading it" as a finding the experiment never made; the
+  confirm direction's cost now says it is likely, which is what it is.
 
 ## The second iteration: delegation (2026-10-03)
 
