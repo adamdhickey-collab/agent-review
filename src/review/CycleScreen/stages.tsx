@@ -43,6 +43,7 @@ import {
   type Priority,
   type ReadingCall,
   type StageId,
+  STORY_BATCH,
 } from '../../data/cycle';
 import { ArchiveFlow, type ArchiveFeatures, type ArchiveFlowHandle, type ArchivePhase } from '../../product/customers/ArchiveFlow';
 import { drawMarkOn } from '../ComponentPreview/mark';
@@ -331,10 +332,9 @@ export function Define() {
 
 /* ---------- 3. EXPLORE ---------- */
 
-/* A batch to try: the first five rows, which hold three active customers
-   (Halvorsen Freight, Brightwater Clinics and Saltmarsh Studio), a trial,
-   and Monarch Dental Group, which can't be archived. Every direction meets all of it. */
-const BATCH = ['c_01HZK3', 'c_01HZK7', 'c_01HZKB', 'c_01HZKF', 'c_01HZKN'];
+/* A batch to try: the case study's three (data/cycle.ts, STORY_BATCH), so
+   the reader who came from the story meets the batch they just read about. */
+const BATCH = STORY_BATCH;
 
 
 export function Explore() {
@@ -342,7 +342,7 @@ export function Explore() {
   const d = directionOf(cycle.exploring);
   /* The batch is selected whenever a direction opens (since 2026-10-26):
      the move is to press Archive and watch, not to pick rows, so the three
-     directions meet the same five customers and differ only in what they
+     directions meet the same three customers and differ only in what they
      say. A person can still change the selection; the screen is working. */
   const [seed, setSeed] = useState(0);
   const tried = (id: DirectionId) => cycle.trials[id].length > 0;
@@ -420,9 +420,9 @@ export function Explore() {
 
   return (
     <div className="cycle__work">
-      <Move stage="explore" title="Archive the same five customers three ways">
+      <Move stage="explore" title="Archive the same three customers three ways">
         <p className="cycle__move-lead">
-          Each direction starts with the same five customers selected: three active, one trial, and one that can’t be archived. Use the button below for each step.
+          Each direction starts with the story’s three customers selected: Northside Trucking, still active, a trial, and a churned one. Use the button below for each step. Monarch Dental Group, a row down, can’t be archived; add it to see what each direction says.
         </p>
         <ol className="cycle__tries" role="list">
           {DIRECTIONS.map((x, i) => {
@@ -452,7 +452,7 @@ export function Explore() {
           </Button>
         ) : guiding ? (
           <Button className="cycle__move-next" variant="primary" leadingIcon="undo" onClick={() => setSeed(seed + 1)}>
-            Select the five again
+            Select the three again
           </Button>
         ) : upNext ? (
           <Button className="cycle__move-next" variant="primary" trailingIcon="arrow-right" onClick={() => go(upNext.id)}>
@@ -765,7 +765,7 @@ export function Delegate() {
 
         {answered ? (
           <Section title="As built">
-            <p className="cycle__lead">The build with your answer applied. Try archiving the five customers again.</p>
+            <p className="cycle__lead">The build with your answer applied. Try archiving the three customers again{cycle.direction !== 'undo' && f['only-active'] ? ', then clear Northside Trucking’s box and archive a batch with nobody active' : ''}.</p>
             <Product label="Relay · customers · as built, simulated">
               <ArchiveFlow direction={cycle.direction} features={toFlow(f)} activeRule={activeRule(cycle.direction, cycle.answer)} initialSelection={BATCH} />
             </Product>

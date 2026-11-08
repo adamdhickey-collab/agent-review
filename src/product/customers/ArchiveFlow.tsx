@@ -22,7 +22,9 @@ import './ArchiveFlow.css';
    press, an Archived view with Restore, who archived each one, and, since
    2026-11-02, stopping only for a batch with an active customer: confirm
    and review then archive a batch with none in one press, as undo does,
-   and ask or review only when one is in it.
+   and ask or review only when one is in it. Since 2026-11-08 the one press
+   offers Undo, as undo's does (rule 6: a press with no question needs a
+   way back; the case study said so and the build didn't).
 
    One customer can't be archived, Monarch Dental Group, because it has an
    open invoice, so every direction meets a partial failure; the question
@@ -217,7 +219,9 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
     setSelected(new Set());
     setStep(false);
     setKeptOut(new Set());
-    const undoable = direction === 'undo';
+    /* A press that asked nothing offers a way back: always for undo, and for
+       the others when the condition let the batch through. */
+    const undoable = direction === 'undo' || immediate;
     setResult({ archived: out, blocked: stopped, undoable });
     setStatus(sentence(out, stopped));
     pendingFocus.current = undoable && out.length ? 'undo' : 'select-all';

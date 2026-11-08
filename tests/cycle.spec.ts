@@ -116,10 +116,10 @@ test('the cycle can be done from the keyboard, and its choices survive a reload'
   await press(page, /Try direction 2/);
   await press(page, 'Press Archive');
   await expect(page.locator('.cycle__next-mark')).toBeVisible();
-  await press(page, 'Press Archive 5 customers');
+  await press(page, 'Press Archive 3 customers');
   await press(page, /Try direction 3/);
   await press(page, 'Press Archive');
-  await press(page, 'Press Archive 4 customers');
+  await press(page, 'Press Archive 3 customers');
   await expect(page.locator('.cycle__tries li[data-done]')).toHaveCount(3);
   await press(page, 'Continue to Evaluate');
 
@@ -148,7 +148,8 @@ test('the cycle can be done from the keyboard, and its choices survive a reload'
 
 /* The case study's call since 2026-11-02: the agent's review, kept, stopping
    only for a batch with an active customer. The as-built screen meets the
-   five with three active and opens the review; the record names the build. */
+   story's three, Northside Trucking active among them, and opens the review;
+   the record names the build. */
 test('the review with its condition is a call the cycle can make and build', async ({ page }) => {
   await seedCycle(page, EXPLORED);
   await open(page, '#/cycle/evaluate');
@@ -160,7 +161,7 @@ test('the review with its condition is a call the cycle can make and build', asy
   await page.getByRole('button', { name: 'Choose Build from existing parts' }).click();
   const built = page.locator('.cycle__product-frame');
   await built.getByRole('button', { name: 'Archive', exact: true }).click();
-  await expect(built.getByRole('heading', { name: 'Review 5 customers before archiving' })).toBeVisible();
+  await expect(built.getByRole('heading', { name: 'Review 3 customers before archiving' })).toBeVisible();
   await open(page, '#/cycle/learn');
   await expect(page.locator('.cycle__facts--record')).toContainText('Review only when someone’s active.');
   await expect(page.getByRole('rowheader', { name: 'How often the review appears' })).toBeVisible();
