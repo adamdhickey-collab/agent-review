@@ -35,7 +35,17 @@ import './Shell.css';
    weight on a screen is the screen's own heading. Two places, and two
    links out of the product (the Storybook and the source), which are not
    places in it and so are a second, quieter nav on the right, before the
-   appearance control.
+   appearance control. Since 2026-11-08 the case study is the first of
+   them, in the same tab: most people arrive from it, and until then the
+   only way back was a link where the cycle ends. It leaves the product,
+   so it carries the same mark as the other two.
+
+   WHO YOU ARE IS A DEMO ROLE, since 2026-11-08. The bar had said "Signed
+   in as Adam Hickey", which a visitor could read as having entered
+   someone's account; a review that day said so. The disc and the name
+   stay, because the decisions are recorded under that name, and a
+   "Demo role" label over it says what the name is: the part a visitor
+   plays, not a session.
 
    The appearance control is three choices, Light, Dark and System, as the
    system's segmented control: one tab stop, arrow keys between them, each
@@ -128,6 +138,10 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
           </nav>
           )}
           <nav className="shell__links" aria-label="Project links">
+            <a href="https://adamhickey.com/lab/agent-review.html">
+              Case study
+              <Icon name="arrow-up-right" size={12} />
+            </a>
             <a href="storybook/" target="_blank" rel="noopener">
               Storybook
               <Icon name="arrow-up-right" size={12} />
@@ -159,8 +173,10 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
             <span className="shell__avatar" aria-hidden="true">
               AH
             </span>
-            <span className="visually-hidden">Signed in as </span>
-            <span className="shell__user-name">Adam Hickey</span>
+            <span className="shell__user-name">
+              <span className="shell__user-role">Demo role</span>
+              Adam Hickey
+            </span>
           </span>
         </div>
       </header>

@@ -290,7 +290,7 @@ export const DIRECTIONS: readonly Direction[] = [
     name: 'Confirm first, naming who',
     does: 'Archive asks first, and names any active customer in the selection.',
     gains: 'An active customer is named before anything happens. Closest to what ships today.',
-    costs: 'People see the question every time and stop reading it.',
+    costs: 'A question on every batch is likely to stop being read.',
     presses: 3,
   },
   {

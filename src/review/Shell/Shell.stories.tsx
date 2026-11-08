@@ -128,8 +128,11 @@ export const LinksOutAreQuieter: Story = {
     await expect(within(places).getByRole('link', { name: 'Design cycle' })).toBeInTheDocument();
     await expect(within(places).getByRole('link', { name: 'Delegated work' })).toBeInTheDocument();
     await expect(within(places).getByRole('link', { name: 'Reviews' })).toBeInTheDocument();
-    await expect(within(links).getAllByRole('link').map((a) => a.textContent)).toEqual(['Storybook', 'Source']);
-    for (const a of within(links).getAllByRole('link')) await expect(a).toHaveAttribute('target', '_blank');
+    await expect(within(links).getAllByRole('link').map((a) => a.textContent)).toEqual(['Case study', 'Storybook', 'Source']);
+    await expect(within(links).getByRole('link', { name: 'Case study' })).not.toHaveAttribute('target');
+    for (const a of [within(links).getByRole('link', { name: 'Storybook' }), within(links).getByRole('link', { name: 'Source' })]) await expect(a).toHaveAttribute('target', '_blank');
+    await expect(canvas.getByText('Demo role')).toBeInTheDocument();
+    await expect(canvas.queryByText(/Signed in/)).toBeNull();
     const resolve = (token: string) => {
       const probe = canvasElement.ownerDocument.createElement('i');
       probe.style.color = `var(${token})`;
