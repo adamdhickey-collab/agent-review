@@ -125,6 +125,7 @@ test('the cycle can be done from the keyboard, and its choices survive a reload'
 
   await expect(page.locator('.cycle__move-lead')).toContainText('The agent recommends Review batch, then archive');
   await press(page, 'Choose Confirm first, naming who');
+  await press(page, 'Choose On every batch');
   await press(page, 'Continue to Delegate');
   await press(page, 'Send the brief');
   await expect(page.getByText('Needs judgment')).toBeVisible();
@@ -154,7 +155,8 @@ test('the review with its condition is a call the cycle can make and build', asy
   await seedCycle(page, EXPLORED);
   await open(page, '#/cycle/evaluate');
   await page.getByRole('button', { name: 'Choose Review batch, then archive' }).click();
-  await page.getByRole('checkbox', { name: /Require: Stop only for a batch with an active customer/ }).check({ force: true });
+  await expect(page.getByRole('button', { name: 'Continue to Delegate' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Choose Only when someone’s active' }).click();
   await expect(page.locator('.cycle__consequence')).toContainText('The agent will build “Review only when someone’s active”');
   await page.getByRole('button', { name: 'Continue to Delegate' }).click();
   await page.getByRole('button', { name: 'Send the brief' }).click();

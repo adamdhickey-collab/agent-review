@@ -34,7 +34,7 @@ const TRIED: CycleAction[] = [
 const explored = TRIED.reduce(reduceCycle, framed);
 /* The case study's path since 2026-11-02: the agent's review, kept, with
    the condition that it stops only for a batch with an active customer. */
-const chosen = reduceCycle(reduceCycle(explored, { type: 'choose', direction: 'review' }), { type: 'require', feature: 'only-active', on: true });
+const chosen = reduceCycle(reduceCycle(explored, { type: 'choose', direction: 'review' }), { type: 'stop', when: 'active' });
 const sent = reduceCycle(chosen, { type: 'delegate' });
 const built = reduceCycle(sent, { type: 'answer', answer: 'inline' });
 
@@ -139,16 +139,24 @@ export const ExploreAllTried: Story = {
 export const Evaluate: Story = {
   args: { stage: 'evaluate' },
   decorators: [inStore(explored)],
-  parameters: { docs: { description: { story: 'The findings, each with its source, and the choice of direction. A requirement the chosen direction already meets says so instead of offering a box. Requiring the review to stop only for an active customer renames the build, and keeps the agent’s recommendation.' } } },
+  parameters: { docs: { description: { story: 'The findings, each with its source, and the choice of direction. A direction that stops asks a second question, when it should stop: the agent recommends every batch, because it read the brief. Answering “Only when someone’s active” renames the build, and the batch table shows a routine cleanup archiving in one press.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvasElement.querySelector('.cycle__move-lead')).toHaveTextContent('The agent recommends Review batch, then archive');
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Review batch, then archive' }));
     await expect(canvas.getAllByText('Review batch, then archive does this already.')).toHaveLength(2);
-    await userEvent.click(canvas.getByRole('checkbox', { name: /Require: Stop only for a batch with an active customer/ }));
+    await expect(canvas.getByRole('heading', { name: 'When should it review?' })).toBeVisible();
+    await expect(canvas.getByText('Your move asks when it should review.')).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: 'Continue to Delegate' })).toBeNull();
+    await expect(canvas.getByRole('row', { name: /A routine cleanup/ })).toHaveTextContent('Opens the review, with nothing in it to check.');
+    await userEvent.click(canvas.getByRole('button', { name: 'Choose Only when someone’s active' }));
+    await expect(canvas.getByRole('row', { name: /A routine cleanup/ })).toHaveTextContent('Archives in one press. Undo until the next action.');
+    await expect(canvas.getByRole('row', { name: /The story’s three/ })).toHaveTextContent('Opens the review, with a box to keep Northside Trucking.');
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('The agent will build “Review only when someone’s active” with 3 requirements.');
     await expect(canvasElement.querySelector('.cycle__consequence')).not.toHaveTextContent('against');
+    await expect(canvas.getByRole('button', { name: 'Continue to Delegate' })).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Archive now, undo after' }));
+    await expect(canvas.queryByRole('heading', { name: /When should it/ })).toBeNull();
     await expect(canvas.getByText('Archive now, undo after does this already.')).toBeVisible();
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('You went against the agent’s recommendation');
   },
@@ -161,7 +169,7 @@ export const DelegateReady: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('Review only when someone’s active.');
-    await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('Stop only for a batch with an active customer. A batch with none archives in one press.');
+    await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('Stop only for a batch with an active customer. A batch with none archives in one press, with Undo.');
     await userEvent.click(canvas.getByRole('button', { name: 'Send the brief' }));
     await expect(canvas.getByRole('heading', { level: 2, name: /The review step needs a panel/ })).toBeVisible();
   },
@@ -180,7 +188,7 @@ export const DelegateAsBuilt: Story = {
 
 export const DelegateStopsDifferently: Story = {
   args: { stage: 'delegate' },
-  decorators: [inStore(reduceCycle(reduceCycle(explored, { type: 'choose', direction: 'confirm' }), { type: 'delegate' }))],
+  decorators: [inStore(reduceCycle(reduceCycle(reduceCycle(explored, { type: 'choose', direction: 'confirm' }), { type: 'stop', when: 'every' }), { type: 'delegate' }))],
   parameters: { a11y: { test: 'error' }, docs: { description: { story: 'A different direction, a different stop: Confirm asks a question of meaning, who counts as active, and the answer changes who the built screen names.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

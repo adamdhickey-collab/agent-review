@@ -72,7 +72,7 @@ export const STAGES: readonly Stage[] = [
     id: 'evaluate',
     name: 'Evaluate',
     question: 'Which direction, and what must it do?',
-    designer: 'Weighs the findings, chooses a direction, and turns findings into requirements.',
+    designer: 'Weighs the findings, chooses a direction, decides when it stops, and turns findings into requirements.',
     agent: 'Ran the checks and compared the findings with the brief.',
   },
   {
@@ -233,7 +233,7 @@ export const CONSTRAINTS: readonly string[] = [
 
 export const NOT_SOLVING: readonly string[] = ['Deleting data for good', 'Who is allowed to archive', 'Archiving from a customer’s own page'];
 
-export const OPEN_QUESTIONS: readonly string[] = ['How often does someone archive more than a page at a time?', 'Does an administrator need to restore, or only to see who archived?'];
+export const OPEN_QUESTIONS: readonly string[] = ['How many batches hold an active customer?', 'How often does someone archive more than a page at a time?', 'Does an administrator need to restore, or only to see who archived?'];
 
 /* The problem statement, as the Discover call leaves it. Keeping the
    disputed reading frames the work around data loss, which the engineering
@@ -378,7 +378,7 @@ export const REQUIREMENT: Record<FeatureId, string> = {
   restore: 'An Archived view where archived customers can be restored for 90 days.',
   who: 'The Archived view says who archived each customer, and when.',
   'blocked-first': 'Say which customers can’t be archived before the press, not after.',
-  'only-active': 'Stop only for a batch with an active customer. A batch with none archives in one press.',
+  'only-active': 'Stop only for a batch with an active customer. A batch with none archives in one press, with Undo.',
 };
 
 /* The condition (2026-11-02). Adam's call in the case study is the agent's
@@ -392,6 +392,56 @@ const ONLY_ACTIVE_NAME: Partial<Record<DirectionId, string>> = {
   confirm: 'Confirm only when someone’s active',
   review: 'Review only when someone’s active',
 };
+
+/* WHEN IT STOPS (2026-11-09). The condition was a box among five under
+   the findings, and a reader went through Evaluate without seeing it was
+   the decision the case study is about. Now it is the move's second
+   question, asked once a direction that stops is chosen: on every batch,
+   which is what the agent recommends because it read the brief, or only
+   when the batch holds an active customer, which is what the session notes
+   argue for. The answer sets the only-active requirement; `stops` keeps
+   whether it was answered, since "every batch" and "not yet" both leave the
+   requirement off. Undo never stops, so it has no second question. */
+export type StopWhen = 'every' | 'active';
+
+/** Whether a direction stops before archiving, so the second question applies. */
+export function stopsFirst(direction: DirectionId | null): direction is 'confirm' | 'review' {
+  return direction === 'confirm' || direction === 'review';
+}
+
+/** The second question's verb: what the direction does when it stops. */
+export function stopVerb(direction: 'confirm' | 'review'): string {
+  return direction === 'confirm' ? 'ask' : 'review';
+}
+
+export const STOP_WHEN: Record<StopWhen, { name: string; says: (d: 'confirm' | 'review') => string }> = {
+  every: {
+    name: 'On every batch',
+    says: (d) => (d === 'confirm' ? 'Every archive stops for the question, even a page of churned customers.' : 'Every archive opens the review, even a page of churned customers.'),
+  },
+  active: {
+    name: 'Only when someone’s active',
+    says: () => 'A batch with no active customer archives in one press, with Undo. A batch with Northside Trucking stops and names it.',
+  },
+};
+
+/** Two batches, to show what the build does with each: a routine cleanup with nobody active, and the story's three. */
+export const BATCHES = [
+  { id: 'routine', name: 'A routine cleanup', who: 'Juniper Foods, Kestrel Aviation, and Verity Labs', active: false },
+  { id: 'story', name: 'The story’s three', who: 'Alder & Finch, Northside Trucking, and Juniper Foods', active: true },
+] as const;
+
+/** What a build does with a batch, in a sentence. */
+export function onBatch(direction: DirectionId, f: Features, active: boolean): string {
+  const once = 'Archives in one press. Undo until the next action.';
+  if (direction === 'undo') {
+    if (!active) return once;
+    return f['names-active'] ? 'Shades Northside Trucking before the press, then archives all three in one press. Undo until the next action.' : 'Archives all three in one press, Northside Trucking too. Undo until the next action.';
+  }
+  if (!active && f['only-active']) return once;
+  if (direction === 'confirm') return active ? 'Asks first, and names Northside Trucking as active.' : 'Asks first, with nobody to name.';
+  return active ? 'Opens the review, with a box to keep Northside Trucking.' : 'Opens the review, with nothing in it to check.';
+}
 
 /** What the build is called: the direction's name, or the conditional one when the condition applies. */
 export function buildNameOf(direction: DirectionId, f: Features): string {
@@ -643,6 +693,8 @@ export interface CycleState {
   /** The designer's reason for the direction, once they write one; the agent's draft until then. */
   reason: string | null;
   required: Features;
+  /** When a direction that stops does so: the answer to Evaluate's second question, or null until it's answered. */
+  stops: StopWhen | null;
   /** Whether the brief has been handed to the agent. */
   delegated: boolean;
   /** The answer to the agent's one stop. */
@@ -661,6 +713,7 @@ export function initialCycle(): CycleState {
     direction: null,
     reason: null,
     required: NO_FEATURES,
+    stops: null,
     delegated: false,
     answer: null,
     kept: false,
@@ -676,6 +729,7 @@ export type CycleAction =
   | { type: 'choose'; direction: DirectionId }
   | { type: 'reason'; text: string }
   | { type: 'require'; feature: FeatureId; on: boolean }
+  | { type: 'stop'; when: StopWhen }
   | { type: 'delegate' }
   | { type: 'answer'; answer: string }
   | { type: 'keep'; on: boolean }
@@ -702,6 +756,8 @@ export function reduceCycle(s: CycleState, a: CycleAction): CycleState {
       return { ...s, reason: a.text };
     case 'require':
       return s.required[a.feature] === a.on ? s : { ...s, required: { ...s.required, [a.feature]: a.on }, delegated: false, answer: null, kept: false };
+    case 'stop':
+      return s.stops === a.when ? s : { ...s, stops: a.when, required: { ...s.required, 'only-active': a.when === 'active' }, delegated: false, answer: null, kept: false };
     case 'delegate':
       return s.direction ? { ...s, delegated: true } : s;
     case 'answer':
@@ -730,7 +786,7 @@ export function decided(s: CycleState, stage: StageId): boolean {
     case 'explore':
       return DIRECTIONS.every((d) => s.trials[d.id].length > 0);
     case 'evaluate':
-      return s.direction !== null;
+      return s.direction !== null && (!stopsFirst(s.direction) || s.stops !== null);
     case 'delegate':
       return s.answer !== null;
     case 'learn':

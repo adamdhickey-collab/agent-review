@@ -24,6 +24,7 @@ export const STORY: CycleState = {
   trials: { undo: ['archived'], confirm: ['archived'], review: ['archived'] },
   direction: 'review',
   required: { ...initialCycle().required, 'only-active': true },
+  stops: 'active',
   delegated: true,
   answer: 'inline',
   kept: true,
