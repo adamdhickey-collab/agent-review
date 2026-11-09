@@ -8,6 +8,7 @@ import {
   BOUNDARIES,
   briefOf,
   buildOf,
+  BATCHES,
   BUILT_IN,
   buildNameOf,
   CONSTRAINTS,
@@ -36,7 +37,12 @@ import {
   STAGES,
   stageIndex,
   stageOf,
+  onBatch,
+  STOP_WHEN,
   stopOf,
+  stopsFirst,
+  stopVerb,
+  type StopWhen,
   type CycleState,
   type DirectionId,
   type FeatureId,
@@ -412,6 +418,7 @@ export function Explore() {
 
   const rows: { label: string; matters?: Priority; values: Record<DirectionId, string> }[] = [
     { label: 'Presses to archive a page', matters: 'pace', values: { undo: '2', confirm: '3', review: '3' } },
+    { label: 'Stops for a batch with nobody active', matters: 'pace', values: { undo: 'No', confirm: 'Yes', review: 'Yes' } },
     { label: 'Names an active customer first', matters: 'recovery', values: { undo: 'No', confirm: 'Yes', review: 'Yes' } },
     { label: 'Says what can’t be archived first', values: { undo: 'No', confirm: 'No', review: 'Yes' } },
     { label: 'Restore afterward', matters: 'recovery', values: { undo: 'Undo, until the next action', confirm: 'None on screen', review: 'None on screen' } },
@@ -560,7 +567,7 @@ export function Evaluate() {
   const chosen = cycle.direction;
   return (
     <div className="cycle__work">
-      <Move stage="evaluate" title="Which direction, and why?">
+      <Move stage="evaluate" title="Which direction, and when does it stop?">
         {cycle.priority ? (
           <p className="cycle__move-lead">
             The agent recommends <strong>{directionOf(recommended).name}</strong>, because you chose “{PRIORITY[cycle.priority].name}.” The agent read the brief, not the
@@ -572,7 +579,20 @@ export function Evaluate() {
             <Choice key={x.id} name={x.name} says={x.costs} chosen={chosen === x.id} recommended={cycle.priority !== null && x.id === recommended} onChoose={() => cycleDo({ type: 'choose', direction: x.id })} />
           ))}
         </ul>
-        {chosen ? (
+        {stopsFirst(chosen) ? (
+          <div className="cycle__stops">
+            <h3 className="cycle__h3">When should it {stopVerb(chosen)}?</h3>
+            <p className="cycle__move-lead">
+              The agent’s plan stops on every batch, because the brief doesn’t say otherwise. The session notes say the quarterly cleanup took twice as long, with nobody active in any of those batches, and that people stopped reading a question they saw every time.
+            </p>
+            <ul className="cycle__choices" role="list">
+              {(Object.keys(STOP_WHEN) as StopWhen[]).map((w) => (
+                <Choice key={w} name={STOP_WHEN[w].name} says={STOP_WHEN[w].says(chosen)} chosen={cycle.stops === w} recommended={w === 'every'} onChoose={() => cycleDo({ type: 'stop', when: w })} />
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {chosen && (!stopsFirst(chosen) || cycle.stops) ? (
           <>
             <TextArea
               label="Your reason"
@@ -589,6 +609,34 @@ export function Evaluate() {
       </Move>
 
       <div className="cycle__main">
+        {chosen ? (
+          <Section title="What each batch gets">
+            <p className="cycle__lead">The build you’re choosing, on a routine cleanup and on the story’s three.</p>
+            <Table caption="What the build does with each batch" density="compact">
+              <thead>
+                <tr>
+                  <HeaderCell>Batch</HeaderCell>
+                  <HeaderCell>What Relay does</HeaderCell>
+                </tr>
+              </thead>
+              <tbody>
+                {BATCHES.map((b) => (
+                  <Row key={b.id}>
+                    <Cell rowHeader>
+                      <span className="cycle__batch">
+                        <strong>{b.name}</strong>
+                        <span className="cycle__batch-who">
+                          {b.who}. {b.active ? 'Northside Trucking is active.' : 'Nobody active.'}
+                        </span>
+                      </span>
+                    </Cell>
+                    <Cell>{onBatch(chosen, featuresOf(chosen, cycle.required), b.active)}</Cell>
+                  </Row>
+                ))}
+              </tbody>
+            </Table>
+          </Section>
+        ) : null}
         <Section title="What came back">
           <p className="cycle__lead">Each finding says where it came from. Turn the ones that matter into requirements for the build.</p>
           <ul className="cycle__findings" role="list">
@@ -603,7 +651,12 @@ export function Evaluate() {
                     {f.about ? <span className="cycle__finding-about">About {f.about.map((a) => `${DIRECTIONS.findIndex((x) => x.id === a) + 1}`).join(' and ')}</span> : null}
                   </p>
                   <p className="cycle__finding-says">{f.says}</p>
-                  {f.becomes ? (
+                  {f.becomes === 'only-active' && stopsFirst(chosen) ? (
+                    <p className="cycle__finding-covered cycle__finding-covered--ask">
+                      <Icon name="arrow-right" size={14} />
+                      Your move asks when it should {stopVerb(chosen)}.
+                    </p>
+                  ) : f.becomes === 'only-active' && !chosen ? null : f.becomes ? (
                     covered ? (
                       <p className="cycle__finding-covered">
                         <Icon name="check" size={14} />
