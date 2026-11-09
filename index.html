@@ -10,13 +10,13 @@
     />
     <meta name="color-scheme" content="light dark" />
     <script>
-      /* The appearance, before the first paint (src/app/useTheme.ts). Dark
+      /* The appearance, before the first paint (src/app/useTheme.ts). Light
          until a person chooses; a remembered Light or Dark is put on the
          root; System leaves it bare, the operating system's scheme
          (app/global.css). */
-      var t = 'dark';
+      var t = 'light';
       try {
-        t = localStorage.getItem('agent-review:theme') || 'dark';
+        t = localStorage.getItem('agent-review:theme') || 'light';
       } catch (e) {}
       if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
       /* The router puts a reloaded or revisited page back where it was,
