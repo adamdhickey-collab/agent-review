@@ -15,7 +15,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The chrome: one bar on the chrome’s ground over the page, with the product’s mark on a tile of the accent. The place you are in is said in the accent, the word and the line under it, the line a selected tab carries, with no filled shape, so the first thing with weight on a screen is the screen’s heading. The appearance control is three choices, Light, Dark and System, as the system’s segmented control. The review is dark until a person chooses, and a choice is remembered.',
+          'The chrome: one bar on the chrome’s ground over the page, with the product’s mark on a tile of the accent. The place you are in is said in the accent, the word and the line under it, the line a selected tab carries, with no filled shape, so the first thing with weight on a screen is the screen’s heading. The appearance control is three choices, Light, Dark and System, as the system’s segmented control. The review is light until a person chooses, and a choice is remembered.',
       },
     },
   },
@@ -64,7 +64,7 @@ export const Appearance: Story = {
     docs: {
       description: {
         story:
-          'Light, Dark and System, one tab stop with arrow keys between them, each an icon named by its tooltip. A first visit is Dark, the charcoal: data-theme="dark" on the root. Choosing Light or Dark puts data-theme on the root and remembers it; choosing System takes the attribute off, so the root’s own color-scheme, "light dark", follows the operating system live, and remembers that. Dark by default since 2026-10-27; following the system from 2026-10-24; dark by default from later on 2026-10-11, following the system when Preview Studio opened, and it was a light/dark toggle before. The remembered choice is cleared at the end, and the Storybook’s own theme put back, so the next story starts as it should.',
+          'Light, Dark and System, one tab stop with arrow keys between them, each an icon named by its tooltip. A first visit is Light: data-theme="light" on the root. Choosing Light or Dark puts data-theme on the root and remembers it; choosing System takes the attribute off, so the root’s own color-scheme, "light dark", follows the operating system live, and remembers that. Light by default since 2026-11-09; dark by default from 2026-10-27; following the system from 2026-10-24; dark by default from later on 2026-10-11, following the system when Preview Studio opened, and it was a light/dark toggle before. The remembered choice is cleared at the end, and the Storybook’s own theme put back, so the next story starts as it should.',
       },
     },
   },
@@ -74,10 +74,10 @@ export const Appearance: Story = {
     const before = root.dataset.theme;
     try {
       const group = await canvas.findByRole('radiogroup', { name: 'Appearance' });
-      /* A first visit, with nothing remembered, is Dark. */
-      await expect(within(group).getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true');
-      await waitFor(() => expect(root.dataset.theme).toBe('dark'));
-      await expect(getComputedStyle(root).colorScheme).toBe('dark');
+      /* A first visit, with nothing remembered, is Light. */
+      await expect(within(group).getByRole('radio', { name: 'Light' })).toHaveAttribute('aria-checked', 'true');
+      await waitFor(() => expect(root.dataset.theme).toBe('light'));
+      await expect(getComputedStyle(root).colorScheme).toBe('light');
 
       await userEvent.click(within(group).getByRole('radio', { name: 'Dark' }));
       await expect(localStorage.getItem('agent-review:theme')).toBe('dark');

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
 /* The review's appearance: Light, Dark, or System, chosen in the bar
-   (Shell) and remembered. Until a person chooses, it is Dark, the charcoal
-   (tokens.css): data-theme="dark" on the root. Choosing Light or Dark puts
+   (Shell) and remembered. Until a person chooses, it is Light:
+   data-theme="light" on the root. Choosing Light or Dark puts
    data-theme on the root and fixes the scheme; choosing System takes the
    attribute off, and the root's color-scheme, "light dark"
    (app/global.css), makes every light-dark() token follow the operating
@@ -13,9 +13,9 @@ import { useCallback, useEffect, useState } from 'react';
    existed is read as it was written: 'light' and 'dark' mean what they
    meant, and 'system' is the one new value. Nothing to migrate.
 
-   Dark by default since 2026-10-27, by decision (Night sage then, the
-   charcoal since 2026-10-29): the case study's pictures are dark, and the
-   prototype a reader opens next should look like them. Following the system from 2026-10-24; dark by
+   Light by default since 2026-11-09, by decision. Dark by default from
+   2026-10-27 (Night sage then, the charcoal from 2026-10-29); following
+   the system from 2026-10-24; dark by
    default from later on 2026-10-11, following the system when Preview
    Studio opened that day, light from earlier that day, and dark from
    2026-10-05. Settled: don't flip it again without a decision.
@@ -36,9 +36,9 @@ export const APPEARANCE_KEY = 'agent-review:theme';
 function remembered(): Appearance {
   try {
     const v = localStorage.getItem(APPEARANCE_KEY);
-    return v === 'light' || v === 'dark' || v === 'system' ? v : 'dark';
+    return v === 'light' || v === 'dark' || v === 'system' ? v : 'light';
   } catch {
-    return 'dark';
+    return 'light';
   }
 }
 

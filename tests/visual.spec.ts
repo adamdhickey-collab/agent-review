@@ -8,8 +8,8 @@ import { FRAMED, seedCycle } from './seed';
 
 const WIDTHS = [1280, 768] as const;
 
-/* The review is dark until a person chooses otherwise (app/useTheme.ts,
-   since 2026-10-27). The baselines not named
+/* The review is light until a person chooses otherwise (app/useTheme.ts,
+   since 2026-11-09). The baselines not named
    -dark are of the light theme and the -dark ones of the dark, and each set
    makes its choice first, the way the bar's control does, by remembering
    it, so a baseline never depends on the machine's own setting; a first
@@ -165,16 +165,16 @@ test.describe('in the dark theme, chosen, at 1280', () => {
   });
 });
 
-/* A first visit, with nothing remembered: Dark, the charcoal, whatever the
-   system's scheme (since 2026-10-27), read from the root rather than a
-   screenshot; the -dark baselines above are the picture of it. */
+/* A first visit, with nothing remembered: Light, whatever the system's
+   scheme (since 2026-11-09), read from the root rather than a screenshot;
+   the light baselines above are the picture of it. */
 for (const scheme of ['light', 'dark'] as const) {
-  test(`a first visit on a ${scheme} system is dark`, async ({ page }) => {
+  test(`a first visit on a ${scheme} system is light`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme });
     await page.goto('#/runs/billing');
     await settle(page);
-    expect(await page.evaluate(() => [document.documentElement.dataset.theme ?? null, getComputedStyle(document.documentElement).colorScheme])).toEqual(['dark', 'dark']);
-    await expect(page.getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true');
+    expect(await page.evaluate(() => [document.documentElement.dataset.theme ?? null, getComputedStyle(document.documentElement).colorScheme])).toEqual(['light', 'light']);
+    await expect(page.getByRole('radio', { name: 'Light' })).toHaveAttribute('aria-checked', 'true');
   });
 }
 
