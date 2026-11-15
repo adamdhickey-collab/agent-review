@@ -188,7 +188,7 @@ export function Discover() {
   }
 
   const calls: { id: ReadingCall; name: string; says: string }[] = [
-    { id: 'correct', name: 'Correct the summary', says: 'Relay keeps archived customers for 90 days. No screen shows or restores an archived customer.' },
+    { id: 'correct', name: 'Correct the summary', says: DISPUTED.corrected },
     { id: 'keep', name: 'Keep the summary', says: 'Plan as if an archived customer is deleted for good.' },
   ];
 
@@ -210,37 +210,73 @@ export function Discover() {
         <Section title="The agent’s summary">
           <p className="cycle__lead">Each claim is labeled by kind. Press a source to read it.</p>
           <ul className="cycle__readings" role="list">
-            {READINGS.map((r) => (
-              <li key={r.id} className="cycle__reading" data-kind={r.kind} data-disputed={r.id === DISPUTED.reading || undefined}>
-                <Badge tone={r.kind === 'observation' ? 'neutral' : r.kind === 'interpretation' ? 'accent' : 'warning'} variant="outline">
-                  {READING_KIND[r.kind]}
-                </Badge>
-                <p className="cycle__reading-says">{r.says}</p>
-                <p className="cycle__reading-from">
-                  <span>Based on</span>
-                  {r.from.map((id) => {
-                    const e = EVIDENCE.find((x) => x.id === id)!;
-                    return (
-                      <Button key={id} size="compact" variant="ghost" onClick={() => show(id)}>
-                        {EVIDENCE_KIND[e.kind]}, {e.from.toLowerCase()}
-                      </Button>
-                    );
-                  })}
-                </p>
-              </li>
-            ))}
+            {READINGS.map((r) => {
+              const disputed = r.id === DISPUTED.reading;
+              const corrected = disputed && cycle.reading === 'correct';
+              const from = corrected ? [DISPUTED.by] : r.from;
+              return (
+                <li key={r.id} className="cycle__reading" data-kind={r.kind} data-disputed={disputed || undefined} data-corrected={corrected || undefined}>
+                  {corrected ? (
+                    <Badge tone="success" variant="outline" icon="check">
+                      Corrected
+                    </Badge>
+                  ) : (
+                    <Badge tone={r.kind === 'observation' ? 'neutral' : r.kind === 'interpretation' ? 'accent' : 'warning'} variant="outline">
+                      {READING_KIND[r.kind]}
+                    </Badge>
+                  )}
+                  {corrected ? (
+                    <p className="cycle__reading-says cycle__reading-was">
+                      <span className="visually-hidden">The summary said: </span>
+                      <del>{r.says}</del>
+                    </p>
+                  ) : (
+                    <p className="cycle__reading-says">{r.says}</p>
+                  )}
+                  {corrected ? <p className="cycle__reading-says cycle__reading-fix">{DISPUTED.corrected}</p> : null}
+                  <p className="cycle__reading-from">
+                    <span>Based on</span>
+                    {from.map((id) => {
+                      const e = EVIDENCE.find((x) => x.id === id)!;
+                      return (
+                        <Button key={id} size="compact" variant="ghost" onClick={() => show(id)}>
+                          {EVIDENCE_KIND[e.kind]}, {e.from.toLowerCase()}
+                        </Button>
+                      );
+                    })}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         </Section>
         <Section title="The evidence">
           <ul className="cycle__evidence" role="list">
-            {EVIDENCE.map((e) => (
-              <li key={e.id} id={`ev-${e.id}`} tabIndex={-1} className="cycle__ev" data-lit={lit === e.id || undefined} data-opened={cycle.opened.includes(e.id) || undefined}>
-                <p className="cycle__ev-kind">
-                  {EVIDENCE_KIND[e.kind]} <span>· {e.from}</span>
-                </p>
-                <p className="cycle__ev-says">{e.says}</p>
-              </li>
-            ))}
+            {EVIDENCE.map((e) => {
+              const voice = e.kind === 'ticket' || e.kind === 'request';
+              return (
+                <li key={e.id} id={`ev-${e.id}`} tabIndex={-1} className="cycle__ev" data-kind={e.kind} data-voice={voice || undefined} data-lit={lit === e.id || undefined} data-opened={cycle.opened.includes(e.id) || undefined}>
+                  {voice ? <blockquote className="cycle__ev-quote">{e.says}</blockquote> : null}
+                  <p className="cycle__ev-kind">
+                    {e.kind === 'note' ? <Icon name="code" size={14} /> : null}
+                    {EVIDENCE_KIND[e.kind]} <span>· {e.from}</span>
+                  </p>
+                  {e.figure ? (
+                    <p className="cycle__ev-figure" data-tone={e.figure.tone}>
+                      <strong>{e.figure.value}</strong>
+                      {e.figure.of ? (
+                        <span className="cycle__dots" aria-hidden="true">
+                          {Array.from({ length: e.figure.of }, (_, i) => (
+                            <i key={i} data-on={i < (e.figure!.on ?? 0) || undefined} />
+                          ))}
+                        </span>
+                      ) : null}
+                    </p>
+                  ) : null}
+                  {voice ? null : <p className="cycle__ev-says">{e.says}</p>}
+                </li>
+              );
+            })}
           </ul>
         </Section>
       </div>
