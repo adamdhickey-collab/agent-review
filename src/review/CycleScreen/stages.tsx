@@ -171,6 +171,18 @@ function toFlow(f: Record<FeatureId, boolean>): ArchiveFeatures {
   return { namesActive: f['names-active'], blockedFirst: f['blocked-first'], restore: f.restore, who: f.who, onlyWhenActive: f['only-active'] };
 }
 
+/** A count, drawn: one dot per thing counted, the counted ones filled. The
+    words beside it say the number, so the dots are decoration to a reader. */
+function Dots({ on, of, tone }: { on: number; of: number; tone?: 'accent' | 'warning' }) {
+  return (
+    <span className="cycle__dots" data-tone={tone} aria-hidden="true">
+      {Array.from({ length: of }, (_, i) => (
+        <i key={i} data-on={i < on || undefined} />
+      ))}
+    </span>
+  );
+}
+
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- 1. DISCOVER ---------- */
@@ -262,15 +274,9 @@ export function Discover() {
                     {EVIDENCE_KIND[e.kind]} <span>· {e.from}</span>
                   </p>
                   {e.figure ? (
-                    <p className="cycle__ev-figure" data-tone={e.figure.tone}>
+                    <p className="cycle__ev-figure">
                       <strong>{e.figure.value}</strong>
-                      {e.figure.of ? (
-                        <span className="cycle__dots" aria-hidden="true">
-                          {Array.from({ length: e.figure.of }, (_, i) => (
-                            <i key={i} data-on={i < (e.figure!.on ?? 0) || undefined} />
-                          ))}
-                        </span>
-                      ) : null}
+                      {e.figure.of ? <Dots on={e.figure.on ?? 0} of={e.figure.of} tone={e.figure.tone} /> : null}
                     </p>
                   ) : null}
                   {voice ? null : <p className="cycle__ev-says">{e.says}</p>}
@@ -334,9 +340,22 @@ export function Define() {
               <dt>Success looks like</dt>
               <dd>
                 <ul className="cycle__list" role="list">
-                  {criteria.map((c) => (
-                    <li key={c.id}>{c.says}</li>
-                  ))}
+                  {criteria.map((c) => {
+                    const added = cycle.priority !== null && c.id !== 'c-who' && c.id !== 'c-loss';
+                    return (
+                      <li key={c.id} className={added ? 'cycle__added' : undefined}>
+                        {c.says}
+                        {added ? (
+                          <>
+                            {' '}
+                            <Badge tone="accent" variant="quiet">
+                              Your priority
+                            </Badge>
+                          </>
+                        ) : null}
+                      </li>
+                    );
+                  })}
                 </ul>
                 {cycle.priority === null ? <p className="cycle__from">Two more come from the priority you pick.</p> : null}
               </dd>
@@ -583,7 +602,16 @@ export function Explore() {
                     </span>
                   </Cell>
                   {DIRECTIONS.map((x) => (
-                    <Cell key={x.id}>{r.values[x.id]}</Cell>
+                    <Cell key={x.id}>
+                      {r.values[x.id] === 'Yes' || r.values[x.id] === 'No' ? (
+                        <span className="cycle__yn" data-yes={r.values[x.id] === 'Yes' || undefined}>
+                          <Icon name={r.values[x.id] === 'Yes' ? 'check' : 'minus'} size={14} />
+                          {r.values[x.id]}
+                        </span>
+                      ) : (
+                        r.values[x.id]
+                      )}
+                    </Cell>
                   ))}
                 </Row>
               ))}
@@ -685,6 +713,7 @@ export function Evaluate() {
                       {FINDING_SOURCE[f.source]}
                     </Badge>
                     {f.about ? <span className="cycle__finding-about">About {f.about.map((a) => `${DIRECTIONS.findIndex((x) => x.id === a) + 1}`).join(' and ')}</span> : null}
+                    {f.figure ? <Dots on={f.figure.on} of={f.figure.of} tone={f.figure.tone} /> : null}
                   </p>
                   <p className="cycle__finding-says">{f.says}</p>
                   {f.becomes === 'only-active' && stopsFirst(chosen) ? (

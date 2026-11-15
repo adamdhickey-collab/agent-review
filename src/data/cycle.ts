@@ -382,6 +382,8 @@ export interface Finding {
   becomes?: FeatureId;
   /** The directions it is about, when it is not about all three. */
   about?: DirectionId[];
+  /** A count the finding carries, drawn as one dot per thing counted. */
+  figure?: { on: number; of: number; tone?: 'warning' };
 }
 
 export const REQUIREMENT: Record<FeatureId, string> = {
@@ -460,10 +462,10 @@ export function buildNameOf(direction: DirectionId, f: Features): string {
 }
 
 export const FINDINGS: readonly Finding[] = [
-  { id: 'f-active', source: 'session', says: 'In 2 of 5 sessions, someone archived an active customer in a batch of churned ones and didn’t notice. The Undo bar said how many were archived, not who.', becomes: 'names-active', about: ['undo'] },
+  { id: 'f-active', source: 'session', figure: { on: 2, of: 5, tone: 'warning' }, says: 'In 2 of 5 sessions, someone archived an active customer in a batch of churned ones and didn’t notice. The Undo bar said how many were archived, not who.', becomes: 'names-active', about: ['undo'] },
   { id: 'f-habit', source: 'session', says: 'By the third batch, people pressed through the question without reading it.', about: ['confirm'] },
   { id: 'f-bulk', source: 'session', says: 'The operations lead’s quarterly cleanup took twice as long with the review step, and not one of those batches had an active customer.', becomes: 'only-active', about: ['review'] },
-  { id: 'f-back', source: 'evidence', says: '6 of 9 archiving tickets ask to restore a customer.', becomes: 'restore' },
+  { id: 'f-back', source: 'evidence', figure: { on: 6, of: 9 }, says: '6 of 9 archiving tickets ask to restore a customer.', becomes: 'restore' },
   { id: 'f-audit', source: 'evidence', says: 'An auditor asked who archived a customer. Nobody could say.', becomes: 'who' },
   { id: 'f-blocked', source: 'trying', says: 'Monarch Dental Group can’t be archived: it has an open invoice. Two directions only say so after the press.', becomes: 'blocked-first', about: ['undo', 'confirm'] },
   { id: 'f-axe', source: 'check', says: 'All three pass the accessibility checks and work with a keyboard. No check can say whether people notice what changed.' },
