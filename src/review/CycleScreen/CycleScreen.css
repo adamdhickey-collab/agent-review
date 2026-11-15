@@ -548,8 +548,9 @@
 
 /* DISCOVER, DRAWN (2026-11-15). The screen was sentences in white boxes at
    one size, and the one decision on it changed nothing a reader could see.
-   Four moves, all in the tokens the review already has, and all on this
-   stage only until the direction is carried to the other five:
+   Four moves, all in the tokens the review already has. The first two,
+   and the decision's motion, are every stage's since the direction was
+   carried to the other five; the last two are Discover's own:
 
    The question is the serif's largest step. Who does what loses its two
    boxes and sits on one hairline. The claim the move asks about corrects
@@ -558,18 +559,18 @@
    is drawn by what it is: a person's words are a quote in the serif under a
    rule, a count is a figure over one dot per thing counted, and the
    engineering note is the one sunken card, under the code mark. */
-.cycle[data-stage='discover'] .cycle__title {
+.cycle .cycle__title {
   font-size: var(--text-4xl);
   text-wrap: balance;
 }
 
-.cycle[data-stage='discover'] .cycle__roles {
+.cycle .cycle__roles {
   gap: var(--space-6);
   padding-top: var(--space-3);
   border-top: var(--border-width) solid var(--color-divider);
 }
 
-.cycle[data-stage='discover'] .cycle__role {
+.cycle .cycle__role {
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -601,13 +602,13 @@
 /* The decision lands in order: the row corrects, then the move says what
    the choice did, then the way on settles under it. Each is a short
    move on transform; none delays a press. */
-.cycle[data-stage='discover'] .cycle__consequence {
+.cycle .cycle__consequence {
   animation: cycle-rise var(--motion-base) var(--ease) both;
 }
 
 /* Continue settles into place and is never transparent: the way on is
    there to press, and to a test to see, from the first frame. */
-.cycle[data-stage='discover'] .cycle__move-next {
+.cycle .cycle__move-next {
   animation: cycle-settle var(--motion-base) var(--ease) both;
 }
 
@@ -702,7 +703,7 @@
   background: var(--color-accent);
 }
 
-.cycle__ev-figure[data-tone='warning'] .cycle__dots i[data-on] {
+.cycle__dots[data-tone='warning'] i[data-on] {
   border-color: var(--color-warning-solid);
   background: var(--color-warning-solid);
 }
@@ -711,20 +712,50 @@
   background: var(--color-surface-sunken);
 }
 
+/* THE OTHER FIVE (2026-11-15). The same idea, where each stage had it to
+   give. Define: the two criteria the priority adds arrive marked "Your
+   priority", the badge Explore's table already uses for the same thing.
+   Explore: a yes or a no in the comparison is a mark and the word, so the
+   three columns read down as a pattern. Evaluate: a finding that carries a
+   count shows it as dots, as Discover's signals do. */
+.cycle__added {
+  animation: cycle-rise var(--motion-base) var(--ease) both;
+}
+
+.cycle__added .badge {
+  vertical-align: baseline;
+}
+
+.cycle__yn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+}
+
+.cycle__yn[data-yes] {
+  color: var(--color-text);
+}
+
+.cycle__yn[data-yes] .icon {
+  color: var(--color-accent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cycle__reading {
     transition: none;
   }
 
   .cycle__reading-fix,
-  .cycle[data-stage='discover'] .cycle__consequence,
-  .cycle[data-stage='discover'] .cycle__move-next {
+  .cycle__added,
+  .cycle .cycle__consequence,
+  .cycle .cycle__move-next {
     animation: none;
   }
 }
 
 @media (max-width: 40rem) {
-  .cycle[data-stage='discover'] .cycle__title {
+  .cycle .cycle__title {
     font-size: var(--text-3xl);
   }
 
@@ -1186,9 +1217,13 @@
    (display: contents) so its two children can take the page's columns, and
    the move still sticks, inside an area as tall as the stage. */
 @media (min-width: 64.0625rem) {
+  /* The move spans the intro's row and the work's. When it is the taller
+     (Evaluate, once every answer is open), the rows share the extra, which
+     opened a gap under who-does-what; the work's row takes all of it. */
   .cycle {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
+    grid-template-rows: auto auto 1fr;
     align-items: start;
   }
 

@@ -99,6 +99,9 @@ export const Define: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Safety comes first' }));
     await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('No active customer is archived without being named first.');
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Review batch, then archive');
+    const added = canvasElement.querySelectorAll('.cycle__added');
+    await expect(added).toHaveLength(2);
+    await expect(added[0]).toHaveTextContent('Your priority');
   },
 };
 
@@ -155,6 +158,7 @@ export const Evaluate: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Review batch, then archive' }));
     await expect(canvas.getAllByText('Review batch, then archive does this already.')).toHaveLength(2);
     await expect(canvas.getByRole('heading', { name: 'When should it review?' })).toBeVisible();
+    await expect(canvasElement.querySelectorAll('.cycle__finding .cycle__dots')).toHaveLength(2);
     await expect(canvas.getByText('Your move asks when it should review.')).toBeVisible();
     await expect(canvas.queryByRole('button', { name: 'Continue to Delegate' })).toBeNull();
     await expect(canvas.getByRole('row', { name: /A routine cleanup/ })).toHaveTextContent('Opens the review, with nothing in it to check.');
