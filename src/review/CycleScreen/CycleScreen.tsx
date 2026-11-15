@@ -58,7 +58,7 @@ export function CycleScreen({ stage }: { stage: StageId }) {
   };
 
   return (
-    <div className="cycle">
+    <div className="cycle" data-stage={stage}>
       <header className="cycle__head">
         <div className="cycle__scenario">
           <Badge variant="quiet" icon="play">

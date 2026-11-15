@@ -73,8 +73,17 @@ export const Discover: Story = {
     await expect(canvas.queryByRole('link', { name: /Next/ })).toBeNull();
     await expect(canvas.getByRole('link', { name: 'Define' })).toBeVisible();
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Nobody can see or restore an archived customer.');
+    const fixed = canvasElement.querySelector('.cycle__reading[data-corrected]')!;
+    await expect(fixed).toHaveTextContent('Corrected');
+    await expect(fixed.querySelector('del')).toHaveTextContent('Archiving deletes customer data');
+    await expect(fixed.querySelector('.cycle__reading-fix')).toHaveTextContent('Relay keeps archived customers for 90 days.');
+    await expect(fixed.querySelector('.cycle__reading-from')).toHaveTextContent('Engineering note, engineering');
+    await expect(canvasElement.querySelectorAll('.cycle__dots i[data-on]')).toHaveLength(7);
+    await expect(canvasElement.querySelectorAll('.cycle__ev-quote')).toHaveLength(3);
     await userEvent.click(canvas.getByRole('button', { name: 'Choose Keep the summary' }));
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Archiving deletes customer data for good');
+    await expect(canvasElement.querySelector('.cycle__reading[data-corrected]')).toBeNull();
+    await expect(canvasElement.querySelector('.cycle__reading[data-disputed]')).toHaveTextContent('Assumption');
   },
 };
 

@@ -114,6 +114,9 @@ export interface Evidence {
   from: string;
   /** The words, as they arrived. */
   says: string;
+  /** The number the words carry, drawn large over them: a count out of a
+      whole is also a row of dots, one per thing counted. */
+  figure?: { value: string; on?: number; of?: number; tone?: 'accent' | 'warning' };
 }
 
 export const EVIDENCE_KIND: Record<EvidenceKind, string> = {
@@ -147,18 +150,21 @@ export const EVIDENCE: readonly Evidence[] = [
     kind: 'signal',
     from: 'Support, last quarter',
     says: '9 tickets mention archiving. 6 ask to restore an archived customer.',
+    figure: { value: '6 of 9', on: 6, of: 9 },
   },
   {
     id: 'signal-active',
     kind: 'signal',
     from: 'Usage, last quarter',
     says: 'Most archived customers were Churned or Trial. 1 in 14 was Active when it was archived, almost always in a batch of 5 or more.',
+    figure: { value: '1 in 14', on: 1, of: 14, tone: 'warning' },
   },
   {
     id: 'note-retention',
     kind: 'note',
     from: 'Engineering',
     says: 'Archived customers stay in the database for 90 days. There’s no screen for restoring, so support restores each customer by hand.',
+    figure: { value: '90 days' },
   },
 ];
 
@@ -190,7 +196,12 @@ export const READINGS: readonly Reading[] = [
 ];
 
 /** The one reading the evidence contradicts, and what contradicts it. */
-export const DISPUTED = { reading: 'r-loss', by: 'note-retention' } as const;
+export const DISPUTED = {
+  reading: 'r-loss',
+  by: 'note-retention',
+  /** What the summary says once the designer corrects it. */
+  corrected: 'Relay keeps archived customers for 90 days. No screen shows or restores an archived customer.',
+} as const;
 
 /** What the designer does with the disputed reading. */
 export type ReadingCall = 'correct' | 'keep';

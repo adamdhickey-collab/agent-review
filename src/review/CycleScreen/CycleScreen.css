@@ -546,6 +546,193 @@
   line-height: var(--leading-body);
 }
 
+/* DISCOVER, DRAWN (2026-11-15). The screen was sentences in white boxes at
+   one size, and the one decision on it changed nothing a reader could see.
+   Four moves, all in the tokens the review already has, and all on this
+   stage only until the direction is carried to the other five:
+
+   The question is the serif's largest step. Who does what loses its two
+   boxes and sits on one hairline. The claim the move asks about corrects
+   itself in place: the old words struck, the new ones under them, the row
+   on the pass's tint and its source the engineering note. And the evidence
+   is drawn by what it is: a person's words are a quote in the serif under a
+   rule, a count is a figure over one dot per thing counted, and the
+   engineering note is the one sunken card, under the code mark. */
+.cycle[data-stage='discover'] .cycle__title {
+  font-size: var(--text-4xl);
+  text-wrap: balance;
+}
+
+.cycle[data-stage='discover'] .cycle__roles {
+  gap: var(--space-6);
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.cycle[data-stage='discover'] .cycle__role {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.cycle__reading {
+  transition: background-color var(--motion-base) var(--ease);
+}
+
+.cycle__reading[data-corrected] {
+  background: var(--color-success-subtle);
+}
+
+.cycle__reading-was {
+  color: var(--color-text-secondary);
+}
+
+.cycle__reading-was del {
+  text-decoration-color: var(--color-warning-solid);
+}
+
+.cycle__reading-fix {
+  grid-column: 2;
+  font-weight: var(--weight-medium);
+  animation: cycle-rise var(--motion-base) var(--ease) both;
+}
+
+/* The decision lands in order: the row corrects, then the move says what
+   the choice did, then the way on settles under it. Each is a short
+   move on transform; none delays a press. */
+.cycle[data-stage='discover'] .cycle__consequence {
+  animation: cycle-rise var(--motion-base) var(--ease) both;
+}
+
+/* Continue settles into place and is never transparent: the way on is
+   there to press, and to a test to see, from the first frame. */
+.cycle[data-stage='discover'] .cycle__move-next {
+  animation: cycle-settle var(--motion-base) var(--ease) both;
+}
+
+@keyframes cycle-settle {
+  from {
+    transform: translateY(var(--space-2));
+  }
+}
+
+.cycle__ev[data-voice] {
+  transition: border-color var(--motion-base) var(--ease), box-shadow var(--motion-base) var(--ease);
+}
+
+@keyframes cycle-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-1));
+  }
+}
+
+.cycle__evidence {
+  gap: var(--space-5) var(--space-4);
+}
+
+.cycle__ev[data-voice] {
+  padding: var(--space-3) 0 0;
+  border: 0;
+  border-top: var(--border-width) solid var(--color-border);
+  border-radius: 0;
+  background: none;
+}
+
+.cycle__ev[data-voice][data-lit] {
+  border-top-color: var(--color-accent);
+  box-shadow: inset 0 2px 0 var(--color-accent);
+}
+
+.cycle__ev-quote {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-display-review);
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+  text-wrap: pretty;
+}
+
+/* The opening mark, large in the accent: the one thing that says "a person
+   said this" before a word is read. Decorative, so it has no spoken text. */
+.cycle__ev-quote::before {
+  content: '“' / '';
+  display: block;
+  height: 0.45em;
+  color: var(--color-accent);
+  font-size: var(--text-4xl);
+  line-height: 1;
+}
+
+.cycle__ev-kind .icon {
+  margin-right: var(--space-1);
+  vertical-align: -0.2em;
+}
+
+.cycle__ev-figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cycle__ev-figure strong {
+  color: var(--color-text);
+  font-family: var(--font-display-review);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-regular); /* Crimson is regular only */
+  line-height: 1;
+}
+
+.cycle__dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.cycle__dots i {
+  width: 0.625rem;
+  height: 0.625rem;
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: 50%;
+}
+
+.cycle__dots i[data-on] {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.cycle__ev-figure[data-tone='warning'] .cycle__dots i[data-on] {
+  border-color: var(--color-warning-solid);
+  background: var(--color-warning-solid);
+}
+
+.cycle__ev[data-kind='note'] {
+  background: var(--color-surface-sunken);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cycle__reading {
+    transition: none;
+  }
+
+  .cycle__reading-fix,
+  .cycle[data-stage='discover'] .cycle__consequence,
+  .cycle[data-stage='discover'] .cycle__move-next {
+    animation: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .cycle[data-stage='discover'] .cycle__title {
+    font-size: var(--text-3xl);
+  }
+
+  .cycle__reading-fix {
+    grid-column: 1;
+  }
+}
+
 /* ---------- Define and Delegate: a brief ---------- */
 
 .cycle__brief {
