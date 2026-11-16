@@ -95,9 +95,14 @@ test('an open stage is an address, and back and forward step between them', asyn
   await expect(page).toHaveTitle('Design cycle: Evaluate · Agent Review');
   await page.getByRole('button', { name: 'Continue to Delegate' }).click();
   await expect(page).toHaveURL(/#\/cycle\/delegate$/);
+  /* The address changes the moment the hash is set, before the router has
+     handled the hashchange. Going back in that gap fires both events after
+     the address is already Evaluate again, so Delegate is never drawn and
+     focus rightly stays on the button. Wait for the screen, not the URL. */
+  await arrived(page, 'What does the agent need from you while it builds?');
   await page.goBack();
   await expect(page).toHaveURL(/#\/cycle\/evaluate$/);
-  await expect.poll(() => page.evaluate(() => document.activeElement?.textContent)).toBe('Which direction, and what must it do?');
+  await arrived(page, 'Which direction, and what must it do?');
   await page.goForward();
   await expect(page).toHaveURL(/#\/cycle\/delegate$/);
 });
