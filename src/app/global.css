@@ -159,6 +159,18 @@ figure {
   margin: 0;
 }
 
+/* Every headline balances its lines, on purpose since 2026-11-16, as on
+   adamhickey.com. Headlines only: body text, quotes and deks wrap the way
+   the browser wraps them, and nothing here uses text-wrap: pretty. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
 ul,
 ol {
   padding: 0;
