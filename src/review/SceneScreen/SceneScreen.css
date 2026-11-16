@@ -311,7 +311,6 @@
 
 .stage-scene__title {
   font-size: var(--text-3xl);
-  text-wrap: balance;
 }
 
 /* A chip: who holds the position. Quiet is a label with no owner. */
@@ -369,7 +368,6 @@
 
 .stage-scene__says {
   font-size: var(--text-2xl);
-  text-wrap: balance;
 }
 
 .stage-scene__says[data-struck] {

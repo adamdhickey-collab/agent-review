@@ -561,7 +561,6 @@
    engineering note is the one sunken card, under the code mark. */
 .cycle .cycle__title {
   font-size: var(--text-4xl);
-  text-wrap: balance;
 }
 
 .cycle .cycle__roles {
@@ -652,7 +651,6 @@
   font-family: var(--font-display-review);
   font-size: var(--text-xl);
   line-height: var(--leading-tight);
-  text-wrap: pretty;
 }
 
 /* The opening mark, large in the accent: the one thing that says "a person
