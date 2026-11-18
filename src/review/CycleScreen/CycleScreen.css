@@ -1337,3 +1337,10 @@
     align-items: center;
   }
 }
+
+/* The head's two actions, since 2026-11-18: the tour beside Start over, on every stage after the first. */
+.cycle__reset-open {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}

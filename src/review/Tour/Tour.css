@@ -1,0 +1,281 @@
+/* The guided tour: a bar at the foot of the window, and a layer over the
+   page that holds a ring and a pointer (Tour.tsx has why). The bar is the
+   only chrome, and it is small on purpose: the app is what is being shown. */
+
+/* ---------- the layer: a ring and a pointer, in the page's coordinates ---------- */
+
+.tour-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.tour-layer__probe {
+  width: 100px;
+  height: 0;
+  visibility: hidden;
+}
+
+/* A whole ring, never an edge: what it is on is usually rounded. It sits a
+   little outside what it marks, so it frames the thing and covers none of
+   it. On a decision the page behind it dims, which is the weight those
+   moments get that the narrated ones don't. */
+.tour-layer__ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: content-box;
+  margin: calc(var(--space-2) * -1);
+  padding: var(--space-2);
+  border-radius: var(--radius-lg);
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  box-shadow: 0 0 0 200vmax transparent;
+  transition:
+    translate var(--motion-travel) var(--ease),
+    width var(--motion-travel) var(--ease),
+    height var(--motion-travel) var(--ease),
+    box-shadow var(--motion-travel) var(--ease);
+}
+
+.tour-layer__ring[data-decision] {
+  outline-width: calc(var(--focus-ring-width) * 1.5);
+  box-shadow: 0 0 0 200vmax color-mix(in srgb, var(--color-scrim) 60%, transparent);
+}
+
+.tour-layer__pointer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--color-text);
+  transition: translate var(--motion-travel) var(--ease);
+}
+
+.tour-layer__pointer .icon {
+  display: block;
+  stroke: var(--color-surface);
+  stroke-width: 12;
+  paint-order: stroke;
+  transition: scale var(--motion-fast) var(--ease);
+  transform-origin: top left;
+}
+
+.tour-layer__pointer[data-pressing] .icon {
+  scale: 0.82;
+}
+
+/* ---------- the bar ---------- */
+
+:root[data-tour] .shell__main {
+  padding-bottom: calc(var(--space-8) * 8);
+}
+
+.tour {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-5);
+  z-index: 30;
+  translate: -50% 0;
+  width: min(56rem, calc(100% - var(--space-8)));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5) var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-menu);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  animation: tour-in var(--motion-base) var(--ease);
+}
+
+@keyframes tour-in {
+  from {
+    opacity: 0;
+    translate: -50% var(--space-3);
+  }
+}
+
+/* The six stages, each a press that goes to it, over a line that fills as its beats play. */
+.tour__chapters {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tour__chapter.btn {
+  width: 100%;
+  height: auto;
+  padding: var(--space-1) 0 0;
+  justify-content: flex-start;
+  color: var(--color-text-muted);
+}
+
+.tour__chapter .btn__label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--space-1);
+  row-gap: var(--space-1);
+  width: 100%;
+  text-align: left;
+  font-size: var(--text-sm);
+  line-height: var(--leading-tight);
+}
+
+.tour__chapter-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.tour__chapter-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tour__chapter[aria-current='step'] {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.tour__chapter-track {
+  grid-column: 1 / -1;
+  display: block;
+  height: 3px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-border);
+}
+
+.tour__chapter-fill {
+  display: block;
+  height: 100%;
+  background: var(--color-accent);
+  transform-origin: left center;
+  transition: scale var(--motion-base) var(--ease);
+}
+
+/* The words, and the controls beside them. */
+.tour__body {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-6);
+}
+
+.tour__says {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 5.5rem; /* three lines of caption, so the bar holds still as the words change */
+}
+
+.tour__beat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  animation: tour-beat var(--motion-base) var(--ease);
+}
+
+@keyframes tour-beat {
+  from {
+    opacity: 0;
+    translate: 0 var(--space-1);
+  }
+}
+
+.tour__caption {
+  margin: 0;
+  max-width: 40rem;
+  font-size: var(--text-xl);
+  line-height: var(--leading-ui);
+  text-wrap: pretty;
+}
+
+.tour[data-decision] .tour__caption {
+  font-weight: var(--weight-semibold);
+}
+
+.tour__why {
+  margin: 0;
+  max-width: 40rem;
+  color: var(--color-text-secondary);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+}
+
+.tour__controls {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tour__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0;
+  padding-top: var(--space-2);
+  border-top: var(--border-width) solid var(--color-divider);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-ui);
+}
+
+/* A narrow window: the bar meets the edges, the controls go under the words,
+   and a stage that isn't the current one is its number. */
+@media (max-width: 44rem) {
+  .tour {
+    bottom: 0;
+    width: 100%;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .tour__body {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .tour__caption {
+    font-size: var(--text-lg);
+  }
+
+  /* Hidden as .visually-hidden hides, so the stage still has its name for a screen reader. */
+  .tour__chapter:not([aria-current='step']) .tour__chapter-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .tour__chapters {
+    grid-template-columns: repeat(6, minmax(0, auto));
+  }
+
+}
+
+/* ---------- the way in, on the cycle's first stage ---------- */
+
+.tour-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-1);
+}
+
+.tour-entry__note {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-ui);
+}

@@ -75,7 +75,7 @@ export const TOKEN_GROUPS = {
     '--color-scrim-product',
   ],
   focus: ['--focus-ring-color', '--focus-ring-width', '--focus-ring-offset'],
-  motion: ['--motion-fast', '--motion-base', '--motion-ambient', '--motion-ambient-repeat', '--ease'],
+  motion: ['--motion-fast', '--motion-base', '--motion-ambient', '--motion-travel', '--motion-ambient-repeat', '--ease'],
   scale: ['--zoom-desktop', '--zoom-wide'],
 } as const;
 
