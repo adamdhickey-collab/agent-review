@@ -72,6 +72,8 @@ const MAP = {
   'circle-x': ['x-circle', 'fill'],
   eye: ['eye', 'fill'],
   play: ['play', 'fill'],
+  pause: ['pause', 'fill'],
+  cursor: ['cursor', 'fill'],
   book: ['book-open', 'fill'],
   contrast: ['circle-half', 'fill'],
   bot: ['terminal-window', 'fill'],

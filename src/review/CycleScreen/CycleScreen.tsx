@@ -3,6 +3,7 @@ import { Badge, Button, Icon } from '../../components';
 import { href } from '../../app/router';
 import { useStore } from '../../app/store';
 import { decided, firstOpen, STAGES, stageIndex, stageOf, type StageId } from '../../data/cycle';
+import { useTour } from '../Tour/Tour';
 import { Define, Delegate, Discover, Evaluate, Explore, Learn, Needs } from './stages';
 import './CycleScreen.css';
 
@@ -47,6 +48,7 @@ export function CycleScreen({ stage }: { stage: StageId }) {
   const open = firstOpen(cycle);
   const locked = at > open;
   const [resetting, setResetting] = useState(false);
+  const tour = useTour();
 
   const body: Record<StageId, ReactNode> = {
     discover: <Discover />,
@@ -87,9 +89,16 @@ export function CycleScreen({ stage }: { stage: StageId }) {
               </Button>
             </span>
           ) : (
-            <Button className="cycle__reset-open" size="compact" variant="ghost" leadingIcon="undo" onClick={() => setResetting(true)}>
-              Start over
-            </Button>
+            <span className="cycle__reset-open">
+              {tour.available && !tour.active && stage !== 'discover' ? (
+                <Button size="compact" variant="ghost" leadingIcon="play" onClick={tour.start}>
+                  Watch the tour
+                </Button>
+              ) : null}
+              <Button size="compact" variant="ghost" leadingIcon="undo" onClick={() => setResetting(true)}>
+                Start over
+              </Button>
+            </span>
           )}
         </div>
         <nav className="cycle__rail" aria-label="Stages">
@@ -135,6 +144,18 @@ export function CycleScreen({ stage }: { stage: StageId }) {
           <p className="cycle__setup">
             You’re Adam, a product designer, taking one feature in Relay from a support ticket to a finished build. An agent gathers evidence, explores solutions, and
             builds the feature. In each of six stages, you make the decision that needs a person. It’s a simplified simulation, about three minutes in all.
+          </p>
+        ) : null}
+        {/* The other way through (since 2026-11-18): the tour plays these six
+            stages by pressing their own controls, for a reader who came to
+            watch. Not offered where there is no tour to play, a story of
+            this screen alone, or while one is playing. */}
+        {stage === 'discover' && tour.available && !tour.active ? (
+          <p className="tour-entry">
+            <Button variant="primary" leadingIcon="play" onClick={tour.start}>
+              Watch the tour
+            </Button>
+            <span className="tour-entry__note">About 2 minutes. It plays this screen for you, and you can take over at any point.</span>
           </p>
         ) : null}
         <dl className="cycle__roles">

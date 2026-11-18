@@ -35,6 +35,8 @@ export const SHORTCUTS: Shortcut[] = [
   { keys: ['Enter'], does: 'Open the row or the finding that has focus', where: 'The review queue and a change’s findings' },
   { keys: ['←', '→'], does: 'Move between tabs, or between a control’s options', where: 'Tabs and segmented controls' },
   { keys: ['Esc'], does: 'Close a dialog, or back out of a question', where: 'Dialogs and confirmations' },
+  { keys: ['←', '→'], does: 'Step back or forward in the tour', where: 'The guided tour, while its bar has focus' },
+  { keys: ['Esc'], does: 'Leave the tour, and keep the choices it made', where: 'The guided tour, while its bar has focus' },
 ];
 
 /* The switch for single-key shortcuts. On unless a person turned it off;

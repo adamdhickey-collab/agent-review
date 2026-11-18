@@ -180,6 +180,7 @@
   --motion-fast: 120ms;
   --motion-base: 200ms;
   --motion-ambient: 1000ms; /* a spinner's turn, a live dot's pulse */
+  --motion-travel: 600ms; /* something crossing the screen where the eye has to follow it: the tour's pointer and its ring (review/Tour) */
   /* How many turns a status's motion takes before it stops: a running
      check's spinner, a live dot's pulse. Four turns of the ambient
      duration is four seconds, inside the five WCAG 2.2.2 allows motion to
