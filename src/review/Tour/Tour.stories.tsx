@@ -31,7 +31,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The guided tour: a bar at the foot of the window that plays the design cycle by pressing its real controls, one line at a time. Six chapters, one for each stage, each a press that goes there; pause, step, and Take over. A beat where the designer decides is labeled and carries a line of reasoning. Simulated demo, said on the bar for as long as it is open.',
+          'The guided tour: a bar at the foot of the window that plays the design cycle by pressing its real controls, one line at a time. Six chapters, one for each stage, each a press that goes there; pause, step, and close. A beat where the designer decides is labeled and carries a line of reasoning. Simulated demo, said on the bar for as long as it is open.',
       },
     },
   },
@@ -49,7 +49,8 @@ export const Narrating: Story = {
     await expect(within(bar).getByText(BEATS[2].caption)).toBeVisible();
     await expect(within(bar).getByText('Simulated demo')).toBeVisible();
     await expect(within(bar).getByRole('button', { name: 'Play the tour' })).toBeVisible();
-    await expect(within(bar).getByRole('button', { name: 'Take over' })).toBeVisible();
+    await expect(within(bar).getByRole('button', { name: 'Close the tour' })).toBeVisible();
+    await expect(within(bar).queryByRole('button', { name: 'Take over' })).toBeNull();
     await expect(within(bar).getAllByRole('listitem')).toHaveLength(6);
     await expect(within(bar).queryByText('The designer decides')).toBeNull();
     await expect(within(bar).getByRole('button', { name: 'Narration' })).toHaveAttribute('aria-pressed', 'true');

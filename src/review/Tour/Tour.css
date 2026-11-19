@@ -243,6 +243,12 @@
   text-overflow: ellipsis;
 }
 
+/* Out of reach as a disabled Button is. */
+.tour__voices:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .tour__voices:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring-color);
   outline-offset: var(--focus-ring-offset);

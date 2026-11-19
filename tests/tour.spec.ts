@@ -125,7 +125,7 @@ test('it starts from anywhere, pauses, goes to a stage, and hands the page over'
   expect(await cycle(page)).toMatchObject({ reading: 'correct', priority: 'recovery' });
   await expect(page.getByRole('button', { name: /Chosen Review batch/ })).toBeVisible({ timeout: 15_000 });
 
-  await bar(page).getByRole('button', { name: 'Take over' }).click();
+  await bar(page).getByRole('button', { name: 'Close the tour' }).click();
   await expect(bar(page)).toHaveCount(0);
   await expect(page.locator('.tour-layer__ring')).toHaveCount(0);
   await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
@@ -155,7 +155,7 @@ test('the arrows step, Escape leaves, and a press on the page pauses', async ({ 
   await expect(page.getByRole('button', { name: 'Watch the tour' })).toBeVisible();
 });
 
-test('the close in the corner leaves the tour, as Take over does', async ({ page }) => {
+test('the close in the corner leaves the tour from its first step', async ({ page }) => {
   await open(page, '#/');
   await page.getByRole('region', { name: /Watch an agent do the work/ }).getByRole('button', { name: 'Watch the tour' }).click();
   await expect(bar(page)).toContainText('Step 1 of 18');
@@ -230,8 +230,8 @@ test('the reading speed steps, is spoken at, and is remembered; the voice menu o
   expect(await page.evaluate(() => localStorage.getItem('adamhickey:read-aloud-voice'))).toBe('Samantha');
   await expect.poll(async () => (await page.evaluate(() => (window as unknown as { __voices: string[] }).__voices)).at(-1), { timeout: 30_000 }).toBe('Samantha');
 
-  /* Narration off takes both settings away with it. */
+  /* Narration off: both settings stay in the bar, out of reach, so they can be found. */
   await bar(page).getByRole('button', { name: 'Narration' }).click();
-  await expect(speed).toHaveCount(0);
-  await expect(menu).toHaveCount(0);
+  await expect(speed).toBeDisabled();
+  await expect(menu).toBeDisabled();
 });
