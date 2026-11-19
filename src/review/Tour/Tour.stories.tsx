@@ -3,6 +3,7 @@ import { expect, waitFor, within } from 'storybook/test';
 import { StoreProvider } from '../../app/store';
 import { CycleScreen } from '../CycleScreen/CycleScreen';
 import { TourProvider } from './Tour';
+import { TourFeature } from './TourFeature';
 import { BEATS, stateBefore } from './script';
 
 /* The tour's bar, opened on a beat without playing it: the cycle is put
@@ -51,6 +52,7 @@ export const Narrating: Story = {
     await expect(within(bar).getByRole('button', { name: 'Take over' })).toBeVisible();
     await expect(within(bar).getAllByRole('listitem')).toHaveLength(6);
     await expect(within(bar).queryByText('The designer decides')).toBeNull();
+    await expect(within(bar).getByRole('button', { name: 'Narration' })).toHaveAttribute('aria-pressed', 'true');
   },
 };
 
@@ -74,5 +76,19 @@ export const Ended: Story = {
     await waitFor(() => expect(within(bar).getByText('Simulated demo')).toBeVisible()); /* the bar fades in */
     await expect(within(bar).getByRole('button', { name: 'Explore the prototype' })).toBeVisible();
     await expect(within(bar).getByRole('button', { name: 'Replay' })).toBeVisible();
+  },
+};
+
+/** The way in, featured on Discover: the stages it plays drawn under it, and one button. */
+export const Feature: StoryObj = {
+  render: () => (
+    <div style={{ padding: 'var(--space-6)' }}>
+      <TourFeature onStart={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const feature = within(canvasElement).getByRole('region', { name: /Watch an agent do the work/ });
+    await expect(within(feature).getByRole('button', { name: 'Watch the tour' })).toBeVisible();
+    await expect(within(feature).getAllByRole('button')).toHaveLength(1);
   },
 };

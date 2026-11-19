@@ -74,6 +74,8 @@ const MAP = {
   play: ['play', 'fill'],
   pause: ['pause', 'fill'],
   cursor: ['cursor', 'fill'],
+  speaker: ['speaker-high', 'fill'],
+  'speaker-off': ['speaker-slash', 'fill'],
   book: ['book-open', 'fill'],
   contrast: ['circle-half', 'fill'],
   bot: ['terminal-window', 'fill'],

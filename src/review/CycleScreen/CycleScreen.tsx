@@ -4,6 +4,7 @@ import { href } from '../../app/router';
 import { useStore } from '../../app/store';
 import { decided, firstOpen, STAGES, stageIndex, stageOf, type StageId } from '../../data/cycle';
 import { useTour } from '../Tour/Tour';
+import { TourFeature } from '../Tour/TourFeature';
 import { Define, Delegate, Discover, Evaluate, Explore, Learn, Needs } from './stages';
 import './CycleScreen.css';
 
@@ -151,12 +152,7 @@ export function CycleScreen({ stage }: { stage: StageId }) {
             watch. Not offered where there is no tour to play, a story of
             this screen alone, or while one is playing. */}
         {stage === 'discover' && tour.available && !tour.active ? (
-          <p className="tour-entry">
-            <Button variant="primary" leadingIcon="play" onClick={tour.start}>
-              Watch the tour
-            </Button>
-            <span className="tour-entry__note">About 2 minutes. It plays this screen for you, and you can take over at any point.</span>
-          </p>
+          <TourFeature onStart={tour.start} />
         ) : null}
         <dl className="cycle__roles">
           <div className="cycle__role">

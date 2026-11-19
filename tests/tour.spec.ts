@@ -18,9 +18,33 @@ import { seedCycle } from './seed';
 test.use({ viewport: { width: 1280, height: 900 } });
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('agent-review:theme', 'light'));
+  /* The speech engine, stood in for: what a browser's own voice would be
+     handed is kept in window.__said, and each sentence ends a moment later,
+     so the tests neither depend on a machine's voices nor wait on them. */
+  await page.addInitScript(() => {
+    const said: string[] = [];
+    const w = window as unknown as { __said: string[]; __cancels: number };
+    w.__said = said;
+    w.__cancels = 0;
+    let live: ReturnType<typeof setTimeout> | null = null;
+    Object.defineProperty(window.speechSynthesis, 'getVoices', { value: () => [] });
+    Object.defineProperty(window.speechSynthesis, 'speak', {
+      value: (u: SpeechSynthesisUtterance) => {
+        said.push(u.text);
+        live = setTimeout(() => u.dispatchEvent(new Event('end')), 40);
+      },
+    });
+    Object.defineProperty(window.speechSynthesis, 'cancel', {
+      value: () => {
+        w.__cancels += 1;
+        if (live) clearTimeout(live);
+      },
+    });
+  });
 });
 
 const BEATS = 18;
+const said = (page: Page) => page.evaluate(() => (window as unknown as { __said: string[] }).__said.slice());
 const bar = (page: Page) => page.getByRole('region', { name: 'Guided tour' });
 const cycle = (page: Page) => page.evaluate(() => JSON.parse(sessionStorage.getItem('agent-review:cycle') ?? '{}'));
 
@@ -124,4 +148,33 @@ test('the arrows step, Escape leaves, and a press on the page pauses', async ({ 
   await page.keyboard.press('Escape');
   await expect(bar(page)).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Watch the tour' })).toBeVisible();
+});
+
+test('the narration reads each caption as it plays, stops on a pause, and stays off once turned off', async ({ page }) => {
+  test.setTimeout(90_000);
+  await open(page, '#/');
+  await page.getByRole('region', { name: /Watch an agent do the work/ }).getByRole('button', { name: 'Watch the tour' }).click();
+  const voice = bar(page).getByRole('button', { name: 'Narration' });
+  await expect(voice).toHaveAttribute('aria-pressed', 'true');
+  /* Each beat's words, sentence by sentence, before the beat moves on. */
+  await expect(bar(page)).toContainText('Step 3 of 18', { timeout: 30_000 });
+  const first = (await said(page)).join(' ');
+  expect(first).toContain('In this demo an agent does the work, and a designer makes the decisions that matter.');
+  expect(first).toContain('Watch for where the person steps in.');
+  expect(first).toContain('It’s a scripted demo.');
+
+  /* A pause stops the voice; nothing more is said until play. */
+  await bar(page).getByRole('button', { name: 'Pause the tour' }).click();
+  const count = (await said(page)).length;
+  await page.waitForTimeout(1500);
+  expect((await said(page)).length).toBe(count);
+
+  /* Off, remembered, and the tour carries on by its own clock. */
+  await voice.click();
+  await expect(voice).toHaveAttribute('aria-pressed', 'false');
+  expect(await page.evaluate(() => localStorage.getItem('agent-review:tour-narration'))).toBe('off');
+  await bar(page).getByRole('button', { name: 'Play the tour' }).click();
+  const silent = (await said(page)).length;
+  await expect(bar(page)).toContainText('Step 5 of 18', { timeout: 40_000 });
+  expect((await said(page)).length).toBe(silent);
 });

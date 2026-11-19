@@ -4,6 +4,7 @@ import { href } from '../../app/router';
 import { useStore } from '../../app/store';
 import { STAGES, type StageId } from '../../data/cycle';
 import { actionsBefore, BEATS, CLOSING, firstBeatOf, holdOf, type Find } from './script';
+import { canNarrate, Narrator, narrationOn, rememberNarration } from './narrate';
 import './Tour.css';
 
 /* THE GUIDED TOUR (2026-11-18). A press on "Watch the tour" plays the design
@@ -46,6 +47,16 @@ import './Tour.css';
    REDUCED MOTION. Nothing plays by itself: each beat makes its presses at
    once and waits for Next, the pointer isn't drawn, and the page doesn't
    glide. The same beats, read at the reader's pace.
+
+   IT IS READ ALOUD (2026-11-18), by the rules adamhickey.com's read-aloud
+   reads its pages with: the same voice, pace and pauses (narrate.ts has
+   them). A beat moves on once its words have been said, so the voice sets
+   the tour's length where it is slower than the reading clock: about two
+   and a half minutes with Zoe (Premium), against two and a quarter silent.
+   Narration is on unless a person turned it off, which the bar's Narration
+   control does and remembers. A pause stops the voice mid-sentence and play
+   says the sentence again; Take over and every jump stop it. A browser with
+   no speech synthesiser gets no control and a silent tour.
 
    SIMULATED, SAID THREE TIMES: on the bar for as long as it is open, in the
    second beat, and where the simulated session notes are quoted. The
@@ -109,10 +120,27 @@ export function TourProvider({
   const bar = useRef<HTMLDivElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
 
-  const setStatus = useCallback((s: Status) => {
-    statusRef.current = s;
-    setStatusState(s);
-  }, []);
+  /* The voice (narrate.ts): on unless a person turned it off, and only where the browser can speak. */
+  const [narrator] = useState(() => new Narrator());
+  const [voiced, setVoicedState] = useState(() => canNarrate && narrationOn());
+  const voicedRef = useRef(voiced);
+  useEffect(() => () => narrator.stop(), [narrator]);
+
+  /* The voice follows the tour: a pause stops it mid-sentence and play says
+     that sentence again. `keepVoice` is for a beat that has finished and
+     waits for Next under reduced motion, which is not a pause of the
+     reading: its caption is still being said. */
+  const setStatus = useCallback(
+    (s: Status, keepVoice = false) => {
+      statusRef.current = s;
+      setStatusState(s);
+      if (keepVoice) return;
+      if (s === 'paused') narrator.pause();
+      else if (s === 'playing') narrator.resume();
+      else if (s === 'off') narrator.stop();
+    },
+    [narrator],
+  );
   const setAt = useCallback((i: number) => {
     atRef.current = i;
     setAtState(i);
@@ -237,6 +265,7 @@ export function TourProvider({
       const beat = BEATS[index];
       const still = reduced();
       setPressing(false);
+      narrator.stop();
       setStatus('playing');
       try {
         if (seeded) {
@@ -257,6 +286,7 @@ export function TourProvider({
         await until(() => document.querySelector<HTMLElement>(`.cycle[data-stage="${beat.stage}"] .cycle__work`), mine);
         setAt(index);
         done.current = false;
+        if (voicedRef.current) narrator.say([beat.caption, beat.why ?? '']);
         let spent = await sleep(still ? 0 : 400, mine); /* the new screen, before anything points at it */
         for (const step of beat.steps) {
           if ('show' in step) {
@@ -274,13 +304,20 @@ export function TourProvider({
             }
           }
         }
-        if (!still) await sleep(Math.max(1600, holdOf(beat) - spent), mine);
+        if (!still) {
+          await sleep(Math.max(1600, holdOf(beat) - spent), mine);
+          /* The beat moves on once its words have been said, however long the voice takes. */
+          await narrator.idle();
+          if (token.current !== mine) throw CANCELLED;
+          await sleep(300, mine);
+        }
         done.current = true;
         if (index === BEATS.length - 1) {
           aim(null, null);
           setStatus('ended');
+          if (voicedRef.current) narrator.say([CLOSING.caption, CLOSING.why]);
         } else if (still) {
-          setStatus('paused');
+          setStatus('paused', true);
         } else {
           again.current(index + 1, false);
         }
@@ -293,7 +330,7 @@ export function TourProvider({
         else again.current(index, true, true);
       }
     },
-    [aim, cycleDo, leave, press, setAt, setStatus, sleep, until],
+    [aim, cycleDo, leave, narrator, press, setAt, setStatus, sleep, until],
   );
 
   useEffect(() => {
@@ -318,6 +355,22 @@ export function TourProvider({
     else if (done.current) next(); /* a beat that finished and waited, as every beat does under reduced motion */
     else setStatus('playing');
   }, [next, run, setStatus, start]);
+
+  /* Narration on or off, remembered. Turned off, the voice stops and the
+     beat moves on by its own clock; turned on, it reads the line on screen. */
+  const setVoiced = useCallback(
+    (on: boolean) => {
+      voicedRef.current = on;
+      setVoicedState(on);
+      rememberNarration(on);
+      if (!on) return narrator.stop();
+      const s = statusRef.current;
+      const words = s === 'ended' ? [CLOSING.caption, CLOSING.why] : [BEATS[atRef.current].caption, BEATS[atRef.current].why ?? ''];
+      narrator.setPaused(s === 'paused' && !done.current);
+      narrator.say(words);
+    },
+    [narrator],
+  );
 
   const active = status !== 'off';
 
@@ -459,6 +512,9 @@ export function TourProvider({
               </div>
             </div>
             <div className="tour__controls">
+              {canNarrate ? (
+                <IconButton className="tour__voice" icon={voiced ? 'speaker' : 'speaker-off'} label="Narration" pressed={voiced} onClick={() => setVoiced(!voiced)} />
+              ) : null}
               {ended ? (
                 <>
                   <Button variant="primary" trailingIcon="arrow-right" onClick={() => leave(true)}>
