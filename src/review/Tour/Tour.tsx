@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { Badge, Button, Icon, IconButton, SegmentedControl } from '../../components';
 import { href } from '../../app/router';
 import { useStore } from '../../app/store';
-import { STAGES, type StageId } from '../../data/cycle';
+import { STAGES, WORK, stageOf, type StageId } from '../../data/cycle';
 import { actionsBefore, BEATS, CLOSING, firstBeatOf, holdOf, type Find } from './script';
 import { canNarrate, currentVoice, Narrator, narrationOn, onVoicesChanged, RATES, rateKept, rememberNarration, rememberRate, rememberVoice, usableVoices, voiceLabel } from './narrate';
 import './Tour.css';
@@ -594,7 +594,7 @@ export function TourProvider({
               <div key={ended ? 'end' : at} className="tour__beat">
                 {decision ? (
                   <Badge className="tour__mark" tone="accent" icon="user">
-                    The designer decides
+                    {WORK[stageOf(stageAt).work]}
                   </Badge>
                 ) : null}
                 <p className="tour__caption">{caption}</p>

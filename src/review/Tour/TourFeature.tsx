@@ -20,7 +20,7 @@ export function TourFeature({ onStart }: { onStart: () => void }) {
           Guided tour · 2½ minutes
         </p>
         <h2 id="tour-feature-title" className="tour-feature__title">
-          Watch an agent do the work, and a designer make the decisions
+          Watch a designer orchestrate an agent, and make the calls it can’t
         </h2>
         <p className="tour-feature__says">
           It plays all six stages for you{canNarrate ? ', with narration if you turn it on' : ''}. Pause it, skip to a stage, or close it at any point.

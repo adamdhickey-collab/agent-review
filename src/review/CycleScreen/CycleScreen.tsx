@@ -143,8 +143,8 @@ export function CycleScreen({ stage }: { stage: StageId }) {
         </h1>
         {stage === 'discover' ? (
           <p className="cycle__setup">
-            You’re Adam, a product designer, taking one feature in Relay from a support ticket to a finished build. An agent gathers evidence, explores solutions, and
-            builds the feature. In each of six stages, you make the decision that needs a person. It’s a simplified simulation, about three minutes in all.
+            Orchestration is setting an agent up: its evidence, its brief, and its rules. Judgment is the call it can’t make. Here you do both, as Adam, a product
+            designer taking one Relay feature from support ticket to finished build. It’s a simplified simulation, about three minutes.
           </p>
         ) : null}
         {/* The other way through (since 2026-11-18): the tour plays these six

@@ -44,11 +44,21 @@ export interface Stage {
   designer: string;
   /** What the agent does here, in a line. */
   agent: string;
+  /** Which of the person's two jobs the stage's move is (2026-11-19, the
+      case study's two words): orchestration sets the agent up, with its
+      evidence, its brief, its boundaries and its rules; judgment is the
+      call on what the agent made. The move's kicker and the tour's label
+      on a decision say it. */
+  work: Work;
 }
+
+export type Work = 'orchestration' | 'judgment';
+export const WORK: Record<Work, string> = { orchestration: 'Orchestration', judgment: 'Judgment' };
 
 export const STAGES: readonly Stage[] = [
   {
     id: 'discover',
+    work: 'orchestration',
     name: 'Discover',
     question: 'Something is wrong with archiving. What, exactly?',
     designer: 'Checks the agent’s summary against the evidence.',
@@ -56,6 +66,7 @@ export const STAGES: readonly Stage[] = [
   },
   {
     id: 'define',
+    work: 'orchestration',
     name: 'Define',
     question: 'What problem are we solving?',
     designer: 'Writes down the problem and picks the priority every later choice follows.',
@@ -63,6 +74,7 @@ export const STAGES: readonly Stage[] = [
   },
   {
     id: 'explore',
+    work: 'judgment',
     name: 'Explore',
     question: 'Three ways to archive. Try each one.',
     designer: 'Uses each direction as a person would, and looks for where it breaks.',
@@ -70,6 +82,7 @@ export const STAGES: readonly Stage[] = [
   },
   {
     id: 'evaluate',
+    work: 'judgment',
     name: 'Evaluate',
     question: 'Which direction, and when does it stop?',
     designer: 'Weighs the findings, chooses a direction, decides when it stops, and turns findings into requirements.',
@@ -77,6 +90,7 @@ export const STAGES: readonly Stage[] = [
   },
   {
     id: 'delegate',
+    work: 'orchestration',
     name: 'Delegate',
     question: 'What does the agent need from you while it builds?',
     designer: 'Sets the boundaries and answers the one question the agent can’t.',
@@ -84,6 +98,7 @@ export const STAGES: readonly Stage[] = [
   },
   {
     id: 'learn',
+    work: 'orchestration',
     name: 'Learn',
     question: 'The feature is built. What is still unknown?',
     designer: 'Decides what to measure, what to research, and which rule to save.',
