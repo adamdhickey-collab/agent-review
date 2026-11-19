@@ -58,9 +58,17 @@
   z-index: 2;
 }
 
-.icon-btn:hover::after,
+/* Hover only where a pointer can hover: on touch, a tap left the tooltip
+   up over whatever sat under the button until the next tap elsewhere
+   (the tour's "Next step" over its step count, 2026-11-18). */
 .icon-btn:focus-visible::after {
   opacity: 1;
+}
+
+@media (hover: hover) {
+  .icon-btn:hover::after {
+    opacity: 1;
+  }
 }
 
 /* At the end of a row: lined up with the button's end edge, so it never runs
