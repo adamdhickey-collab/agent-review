@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, waitFor, within } from 'storybook/test';
+import { expect, waitFor, within, userEvent } from 'storybook/test';
 import { StoreProvider } from '../../app/store';
 import { CycleScreen } from '../CycleScreen/CycleScreen';
 import { TourProvider } from './Tour';
@@ -54,8 +54,16 @@ export const Narrating: Story = {
     await expect(within(bar).getAllByRole('listitem')).toHaveLength(6);
     await expect(within(bar).queryByText('The designer decides')).toBeNull();
     await expect(within(bar).getByRole('button', { name: 'Narration' })).toHaveAttribute('aria-pressed', 'true');
-    await expect(within(bar).getByRole('button', { name: 'Speed 1×' })).toBeVisible();
-    await expect(within(bar).getByRole('combobox', { name: 'Voice' })).toBeVisible();
+    /* One button says the voice and the speed and opens the menu that changes them. */
+    const settings = within(bar).getByRole('button', { name: /^Voice and speed: / });
+    await expect(settings).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(settings);
+    const menu = within(bar).getByRole('dialog', { name: 'Voice and speed' });
+    await expect(within(menu).getByRole('radio', { name: '1×' })).toBeChecked();
+    await waitFor(() => expect(within(menu).getByRole('radiogroup', { name: 'Voice' })).toBeVisible()); /* it fades in */
+    await userEvent.keyboard('{Escape}');
+    await expect(within(bar).queryByRole('dialog')).toBeNull();
+    await expect(settings).toHaveFocus();
   },
 };
 

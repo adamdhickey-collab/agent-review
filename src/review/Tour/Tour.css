@@ -241,43 +241,116 @@
   color: var(--color-text-on-accent);
 }
 
-/* The voice's two settings, in the foot row: the speed, a bordered button
-   as wide as its longest label so the row doesn't shift as it steps, and
-   the voice menu, the platform's own select drawn to match it. */
-.tour__settings {
+/* Narration: its switch, and one button that says the voice and the speed
+   in use and opens the menu that changes them. */
+.tour__narration {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  margin-inline: auto var(--space-2);
+  gap: var(--space-1);
 }
 
-.tour__rate.btn {
-  min-width: 6rem;
+.tour__settings {
+  position: relative;
+  display: flex;
+}
+
+.tour__settings-open.btn {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tour__settings-open .btn__label {
+  display: inline-flex;
+  align-items: baseline;
+  white-space: pre;
+}
+
+.tour__settings-voice {
+  max-width: 7rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The menu, over the bar, its right edge on the button's. */
+.tour__menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--space-2));
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 15rem;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-menu);
+  animation: tour-beat var(--motion-fast) var(--ease);
+}
+
+.tour__menu-label {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-ui);
+}
+
+.tour__menu-label:not(:first-child) {
+  margin-top: var(--space-2);
+}
+
+.tour__rates.segmented {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.tour__rates .segmented__option {
+  justify-content: center;
   font-variant-numeric: tabular-nums;
 }
 
 .tour__voices {
-  height: var(--control-height-compact);
-  max-width: 10rem;
+  display: flex;
+  flex-direction: column;
+  max-height: 11rem;
+  margin-inline: calc(var(--space-2) * -1);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.tour__voice-option {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--control-height);
   padding: 0 var(--space-2);
-  border: var(--border-width) solid var(--color-border-control);
+  border: 0;
   border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
+  background: transparent;
+  color: var(--color-text-secondary);
   font: inherit;
-  font-size: var(--text-sm);
-  text-overflow: ellipsis;
+  font-size: var(--text-md);
+  line-height: var(--leading-ui);
+  text-align: left;
+  cursor: pointer;
 }
 
-/* Out of reach as a disabled Button is. */
-.tour__voices:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+.tour__voice-option:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
 }
 
-.tour__voices:focus-visible {
+.tour__voice-option[aria-checked='true'] {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.tour__voice-option:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: var(--focus-ring-offset);
+  outline-offset: calc(var(--focus-ring-width) * -1);
 }
 
 .tour__foot {
@@ -315,11 +388,21 @@
     justify-content: space-between;
   }
 
-  /* The settings take the foot's second line, under the badge and the step. */
-  .tour__settings {
-    order: 3;
-    flex-basis: 100%;
-    margin: 0;
+  /* The words keep three lines' room at the smaller size, and the foot is a line with no rule over it. */
+  .tour__says {
+    min-height: 4.5rem;
+  }
+
+  .tour__foot {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  /* The menu opens from the button's left edge, where the phone has the room. */
+  .tour__menu {
+    right: auto;
+    left: 0;
+    width: min(17rem, calc(100vw - var(--space-8) - var(--control-height-touch)));
   }
 
   .tour__caption {
@@ -447,5 +530,18 @@
 
   .tour__chapter.btn {
     min-height: var(--control-height-touch);
+  }
+
+  .tour__settings-open.btn,
+  .tour__voice-option {
+    min-height: var(--control-height-touch);
+  }
+
+  .tour__rates.segmented {
+    height: var(--control-height-touch);
+  }
+
+  .tour__voices {
+    max-height: calc(var(--control-height-touch) * 4.5); /* half a row shows, so the list reads as longer */
   }
 }
