@@ -150,6 +150,16 @@ test('the arrows step, Escape leaves, and a press on the page pauses', async ({ 
   await expect(page.getByRole('button', { name: 'Watch the tour' })).toBeVisible();
 });
 
+test('the close in the corner leaves the tour, as Take over does', async ({ page }) => {
+  await open(page, '#/');
+  await page.getByRole('region', { name: /Watch an agent do the work/ }).getByRole('button', { name: 'Watch the tour' }).click();
+  await expect(bar(page)).toContainText('Step 1 of 18');
+  await bar(page).getByRole('button', { name: 'Close the tour' }).click();
+  await expect(bar(page)).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
+  expect((await said(page)).length).toBeGreaterThan(0);
+});
+
 test('the narration reads each caption as it plays, stops on a pause, and stays off once turned off', async ({ page }) => {
   test.setTimeout(90_000);
   await open(page, '#/');

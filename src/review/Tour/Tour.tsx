@@ -38,7 +38,7 @@ import './Tour.css';
 
    WHAT A PERSON CAN DO. Pause and resume; step back and forward (the arrow
    keys do the same while the bar has focus); jump to any of the six stages;
-   and take over, by the button, by Escape, or just by pressing something
+   and take over, by the button, by the close in the corner, by Escape, or just by pressing something
    on the page, which pauses the tour first. Focus stays in the bar while
    the tour presses things, so a keyboard keeps hold of it: the app moves
    focus to a new screen's heading, and the tour puts it back unless the
@@ -474,6 +474,10 @@ export function TourProvider({
       </div>
       {active ? (
         <section ref={bar} className="tour" data-surface="review" data-decision={decision || undefined} aria-label="Guided tour">
+          {/* The plain way out (2026-11-18), in the corner where a reader looks for
+              one: the same as Take over and Escape, the page left where the tour
+              got to. First in the bar, so a keyboard meets it as an eye does. */}
+          <IconButton className="tour__close" icon="x" label="Close the tour" tooltip="end" onClick={() => leave()} />
           <ol className="tour__chapters" role="list">
             {STAGES.map((st, i) => {
               const first = firstBeatOf(st.id);
