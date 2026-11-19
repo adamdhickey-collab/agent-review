@@ -7,6 +7,8 @@ import { cycleActionsFor, loadStops, NOTE, ruleFor, saveStops, SHORT_BATCHES, SH
 import { customers } from '../../product/customers/customers';
 import { ArchiveFlow } from '../../product/customers/ArchiveFlow';
 import { Choice, Consequence, Product } from '../CycleScreen/stages';
+import { useTour } from '../Tour/Tour';
+import { TourFeature } from '../Tour/TourFeature';
 import '../CycleScreen/CycleScreen.css';
 import './DecideScreen.css';
 
@@ -94,6 +96,7 @@ function CompareAll() {
 
 export function DecideScreen({ initial }: { initial?: StopWhen | null }) {
   const { cycleDo } = useStore();
+  const tour = useTour();
   const [stops, setStopsState] = useState<StopWhen | null>(() => (initial !== undefined ? initial : loadStops()));
   const [planBatch, setPlanBatch] = useState<BatchId>('routine');
   const [builtBatch, setBuiltBatch] = useState<BatchId>('routine');
@@ -152,6 +155,10 @@ export function DecideScreen({ initial }: { initial?: StopWhen | null }) {
         <p className="cycle__setup">
           An agent built bulk archiving for Relay, a customer tool. Its plan reviews every batch before anything is archived. Try a routine cleanup, then add one active customer, and decide when Relay should pause. It’s a simulation: the ticket and the research are written for it, and the archive screen is a working interface.
         </p>
+        {/* Watch before trying (since 2026-11-18): the tour plays these three
+            beats by pressing their own controls. Not offered where there is
+            no tour to play, a story of this screen alone, or while one plays. */}
+        {tour.available && !tour.active ? <TourFeature onStart={tour.start} /> : null}
       </div>
 
       <section className="decide__beat" aria-labelledby="decide-wrong">

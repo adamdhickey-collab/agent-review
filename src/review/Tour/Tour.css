@@ -109,7 +109,7 @@
 /* The chapters stop short of the close, so the last one's line never runs under it. */
 .tour__chapters {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
   margin: 0;
   padding: 0 calc(var(--control-height) + var(--space-3)) 0 0;
@@ -266,7 +266,7 @@
   }
 
   .tour__chapters {
-    grid-template-columns: repeat(6, minmax(0, auto));
+    grid-template-columns: repeat(3, minmax(0, auto));
   }
 
 }
@@ -331,7 +331,7 @@
 .tour-feature__track {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
   margin: 0;
   padding: 0;

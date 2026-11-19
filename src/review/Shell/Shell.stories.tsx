@@ -158,12 +158,13 @@ export const ShortcutsFromTheKeyboard: Story = {
     await expect(body.queryByRole('dialog')).toBeNull();
 
     await userEvent.keyboard('?');
-    await expect(body.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeVisible();
+    /* Found, not got: the sheet opens on the key's own event, a moment after the press resolves (a slower runner missed it, 2026-11-18). */
+    await expect(await body.findByRole('dialog', { name: 'Keyboard shortcuts' })).toBeVisible();
     await userEvent.keyboard('{Escape}');
     await expect(body.queryByRole('dialog')).toBeNull();
 
     await userEvent.click(trigger);
-    const dialog = body.getByRole('dialog', { name: 'Keyboard shortcuts' });
+    const dialog = await body.findByRole('dialog', { name: 'Keyboard shortcuts' });
     await userEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
     await expect(body.queryByRole('dialog')).toBeNull();
     await expect(trigger).toHaveFocus();

@@ -1,22 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, waitFor, within } from 'storybook/test';
 import { StoreProvider } from '../../app/store';
-import { CycleScreen } from '../CycleScreen/CycleScreen';
+import { DecideScreen } from '../DecideScreen/DecideScreen';
 import { TourProvider } from './Tour';
 import { TourFeature } from './TourFeature';
-import { BEATS, stateBefore } from './script';
+import { BEATS, stopsBefore } from './script';
 
 /* The tour's bar, opened on a beat without playing it: the cycle is put
-   where the earlier beats' actions leave it (script.ts, stateBefore), which
+   where the earlier beats leave the visitor's answer (script.ts, stopsBefore), which
    is how the tour itself starts a beat from anywhere. The playing is held
-   by tests/tour.spec.ts, in a browser, with the app's own router. */
+   by tests/tour.spec.ts, in a browser, with the app's own router, on the short path. */
 
 function At({ beat, ended = false }: { beat: number; ended?: boolean }) {
   const at = Math.min(beat, BEATS.length - 1);
   return (
-    <StoreProvider cycle={stateBefore(ended ? BEATS.length : at)}>
+    <StoreProvider>
       <TourProvider opening={{ at, status: ended ? 'ended' : 'paused' }}>
-        <CycleScreen stage={BEATS[at].stage} />
+        <DecideScreen initial={stopsBefore(ended ? BEATS.length : at)} />
       </TourProvider>
     </StoreProvider>
   );
@@ -31,7 +31,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The guided tour: a bar at the foot of the window that plays the design cycle by pressing its real controls, one line at a time. Six chapters, one for each stage, each a press that goes there; pause, step, and Take over. A beat where the designer decides is labeled and carries a line of reasoning. Simulated demo, said on the bar for as long as it is open.',
+          'The guided tour: a bar at the foot of the window that plays the short path by pressing its real controls, one line at a time. Three chapters, one for each beat, each a press that goes there; pause, step, and Take over. A beat where the designer decides is labeled and carries a line of reasoning. Simulated demo, said on the bar for as long as it is open.',
       },
     },
   },
@@ -50,7 +50,7 @@ export const Narrating: Story = {
     await expect(within(bar).getByText('Simulated demo')).toBeVisible();
     await expect(within(bar).getByRole('button', { name: 'Play the tour' })).toBeVisible();
     await expect(within(bar).getByRole('button', { name: 'Take over' })).toBeVisible();
-    await expect(within(bar).getAllByRole('listitem')).toHaveLength(6);
+    await expect(within(bar).getAllByRole('listitem')).toHaveLength(3);
     await expect(within(bar).queryByText('The designer decides')).toBeNull();
     await expect(within(bar).getByRole('button', { name: 'Narration' })).toHaveAttribute('aria-pressed', 'true');
   },
@@ -58,13 +58,13 @@ export const Narrating: Story = {
 
 /** A beat where the designer decides: labeled, with its reasoning under the line. */
 export const Decision: Story = {
-  args: { beat: 6 },
+  args: { beat: 5 },
   play: async ({ canvasElement }) => {
     const bar = within(canvasElement).getByRole('region', { name: 'Guided tour' });
     await waitFor(() => expect(within(bar).getByText('Simulated demo')).toBeVisible()); /* the bar fades in */
     await expect(within(bar).getByText('The designer decides')).toBeVisible();
-    await expect(within(bar).getByText(BEATS[6].why!)).toBeVisible();
-    await expect(within(bar).getByRole('button', { name: /Define/ })).toHaveAttribute('aria-current', 'step');
+    await expect(within(bar).getByText(BEATS[5].why!)).toBeVisible();
+    await expect(within(bar).getByRole('button', { name: /Decide when to pause/ })).toHaveAttribute('aria-current', 'step');
   },
 };
 
@@ -79,7 +79,7 @@ export const Ended: Story = {
   },
 };
 
-/** The way in, featured on Discover: the stages it plays drawn under it, and one button. */
+/** The way in, featured on the short path: the chapters it plays drawn under it, and one button. */
 export const Feature: StoryObj = {
   render: () => (
     <div style={{ padding: 'var(--space-6)' }}>
@@ -87,7 +87,7 @@ export const Feature: StoryObj = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    const feature = within(canvasElement).getByRole('region', { name: /Watch an agent do the work/ });
+    const feature = within(canvasElement).getByRole('region', { name: /Watch the decision play out/ });
     await expect(within(feature).getByRole('button', { name: 'Watch the tour' })).toBeVisible();
     await expect(within(feature).getAllByRole('button')).toHaveLength(1);
   },
