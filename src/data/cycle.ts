@@ -85,7 +85,7 @@ export const STAGES: readonly Stage[] = [
   {
     id: 'learn',
     name: 'Learn',
-    question: 'The feature is built. What do you know, and what don’t you?',
+    question: 'The feature is built. What is still unknown?',
     designer: 'Decides what to measure, what to research, and which rule to save.',
     agent: 'Lists what was verified and what wasn’t.',
   },
