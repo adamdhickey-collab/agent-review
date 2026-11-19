@@ -206,14 +206,13 @@ test('the reading speed steps, is spoken at, and is remembered; the voice menu o
   });
   await open(page, '#/');
   await page.getByRole('region', { name: /Watch an agent do the work/ }).getByRole('button', { name: 'Watch the tour' }).click();
-  const speed = bar(page).getByRole('button', { name: /^Reading speed/ });
-  await expect(speed).toHaveText('1×');
+  const speed = bar(page).getByRole('button', { name: /^Speed / });
+  await expect(speed).toHaveText('Speed 1×');
   await bar(page).getByRole('button', { name: 'Pause the tour' }).click();
   await bar(page).getByRole('button', { name: 'Play the tour' }).click();
   const before = (await said(page)).length;
   await speed.click();
-  await expect(speed).toHaveText('1.25×');
-  await expect(speed).toHaveAccessibleName('Reading speed, 1.25×');
+  await expect(speed).toHaveText('Speed 1.25×');
   expect(await page.evaluate(() => localStorage.getItem('agent-review:tour-rate'))).toBe('1.25');
   /* The stand-in ends a sentence in 40ms, so the beat's words are usually said already: the next beat's are what come at the new speed. */
   await expect.poll(async () => (await said(page)).length, { timeout: 30_000 }).toBeGreaterThan(before);

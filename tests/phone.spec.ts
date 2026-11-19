@@ -184,3 +184,33 @@ test.describe('the return dialog on a phone', () => {
     expect(box.page).toBeLessThanOrEqual(360);
   });
 });
+
+/* The guided tour's bar on a phone (since 2026-11-18): its own controls and
+   the voice's settings are a fingertip, the bar fits the screen, and a tap
+   on an icon button leaves no tooltip over the step count. Until then the
+   bar was outside the touch rule in global.css and drew them at 28px. */
+test.describe('the tour on a phone', () => {
+  test.use({ ...phone, viewport: { width: 360, height: 760 }, deviceScaleFactor: 1 });
+
+  test('the bar fits, and its controls are a fingertip', async ({ page }) => {
+    await open(page, '#/');
+    await page.getByRole('button', { name: 'Watch the tour' }).first().click();
+    const bar = page.getByRole('region', { name: 'Guided tour' });
+    await expect(bar).toContainText('Step 1 of 18');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+    const small = await bar.evaluate((el, floor) => {
+      const out: string[] = [];
+      for (const c of el.querySelectorAll<HTMLElement>('button, select')) {
+        const r = c.getBoundingClientRect();
+        if (r.height > 0 && r.height < floor) out.push(`${c.getAttribute("aria-label") ?? c.textContent?.trim()} (${r.height})`);
+      }
+      return out;
+    }, FLOOR);
+    expect(small, `controls under ${FLOOR}px`).toEqual([]);
+
+    await bar.getByRole('button', { name: 'Next step' }).tap();
+    await expect(bar).toContainText('Step 2 of 18');
+    const tip = await bar.getByRole('button', { name: 'Next step' }).evaluate((b) => getComputedStyle(b, '::after').opacity);
+    expect(tip, 'no tooltip left up after a tap').toBe('0');
+  });
+});

@@ -555,13 +555,42 @@ export function TourProvider({
               {canNarrate ? (
                 <IconButton className="tour__voice" icon={voiced ? 'speaker' : 'speaker-off'} label="Narration" pressed={voiced} onClick={() => setVoiced(!voiced)} />
               ) : null}
-              {/* Both settings stay in the bar with narration off, disabled
-                  (since 2026-11-18): hidden, a reader whose narration was
-                  off from an earlier visit never learned they existed. */}
-              {canNarrate ? (
+              {/* The transport, apart from the voice's switch by a gap, with
+                  play and pause the one filled control, so it is the first
+                  thing found and a pause shows on it. */}
+              <span className="tour__transport">
+              {ended ? (
                 <>
-                  <Button className="tour__rate" variant="ghost" aria-label={`Reading speed, ${rate}×`} disabled={!voiced} onClick={stepRate}>
-                    {rate}×
+                  <Button variant="primary" trailingIcon="arrow-right" onClick={() => leave(true)}>
+                    Explore the prototype
+                  </Button>
+                  <Button ref={toggle} variant="ghost" leadingIcon="undo" onClick={start}>
+                    Replay
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <IconButton className="tour__step" icon="arrow-left" label="Previous step" disabled={at === 0} onClick={back} />
+                  <IconButton ref={toggle} className="tour__toggle" icon={status === 'playing' ? 'pause' : 'play'} label={status === 'playing' ? 'Pause the tour' : 'Play the tour'} onClick={playPause} />
+                  <IconButton className="tour__step" icon="arrow-right" label="Next step" tooltip="end" disabled={at === BEATS.length - 1} onClick={next} />
+                </>
+              )}
+              </span>
+            </div>
+          </div>
+          <div className="tour__foot">
+            <Badge variant="quiet" icon="play">
+              Simulated demo
+            </Badge>
+              {/* The voice's settings, set once and left (since 2026-11-18, a
+                  design critique): in the foot row, so they don't take width
+                  from the caption on every step. They stay with narration
+                  off, disabled: hidden, a reader whose narration was off from
+                  an earlier visit never learned they existed. */}
+              {canNarrate ? (
+                <span className="tour__settings">
+                  <Button className="tour__rate" variant="secondary" size="compact" disabled={!voiced} onClick={stepRate}>
+                    Speed {rate}×
                   </Button>
                   <select
                     className="tour__voices"
@@ -583,35 +612,13 @@ export function TourProvider({
                       <option value={voiceName}>{voiceName ? voiceLabel({ name: voiceName } as SpeechSynthesisVoice) : 'System voice'}</option>
                     )}
                   </select>
-                </>
+                </span>
               ) : null}
-              {ended ? (
-                <>
-                  <Button variant="primary" trailingIcon="arrow-right" onClick={() => leave(true)}>
-                    Explore the prototype
-                  </Button>
-                  <Button ref={toggle} variant="ghost" leadingIcon="undo" onClick={start}>
-                    Replay
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <IconButton className="tour__step" icon="arrow-left" label="Previous step" disabled={at === 0} onClick={back} />
-                  <IconButton ref={toggle} className="tour__toggle" icon={status === 'playing' ? 'pause' : 'play'} label={status === 'playing' ? 'Pause the tour' : 'Play the tour'} onClick={playPause} />
-                  <IconButton className="tour__step" icon="arrow-right" label="Next step" disabled={at === BEATS.length - 1} onClick={next} />
-                </>
-              )}
-            </div>
-          </div>
-          <p className="tour__foot">
-            <Badge variant="quiet" icon="play">
-              Simulated demo
-            </Badge>
-            <span>
+            <span className="tour__where">
               {ended ? 'The end' : `Step ${at + 1} of ${BEATS.length}`}
               {status === 'paused' ? ' · Paused' : ''}
             </span>
-          </p>
+          </div>
         </section>
       ) : null}
     </TourContext.Provider>
