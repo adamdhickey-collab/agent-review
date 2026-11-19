@@ -18,6 +18,12 @@
      also keeps each one under Chrome's fifteen-second limit and lets every
      browser report where the voice has got to, by `start` and `end`.
 
+   - The same two settings, since 2026-11-18: a reading speed that steps
+     1x, 1.25x, 1.5x, 0.75x (times the pace above; the pauses shorten with
+     it), and a menu of the English voices on the machine, best first. A
+     change of either says the sentence in hand again, so it is heard
+     against the words that prompted it.
+
    It differs from the site's in one way: it never marks words. The caption
    is a line in a bar, short enough to follow by ear, and the page under it
    is busy with the tour's own ring.
@@ -36,13 +42,81 @@ const NOVELTY =
   /^(albert|bad news|bahh|bells|boing|bubbles|cellos|fred|good news|jester|junior|kathy|organ|pipe organ|ralph|superstar|trinoids|whisper|wobble|zarvox|deranged|hysterical|princess|bruce)\b/i;
 const VOICE_KEY = 'adamhickey:read-aloud-voice';
 const ON_KEY = 'agent-review:tour-narration';
+const RATE_KEY = 'agent-review:tour-rate';
 
-function voiceOf(): SpeechSynthesisVoice | null {
-  if (!synth) return null;
+/** The speeds the control steps through, in the site's order. */
+export const RATES: readonly number[] = [1, 1.25, 1.5, 0.75];
+
+/** The English voices worth offering, best first: the preference list's, in its order, then the rest by name. */
+export function usableVoices(): SpeechSynthesisVoice[] {
+  if (!synth) return [];
   const en = synth.getVoices().filter((v) => /^en(-|$)/i.test(v.lang));
   let list = en.filter((v) => !NOVELTY.test(v.name));
   if (list.length < 2) list = en;
+  const rank = (v: SpeechSynthesisVoice) => {
+    const i = WANTED.findIndex((w) => w.test(v.name));
+    return i < 0 ? WANTED.length : i;
+  };
+  return [...list].sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name));
+}
+
+/** A voice's name, short enough for a control: the platform's "(English (United States))" is "(US)". */
+export function voiceLabel(v: SpeechSynthesisVoice): string {
+  return v.name
+    .replace(/\(English \(United States\)\)/i, '(US)')
+    .replace(/\(English \(United Kingdom\)\)/i, '(UK)')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** The voice the tour speaks in now, or null where the machine offers none. */
+export function currentVoice(): SpeechSynthesisVoice | null {
+  return voiceOf();
+}
+
+export function rememberVoice(name: string) {
+  try {
+    localStorage.setItem(VOICE_KEY, name);
+  } catch {
+    /* it holds for this visit only where nothing can be stored */
+  }
+  chosenName = name;
+}
+
+/** Calls back when the machine's voices arrive or change; returns the way to stop listening. */
+export function onVoicesChanged(fn: () => void): () => void {
+  if (!synth || typeof synth.addEventListener !== 'function') return () => {};
+  synth.addEventListener('voiceschanged', fn);
+  return () => synth.removeEventListener('voiceschanged', fn);
+}
+
+/** The speed kept from last time, or 1. */
+export function rateKept(): number {
+  try {
+    const kept = Number(localStorage.getItem(RATE_KEY));
+    return RATES.includes(kept) ? kept : 1;
+  } catch {
+    return 1;
+  }
+}
+
+export function rememberRate(rate: number) {
+  try {
+    if (rate === 1) localStorage.removeItem(RATE_KEY);
+    else localStorage.setItem(RATE_KEY, String(rate));
+  } catch {
+    /* it holds for this visit */
+  }
+}
+
+/* The voice chosen in this visit, for a browser that can't store it. */
+let chosenName: string | null = null;
+
+function voiceOf(): SpeechSynthesisVoice | null {
+  const list = usableVoices();
   if (!list.length) return null;
+  const picked = chosenName && list.find((v) => v.name === chosenName);
+  if (picked) return picked;
   let kept: string | null = null;
   try {
     kept = localStorage.getItem(VOICE_KEY);
@@ -97,6 +171,7 @@ export class Narrator {
   private at = 0;
   private run = 0;
   private paused = false;
+  private rate = rateKept();
   /** The utterance being spoken: held here, or Chrome can collect it and never fire `end`. */
   holding: SpeechSynthesisUtterance | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
@@ -139,6 +214,21 @@ export class Narrator {
     this.finish();
   }
 
+  /** The reading speed, times the pace. The sentence in hand is said again at it. */
+  setRate(rate: number) {
+    this.rate = rate;
+    this.restate();
+  }
+
+  /** Says the sentence in hand again from its start: after a change of speed or of voice. */
+  restate() {
+    if (!this.settle || this.paused || this.at >= this.pieces.length) return;
+    this.run += 1;
+    this.clear();
+    synth?.cancel();
+    this.speak();
+  }
+
   /** Whether the voice has been paused by the tour, for a reading begun while it was. */
   setPaused(paused: boolean) {
     this.paused = paused;
@@ -167,11 +257,11 @@ export class Narrator {
       u.voice = voice;
       u.lang = voice.lang;
     }
-    u.rate = PACE;
+    u.rate = PACE * this.rate;
     /* A synthesiser that never says `end` (no voices installed, a voice
        still downloading) must not hold the tour: past twice the time the
        sentence could take, it counts as said. */
-    const guard = setTimeout(() => next(), 1500 + piece.text.length * 110);
+    const guard = setTimeout(() => next(), (1500 + piece.text.length * 110) / Math.min(this.rate, 1));
     const next = () => {
       clearTimeout(guard);
       if (mine !== this.run) return;
@@ -180,7 +270,7 @@ export class Narrator {
       if (this.at >= this.pieces.length) return this.finish();
       this.timer = setTimeout(() => {
         if (mine === this.run && !this.paused) this.speak();
-      }, piece.gap);
+      }, piece.gap / this.rate);
     };
     u.onend = next;
     u.onerror = next;

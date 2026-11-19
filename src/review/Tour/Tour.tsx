@@ -4,7 +4,7 @@ import { href } from '../../app/router';
 import { useStore } from '../../app/store';
 import { STAGES, type StageId } from '../../data/cycle';
 import { actionsBefore, BEATS, CLOSING, firstBeatOf, holdOf, type Find } from './script';
-import { canNarrate, Narrator, narrationOn, rememberNarration } from './narrate';
+import { canNarrate, currentVoice, Narrator, narrationOn, onVoicesChanged, RATES, rateKept, rememberNarration, rememberRate, rememberVoice, usableVoices, voiceLabel } from './narrate';
 import './Tour.css';
 
 /* THE GUIDED TOUR (2026-11-18). A press on "Watch the tour" plays the design
@@ -125,6 +125,40 @@ export function TourProvider({
   const [voiced, setVoicedState] = useState(() => canNarrate && narrationOn());
   const voicedRef = useRef(voiced);
   useEffect(() => () => narrator.stop(), [narrator]);
+
+  /* The voice's two settings, as adamhickey.com's player has them (since
+     2026-11-18): a speed that steps through RATES, and a menu of the
+     machine's English voices. The menu holds one option, the voice in use,
+     until someone reaches for it, as the site's does; voices arrive late in
+     most browsers, so both are read again when they change. */
+  const [rate, setRateState] = useState(rateKept);
+  const [voiceName, setVoiceName] = useState(() => currentVoice()?.name ?? '');
+  const [voices, setVoices] = useState<{ name: string; label: string }[]>([]);
+  const fillVoices = useCallback(() => setVoices(usableVoices().map((v) => ({ name: v.name, label: voiceLabel(v) }))), []);
+  useEffect(
+    () =>
+      onVoicesChanged(() => {
+        setVoiceName(currentVoice()?.name ?? '');
+        setVoices((had) => (had.length ? usableVoices().map((v) => ({ name: v.name, label: voiceLabel(v) })) : had));
+      }),
+    [],
+  );
+  const rateRef = useRef(rate);
+  const stepRate = useCallback(() => {
+    const next = RATES[(RATES.indexOf(rateRef.current) + 1) % RATES.length];
+    rateRef.current = next;
+    setRateState(next);
+    rememberRate(next);
+    narrator.setRate(next);
+  }, [narrator]);
+  const chooseVoice = useCallback(
+    (name: string) => {
+      rememberVoice(name);
+      setVoiceName(name);
+      narrator.restate();
+    },
+    [narrator],
+  );
 
   /* The voice follows the tour: a pause stops it mid-sentence and play says
      that sentence again. `keepVoice` is for a beat that has finished and
@@ -518,6 +552,33 @@ export function TourProvider({
             <div className="tour__controls">
               {canNarrate ? (
                 <IconButton className="tour__voice" icon={voiced ? 'speaker' : 'speaker-off'} label="Narration" pressed={voiced} onClick={() => setVoiced(!voiced)} />
+              ) : null}
+              {canNarrate && voiced ? (
+                <>
+                  <Button className="tour__rate" variant="ghost" aria-label={`Reading speed, ${rate}×`} onClick={stepRate}>
+                    {rate}×
+                  </Button>
+                  <select
+                    className="tour__voices"
+                    aria-label="Voice"
+                    value={voiceName}
+                    disabled={!voiceName}
+                    onPointerDown={fillVoices}
+                    onKeyDown={fillVoices}
+                    onFocus={fillVoices}
+                    onChange={(e) => chooseVoice(e.currentTarget.value)}
+                  >
+                    {voices.length ? (
+                      voices.map((v) => (
+                        <option key={v.name} value={v.name}>
+                          {v.label}
+                        </option>
+                      ))
+                    ) : (
+                      <option value={voiceName}>{voiceName ? voiceLabel({ name: voiceName } as SpeechSynthesisVoice) : 'System voice'}</option>
+                    )}
+                  </select>
+                </>
               ) : null}
               {ended ? (
                 <>

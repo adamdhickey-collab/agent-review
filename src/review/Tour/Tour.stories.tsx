@@ -53,6 +53,8 @@ export const Narrating: Story = {
     await expect(within(bar).getAllByRole('listitem')).toHaveLength(6);
     await expect(within(bar).queryByText('The designer decides')).toBeNull();
     await expect(within(bar).getByRole('button', { name: 'Narration' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(within(bar).getByRole('button', { name: 'Reading speed, 1×' })).toBeVisible();
+    await expect(within(bar).getByRole('combobox', { name: 'Voice' })).toBeVisible();
   },
 };
 
