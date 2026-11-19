@@ -1,11 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Badge, Button, Icon, IconButton } from '../../components';
+import { Badge, Button, Icon, IconButton, SegmentedControl } from '../../components';
 import { href } from '../../app/router';
 import { useStore } from '../../app/store';
 import { STAGES, type StageId } from '../../data/cycle';
 import { actionsBefore, BEATS, CLOSING, firstBeatOf, holdOf, type Find } from './script';
 import { canNarrate, currentVoice, Narrator, narrationOn, onVoicesChanged, RATES, rateKept, rememberNarration, rememberRate, rememberVoice, usableVoices, voiceLabel } from './narrate';
 import './Tour.css';
+
+/* The speeds, slowest first, as a row reads. */
+const SPEEDS = [...RATES].sort((a, b) => a - b).map((r) => ({ value: String(r), label: `${r}×` }));
 
 /* THE GUIDED TOUR (2026-11-18). A press on "Watch the tour" plays the design
    cycle from its first stage to its last: a pointer crosses to each real
@@ -127,10 +130,10 @@ export function TourProvider({
   useEffect(() => () => narrator.stop(), [narrator]);
 
   /* The voice's two settings, as adamhickey.com's player has them (since
-     2026-11-18): a speed that steps through RATES, and a menu of the
-     machine's English voices. The menu holds one option, the voice in use,
-     until someone reaches for it, as the site's does; voices arrive late in
-     most browsers, so both are read again when they change. */
+     2026-11-18): one of RATES, and one of the machine's English voices. The
+     list holds one option, the voice in use, until someone opens the menu;
+     voices arrive late in most browsers, so both are read again when they
+     change. */
   const [rate, setRateState] = useState(rateKept);
   const [voiceName, setVoiceName] = useState(() => currentVoice()?.name ?? '');
   const [voices, setVoices] = useState<{ name: string; label: string }[]>([]);
@@ -143,14 +146,14 @@ export function TourProvider({
       }),
     [],
   );
-  const rateRef = useRef(rate);
-  const stepRate = useCallback(() => {
-    const next = RATES[(RATES.indexOf(rateRef.current) + 1) % RATES.length];
-    rateRef.current = next;
-    setRateState(next);
-    rememberRate(next);
-    narrator.setRate(next);
-  }, [narrator]);
+  const chooseRate = useCallback(
+    (next: number) => {
+      setRateState(next);
+      rememberRate(next);
+      narrator.setRate(next);
+    },
+    [narrator],
+  );
   const chooseVoice = useCallback(
     (name: string) => {
       rememberVoice(name);
@@ -159,6 +162,46 @@ export function TourProvider({
     },
     [narrator],
   );
+
+  /* The settings menu (2026-11-19): the speed and the voice behind one
+     button beside the narration switch, the same on a phone and a desk.
+     Until then they were a button and the platform's select in the foot
+     row, which cost a phone a whole line of the bar, set the two in
+     different type, and listed every voice once per accent. Opening it
+     moves focus to the chosen speed; Escape, a press outside it, or the
+     button again closes it and gives focus back to the button. */
+  const [settingsOpen, setSettingsOpenState] = useState(false);
+  const settingsOpenRef = useRef(false);
+  const settings = useRef<HTMLSpanElement>(null);
+  const settingsButton = useRef<HTMLButtonElement>(null);
+  const setSettingsOpen = useCallback(
+    (open: boolean, refocus = true) => {
+      if (open) fillVoices();
+      settingsOpenRef.current = open;
+      setSettingsOpenState(open);
+      if (!open && refocus) settingsButton.current?.focus({ preventScroll: true });
+    },
+    [fillVoices],
+  );
+  useEffect(() => {
+    if (!settingsOpen) return;
+    settings.current?.querySelector<HTMLElement>('.tour__menu [aria-checked="true"]')?.focus({ preventScroll: true });
+    const outside = (e: PointerEvent) => {
+      if (!settings.current?.contains(e.target as Node)) setSettingsOpen(false, false);
+    };
+    document.addEventListener('pointerdown', outside, true);
+    return () => document.removeEventListener('pointerdown', outside, true);
+  }, [settingsOpen, setSettingsOpen]);
+  /* Up and down move the voice, as they move a radio group's choice. */
+  const onVoiceKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const step = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0;
+    if (!step || !voices.length) return;
+    e.preventDefault();
+    const i = Math.max(0, voices.findIndex((v) => v.name === voiceName));
+    const to = voices[(i + step + voices.length) % voices.length];
+    chooseVoice(to.name);
+    e.currentTarget.querySelector<HTMLElement>(`[data-voice="${CSS.escape(to.name)}"]`)?.focus();
+  };
 
   /* The voice follows the tour: a pause stops it mid-sentence and play says
      that sentence again. `keepVoice` is for a beat that has finished and
@@ -457,6 +500,13 @@ export function TourProvider({
       if (document.querySelector('dialog[open], [aria-modal="true"]')) return;
       const here = document.activeElement;
       if (here !== document.body && !bar.current?.contains(here)) return;
+      /* The settings menu keeps its own keys: Escape closes it, not the tour, and its arrows move a choice, not a step. */
+      if (settingsOpenRef.current) {
+        if (e.key !== 'Escape') return;
+        setSettingsOpen(false);
+        e.preventDefault();
+        return;
+      }
       if (e.key === 'Escape') leave();
       else if (e.key === 'ArrowRight') next();
       else if (e.key === 'ArrowLeft') back();
@@ -471,7 +521,7 @@ export function TourProvider({
       document.removeEventListener('focusin', onFocus);
       window.removeEventListener('keydown', onKey);
     };
-  }, [active, back, leave, next, setStatus]);
+  }, [active, back, leave, next, setSettingsOpen, setStatus]);
 
   /* The bar's own controls change with the tour (Replay where Pause was), and
      a control that leaves the page takes focus with it, silently. */
@@ -553,7 +603,63 @@ export function TourProvider({
             </div>
             <div className="tour__controls">
               {canNarrate ? (
-                <IconButton className="tour__voice" icon={voiced ? 'speaker' : 'speaker-off'} label="Narration" pressed={voiced} onClick={() => setVoiced(!voiced)} />
+                <span className="tour__narration">
+                  <IconButton className="tour__voice" icon={voiced ? 'speaker' : 'speaker-off'} label="Narration" pressed={voiced} onClick={() => setVoiced(!voiced)} />
+                  {/* It stays with narration off, disabled: hidden, a reader whose
+                      narration was off from an earlier visit never learned it existed. */}
+                  <span ref={settings} className="tour__settings">
+                    <Button
+                      ref={settingsButton}
+                      className="tour__settings-open"
+                      variant="ghost"
+                      size="compact"
+                      trailingIcon="chevron-down"
+                      aria-haspopup="dialog"
+                      aria-expanded={settingsOpen}
+                      disabled={!voiced}
+                      onClick={() => setSettingsOpen(!settingsOpen)}
+                    >
+                      <span className="visually-hidden">Voice and speed: </span>
+                      <span className="tour__settings-voice">{voiceName ? voiceLabel({ name: voiceName }) : 'Voice'}</span>
+                      <span aria-hidden="true"> · </span>
+                      <span className="visually-hidden">, </span>
+                      {rate}×
+                    </Button>
+                    {settingsOpen && voiced ? (
+                      <div className="tour__menu" role="dialog" aria-label="Voice and speed">
+                        <p className="tour__menu-label">Speed</p>
+                        <SegmentedControl
+                          className="tour__rates"
+                          label="Speed"
+                          options={SPEEDS}
+                          value={String(rate)}
+                          onChange={(v) => chooseRate(Number(v))}
+                        />
+                        <p className="tour__menu-label">Voice</p>
+                        <div className="tour__voices" role="radiogroup" aria-label="Voice" onKeyDown={onVoiceKey}>
+                          {(voices.length ? voices : [{ name: voiceName, label: voiceName ? voiceLabel({ name: voiceName }) : 'System voice' }]).map((v) => {
+                            const checked = v.name === voiceName;
+                            return (
+                              <button
+                                key={v.name}
+                                type="button"
+                                role="radio"
+                                aria-checked={checked}
+                                data-voice={v.name}
+                                tabIndex={checked ? 0 : -1}
+                                className="tour__voice-option"
+                                onClick={() => chooseVoice(v.name)}
+                              >
+                                <span>{v.label}</span>
+                                {checked ? <Icon name="check" size={16} /> : null}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : null}
+                  </span>
+                </span>
               ) : null}
               {/* The transport, apart from the voice's switch by a gap, with
                   play and pause the one filled control, so it is the first
@@ -582,38 +688,6 @@ export function TourProvider({
             <Badge variant="quiet" icon="play">
               Simulated demo
             </Badge>
-              {/* The voice's settings, set once and left (since 2026-11-18, a
-                  design critique): in the foot row, so they don't take width
-                  from the caption on every step. They stay with narration
-                  off, disabled: hidden, a reader whose narration was off from
-                  an earlier visit never learned they existed. */}
-              {canNarrate ? (
-                <span className="tour__settings">
-                  <Button className="tour__rate" variant="secondary" size="compact" disabled={!voiced} onClick={stepRate}>
-                    Speed {rate}×
-                  </Button>
-                  <select
-                    className="tour__voices"
-                    aria-label="Voice"
-                    value={voiceName}
-                    disabled={!voiced || !voiceName}
-                    onPointerDown={fillVoices}
-                    onKeyDown={fillVoices}
-                    onFocus={fillVoices}
-                    onChange={(e) => chooseVoice(e.currentTarget.value)}
-                  >
-                    {voices.length ? (
-                      voices.map((v) => (
-                        <option key={v.name} value={v.name}>
-                          {v.label}
-                        </option>
-                      ))
-                    ) : (
-                      <option value={voiceName}>{voiceName ? voiceLabel({ name: voiceName } as SpeechSynthesisVoice) : 'System voice'}</option>
-                    )}
-                  </select>
-                </span>
-              ) : null}
             <span className="tour__where">
               {ended ? 'The end' : `Step ${at + 1} of ${BEATS.length}`}
               {status === 'paused' ? ' · Paused' : ''}

@@ -194,25 +194,27 @@ test('the narration reads each caption as it plays, stops on a pause, and stays 
   expect((await said(page)).length).toBe(silent);
 });
 
-test('the reading speed steps, is spoken at, and is remembered; the voice menu offers the machine\'s English voices', async ({ page }) => {
+test('one menu holds the speed and the voice: a speed is spoken at and remembered, and each English voice is offered once', async ({ page }) => {
   test.setTimeout(60_000);
-  /* Two voices and a novelty one, offered through the stand-in above. */
+  /* Voices as macOS lists them (one twice by quality, one twice by accent) and a novelty one, offered through the stand-in above. */
   await page.addInitScript(() => {
     const voice = (name: string) => ({ name, lang: 'en-US', default: false, localService: true, voiceURI: name }) as SpeechSynthesisVoice;
-    (window as unknown as { __offer: SpeechSynthesisVoice[] }).__offer = [voice('Samantha'), voice('Zarvox'), voice('Ava (Premium)')];
+    (window as unknown as { __offer: SpeechSynthesisVoice[] }).__offer = [voice('Samantha'), voice('Zarvox'), voice('Ava'), voice('Ava (Premium)'), voice('Eddy (English (United States))'), { ...voice('Eddy (English (United Kingdom))'), lang: 'en-GB' }];
     /* A real utterance refuses a voice that isn't the engine's own; these aren't, so it is taught to hold one. */
     let held: SpeechSynthesisVoice | null = null;
     Object.defineProperty(SpeechSynthesisUtterance.prototype, 'voice', { get: () => held, set: (v: SpeechSynthesisVoice | null) => (held = v) });
   });
   await open(page, '#/');
   await page.getByRole('region', { name: /Watch an agent do the work/ }).getByRole('button', { name: 'Watch the tour' }).click();
-  const speed = bar(page).getByRole('button', { name: /^Speed / });
-  await expect(speed).toHaveText('Speed 1×');
+  const settings = bar(page).getByRole('button', { name: /^Voice and speed: / });
+  await expect(settings).toHaveText('Voice and speed: Ava · , 1×');
   await bar(page).getByRole('button', { name: 'Pause the tour' }).click();
   await bar(page).getByRole('button', { name: 'Play the tour' }).click();
   const before = (await said(page)).length;
-  await speed.click();
-  await expect(speed).toHaveText('Speed 1.25×');
+  await settings.click();
+  const menu = bar(page).getByRole('dialog', { name: 'Voice and speed' });
+  await menu.getByRole('radio', { name: '1.25×' }).click();
+  await expect(settings).toContainText('1.25×');
   expect(await page.evaluate(() => localStorage.getItem('agent-review:tour-rate'))).toBe('1.25');
   /* The stand-in ends a sentence in 40ms, so the beat's words are usually said already: the next beat's are what come at the new speed. */
   await expect.poll(async () => (await said(page)).length, { timeout: 30_000 }).toBeGreaterThan(before);
@@ -220,17 +222,21 @@ test('the reading speed steps, is spoken at, and is remembered; the voice menu o
   expect(rates[0]).toBeCloseTo(0.95);
   expect(rates[rates.length - 1]).toBeCloseTo(0.95 * 1.25);
 
-  /* The menu: the better voice first, the novelty one never offered; a choice is spoken in and kept. */
-  const menu = bar(page).getByRole('combobox', { name: 'Voice' });
-  await expect(menu).toHaveValue('Ava (Premium)');
-  await menu.focus();
-  await expect(menu.locator('option')).toHaveText(['Ava (Premium)', 'Samantha']);
-  await menu.selectOption('Samantha');
+  /* The voices: the better one first, each name once, the novelty one never offered; a choice is spoken in and kept. */
+  const voices = menu.getByRole('radiogroup', { name: 'Voice' }).getByRole('radio');
+  await expect(voices).toHaveText(['Ava', 'Samantha', 'Eddy']);
+  await expect(voices.first()).toBeChecked();
+  await voices.nth(1).click();
   expect(await page.evaluate(() => localStorage.getItem('adamhickey:read-aloud-voice'))).toBe('Samantha');
   await expect.poll(async () => (await page.evaluate(() => (window as unknown as { __voices: string[] }).__voices)).at(-1), { timeout: 30_000 }).toBe('Samantha');
+  await expect(settings).toContainText('Samantha');
 
-  /* Narration off: both settings stay in the bar, out of reach, so they can be found. */
+  /* Escape closes the menu and leaves the tour open. */
+  await page.keyboard.press('Escape');
+  await expect(menu).toBeHidden();
+  await expect(bar(page)).toBeVisible();
+
+  /* Narration off: the settings stay in the bar, out of reach, so they can be found. */
   await bar(page).getByRole('button', { name: 'Narration' }).click();
-  await expect(speed).toBeDisabled();
-  await expect(menu).toBeDisabled();
+  await expect(settings).toBeDisabled();
 });

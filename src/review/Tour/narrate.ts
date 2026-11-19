@@ -44,29 +44,38 @@ const VOICE_KEY = 'adamhickey:read-aloud-voice';
 const ON_KEY = 'agent-review:tour-narration';
 const RATE_KEY = 'agent-review:tour-rate';
 
-/** The speeds the control steps through, in the site's order. */
+/** The speeds on offer, the site's four. */
 export const RATES: readonly number[] = [1, 1.25, 1.5, 0.75];
 
-/** The English voices worth offering, best first: the preference list's, in its order, then the rest by name. */
+/* One voice per name. macOS offers most of its newer voices twice, "Eddy
+   (English (United States))" and "Eddy (English (United Kingdom))", and a
+   downloaded voice beside its compact one, "Zoe" and "Zoe (Premium)"; listed
+   as they come, a menu says every name twice. The better recording wins,
+   then the American one. */
+const baseName = (name: string) => name.replace(/\s*\((?:[^()]|\([^()]*\))*\)/g, '').replace(/\s+/g, ' ').trim() || name;
+const quality = (v: SpeechSynthesisVoice) => (/premium/i.test(v.name) ? 4 : /enhanced/i.test(v.name) ? 2 : 0) + (/^en-US$/i.test(v.lang.replace('_', '-')) ? 1 : 0);
+
+/** The English voices worth offering, one per name, best first: the preference list's, in its order, then the rest by name. */
 export function usableVoices(): SpeechSynthesisVoice[] {
   if (!synth) return [];
-  const en = synth.getVoices().filter((v) => /^en(-|$)/i.test(v.lang));
+  const en = synth.getVoices().filter((v) => /^en(-|_|$)/i.test(v.lang));
   let list = en.filter((v) => !NOVELTY.test(v.name));
   if (list.length < 2) list = en;
+  const byName = new Map<string, SpeechSynthesisVoice>();
+  for (const v of list) {
+    const had = byName.get(baseName(v.name));
+    if (!had || quality(v) > quality(had)) byName.set(baseName(v.name), v);
+  }
   const rank = (v: SpeechSynthesisVoice) => {
     const i = WANTED.findIndex((w) => w.test(v.name));
     return i < 0 ? WANTED.length : i;
   };
-  return [...list].sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name));
+  return [...byName.values()].sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name));
 }
 
-/** A voice's name, short enough for a control: the platform's "(English (United States))" is "(US)". */
-export function voiceLabel(v: SpeechSynthesisVoice): string {
-  return v.name
-    .replace(/\(English \(United States\)\)/i, '(US)')
-    .replace(/\(English \(United Kingdom\)\)/i, '(UK)')
-    .replace(/\s+/g, ' ')
-    .trim();
+/** A voice's name as a person says it: "Zoe", not "Zoe (Premium)" or "Eddy (English (United States))". */
+export function voiceLabel(v: Pick<SpeechSynthesisVoice, 'name'>): string {
+  return baseName(v.name);
 }
 
 /** The voice the tour speaks in now, or null where the machine offers none. */
