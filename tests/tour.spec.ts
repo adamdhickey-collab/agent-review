@@ -31,7 +31,7 @@ async function open(page: Page, hash: string) {
 
 test('pressed through under reduced motion, the tour ends in the case study’s choices', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await open(page, '#/');
+  await open(page, '#/cycle/discover');
   await page.getByRole('button', { name: 'Watch the tour' }).click();
   await expect(bar(page)).toContainText('Step 1 of 18 · Paused');
   await expect(bar(page)).toContainText('Simulated demo');
@@ -106,7 +106,7 @@ test('it starts from anywhere, pauses, goes to a stage, and hands the page over'
 });
 
 test('the arrows step, Escape leaves, and a press on the page pauses', async ({ page }) => {
-  await open(page, '#/');
+  await open(page, '#/cycle/discover');
   await page.getByRole('button', { name: 'Watch the tour' }).click();
   await expect(bar(page)).toContainText('Step 1 of 18');
   await page.keyboard.press('ArrowRight');

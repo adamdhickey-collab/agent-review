@@ -22,9 +22,14 @@ import { isScene, type SceneId } from '../review/SceneScreen/scenes';
    its siblings (since 2026-10-26) are the stages drawn as one 16:9 picture
    each, for the case study to capture. A route
    with parameters beyond an id and a finding is when a dependency earns its
-   place. */
+   place.
+
+   Since 2026-11-18 the front door is the short path, "/decide": one
+   question in three beats (data/decide.ts says why). The cycle keeps its
+   six addresses, and "/cycle" is still its first stage. */
 
 export type Route =
+  | { name: 'decide' }
   | { name: 'delegation'; run?: RunId }
   | { name: 'queue' }
   | { name: 'cycle'; stage: StageId }
@@ -34,7 +39,7 @@ export type Route =
 
 export function parse(hash: string): Route {
   const path = hash.replace(/^#/, '') || '/';
-  if (path === '/') return { name: 'cycle', stage: 'discover' };
+  if (path === '/' || path === '/decide' || path === '/decide/') return { name: 'decide' };
   if (path === '/runs/billing' || path === '/runs/billing/') return { name: 'delegation' };
   if (path === '/runs/shared-table' || path === '/runs/shared-table/') return { name: 'delegation', run: 'shared-table' };
   if (path === '/queue' || path === '/queue/') return { name: 'queue' };
@@ -50,6 +55,8 @@ export function parse(hash: string): Route {
 
 export function href(route: Route): string {
   switch (route.name) {
+    case 'decide':
+      return '#/decide';
     case 'delegation':
       return `#/runs/${route.run ?? 'billing'}`;
     case 'queue':

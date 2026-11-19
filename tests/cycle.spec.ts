@@ -42,8 +42,9 @@ async function press(page: Page, name: string | RegExp, role: 'button' | 'link' 
   throw new Error(`never reached ${name} by Tab`);
 }
 
-test('the front door is the first stage, and a run’s own address is the run', async ({ page }) => {
-  await open(page, '#/');
+test('the cycle’s first stage is at its own address, and a run’s own address is the run', async ({ page }) => {
+  /* Since 2026-11-18 the front door is the short path (decide.spec.ts). */
+  await open(page, '#/cycle');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Something is wrong with archiving. What, exactly?');
   await expect(page).toHaveTitle('Design cycle: Discover · Agent Review');
   await expect(page.locator('.cycle__setup')).toContainText('You’re Adam, a product designer');
@@ -60,11 +61,11 @@ test('the front door is the first stage, and a run’s own address is the run', 
   }
 });
 
-test('the product’s name goes to the first stage', async ({ page }) => {
+test('the product’s name goes to the front door, the short path', async ({ page }) => {
   await open(page, '#/queue');
-  await page.getByRole('link', { name: 'Agent Review, start of the design cycle' }).click();
-  await expect(page).toHaveURL(/#\/cycle\/discover$/);
-  await arrived(page, 'Something is wrong with archiving. What, exactly?');
+  await page.getByRole('link', { name: 'Agent Review, start' }).click();
+  await expect(page).toHaveURL(/#\/decide$/);
+  await arrived(page, 'When should Archive stop and ask?');
 });
 
 test('Continue waits for the move, and a stage further on sends the reader back to the open one', async ({ page }) => {
@@ -108,7 +109,7 @@ test('an open stage is an address, and back and forward step between them', asyn
 });
 
 test('the cycle can be done from the keyboard, and its choices survive a reload', async ({ page }) => {
-  await open(page, '#/');
+  await open(page, '#/cycle/discover');
   await press(page, 'Choose Correct the summary');
   await press(page, 'Continue to Define');
   await press(page, 'Choose Safety comes first');

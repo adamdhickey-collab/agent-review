@@ -47,7 +47,8 @@ for (const width of WIDTHS) {
 
     /* The cycle's later stages open from the choices before them (seed.ts). */
     const SCREENS: [string, string, object?][] = [
-      ['the design cycle, discover, the front door', '#/'],
+      ['the short path, the front door', '#/'],
+      ['the design cycle, discover', '#/cycle/discover'],
       ['the design cycle, explore', '#/cycle/explore', FRAMED],
       ['the design cycle, evaluate', '#/cycle/evaluate', EXPLORED],
       ['the delegated work', '#/runs/billing'],
