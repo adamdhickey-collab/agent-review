@@ -25,8 +25,55 @@
   line-height: var(--leading-ui);
 }
 
-.archive-flow__question strong {
+/* The confirm direction's pop-up (since 2026-11-18). The rows and the
+   pop-up share one grid cell, so the pop-up sits over the rows and the
+   panel is never shorter than it; the panel clips its overflow, and a
+   pop-up placed absolutely over three rows lost its buttons. The rows
+   under it are inert; nothing dims them, as the case study draws it. */
+.archive-flow__stage {
+  display: grid;
+}
+
+.archive-flow__stage > * {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+.archive-flow__ask {
+  /* Over the table's sticky head, which is 1. */
+  z-index: 2;
+  align-self: start;
+  justify-self: center;
+  display: flex;
+  flex-direction: column;
+  /* Room over the buttons for Explore's "Press this" tag, which sat on the
+     note's last word in a narrow panel. */
+  gap: var(--space-6);
+  width: min(24rem, calc(100% - 2 * var(--space-3)));
+  margin: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-menu);
+}
+
+.archive-flow__question {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--color-text);
+}
+
+.archive-flow__ask-title {
+  font-size: var(--text-md);
   font-weight: var(--weight-semibold);
+}
+
+.archive-flow__ask-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
 }
 
 /* What the person should know before the press, under the bar that offers it. */

@@ -11,8 +11,16 @@ import './ArchiveFlow.css';
 
      undo     Archive acts at once. A bar says what left and offers Undo
               until the next action (rule 6's "a way back").
-     confirm  Archive becomes the question, as CustomerTable's does, and the
-              question names any active customer in the selection.
+     confirm  Archive opens a pop-up over the rows that asks first and
+              names any active customer in the selection. Until 2026-11-18
+              the selection bar became the question, as CustomerTable's
+              does; the case study drew a pop-up and argued against one, so
+              the working screen now shows what the argument is about. The
+              pop-up is this screen's own, inside its panel: the rows and
+              the bar under it are inert while it is open, and Escape
+              cancels. Tab is not held in it: this screen sits inside the
+              review, whose own controls (Explore's move presses this
+              screen's next button) have to stay in reach.
      review   Archive opens a review of the selection under the toolbar:
               what can't be archived and why, the active customers each with
               a box to keep them out, and the routine rest as a count.
@@ -101,6 +109,20 @@ const BLOCKED: Record<string, string> = { c_01HZKF: 'it has an open invoice' };
 
 function plural(n: number): string {
   return n === 1 ? '1 customer' : `${n} customers`;
+}
+
+/** What the routine rest of a batch is, by the statuses in it. */
+const REST: [CustomerStatus, string][] = [
+  ['churned', 'churned'],
+  ['past-due', 'past due'],
+  ['trial', 'on trial'],
+];
+
+function restOf(rest: Customer[]): string {
+  const words = REST.filter(([status]) => rest.some((c) => c.status === status)).map(([, word]) => word);
+  if (!words.length || rest.some((c) => c.status === 'active')) return 'churned, past due, or on trial';
+  if (words.length < 3) return words.join(' or ');
+  return `${words.slice(0, -1).join(', ')}, or ${words[words.length - 1]}`;
 }
 
 function list(names: string[]): string {
@@ -258,6 +280,16 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
      side, and a written id named all three sections by the first one's title. */
   const titleId = useId();
   const reviewId = useId();
+  const askId = useId();
+  const askNoteId = useId();
+  const asking = view === 'current' && step && direction === 'confirm';
+  const askNote = [
+    f.namesActive && active.length ? `${active.length} ${active.length === 1 ? 'is' : 'are'} active: ${list(active.map((c) => c.company))}.` : '',
+    f.blockedFirst && blocked.length ? `${list(blocked.map((c) => c.company))} can’t be archived: ${BLOCKED[blocked[0].id]}.` : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const rest = chosen.filter((c) => !BLOCKED[c.id] && !isActive(c, activeRule));
 
   return (
     <section ref={root} className="archive-flow" aria-labelledby={titleId}>
@@ -289,9 +321,18 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
         ) : null}
       </Toolbar>
 
-      {view === 'current' && count > 0 && !step ? (
-        <Toolbar label="Selected customers" tone="accent" start={<span className="archive-flow__selected">{count} selected</span>}>
-          <Button size="compact" variant="danger" data-next="" onClick={press}>
+      {view === 'current' && count > 0 && (!step || asking) ? (
+        <Toolbar
+          label="Selected customers"
+          tone="accent"
+          inert={asking}
+          start={
+            <span className="archive-flow__selected">
+              {count} of {visible.length} customers selected
+            </span>
+          }
+        >
+          <Button size="compact" variant="danger" data-next={asking ? undefined : ''} onClick={press}>
             Archive
           </Button>
           <Button size="compact" variant="ghost" onClick={() => toggleAll(false)}>
@@ -312,33 +353,6 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
             <Badge tone="warning">Can’t archive</Badge> {list(blocked.map((c) => c.company))}: {BLOCKED[blocked[0].id]}.
           </p>
         </div>
-      ) : null}
-
-      {view === 'current' && step && direction === 'confirm' ? (
-        <Toolbar
-          label="Confirm archive"
-          tone="accent"
-          start={
-            <span className="archive-flow__question">
-              <strong>Archive {plural(offered)}?</strong>
-              {f.namesActive && active.length ? ` ${list(active.map((c) => c.company))} ${active.length === 1 ? 'is' : 'are'} active.` : ''}
-              {f.blockedFirst && blocked.length ? ` ${list(blocked.map((c) => c.company))} can’t be: ${BLOCKED[blocked[0].id]}.` : ''}
-            </span>
-          }
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              e.preventDefault();
-              cancel();
-            }
-          }}
-        >
-          <Button size="compact" variant="ghost" onClick={cancel}>
-            Cancel
-          </Button>
-          <Button ref={stepButton} size="compact" variant="danger" data-next={offered > 0 ? '' : undefined} onClick={archive} disabled={offered === 0}>
-            Archive {plural(offered)}
-          </Button>
-        </Toolbar>
       ) : null}
 
       {view === 'current' && step && direction === 'review' ? (
@@ -372,7 +386,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
           {active.length ? (
             <div className="archive-flow__group">
               <p className="archive-flow__group-name">
-                <Badge tone="success">Active</Badge> Check these. Clear a box to keep the customer.
+                <Badge tone="success">Active</Badge> {active.length === 1 ? 'Check this one. Clear the box to keep the customer.' : 'Check these. Clear a box to keep the customer.'}
               </p>
               <ul className="archive-flow__rows">
                 {active.map((c) => (
@@ -392,8 +406,10 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
               </ul>
             </div>
           ) : null}
-          {count - blocked.length - active.length > 0 ? (
-            <p className="archive-flow__group-name">{plural(count - blocked.length - active.length)} churned, past due or on trial.</p>
+          {rest.length > 0 ? (
+            <p className="archive-flow__group-name">
+              {plural(rest.length)} {restOf(rest)}.
+            </p>
           ) : null}
           <div className="archive-flow__review-actions">
             <Button size="compact" variant="ghost" onClick={cancel}>
@@ -417,7 +433,37 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
       ) : null}
 
       {view === 'current' ? (
-        <>
+        <div className="archive-flow__stage">
+          {asking ? (
+            <div
+              role="alertdialog"
+              className="archive-flow__ask"
+              aria-labelledby={askId}
+              aria-describedby={askNote ? askNoteId : undefined}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  cancel();
+                }
+              }}
+            >
+              <div className="archive-flow__question">
+                <h3 id={askId} className="archive-flow__ask-title">
+                  Archive {plural(offered)}?
+                </h3>
+                {askNote ? <p id={askNoteId}>{askNote}</p> : null}
+              </div>
+              <div className="archive-flow__ask-actions">
+                <Button size="compact" variant="secondary" onClick={cancel}>
+                  Cancel
+                </Button>
+                <Button ref={stepButton} size="compact" variant="danger" data-next={offered > 0 ? '' : undefined} onClick={archive} disabled={offered === 0}>
+                  Archive {plural(offered)}
+                </Button>
+              </div>
+            </div>
+          ) : null}
+          <div className="archive-flow__rows-under" inert={asking}>
           <Table caption="Customers, with status, seats and monthly revenue" density="compact">
             <thead>
               <tr>
@@ -449,7 +495,8 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
             </tbody>
           </Table>
           {visible.length === 0 ? <EmptyState title="All customers archived" description={f.restore ? 'They’re in Archived, and can be restored for 90 days.' : 'Archived customers aren’t shown here. Support can restore one for 90 days.'} /> : null}
-        </>
+          </div>
+        </div>
       ) : (
         <>
           <Table caption="Archived customers, restorable for 90 days" density="compact">
