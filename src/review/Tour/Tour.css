@@ -100,12 +100,19 @@
 }
 
 /* The six stages, each a press that goes to it, over a line that fills as its beats play. */
+.tour__close {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}
+
+/* The chapters stop short of the close, so the last one's line never runs under it. */
 .tour__chapters {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
   margin: 0;
-  padding: 0;
+  padding: 0 calc(var(--control-height) + var(--space-3)) 0 0;
   list-style: none;
 }
 
@@ -259,23 +266,111 @@
   }
 
   .tour__chapters {
-    grid-template-columns: repeat(6, minmax(0, auto));
+    grid-template-columns: repeat(3, minmax(0, auto));
   }
 
 }
 
-/* ---------- the way in, on the cycle's first stage ---------- */
+/* ---------- the way in, featured on the cycle's first stage (TourFeature) ---------- */
 
-.tour-entry {
-  display: flex;
-  flex-wrap: wrap;
+.tour-feature {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-1);
+  column-gap: var(--space-6);
+  row-gap: var(--space-4);
+  margin-top: var(--space-2);
+  padding: var(--space-5) var(--space-6);
+  border: var(--border-width) solid var(--color-accent-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-subtle);
+  box-shadow: var(--shadow-raised);
 }
 
-.tour-entry__note {
+.tour-feature__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.tour-feature__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-ui);
+}
+
+.tour-feature__title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.tour-feature__says {
+  margin: 0;
+  max-width: 40rem;
+  color: var(--color-text-secondary);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+}
+
+.tour-feature__go.btn {
+  height: var(--control-height-touch);
+  padding-inline: var(--space-5);
+  font-size: var(--text-lg);
+}
+
+/* The stages the tour plays, drawn as the bar draws them. */
+.tour-feature__track {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tour-feature__track li {
+  padding-top: var(--space-2);
+  border-top: calc(var(--border-width) * 3) solid var(--color-accent-border);
   color: var(--color-text-muted);
   font-size: var(--text-sm);
-  line-height: var(--leading-ui);
+  line-height: var(--leading-tight);
+}
+
+.tour-feature__track span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 44rem) {
+  .tour-feature {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--space-4);
+  }
+
+  .tour-feature__go.btn {
+    width: 100%;
+  }
+
+  .tour-feature__track {
+    display: none;
+  }
+}
+
+/* Where the close is a fingertip's 44px, the chapters make room for that. */
+@media (pointer: coarse) {
+  .tour__chapters {
+    padding-right: calc(var(--control-height-touch) + var(--space-3));
+  }
 }

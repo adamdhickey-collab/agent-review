@@ -1,17 +1,19 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Badge, Button, Icon, IconButton } from '../../components';
 import { href } from '../../app/router';
-import { useStore } from '../../app/store';
-import { STAGES, type StageId } from '../../data/cycle';
-import { actionsBefore, BEATS, CLOSING, firstBeatOf, holdOf, type Find } from './script';
+import { saveStops } from '../../data/decide';
+import { BEATS, CHAPTERS, CLOSING, firstBeatOf, holdOf, stopsBefore, type Find } from './script';
+import { canNarrate, Narrator, narrationOn, rememberNarration } from './narrate';
 import './Tour.css';
 
-/* THE GUIDED TOUR (2026-11-18). A press on "Watch the tour" plays the design
-   cycle from its first stage to its last: a pointer crosses to each real
-   control and presses it, a ring says where to look, and one line in a bar
-   at the foot of the window says what is happening. About two minutes. It
-   is for someone who came to watch, a hiring manager mostly, and wants the
-   idea before deciding whether to use the prototype themselves.
+/* THE GUIDED TOUR (2026-11-18). A press on "Watch the tour" plays the short
+   path (review/DecideScreen), the prototype's front door, through its three
+   beats: a pointer crosses to each real control and presses it, a ring says
+   where to look, and one line in a bar at the foot of the window says what
+   is happening. About a minute and a half. It is for someone who came to
+   watch, a hiring manager mostly, and wants the idea before deciding
+   whether to use the prototype themselves. It played the design cycle's six
+   stages until the short path replaced them as the way in (script.ts).
 
    WHY IT IS NOT A RECORDING. The tour presses the cycle's own buttons, so
    what a viewer sees is the app, in the state those presses leave. That is
@@ -26,18 +28,17 @@ import './Tour.css';
    bar is built from the system's parts (Button, IconButton, Badge, Icon)
    and lives here, with the review's screens, because there is one of it.
 
-   HOW IT STARTS FROM ANYWHERE. A beat's presses are also written as the
-   reducer's actions (script.ts). Starting, replaying, stepping back or
-   jumping to a stage resets the cycle, plays the earlier beats' actions,
-   and remounts the stage (`epoch`, which App uses as the screen's key), so
-   the page is exactly where the presses would have left it whatever a
-   person had chosen before. It does clear those choices: the tour's are the
-   ones on screen afterwards. Playing on from one beat to the next does none
-   of that. It presses.
+   HOW IT STARTS FROM ANYWHERE. Each beat says what the visitor's answer is
+   once it is done (script.ts). Starting, replaying, stepping back or
+   jumping to a chapter sets the answer as the earlier beats left it and
+   draws the short path fresh (`epoch`, which App uses as the screen's key),
+   and every beat presses whatever else it needs from there. It does clear
+   a person's own answer: the tour's is the one on screen afterwards.
+   Playing on from one beat to the next does none of that. It presses.
 
    WHAT A PERSON CAN DO. Pause and resume; step back and forward (the arrow
-   keys do the same while the bar has focus); jump to any of the six stages;
-   and take over, by the button, by Escape, or just by pressing something
+   keys do the same while the bar has focus); jump to any of the three chapters;
+   and take over, by the button, by the close in the corner, by Escape, or just by pressing something
    on the page, which pauses the tour first. Focus stays in the bar while
    the tour presses things, so a keyboard keeps hold of it: the app moves
    focus to a new screen's heading, and the tour puts it back unless the
@@ -46,6 +47,15 @@ import './Tour.css';
    REDUCED MOTION. Nothing plays by itself: each beat makes its presses at
    once and waits for Next, the pointer isn't drawn, and the page doesn't
    glide. The same beats, read at the reader's pace.
+
+   IT IS READ ALOUD (2026-11-18), by the rules adamhickey.com's read-aloud
+   reads its pages with: the same voice, pace and pauses (narrate.ts has
+   them). A beat moves on once its words have been said, so the voice sets
+   the tour's length where it is slower than the reading clock.
+   Narration is on unless a person turned it off, which the bar's Narration
+   control does and remembers. A pause stops the voice mid-sentence and play
+   says the sentence again; Take over and every jump stop it. A browser with
+   no speech synthesiser gets no control and a silent tour.
 
    SIMULATED, SAID THREE TIMES: on the bar for as long as it is open, in the
    second beat, and where the simulated session notes are quoted. The
@@ -70,7 +80,7 @@ export function useTour(): TourApi {
 
 const CANCELLED = Symbol('cancelled');
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const stageNow = () => document.querySelector('.cycle')?.getAttribute('data-stage') ?? null;
+const onPath = () => /^#\/(decide\/?)?$/.test(location.hash) || location.hash === '';
 
 interface Box {
   x: number;
@@ -89,7 +99,6 @@ export function TourProvider({
   /** Where the bar opens, for a story: on a beat, waiting, or at the end. The app opens it by a press. */
   opening?: { at: number; status: 'paused' | 'ended' };
 }) {
-  const { cycleDo } = useStore();
   const [status, setStatusState] = useState<Status>(opening?.status ?? 'off');
   const [at, setAtState] = useState(opening?.at ?? 0);
   const [epoch, setEpoch] = useState(0);
@@ -109,10 +118,27 @@ export function TourProvider({
   const bar = useRef<HTMLDivElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
 
-  const setStatus = useCallback((s: Status) => {
-    statusRef.current = s;
-    setStatusState(s);
-  }, []);
+  /* The voice (narrate.ts): on unless a person turned it off, and only where the browser can speak. */
+  const [narrator] = useState(() => new Narrator());
+  const [voiced, setVoicedState] = useState(() => canNarrate && narrationOn());
+  const voicedRef = useRef(voiced);
+  useEffect(() => () => narrator.stop(), [narrator]);
+
+  /* The voice follows the tour: a pause stops it mid-sentence and play says
+     that sentence again. `keepVoice` is for a beat that has finished and
+     waits for Next under reduced motion, which is not a pause of the
+     reading: its caption is still being said. */
+  const setStatus = useCallback(
+    (s: Status, keepVoice = false) => {
+      statusRef.current = s;
+      setStatusState(s);
+      if (keepVoice) return;
+      if (s === 'paused') narrator.pause();
+      else if (s === 'playing') narrator.resume();
+      else if (s === 'off') narrator.stop();
+    },
+    [narrator],
+  );
   const setAt = useCallback((i: number) => {
     atRef.current = i;
     setAtState(i);
@@ -237,50 +263,45 @@ export function TourProvider({
       const beat = BEATS[index];
       const still = reduced();
       setPressing(false);
+      narrator.stop();
       setStatus('playing');
       try {
-        if (seeded) {
+        if (seeded || !onPath()) {
           aim(null, null);
-          cycleDo({ type: 'reset' });
-          for (const action of actionsBefore(index)) cycleDo(action);
-          const to = href({ name: 'cycle', stage: beat.stage });
-          if (location.hash !== to) location.hash = to;
+          saveStops(stopsBefore(index));
+          const to = href({ name: 'decide' });
+          if (!onPath()) location.hash = to;
           setEpoch((e) => e + 1);
           setAt(index);
-        } else if (stageNow() !== beat.stage) {
-          /* The way on is the cycle's own: Continue, in the move. */
-          const on = document.querySelector<HTMLElement>('.cycle__move .cycle__move-next');
-          if (on && (on.textContent ?? '').trim().startsWith('Continue')) await press(on, on, mine, still);
-          else location.hash = href({ name: 'cycle', stage: beat.stage });
-          aim(null, null);
         }
-        await until(() => document.querySelector<HTMLElement>(`.cycle[data-stage="${beat.stage}"] .cycle__work`), mine);
+        await until(() => document.querySelector<HTMLElement>('.decide .decide__beat'), mine);
         setAt(index);
         done.current = false;
+        if (voicedRef.current) narrator.say([beat.caption, beat.why ?? '']);
         let spent = await sleep(still ? 0 : 400, mine); /* the new screen, before anything points at it */
         for (const step of beat.steps) {
           if ('show' in step) {
             aim(await until(step.show, mine), null);
             spent += await sleep(still ? 0 : 1100, mine);
-          } else if ('press' in step) {
+          } else {
             const control = await until(step.press, mine);
             spent += await press(control, step.frame?.() ?? control, mine, still);
-          } else {
-            for (let i = 0; i < 4; i++) {
-              const control = i === 0 ? await until(step.pressWhile, mine) : step.pressWhile();
-              if (!control) break;
-              spent += await press(control, step.frame?.() ?? control, mine, still);
-              spent += await sleep(still ? 0 : 700, mine);
-            }
           }
         }
-        if (!still) await sleep(Math.max(1600, holdOf(beat) - spent), mine);
+        if (!still) {
+          await sleep(Math.max(1600, holdOf(beat) - spent), mine);
+          /* The beat moves on once its words have been said, however long the voice takes. */
+          await narrator.idle();
+          if (token.current !== mine) throw CANCELLED;
+          await sleep(300, mine);
+        }
         done.current = true;
         if (index === BEATS.length - 1) {
           aim(null, null);
           setStatus('ended');
+          if (voicedRef.current) narrator.say([CLOSING.caption, CLOSING.why]);
         } else if (still) {
-          setStatus('paused');
+          setStatus('paused', true);
         } else {
           again.current(index + 1, false);
         }
@@ -293,7 +314,7 @@ export function TourProvider({
         else again.current(index, true, true);
       }
     },
-    [aim, cycleDo, leave, press, setAt, setStatus, sleep, until],
+    [aim, leave, narrator, press, setAt, setStatus, sleep, until],
   );
 
   useEffect(() => {
@@ -318,6 +339,22 @@ export function TourProvider({
     else if (done.current) next(); /* a beat that finished and waited, as every beat does under reduced motion */
     else setStatus('playing');
   }, [next, run, setStatus, start]);
+
+  /* Narration on or off, remembered. Turned off, the voice stops and the
+     beat moves on by its own clock; turned on, it reads the line on screen. */
+  const setVoiced = useCallback(
+    (on: boolean) => {
+      voicedRef.current = on;
+      setVoicedState(on);
+      rememberNarration(on);
+      if (!on) return narrator.stop();
+      const s = statusRef.current;
+      const words = s === 'ended' ? [CLOSING.caption, CLOSING.why] : [BEATS[atRef.current].caption, BEATS[atRef.current].why ?? ''];
+      narrator.setPaused(s === 'paused' && !done.current);
+      narrator.say(words);
+    },
+    [narrator],
+  );
 
   const active = status !== 'off';
 
@@ -399,7 +436,7 @@ export function TourProvider({
   const caption = ended ? CLOSING.caption : beat.caption;
   const why = ended ? CLOSING.why : beat.why;
   const decision = !ended && !!beat.decision;
-  const stageAt: StageId = beat.stage;
+  const chapterAt = beat.chapter;
 
   return (
     <TourContext.Provider value={api}>
@@ -421,14 +458,18 @@ export function TourProvider({
       </div>
       {active ? (
         <section ref={bar} className="tour" data-surface="review" data-decision={decision || undefined} aria-label="Guided tour">
+          {/* The plain way out (2026-11-18), in the corner where a reader looks for
+              one: the same as Take over and Escape, the page left where the tour
+              got to. First in the bar, so a keyboard meets it as an eye does. */}
+          <IconButton className="tour__close" icon="x" label="Close the tour" tooltip="end" onClick={() => leave()} />
           <ol className="tour__chapters" role="list">
-            {STAGES.map((st, i) => {
-              const first = firstBeatOf(st.id);
-              const count = BEATS.filter((b) => b.stage === st.id).length;
+            {CHAPTERS.map((name, i) => {
+              const first = firstBeatOf(i);
+              const count = BEATS.filter((b) => b.chapter === i).length;
               const filled = ended ? 1 : Math.min(1, Math.max(0, (at - first + 1) / count));
-              const current = !ended && st.id === stageAt;
+              const current = !ended && i === chapterAt;
               return (
-                <li key={st.id}>
+                <li key={name}>
                   <Button
                     className="tour__chapter"
                     size="compact"
@@ -437,7 +478,7 @@ export function TourProvider({
                     onClick={() => void run(first, true)}
                   >
                     <span className="tour__chapter-num">{i + 1}</span>
-                    <span className="tour__chapter-name">{st.name}</span>
+                    <span className="tour__chapter-name">{name}</span>
                     <span className="tour__chapter-track">
                       <span className="tour__chapter-fill" style={{ scale: `${filled} 1` }} />
                     </span>
@@ -459,6 +500,9 @@ export function TourProvider({
               </div>
             </div>
             <div className="tour__controls">
+              {canNarrate ? (
+                <IconButton className="tour__voice" icon={voiced ? 'speaker' : 'speaker-off'} label="Narration" pressed={voiced} onClick={() => setVoiced(!voiced)} />
+              ) : null}
               {ended ? (
                 <>
                   <Button variant="primary" trailingIcon="arrow-right" onClick={() => leave(true)}>
