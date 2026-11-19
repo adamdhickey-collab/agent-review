@@ -61,8 +61,7 @@ for (const width of [1296, 1440]) {
     test.use({ viewport: { width, height: 900 } });
 
     const SCREENS: [string, string][] = [
-      ['the short path, the front door', '#/'],
-      ['the design cycle, discover', '#/cycle/discover'],
+      ['the design cycle, discover, the front door', '#/'],
       ['the delegated work', '#/runs/billing'],
       ['the shared-table run', '#/runs/shared-table'],
       ['the queue', '#/queue'],

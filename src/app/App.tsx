@@ -7,7 +7,6 @@ import { DelegationScreen } from '../review/DelegationScreen/DelegationScreen';
 import { ChangeScreen } from '../review/ChangeScreen/ChangeScreen';
 import { CycleScreen } from '../review/CycleScreen/CycleScreen';
 import { SceneScreen } from '../review/SceneScreen/SceneScreen';
-import { DecideScreen } from '../review/DecideScreen/DecideScreen';
 import { TourProvider, useTour } from '../review/Tour/Tour';
 import { EmptyState } from '../components';
 
@@ -21,9 +20,8 @@ function Screens() {
   if (route.name === 'scene') return <SceneScreen id={route.id} />;
   return (
     <Shell route={route}>
-      {route.name === 'decide' ? <DecideScreen key={epoch} /> : null}
       {route.name === 'delegation' ? <DelegationScreen run={route.run ?? 'billing'} /> : null}
-      {route.name === 'cycle' ? <CycleScreen stage={route.stage} /> : null}
+      {route.name === 'cycle' ? <CycleScreen key={epoch} stage={route.stage} /> : null}
       {route.name === 'queue' ? <QueueScreen /> : null}
       {route.name === 'change' ? <ChangeScreen id={route.id} findingId={route.findingId} /> : null}
       {route.name === 'not-found' ? (
