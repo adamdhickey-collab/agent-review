@@ -23,14 +23,19 @@ test.beforeEach(async ({ page }) => {
      so the tests neither depend on a machine's voices nor wait on them. */
   await page.addInitScript(() => {
     const said: string[] = [];
-    const w = window as unknown as { __said: string[]; __cancels: number };
+    const w = window as unknown as { __said: string[]; __cancels: number; __rates: number[]; __voices: string[]; __offer?: SpeechSynthesisVoice[] };
     w.__said = said;
     w.__cancels = 0;
+    /* Each utterance's rate and voice, and the voices a test offers the page (none, unless it sets __offer). */
+    w.__rates = [];
+    w.__voices = [];
     let live: ReturnType<typeof setTimeout> | null = null;
-    Object.defineProperty(window.speechSynthesis, 'getVoices', { value: () => [] });
+    Object.defineProperty(window.speechSynthesis, 'getVoices', { value: () => w.__offer ?? [] });
     Object.defineProperty(window.speechSynthesis, 'speak', {
       value: (u: SpeechSynthesisUtterance) => {
         said.push(u.text);
+        w.__rates.push(u.rate);
+        w.__voices.push(u.voice?.name ?? '');
         live = setTimeout(() => u.dispatchEvent(new Event('end')), 40);
       },
     });
@@ -187,4 +192,46 @@ test('the narration reads each caption as it plays, stops on a pause, and stays 
   const silent = (await said(page)).length;
   await expect(bar(page)).toContainText('Step 5 of 18', { timeout: 40_000 });
   expect((await said(page)).length).toBe(silent);
+});
+
+test('the reading speed steps, is spoken at, and is remembered; the voice menu offers the machine\'s English voices', async ({ page }) => {
+  test.setTimeout(60_000);
+  /* Two voices and a novelty one, offered through the stand-in above. */
+  await page.addInitScript(() => {
+    const voice = (name: string) => ({ name, lang: 'en-US', default: false, localService: true, voiceURI: name }) as SpeechSynthesisVoice;
+    (window as unknown as { __offer: SpeechSynthesisVoice[] }).__offer = [voice('Samantha'), voice('Zarvox'), voice('Ava (Premium)')];
+    /* A real utterance refuses a voice that isn't the engine's own; these aren't, so it is taught to hold one. */
+    let held: SpeechSynthesisVoice | null = null;
+    Object.defineProperty(SpeechSynthesisUtterance.prototype, 'voice', { get: () => held, set: (v: SpeechSynthesisVoice | null) => (held = v) });
+  });
+  await open(page, '#/');
+  await page.getByRole('region', { name: /Watch an agent do the work/ }).getByRole('button', { name: 'Watch the tour' }).click();
+  const speed = bar(page).getByRole('button', { name: /^Reading speed/ });
+  await expect(speed).toHaveText('1×');
+  await bar(page).getByRole('button', { name: 'Pause the tour' }).click();
+  await bar(page).getByRole('button', { name: 'Play the tour' }).click();
+  const before = (await said(page)).length;
+  await speed.click();
+  await expect(speed).toHaveText('1.25×');
+  await expect(speed).toHaveAccessibleName('Reading speed, 1.25×');
+  expect(await page.evaluate(() => localStorage.getItem('agent-review:tour-rate'))).toBe('1.25');
+  /* The stand-in ends a sentence in 40ms, so the beat's words are usually said already: the next beat's are what come at the new speed. */
+  await expect.poll(async () => (await said(page)).length, { timeout: 30_000 }).toBeGreaterThan(before);
+  const rates = await page.evaluate(() => (window as unknown as { __rates: number[] }).__rates);
+  expect(rates[0]).toBeCloseTo(0.95);
+  expect(rates[rates.length - 1]).toBeCloseTo(0.95 * 1.25);
+
+  /* The menu: the better voice first, the novelty one never offered; a choice is spoken in and kept. */
+  const menu = bar(page).getByRole('combobox', { name: 'Voice' });
+  await expect(menu).toHaveValue('Ava (Premium)');
+  await menu.focus();
+  await expect(menu.locator('option')).toHaveText(['Ava (Premium)', 'Samantha']);
+  await menu.selectOption('Samantha');
+  expect(await page.evaluate(() => localStorage.getItem('adamhickey:read-aloud-voice'))).toBe('Samantha');
+  await expect.poll(async () => (await page.evaluate(() => (window as unknown as { __voices: string[] }).__voices)).at(-1), { timeout: 30_000 }).toBe('Samantha');
+
+  /* Narration off takes both settings away with it. */
+  await bar(page).getByRole('button', { name: 'Narration' }).click();
+  await expect(speed).toHaveCount(0);
+  await expect(menu).toHaveCount(0);
 });

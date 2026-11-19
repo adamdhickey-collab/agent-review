@@ -222,6 +222,38 @@
   gap: var(--space-2);
 }
 
+/* The voice's two settings, beside its switch: the speed, a button as wide
+   as its longest label so the row doesn't shift as it steps, and the voice
+   menu, the platform's own select in the bar's ink. */
+.tour__rate.btn {
+  min-width: 3.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.tour__voices {
+  height: var(--control-height);
+  max-width: 10rem;
+  padding: 0 var(--space-2);
+  border: var(--border-width) solid var(--color-border-control);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+}
+
+.tour__voices:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (pointer: coarse) {
+  .tour__voices {
+    height: var(--control-height-touch);
+  }
+}
+
 .tour__foot {
   display: flex;
   align-items: center;
@@ -250,6 +282,10 @@
     flex-direction: column;
     align-items: stretch;
     gap: var(--space-3);
+  }
+
+  .tour__controls {
+    flex-wrap: wrap;
   }
 
   .tour__caption {
