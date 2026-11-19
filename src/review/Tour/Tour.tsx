@@ -555,16 +555,19 @@ export function TourProvider({
               {canNarrate ? (
                 <IconButton className="tour__voice" icon={voiced ? 'speaker' : 'speaker-off'} label="Narration" pressed={voiced} onClick={() => setVoiced(!voiced)} />
               ) : null}
-              {canNarrate && voiced ? (
+              {/* Both settings stay in the bar with narration off, disabled
+                  (since 2026-11-18): hidden, a reader whose narration was
+                  off from an earlier visit never learned they existed. */}
+              {canNarrate ? (
                 <>
-                  <Button className="tour__rate" variant="ghost" aria-label={`Reading speed, ${rate}×`} onClick={stepRate}>
+                  <Button className="tour__rate" variant="ghost" aria-label={`Reading speed, ${rate}×`} disabled={!voiced} onClick={stepRate}>
                     {rate}×
                   </Button>
                   <select
                     className="tour__voices"
                     aria-label="Voice"
                     value={voiceName}
-                    disabled={!voiceName}
+                    disabled={!voiced || !voiceName}
                     onPointerDown={fillVoices}
                     onKeyDown={fillVoices}
                     onFocus={fillVoices}

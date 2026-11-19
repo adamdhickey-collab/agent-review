@@ -230,8 +230,8 @@ test('the reading speed steps, is spoken at, and is remembered; the voice menu o
   expect(await page.evaluate(() => localStorage.getItem('adamhickey:read-aloud-voice'))).toBe('Samantha');
   await expect.poll(async () => (await page.evaluate(() => (window as unknown as { __voices: string[] }).__voices)).at(-1), { timeout: 30_000 }).toBe('Samantha');
 
-  /* Narration off takes both settings away with it. */
+  /* Narration off: both settings stay in the bar, out of reach, so they can be found. */
   await bar(page).getByRole('button', { name: 'Narration' }).click();
-  await expect(speed).toHaveCount(0);
-  await expect(menu).toHaveCount(0);
+  await expect(speed).toBeDisabled();
+  await expect(menu).toBeDisabled();
 });
