@@ -102,6 +102,17 @@
   background: var(--color-success-subtle);
 }
 
+/* The rows the last press archived, in view while its bar shows: muted,
+   the company struck through, the box out of reach. */
+.archive-flow .archive-flow__row--archived .table__td,
+.archive-flow .archive-flow__row--archived .table__th {
+  color: var(--color-text-muted);
+}
+
+.archive-flow__row--archived .archive-flow__company {
+  text-decoration: line-through;
+}
+
 /* The review: the batch sorted by what a person should look at, on the
    sunken ground under the toolbar, so it reads as the toolbar's next step
    and not as a dialog over the table. */

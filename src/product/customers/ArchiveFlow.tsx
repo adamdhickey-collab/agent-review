@@ -11,6 +11,13 @@ import './ArchiveFlow.css';
 
      undo     Archive acts at once. A bar says what left and offers Undo
               until the next action (rule 6's "a way back").
+
+   Since 2026-11-18 the rows a press archived stay in view, struck through
+   and out of reach, for as long as that bar shows, and the bar counts them
+   of the table ("3 of 12 customers archived."). The case study draws it
+   this way and says so ("the archived rows stay in view"); here they left
+   at once, and a reader saw only a shorter table. The next action ends the
+   bar and the rows go with it.
      confirm  Archive opens a pop-up over the rows that asks first and
               names any active customer in the selection. Until 2026-11-18
               the selection bar became the question, as CustomerTable's
@@ -136,6 +143,8 @@ export function isActive(c: Customer, rule: 'status' | 'recent'): boolean {
 
 interface Result {
   archived: Customer[];
+  /** How many customers the table held before the press. */
+  of: number;
   blocked: Customer[];
   undoable: boolean;
 }
@@ -167,6 +176,9 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
   const pendingFocus = useRef<'select-all' | 'undo' | null>(null);
 
   const visible = useMemo(() => customers.filter((c) => !archived.includes(c.id)), [customers, archived]);
+  /* The rows the last press archived, kept in view while its bar shows. */
+  const justGone = useMemo(() => new Set(result ? result.archived.map((c) => c.id) : []), [result]);
+  const shown = useMemo(() => customers.filter((c) => !archived.includes(c.id) || justGone.has(c.id)), [customers, archived, justGone]);
   const gone = useMemo(() => archived.map((id) => customers.find((c) => c.id === id)).filter((c): c is Customer => !!c), [customers, archived]);
   const chosen = useMemo(() => visible.filter((c) => selected.has(c.id)), [visible, selected]);
   const count = chosen.length;
@@ -244,8 +256,8 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
     /* A press that asked nothing offers a way back: always for undo, and for
        the others when the condition let the batch through. */
     const undoable = direction === 'undo' || immediate;
-    setResult({ archived: out, blocked: stopped, undoable });
-    setStatus(sentence(out, stopped));
+    setResult({ archived: out, of: visible.length, blocked: stopped, undoable });
+    setStatus(sentence(out, visible.length, stopped));
     pendingFocus.current = undoable && out.length ? 'undo' : 'select-all';
     if (out.length) onEvent?.('archived');
     if (stopped.length) onEvent?.('blocked');
@@ -423,7 +435,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
       ) : null}
 
       {view === 'current' && result ? (
-        <Toolbar label="Last action" start={<span className="archive-flow__result">{sentence(result.archived, result.blocked)}</span>}>
+        <Toolbar label="Last action" start={<span className="archive-flow__result">{sentence(result.archived, result.of, result.blocked)}</span>}>
           {result.undoable && result.archived.length ? (
             <Button ref={undoButton} size="compact" variant="secondary" leadingIcon="undo" onClick={undo}>
               Undo
@@ -478,12 +490,15 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
               </tr>
             </thead>
             <tbody>
-              {visible.map((c) => (
-                <Row key={c.id} selected={selected.has(c.id)} className={shaded.has(c.id) ? 'archive-flow__row--active' : undefined}>
+              {shown.map((c) => (
+                <Row key={c.id} selected={selected.has(c.id)} className={justGone.has(c.id) ? 'archive-flow__row--archived' : shaded.has(c.id) ? 'archive-flow__row--active' : undefined}>
                   <Cell control>
-                    <Checkbox label={`Select ${c.company}`} hideLabel checked={selected.has(c.id)} onChange={(e) => toggleRow(c.id, e.currentTarget.checked)} />
+                    <Checkbox label={`Select ${c.company}`} hideLabel checked={selected.has(c.id)} disabled={justGone.has(c.id)} onChange={(e) => toggleRow(c.id, e.currentTarget.checked)} />
                   </Cell>
-                  <Cell rowHeader>{c.company}</Cell>
+                  <Cell rowHeader>
+                    <span className="archive-flow__company">{c.company}</span>
+                    {justGone.has(c.id) ? <span className="visually-hidden">, archived</span> : null}
+                  </Cell>
                   <Cell>
                     <Badge tone={STATUS_TONE[c.status]}>{STATUS_LABEL[c.status]}</Badge>
                   </Cell>
@@ -494,7 +509,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
               ))}
             </tbody>
           </Table>
-          {visible.length === 0 ? <EmptyState title="All customers archived" description={f.restore ? 'They’re in Archived, and can be restored for 90 days.' : 'Archived customers aren’t shown here. Support can restore one for 90 days.'} /> : null}
+          {shown.length === 0 ? <EmptyState title="All customers archived" description={f.restore ? 'They’re in Archived, and can be restored for 90 days.' : 'Archived customers aren’t shown here. Support can restore one for 90 days.'} /> : null}
           </div>
         </div>
       ) : (
@@ -537,8 +552,8 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
   );
 });
 
-function sentence(out: Customer[], stopped: Customer[]): string {
-  const a = out.length ? `${plural(out.length)} archived.` : 'Nothing archived.';
+function sentence(out: Customer[], of: number, stopped: Customer[]): string {
+  const a = out.length ? `${out.length} of ${plural(of)} archived.` : 'Nothing archived.';
   const b = stopped.length ? ` ${list(stopped.map((c) => c.company))} wasn’t: ${BLOCKED[stopped[0].id]}.` : '';
   return a + b;
 }
