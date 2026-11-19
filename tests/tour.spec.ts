@@ -162,15 +162,21 @@ test('the close in the corner leaves the tour from its first step', async ({ pag
   await bar(page).getByRole('button', { name: 'Close the tour' }).click();
   await expect(bar(page)).toHaveCount(0);
   await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
-  expect((await said(page)).length).toBeGreaterThan(0);
+  expect(await said(page), 'the tour is silent until narration is turned on').toEqual([]);
 });
 
-test('the narration reads each caption as it plays, stops on a pause, and stays off once turned off', async ({ page }) => {
+test('the narration is off until turned on, then reads each caption as it plays, stops on a pause, and goes off again', async ({ page }) => {
   test.setTimeout(90_000);
   await open(page, '#/');
   await page.getByRole('region', { name: /Watch an agent do the work/ }).getByRole('button', { name: 'Watch the tour' }).click();
   const voice = bar(page).getByRole('button', { name: 'Narration' });
+  /* Off by default: nothing is said, and nothing is kept. Turned on, it reads the line on screen and is remembered. */
+  await expect(voice).toHaveAttribute('aria-pressed', 'false');
+  await expect(bar(page)).toContainText('Step 1 of 18');
+  expect(await said(page)).toEqual([]);
+  await voice.click();
   await expect(voice).toHaveAttribute('aria-pressed', 'true');
+  expect(await page.evaluate(() => localStorage.getItem('agent-review:tour-narration'))).toBe('on');
   /* Each beat's words, sentence by sentence, before the beat moves on. */
   await expect(bar(page)).toContainText('Step 3 of 18', { timeout: 30_000 });
   const first = (await said(page)).join(' ');
@@ -184,10 +190,10 @@ test('the narration reads each caption as it plays, stops on a pause, and stays 
   await page.waitForTimeout(1500);
   expect((await said(page)).length).toBe(count);
 
-  /* Off, remembered, and the tour carries on by its own clock. */
+  /* Off, forgotten, and the tour carries on by its own clock. */
   await voice.click();
   await expect(voice).toHaveAttribute('aria-pressed', 'false');
-  expect(await page.evaluate(() => localStorage.getItem('agent-review:tour-narration'))).toBe('off');
+  expect(await page.evaluate(() => localStorage.getItem('agent-review:tour-narration'))).toBeNull();
   await bar(page).getByRole('button', { name: 'Play the tour' }).click();
   const silent = (await said(page)).length;
   await expect(bar(page)).toContainText('Step 5 of 18', { timeout: 40_000 });
@@ -198,6 +204,7 @@ test('one menu holds the speed and the voice: a speed is spoken at and remembere
   test.setTimeout(60_000);
   /* Voices as macOS lists them (one twice by quality, one twice by accent) and a novelty one, offered through the stand-in above. */
   await page.addInitScript(() => {
+    localStorage.setItem('agent-review:tour-narration', 'on'); /* a reader who turned narration on last time */
     const voice = (name: string) => ({ name, lang: 'en-US', default: false, localService: true, voiceURI: name }) as SpeechSynthesisVoice;
     (window as unknown as { __offer: SpeechSynthesisVoice[] }).__offer = [voice('Samantha'), voice('Zarvox'), voice('Ava'), voice('Ava (Premium)'), voice('Eddy (English (United States))'), { ...voice('Eddy (English (United Kingdom))'), lang: 'en-GB' }];
     /* A real utterance refuses a voice that isn't the engine's own; these aren't, so it is taught to hold one. */

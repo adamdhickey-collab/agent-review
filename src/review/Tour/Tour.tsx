@@ -51,13 +51,13 @@ const SPEEDS = [...RATES].sort((a, b) => a - b).map((r) => ({ value: String(r), 
    once and waits for Next, the pointer isn't drawn, and the page doesn't
    glide. The same beats, read at the reader's pace.
 
-   IT IS READ ALOUD (2026-11-18), by the rules adamhickey.com's read-aloud
+   IT CAN BE READ ALOUD (2026-11-18), by the rules adamhickey.com's read-aloud
    reads its pages with: the same voice, pace and pauses (narrate.ts has
    them). A beat moves on once its words have been said, so the voice sets
    the tour's length where it is slower than the reading clock: about two
    and a half minutes with Zoe (Premium), against two and a quarter silent.
-   Narration is on unless a person turned it off, which the bar's Narration
-   control does and remembers. A pause stops the voice mid-sentence and play
+   Narration is off until a person turns it on (since 2026-11-19), which the
+   bar's Narration control does and remembers. A pause stops the voice mid-sentence and play
    says the sentence again; the close and every jump stop it. A browser with
    no speech synthesiser gets no control and a silent tour.
 
@@ -123,7 +123,7 @@ export function TourProvider({
   const bar = useRef<HTMLDivElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
 
-  /* The voice (narrate.ts): on unless a person turned it off, and only where the browser can speak. */
+  /* The voice (narrate.ts): off until a person turns it on, and only where the browser can speak. */
   const [narrator] = useState(() => new Narrator());
   const [voiced, setVoicedState] = useState(() => canNarrate && narrationOn());
   const voicedRef = useRef(voiced);
@@ -605,8 +605,8 @@ export function TourProvider({
               {canNarrate ? (
                 <span className="tour__narration">
                   <IconButton className="tour__voice" icon={voiced ? 'speaker' : 'speaker-off'} label="Narration" pressed={voiced} onClick={() => setVoiced(!voiced)} />
-                  {/* It stays with narration off, disabled: hidden, a reader whose
-                      narration was off from an earlier visit never learned it existed. */}
+                  {/* It stays with narration off, disabled: hidden, a reader who
+                      never turned narration on never learned it existed. */}
                   <span ref={settings} className="tour__settings">
                     <Button
                       ref={settingsButton}

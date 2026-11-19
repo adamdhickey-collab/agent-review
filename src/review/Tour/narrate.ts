@@ -1,5 +1,5 @@
-/* THE TOUR'S VOICE (2026-11-18). The tour reads its captions aloud with the
-   browser's own speech synthesiser, by the rules adamhickey.com's
+/* THE TOUR'S VOICE (2026-11-18). The tour can read its captions aloud, once
+   a person turns narration on, with the browser's own speech synthesiser, by the rules adamhickey.com's
    read-aloud.js reads its pages with, so a reader who listened to the case
    study hears the same voice in the prototype:
 
@@ -141,19 +141,21 @@ function voiceOf(): SpeechSynthesisVoice | null {
   return list.find((v) => v.default) ?? list[0];
 }
 
-/** Whether narration is on: on unless a person turned it off, remembered where storage allows. */
+/** Whether narration is on: off until a person turns it on (since 2026-11-19; a page that
+    starts talking unasked is a surprise), remembered where storage allows. An 'off' kept
+    from before that date reads as off too. */
 export function narrationOn(): boolean {
   try {
-    return localStorage.getItem(ON_KEY) !== 'off';
+    return localStorage.getItem(ON_KEY) === 'on';
   } catch {
-    return true;
+    return false;
   }
 }
 
 export function rememberNarration(on: boolean) {
   try {
-    if (on) localStorage.removeItem(ON_KEY);
-    else localStorage.setItem(ON_KEY, 'off');
+    if (on) localStorage.setItem(ON_KEY, 'on');
+    else localStorage.removeItem(ON_KEY);
   } catch {
     /* it holds for this visit */
   }

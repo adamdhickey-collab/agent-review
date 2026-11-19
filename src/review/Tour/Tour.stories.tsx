@@ -53,9 +53,14 @@ export const Narrating: Story = {
     await expect(within(bar).queryByRole('button', { name: 'Take over' })).toBeNull();
     await expect(within(bar).getAllByRole('listitem')).toHaveLength(6);
     await expect(within(bar).queryByText('The designer decides')).toBeNull();
-    await expect(within(bar).getByRole('button', { name: 'Narration' })).toHaveAttribute('aria-pressed', 'true');
-    /* One button says the voice and the speed and opens the menu that changes them. */
+    /* Narration is off until it is turned on, and its settings wait with it. */
+    const voice = within(bar).getByRole('button', { name: 'Narration' });
     const settings = within(bar).getByRole('button', { name: /^Voice and speed: / });
+    await expect(voice).toHaveAttribute('aria-pressed', 'false');
+    await expect(settings).toBeDisabled();
+    await userEvent.click(voice);
+    await expect(voice).toHaveAttribute('aria-pressed', 'true');
+    /* One button says the voice and the speed and opens the menu that changes them. */
     await expect(settings).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(settings);
     const menu = within(bar).getByRole('dialog', { name: 'Voice and speed' });
@@ -64,6 +69,8 @@ export const Narrating: Story = {
     await userEvent.keyboard('{Escape}');
     await expect(within(bar).queryByRole('dialog')).toBeNull();
     await expect(settings).toHaveFocus();
+    await userEvent.click(voice); /* off again, so the next story starts silent */
+    await expect(voice).toHaveAttribute('aria-pressed', 'false');
   },
 };
 
