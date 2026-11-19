@@ -87,6 +87,8 @@ export interface ArchiveFlowProps {
   onEvent?: (event: ArchiveEvent) => void;
   /** The phase, and the label of the press that moves it on, or null when none does. */
   onPhase?: (phase: ArchivePhase, next: string | null) => void;
+  /** What this copy is, when a page shows more than one (since 2026-11-18, the short path shows the agent's plan and the build): it names the section and its table, so a screen reader's list of regions can tell them apart. The visible title stays "Customers". */
+  name?: string;
 }
 
 const STATUS_TONE: Record<CustomerStatus, BadgeTone> = {
@@ -119,7 +121,7 @@ interface Result {
 }
 
 export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(function ArchiveFlow(
-  { direction, features = {}, activeRule = 'status', customers = allCustomers, initialSelection = [], initialStep = false, initialArchived = [], initialView = 'current', onEvent, onPhase },
+  { direction, features = {}, activeRule = 'status', customers = allCustomers, initialSelection = [], initialStep = false, initialArchived = [], initialView = 'current', onEvent, onPhase, name },
   ref,
 ) {
   const f: ArchiveFeatures = {
@@ -260,7 +262,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
   const reviewId = useId();
 
   return (
-    <section ref={root} className="archive-flow" aria-labelledby={titleId}>
+    <section ref={root} className="archive-flow" aria-labelledby={name ? undefined : titleId} aria-label={name ? `Customers, ${name}` : undefined}>
       <Toolbar
         label="Customers"
         start={
@@ -418,7 +420,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
 
       {view === 'current' ? (
         <>
-          <Table caption="Customers, with status, seats and monthly revenue" density="compact">
+          <Table caption={`Customers${name ? `, ${name},` : ','} with status, seats and monthly revenue`} density="compact">
             <thead>
               <tr>
                 <HeaderCell control>
@@ -452,7 +454,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
         </>
       ) : (
         <>
-          <Table caption="Archived customers, restorable for 90 days" density="compact">
+          <Table caption={`Archived customers${name ? `, ${name},` : ','} restorable for 90 days`} density="compact">
             <thead>
               <tr>
                 <HeaderCell>Company</HeaderCell>

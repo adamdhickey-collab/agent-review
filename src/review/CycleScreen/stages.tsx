@@ -119,7 +119,7 @@ export function Choice({ name, says, chosen, recommended, onChoose, children }: 
 }
 
 /** What a choice did, said once it is made. */
-function Consequence({ children }: { children: ReactNode }) {
+export function Consequence({ children }: { children: ReactNode }) {
   return (
     <p className="cycle__consequence" role="status">
       <Icon name="arrow-right" size={14} />
@@ -140,7 +140,7 @@ export function Needs({ stage, what, description }: { stage: StageId; what: stri
 /** Relay, inside the review: the product's surface and icons, always light.
     A stage that marks something in the screen draws the mark in the frame,
     over the screen, as the preview does (mark.ts). */
-function Product({ label, frameRef, mark, children }: { label: string; frameRef?: Ref<HTMLDivElement>; mark?: ReactNode; children: ReactNode }) {
+export function Product({ label, frameRef, mark, children }: { label: string; frameRef?: Ref<HTMLDivElement>; mark?: ReactNode; children: ReactNode }) {
   return (
     <figure className="cycle__product">
       <figcaption className="cycle__product-label">

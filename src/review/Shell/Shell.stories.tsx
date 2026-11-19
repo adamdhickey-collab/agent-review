@@ -55,7 +55,7 @@ export const OnTheCycle: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.queryByRole('navigation', { name: 'Primary' })).toBeNull();
     await expect(canvas.queryByText('relay/web')).toBeNull();
-    await expect(canvas.getByRole('link', { name: 'Agent Review, start of the design cycle' })).toHaveAttribute('href', '#/cycle/discover');
+    await expect(canvas.getByRole('link', { name: 'Agent Review, start' })).toHaveAttribute('href', '#/decide');
   },
 };
 

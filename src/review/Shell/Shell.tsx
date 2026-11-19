@@ -88,7 +88,8 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
   const { appearance, setAppearance } = useTheme();
   const singleKeys = useSingleKeys();
   const [sheet, setSheet] = useState(false);
-  const guided = route.name === 'cycle';
+  /* The short path is guided too (since 2026-11-18), and the front door: the product's name goes there. */
+  const guided = route.name === 'cycle' || route.name === 'decide';
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -113,7 +114,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
         Skip to content
       </a>
       <header className="shell__bar">
-        <a className="shell__brand" href={href({ name: 'cycle', stage: 'discover' })} aria-label="Agent Review, start of the design cycle">
+        <a className="shell__brand" href={href({ name: 'decide' })} aria-label="Agent Review, start">
           <AppMark />
           <span>Agent Review</span>
         </a>
