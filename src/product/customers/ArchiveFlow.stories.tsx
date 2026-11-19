@@ -19,7 +19,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Archiving customers, three ways: the design cycle’s three directions as working screens. Undo archives at once and offers Undo until the next action; Confirm asks first and names any active customer; Review sorts the selection into what can’t be archived, the active customers and the rest before anything happens. Five requirements can be added to any of them: name active customers first, name blocked ones first, an Archived view with Restore, who archived each one, and stop only for a batch with an active customer. Monarch Dental Group has an open invoice and can’t be archived, so each direction meets a partial failure.',
+          'Archiving customers, three ways: the design cycle’s three directions as working screens. Undo archives at once and offers Undo until the next action; Confirm asks first, in a pop-up over the rows, and names any active customer; Review sorts the selection into what can’t be archived, the active customers and the rest before anything happens. Five requirements can be added to any of them: name active customers first, name blocked ones first, an Archived view with Restore, who archived each one, and stop only for a batch with an active customer. Monarch Dental Group has an open invoice and can’t be archived, so each direction meets a partial failure.',
       },
     },
   },
@@ -62,10 +62,15 @@ export const UndoNamingActive: Story = {
 
 export const Confirm: Story = {
   args: { direction: 'confirm', initialSelection: BATCH, initialStep: true },
-  parameters: { docs: { description: { story: 'The question names the active customers. It offers all five, because without the blocked-first requirement the screen learns about Monarch Dental Group only when the archive fails.' } } },
+  parameters: { docs: { description: { story: 'The pop-up names the active customers, over rows that are inert while it asks. It offers all five, because without the blocked-first requirement the screen learns about Monarch Dental Group only when the archive fails.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvasElement.querySelector('.archive-flow__question')).toHaveTextContent('Archive 5 customers? Halvorsen Freight, Brightwater Clinics and Saltmarsh Studio are active.');
+    const ask = canvas.getByRole('alertdialog');
+    await expect(ask).toHaveAccessibleName('Archive 5 customers?');
+    await expect(ask).toHaveAccessibleDescription('3 are active: Halvorsen Freight, Brightwater Clinics and Saltmarsh Studio.');
+    /* The bar and the rows under the pop-up can't be reached while it asks. */
+    await expect(canvasElement.querySelector('.archive-flow__selected')).toHaveTextContent('5 of 12 customers selected');
+    await expect(canvasElement.querySelector('.archive-flow__rows-under')).toHaveAttribute('inert');
     await expect(canvas.getByRole('button', { name: 'Archive 5 customers' })).toHaveFocus();
     await userEvent.keyboard('{Escape}');
     await expect(canvas.getByRole('button', { name: 'Archive' })).toBeVisible();

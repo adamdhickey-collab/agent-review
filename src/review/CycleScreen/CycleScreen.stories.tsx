@@ -126,7 +126,7 @@ export const Explore: Story = {
     await expect(mark).not.toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: /^Try direction 2/ }));
     await expect(canvasElement.querySelector('.cycle__direction-does')).toHaveTextContent('Archive asks first');
-    await expect(canvas.getByText('3 selected')).toBeVisible();
+    await expect(canvas.getByText('3 of 12 customers selected')).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Press Archive' }));
     await expect(canvasElement.querySelector('.cycle__consequence')).toHaveTextContent('Relay asks before archiving');
     await expect(mark).toBeVisible();
