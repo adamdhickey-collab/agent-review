@@ -14,7 +14,8 @@ import { DIRECTIONS, PRIORITY, REQUIREMENT, STOP_WHEN, initialCycle, reduceCycle
    give, so the two cannot drift apart unnoticed.
 
    A beat marked `decision` is one of the moments a person decides and the
-   agent doesn't. The bar gives those a label and a line of reasoning, and
+   agent doesn't. The bar gives those a label, the stage's kind of work
+   (Orchestration or Judgment, since 2026-11-19), and a line of reasoning, and
    the page dims around the choice; the beats between them only narrate.
 
    The words are for someone who has never seen the prototype. They say
@@ -79,7 +80,7 @@ const BUILD_ANSWER = stopOf('review').answers.find((a) => a.recommended)!;
 export const BEATS: readonly Beat[] = [
   {
     stage: 'discover',
-    caption: 'In this demo an agent does the work, and a designer makes the decisions that matter. Watch for where the person steps in.',
+    caption: 'Orchestration is setting an agent up: the evidence, the brief, and the rules it works from. Judgment is the call no rule can make. Watch a designer do both.',
     steps: [{ show: () => q('.cycle__roles') }],
     does: [],
   },
@@ -105,7 +106,7 @@ export const BEATS: readonly Beat[] = [
     stage: 'discover',
     decision: true,
     caption: 'The designer corrects the summary.',
-    why: 'The agent built its claim on one ticket. A person checks the claim before anyone plans around it.',
+    why: 'Orchestration starts with what the agent believes. A person checks the claim before anyone plans around it.',
     steps: [{ press: pick('Correct the summary'), frame: choice('Correct the summary') }, { show: () => q('.cycle__reading[data-corrected]') }],
     does: [{ type: 'read', call: 'correct' }],
   },
@@ -119,7 +120,7 @@ export const BEATS: readonly Beat[] = [
     stage: 'define',
     decision: true,
     caption: 'The designer puts safety first.',
-    why: 'An agent can’t weigh one person’s need against another’s. This one priority steers every choice after it.',
+    why: 'The brief is orchestration too. This one priority steers every choice the agent makes after it.',
     steps: [{ press: pick(PRIORITY.recovery.name), frame: choice(PRIORITY.recovery.name) }, { show: () => q('.cycle__brief .cycle__added')?.closest<HTMLElement>('ul') ?? null }],
     does: [{ type: 'prioritize', priority: 'recovery' }],
   },
@@ -150,7 +151,7 @@ export const BEATS: readonly Beat[] = [
   {
     stage: 'explore',
     decision: true,
-    caption: 'The designer compares the three by using them.',
+    caption: 'Now judgment. The designer compares the three by using them.',
     why: 'Each direction is a working screen, so its weak spot shows up in use, not in a spec.',
     steps: [{ show: () => q('.cycle__tries') }],
     does: [],
@@ -165,7 +166,7 @@ export const BEATS: readonly Beat[] = [
     stage: 'evaluate',
     decision: true,
     caption: 'The designer decides when the review is needed: only when someone’s active.',
-    why: 'The agent would stop on every batch. The simulated session notes say that doubled a routine cleanup, and people stopped reading.',
+    why: 'No check can make this call. The agent would stop on every batch, and the simulated session notes say people stopped reading.',
     steps: [{ press: pick(STOP_WHEN.active.name), frame: choice(STOP_WHEN.active.name) }],
     does: [{ type: 'stop', when: 'active' }],
   },
@@ -182,7 +183,7 @@ export const BEATS: readonly Beat[] = [
     stage: 'delegate',
     decision: true,
     caption: 'The designer sets the agent’s boundaries, then sends the brief.',
-    why: 'The brief says what the agent does alone, what needs a person’s judgment, and what needs approval.',
+    why: 'Back to orchestration. The brief says what the agent does alone, what needs a person’s judgment, and what needs approval.',
     steps: [{ show: () => q('.cycle__bounds') }, { press: () => starting('.cycle__move .btn', 'Send the brief') }],
     does: [{ type: 'delegate' }],
   },
@@ -202,7 +203,7 @@ export const BEATS: readonly Beat[] = [
     stage: 'learn',
     decision: true,
     caption: 'The designer saves the decision as a rule.',
-    why: 'The next agent reads this rule before it builds a bulk action.',
+    why: 'Today’s judgment becomes the next agent’s orchestration: it reads this rule before it builds a bulk action.',
     steps: [{ show: () => q('.cycle__rule') }, { press: () => q('.cycle__move .checkbox') }],
     does: [{ type: 'keep', on: true }],
   },
@@ -210,7 +211,7 @@ export const BEATS: readonly Beat[] = [
 
 /** What the bar says once the last beat is done. */
 export const CLOSING = {
-  caption: 'One decision at a time, a person’s judgment became guidance the next agent can reuse.',
+  caption: 'Orchestration set the agent up. Judgment decided what ships. Now it’s your turn.',
   why: 'Every choice the tour made is still here. Change one and see what the later stages do with it.',
 } as const;
 

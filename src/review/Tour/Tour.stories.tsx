@@ -52,7 +52,7 @@ export const Narrating: Story = {
     await expect(within(bar).getByRole('button', { name: 'Close the tour' })).toBeVisible();
     await expect(within(bar).queryByRole('button', { name: 'Take over' })).toBeNull();
     await expect(within(bar).getAllByRole('listitem')).toHaveLength(6);
-    await expect(within(bar).queryByText('The designer decides')).toBeNull();
+    await expect(within(bar).queryByText('Orchestration')).toBeNull();
     /* Narration is off until it is turned on, and its settings wait with it. */
     const voice = within(bar).getByRole('button', { name: 'Narration' });
     const settings = within(bar).getByRole('button', { name: /^Voice and speed: / });
@@ -74,13 +74,13 @@ export const Narrating: Story = {
   },
 };
 
-/** A beat where the designer decides: labeled, with its reasoning under the line. */
+/** A beat where the designer decides: labeled with the stage's kind of work, with its reasoning under the line. */
 export const Decision: Story = {
   args: { beat: 6 },
   play: async ({ canvasElement }) => {
     const bar = within(canvasElement).getByRole('region', { name: 'Guided tour' });
     await waitFor(() => expect(within(bar).getByText('Simulated demo')).toBeVisible()); /* the bar fades in */
-    await expect(within(bar).getByText('The designer decides')).toBeVisible();
+    await expect(within(bar).getByText('Orchestration')).toBeVisible();
     await expect(within(bar).getByText(BEATS[6].why!)).toBeVisible();
     await expect(within(bar).getByRole('button', { name: /Define/ })).toHaveAttribute('aria-current', 'step');
   },
@@ -105,7 +105,7 @@ export const Feature: StoryObj = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    const feature = within(canvasElement).getByRole('region', { name: /Watch an agent do the work/ });
+    const feature = within(canvasElement).getByRole('region', { name: /Watch a designer orchestrate an agent/ });
     await expect(within(feature).getByRole('button', { name: 'Watch the tour' })).toBeVisible();
     await expect(within(feature).getAllByRole('button')).toHaveLength(1);
   },

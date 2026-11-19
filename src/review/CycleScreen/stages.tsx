@@ -3,6 +3,7 @@ import { Badge, Button, Cell, Checkbox, EmptyState, HeaderCell, Icon, IconSetCon
 import { href } from '../../app/router';
 import { useStore } from '../../app/store';
 import {
+  WORK,
   activeRule,
   ASKING,
   BOUNDARIES,
@@ -76,7 +77,7 @@ function Move({ stage, title, children }: { stage: StageId; title: string; child
       <div className="cycle__move-head">
         <p className="cycle__move-kicker">
           <Icon name="user" size={14} />
-          Your move
+          Your move · {WORK[stageOf(stage).work]}
         </p>
         <h2 id="cycle-move" className="cycle__move-title">
           {title}

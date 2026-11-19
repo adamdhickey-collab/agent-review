@@ -157,7 +157,7 @@ test('the arrows step, Escape leaves, and a press on the page pauses', async ({ 
 
 test('the close in the corner leaves the tour from its first step', async ({ page }) => {
   await open(page, '#/');
-  await page.getByRole('region', { name: /Watch an agent do the work/ }).getByRole('button', { name: 'Watch the tour' }).click();
+  await page.getByRole('region', { name: /Watch a designer orchestrate an agent/ }).getByRole('button', { name: 'Watch the tour' }).click();
   await expect(bar(page)).toContainText('Step 1 of 18');
   await bar(page).getByRole('button', { name: 'Close the tour' }).click();
   await expect(bar(page)).toHaveCount(0);
@@ -168,7 +168,7 @@ test('the close in the corner leaves the tour from its first step', async ({ pag
 test('the narration is off until turned on, then reads each caption as it plays, stops on a pause, and goes off again', async ({ page }) => {
   test.setTimeout(90_000);
   await open(page, '#/');
-  await page.getByRole('region', { name: /Watch an agent do the work/ }).getByRole('button', { name: 'Watch the tour' }).click();
+  await page.getByRole('region', { name: /Watch a designer orchestrate an agent/ }).getByRole('button', { name: 'Watch the tour' }).click();
   const voice = bar(page).getByRole('button', { name: 'Narration' });
   /* Off by default: nothing is said, and nothing is kept. Turned on, it reads the line on screen and is remembered. */
   await expect(voice).toHaveAttribute('aria-pressed', 'false');
@@ -180,8 +180,8 @@ test('the narration is off until turned on, then reads each caption as it plays,
   /* Each beat's words, sentence by sentence, before the beat moves on. */
   await expect(bar(page)).toContainText('Step 3 of 18', { timeout: 30_000 });
   const first = (await said(page)).join(' ');
-  expect(first).toContain('In this demo an agent does the work, and a designer makes the decisions that matter.');
-  expect(first).toContain('Watch for where the person steps in.');
+  expect(first).toContain('Orchestration is setting an agent up: the evidence, the brief, and the rules it works from.');
+  expect(first).toContain('Watch a designer do both.');
   expect(first).toContain('It’s a scripted demo.');
 
   /* A pause stops the voice; nothing more is said until play. */
@@ -212,7 +212,7 @@ test('one menu holds the speed and the voice: a speed is spoken at and remembere
     Object.defineProperty(SpeechSynthesisUtterance.prototype, 'voice', { get: () => held, set: (v: SpeechSynthesisVoice | null) => (held = v) });
   });
   await open(page, '#/');
-  await page.getByRole('region', { name: /Watch an agent do the work/ }).getByRole('button', { name: 'Watch the tour' }).click();
+  await page.getByRole('region', { name: /Watch a designer orchestrate an agent/ }).getByRole('button', { name: 'Watch the tour' }).click();
   const settings = bar(page).getByRole('button', { name: /^Voice and speed: / });
   await expect(settings).toHaveText('Voice and speed: Ava · , 1×');
   await bar(page).getByRole('button', { name: 'Pause the tour' }).click();
