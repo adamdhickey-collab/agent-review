@@ -277,9 +277,13 @@
   line-height: var(--leading-body);
 }
 
+/* Content in small print (evidence sources, how a check was run, where a
+   finding came from, what was tried) is the reading size's step down, 14px
+   on the review, since 2026-11-18. It sat at 12px, which is a label's size,
+   and it is what a reader is asked to weigh. */
 .cycle__from {
   color: var(--color-text-muted);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   line-height: var(--leading-ui);
 }
 
@@ -532,7 +536,7 @@
 
 .cycle__ev-kind {
   color: var(--color-text);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   font-weight: var(--weight-semibold);
 }
 
@@ -960,6 +964,57 @@
   gap: var(--space-2);
 }
 
+/* The review's own compact tables (the comparison, the measures) at the
+   reading size's step down, as the small print above. Relay's tables, in
+   the product frame, keep the product's sizes. */
+.cycle .table--compact:not(.cycle__product-frame *) {
+  font-size: var(--text-md);
+}
+
+/* The checks' status words, beside their marks, at the same size. */
+.cycle .test-status {
+  font-size: var(--text-md);
+}
+
+/* The comparison, one direction at a time, for a phone: shown only there. */
+.cycle__compare-stack {
+  display: none;
+}
+
+.cycle__compare-way + .cycle__compare-way {
+  margin-top: var(--space-5);
+}
+
+.cycle__compare-name {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.cycle__compare-rows {
+  margin: 0;
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.cycle__compare-rows > div {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: var(--border-width) solid var(--color-divider);
+  font-size: var(--text-md);
+  line-height: var(--leading-ui);
+}
+
+.cycle__compare-rows dt {
+  color: var(--color-text-secondary);
+}
+
+.cycle__compare-rows dd {
+  margin: 0;
+  color: var(--color-text);
+}
+
 /* The next press, marked in the screen (since 2026-10-28): the box the
    preview draws over the element a finding is about (mark.ts), drawn in
    the frame above the screen, with a tag saying what it is for. In the ink
@@ -994,6 +1049,19 @@
   top: 0;
   bottom: auto;
   transform: translateY(-50%);
+}
+
+/* On a phone, Relay's selection bar wraps and the tag above the button sat
+   on the count, the one line saying what is selected (since 2026-11-18).
+   There it sits to the button's left, where the wrapped row is empty. */
+@media (max-width: 40rem) {
+  .cycle__next-mark:not([data-tag='edge'])::after {
+    top: 50%;
+    bottom: auto;
+    left: auto;
+    right: calc(100% + var(--space-2));
+    transform: translateY(-50%);
+  }
 }
 
 /* The three directions as the move's script: the one open now marked in
@@ -1039,7 +1107,7 @@
 
 .cycle__tries-count {
   color: var(--color-text-secondary);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
 }
 
 .cycle__try-showed {
@@ -1079,7 +1147,7 @@
 
 .cycle__finding-about {
   color: var(--color-text-muted);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
 }
 
 .cycle__finding-says {
@@ -1284,6 +1352,14 @@
   .cycle {
     gap: var(--space-4);
     padding: var(--space-4);
+  }
+
+  .cycle__section:has(> .cycle__compare-stack) > .table-scroll {
+    display: none;
+  }
+
+  .cycle__compare-stack {
+    display: block;
   }
 
   .cycle__roles,

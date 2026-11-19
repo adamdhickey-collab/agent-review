@@ -184,7 +184,7 @@ export const DelegateReady: Story = {
     await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('Review only when someone’s active.');
     await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('Stop only for a batch with an active customer. A batch with none archives in one press, with Undo.');
     await userEvent.click(canvas.getByRole('button', { name: 'Send the brief' }));
-    await expect(canvas.getByRole('heading', { level: 2, name: /The review step needs a panel/ })).toBeVisible();
+    await expect(canvas.getByRole('heading', { level: 2, name: /Build the review panel from existing parts/ })).toBeVisible();
   },
 };
 

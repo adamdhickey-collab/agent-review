@@ -3,6 +3,7 @@
    this screen's own: the notes before a press, the review of a batch, and
    the sentence after. Everything else is the system's. */
 .archive-flow {
+  container-type: inline-size;
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -163,4 +164,20 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--space-2);
+}
+
+/* A narrow panel (a phone, 2026-11-18): the table keeps the company, its
+   status, and when it was last active, a long name on two lines, and
+   leaves seats and monthly
+   revenue, which ran it off the screen. Nothing on the screen is decided by
+   either; the review still names a customer's monthly revenue. */
+@container (max-width: 30rem) {
+  .archive-flow .table__cell--numeric {
+    display: none;
+  }
+
+  /* And a long company name takes a second line rather than the width. */
+  .archive-flow tbody th {
+    white-space: normal;
+  }
 }

@@ -120,7 +120,7 @@ test('it starts from anywhere, pauses, goes to a stage, and hands the page over'
 
   /* A stage's chapter goes there, with every earlier choice made. */
   await bar(page).getByRole('button', { name: /^4\s*Evaluate$/ }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Which direction, and what must it do?' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Which direction, and when does it stop?' })).toBeVisible();
   await expect(bar(page)).toContainText('Step 12 of 18');
   expect(await cycle(page)).toMatchObject({ reading: 'correct', priority: 'recovery' });
   await expect(page.getByRole('button', { name: /Chosen Review batch/ })).toBeVisible({ timeout: 15_000 });

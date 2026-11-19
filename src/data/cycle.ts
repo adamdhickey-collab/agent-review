@@ -71,7 +71,7 @@ export const STAGES: readonly Stage[] = [
   {
     id: 'evaluate',
     name: 'Evaluate',
-    question: 'Which direction, and what must it do?',
+    question: 'Which direction, and when does it stop?',
     designer: 'Weighs the findings, chooses a direction, decides when it stops, and turns findings into requirements.',
     agent: 'Ran the checks and compared the findings with the brief.',
   },
@@ -368,9 +368,9 @@ export const NO_FEATURES: Features = { 'names-active': false, restore: false, wh
 export type FindingSource = 'evidence' | 'session' | 'trying' | 'check';
 
 export const FINDING_SOURCE: Record<FindingSource, string> = {
-  evidence: 'From the evidence',
-  session: 'Session notes, simulated',
-  trying: 'From trying it',
+  evidence: 'Evidence',
+  session: 'Session notes (simulated)',
+  trying: 'Tried in Explore',
   check: 'Automated check',
 };
 
@@ -512,8 +512,8 @@ export function stopOf(direction: DirectionId): Stop {
     case 'undo':
       return {
         kind: 'approval',
-        question: 'The Undo bar is a new pattern. Keep the bar on this screen, or propose it for the design system?',
-        why: 'The agent can’t add a new pattern to the design system (rule 12). The design systems lead decides.',
+        question: 'Keep the Undo bar on this screen, or propose it for the design system?',
+        why: 'The Undo bar is a new pattern, and the agent can’t add one to the design system (rule 12). The design systems lead decides.',
         answers: [
           { id: 'local', name: 'Keep the bar on this screen', means: 'The agent can do this alone. Other screens don’t get the Undo bar yet.', recommended: true },
           { id: 'system', name: 'Propose the bar for the design system', means: 'The agent drafts a component and a story. The design systems lead decides.' },
@@ -532,8 +532,8 @@ export function stopOf(direction: DirectionId): Stop {
     case 'review':
       return {
         kind: 'approval',
-        question: 'The review step needs a panel. Build the panel from existing parts, or add a Panel component to the design system?',
-        why: 'A new shared component needs a written reason and the design systems lead’s approval (rule 10).',
+        question: 'Build the review panel from existing parts, or add a Panel component?',
+        why: 'The review step needs a panel. A new shared component needs a written reason and the design systems lead’s approval (rule 10).',
         answers: [
           { id: 'inline', name: 'Build from existing parts', means: 'The agent can do this alone, with the Toolbar and Table.', recommended: true },
           { id: 'panel', name: 'Propose a Panel', means: 'The agent drafts a Panel with stories. The design systems lead decides, and until then the screen uses existing parts.' },
