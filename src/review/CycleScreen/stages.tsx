@@ -575,7 +575,7 @@ export function Explore() {
         </Tabs>
 
         <Section title="Side by side">
-          <Table caption="The three directions compared" density="compact">
+          <Table caption="The three directions compared" density="compact" className="cycle__compare-table">
             <thead>
               <tr>
                 <HeaderCell>
@@ -617,6 +617,36 @@ export function Explore() {
               ))}
             </tbody>
           </Table>
+          {/* On a phone, the same comparison one direction at a time
+              (since 2026-11-18): four columns ran off a 390px screen. The
+              table is display: none there and this is display: none above,
+              so a screen reader meets one of the two. */}
+          <div className="cycle__compare-stack">
+            {DIRECTIONS.map((x, i) => (
+              <section key={x.id} className="cycle__compare-way" aria-label={`${i + 1}. ${x.name}`}>
+                <h3 className="cycle__compare-name">
+                  {i + 1}. {x.name}
+                </h3>
+                <dl className="cycle__compare-rows">
+                  {rows.map((r) => (
+                    <div key={r.label}>
+                      <dt>{r.label}</dt>
+                      <dd>
+                        {r.values[x.id] === 'Yes' || r.values[x.id] === 'No' ? (
+                          <span className="cycle__yn" data-yes={r.values[x.id] === 'Yes' || undefined}>
+                            <Icon name={r.values[x.id] === 'Yes' ? 'check' : 'minus'} size={14} />
+                            {r.values[x.id]}
+                          </span>
+                        ) : (
+                          r.values[x.id]
+                        )}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            ))}
+          </div>
         </Section>
       </div>
     </div>
@@ -712,7 +742,8 @@ export function Evaluate() {
                     <Badge tone={f.source === 'session' ? 'warning' : f.source === 'check' ? 'success' : 'neutral'} variant="outline">
                       {FINDING_SOURCE[f.source]}
                     </Badge>
-                    {f.about ? <span className="cycle__finding-about">About {f.about.map((a) => `${DIRECTIONS.findIndex((x) => x.id === a) + 1}`).join(' and ')}</span> : null}
+                    {/* The direction by name, not its number from Explore (since 2026-11-18). */}
+                    {f.about ? <span className="cycle__finding-about">About {f.about.map((a) => DIRECTIONS.find((x) => x.id === a)?.name).join(' and ')}</span> : null}
                     {f.figure ? <Dots on={f.figure.on} of={f.figure.of} tone={f.figure.tone} /> : null}
                   </p>
                   <p className="cycle__finding-says">{f.says}</p>

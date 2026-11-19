@@ -80,7 +80,7 @@ test('Continue waits for the move, and a stage further on sends the reader back 
   await expect(page.locator('.cycle__rail a')).toHaveCount(1);
 
   await open(page, '#/cycle/evaluate');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Which direction, and what must it do?');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Which direction, and when does it stop?');
   await expect(page.getByText('Start with Discover')).toBeVisible();
   await page.getByRole('button', { name: 'Go to Discover' }).click();
   await expect(page).toHaveURL(/#\/cycle\/discover$/);
@@ -96,7 +96,7 @@ test('Continue waits for the move, and a stage further on sends the reader back 
 test('an open stage is an address, and back and forward step between them', async ({ page }) => {
   await seedCycle(page, { ...EXPLORED, direction: 'undo' });
   await open(page, '#/cycle/evaluate');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Which direction, and what must it do?');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Which direction, and when does it stop?');
   await expect(page).toHaveTitle('Design cycle: Evaluate · Agent Review');
   await page.getByRole('button', { name: 'Continue to Delegate' }).click();
   await expect(page).toHaveURL(/#\/cycle\/delegate$/);
@@ -107,7 +107,7 @@ test('an open stage is an address, and back and forward step between them', asyn
   await arrived(page, 'What does the agent need from you while it builds?');
   await page.goBack();
   await expect(page).toHaveURL(/#\/cycle\/evaluate$/);
-  await arrived(page, 'Which direction, and what must it do?');
+  await arrived(page, 'Which direction, and when does it stop?');
   await page.goForward();
   await expect(page).toHaveURL(/#\/cycle\/delegate$/);
 });
