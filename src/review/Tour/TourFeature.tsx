@@ -23,7 +23,7 @@ export function TourFeature({ onStart }: { onStart: () => void }) {
           Watch an agent do the work, and a designer make the decisions
         </h2>
         <p className="tour-feature__says">
-          It plays all six stages for you{canNarrate ? ', read aloud' : ''}. Pause it, skip to a stage, or close it at any point.
+          It plays all six stages for you{canNarrate ? ', with narration if you turn it on' : ''}. Pause it, skip to a stage, or close it at any point.
         </p>
       </div>
       <Button className="tour-feature__go" variant="primary" leadingIcon="play" onClick={onStart}>
