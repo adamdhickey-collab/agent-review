@@ -125,7 +125,7 @@ test('it starts from anywhere, pauses, goes to a stage, and hands the page over'
   expect(await cycle(page)).toMatchObject({ reading: 'correct', priority: 'recovery' });
   await expect(page.getByRole('button', { name: /Chosen Review batch/ })).toBeVisible({ timeout: 15_000 });
 
-  await bar(page).getByRole('button', { name: 'Take over' }).click();
+  await bar(page).getByRole('button', { name: 'Close the tour' }).click();
   await expect(bar(page)).toHaveCount(0);
   await expect(page.locator('.tour-layer__ring')).toHaveCount(0);
   await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
@@ -155,7 +155,7 @@ test('the arrows step, Escape leaves, and a press on the page pauses', async ({ 
   await expect(page.getByRole('button', { name: 'Watch the tour' })).toBeVisible();
 });
 
-test('the close in the corner leaves the tour, as Take over does', async ({ page }) => {
+test('the close in the corner leaves the tour from its first step', async ({ page }) => {
   await open(page, '#/');
   await page.getByRole('region', { name: /Watch an agent do the work/ }).getByRole('button', { name: 'Watch the tour' }).click();
   await expect(bar(page)).toContainText('Step 1 of 18');

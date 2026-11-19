@@ -38,7 +38,7 @@ import './Tour.css';
 
    WHAT A PERSON CAN DO. Pause and resume; step back and forward (the arrow
    keys do the same while the bar has focus); jump to any of the six stages;
-   and take over, by the button, by the close in the corner, by Escape, or just by pressing something
+   and take over, by the close in the corner, by Escape, or just by pressing something
    on the page, which pauses the tour first. Focus stays in the bar while
    the tour presses things, so a keyboard keeps hold of it: the app moves
    focus to a new screen's heading, and the tour puts it back unless the
@@ -55,7 +55,7 @@ import './Tour.css';
    and a half minutes with Zoe (Premium), against two and a quarter silent.
    Narration is on unless a person turned it off, which the bar's Narration
    control does and remembers. A pause stops the voice mid-sentence and play
-   says the sentence again; Take over and every jump stop it. A browser with
+   says the sentence again; the close and every jump stop it. A browser with
    no speech synthesiser gets no control and a silent tour.
 
    SIMULATED, SAID THREE TIMES: on the bar for as long as it is open, in the
@@ -509,8 +509,10 @@ export function TourProvider({
       {active ? (
         <section ref={bar} className="tour" data-surface="review" data-decision={decision || undefined} aria-label="Guided tour">
           {/* The plain way out (2026-11-18), in the corner where a reader looks for
-              one: the same as Take over and Escape, the page left where the tour
-              got to. First in the bar, so a keyboard meets it as an eye does. */}
+              one: the same as Escape, the page left where the tour got to. First
+              in the bar, so a keyboard meets it as an eye does. Until the same
+              day a "Take over" button beside the transport did the same thing;
+              with the close there, it was the second way to say one thing. */}
           <IconButton className="tour__close" icon="x" label="Close the tour" tooltip="end" onClick={() => leave()} />
           <ol className="tour__chapters" role="list">
             {STAGES.map((st, i) => {
@@ -594,9 +596,6 @@ export function TourProvider({
                   <IconButton className="tour__step" icon="arrow-left" label="Previous step" disabled={at === 0} onClick={back} />
                   <IconButton ref={toggle} className="tour__toggle" icon={status === 'playing' ? 'pause' : 'play'} label={status === 'playing' ? 'Pause the tour' : 'Play the tour'} onClick={playPause} />
                   <IconButton className="tour__step" icon="arrow-right" label="Next step" disabled={at === BEATS.length - 1} onClick={next} />
-                  <Button variant="secondary" onClick={() => leave()}>
-                    Take over
-                  </Button>
                 </>
               )}
             </div>
