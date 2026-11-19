@@ -24,12 +24,12 @@ import { isScene, type SceneId } from '../review/SceneScreen/scenes';
    with parameters beyond an id and a finding is when a dependency earns its
    place.
 
-   Since 2026-11-18 the front door is the short path, "/decide": one
-   question in three beats (data/decide.ts says why). The cycle keeps its
-   six addresses, and "/cycle" is still its first stage. */
+   For a day, 2026-11-18, the front door was a short path at "/decide", one
+   question in three beats. Adam took it out: the full prototype is the
+   front door again, with the guided tour featured on Discover. "/decide"
+   still opens Discover, because the case study linked to it. */
 
 export type Route =
-  | { name: 'decide' }
   | { name: 'delegation'; run?: RunId }
   | { name: 'queue' }
   | { name: 'cycle'; stage: StageId }
@@ -39,7 +39,7 @@ export type Route =
 
 export function parse(hash: string): Route {
   const path = hash.replace(/^#/, '') || '/';
-  if (path === '/' || path === '/decide' || path === '/decide/') return { name: 'decide' };
+  if (path === '/' || path === '/decide' || path === '/decide/') return { name: 'cycle', stage: 'discover' };
   if (path === '/runs/billing' || path === '/runs/billing/') return { name: 'delegation' };
   if (path === '/runs/shared-table' || path === '/runs/shared-table/') return { name: 'delegation', run: 'shared-table' };
   if (path === '/queue' || path === '/queue/') return { name: 'queue' };
@@ -55,8 +55,6 @@ export function parse(hash: string): Route {
 
 export function href(route: Route): string {
   switch (route.name) {
-    case 'decide':
-      return '#/decide';
     case 'delegation':
       return `#/runs/${route.run ?? 'billing'}`;
     case 'queue':

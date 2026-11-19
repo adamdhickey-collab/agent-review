@@ -32,18 +32,6 @@ for (const width of WIDTHS) {
        the batch archived in its first direction, so the baseline holds a
        working interface mid-use, not only a page. Since 2026-10-26 Discover
        is the front door, and a direction opens with the batch selected. */
-    /* The front door since 2026-11-18: the short path, with the agent's plan
-       open on the routine cleanup, so the baseline holds the review with
-       nobody to name in it, the moment the question is about. */
-    test('the short path', async ({ page }) => {
-      await page.goto('#/');
-      await settle(page);
-      await page.locator('.decide__beat').nth(1).getByRole('button', { name: 'Archive', exact: true }).click();
-      await page.evaluate(() => window.scrollTo(0, 0));
-      await settle(page);
-      await expect(page).toHaveScreenshot(`decide-${width}.png`, { fullPage: true });
-    });
-
     test('the design cycle, discover', async ({ page }) => {
       await page.goto('#/cycle/discover');
       await settle(page);

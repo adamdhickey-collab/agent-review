@@ -42,13 +42,17 @@ async function press(page: Page, name: string | RegExp, role: 'button' | 'link' 
   throw new Error(`never reached ${name} by Tab`);
 }
 
-test('the cycle’s first stage is at its own address, and a run’s own address is the run', async ({ page }) => {
-  /* Since 2026-11-18 the front door is the short path (decide.spec.ts). */
-  await open(page, '#/cycle');
+test('the front door is the first stage, and a run’s own address is the run', async ({ page }) => {
+  await open(page, '#/');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Something is wrong with archiving. What, exactly?');
   await expect(page).toHaveTitle('Design cycle: Discover · Agent Review');
   await expect(page.locator('.cycle__setup')).toContainText('You’re Adam, a product designer');
   await expect(page.getByRole('navigation', { name: 'Primary' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Watch the tour' })).toBeVisible();
+
+  /* The short path's address, which the case study linked to for a day, opens the first stage. */
+  await open(page, '#/decide');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Something is wrong with archiving. What, exactly?');
 
   for (const [hash, title] of [
     ['#/runs/billing', 'Bring the billing screens onto the design system'],
@@ -61,11 +65,11 @@ test('the cycle’s first stage is at its own address, and a run’s own address
   }
 });
 
-test('the product’s name goes to the front door, the short path', async ({ page }) => {
+test('the product’s name goes to the first stage', async ({ page }) => {
   await open(page, '#/queue');
-  await page.getByRole('link', { name: 'Agent Review, start' }).click();
-  await expect(page).toHaveURL(/#\/decide$/);
-  await arrived(page, 'When should Archive stop and ask?');
+  await page.getByRole('link', { name: 'Agent Review, start of the design cycle' }).click();
+  await expect(page).toHaveURL(/#\/cycle\/discover$/);
+  await arrived(page, 'Something is wrong with archiving. What, exactly?');
 });
 
 test('Continue waits for the move, and a stage further on sends the reader back to the open one', async ({ page }) => {
@@ -109,7 +113,7 @@ test('an open stage is an address, and back and forward step between them', asyn
 });
 
 test('the cycle can be done from the keyboard, and its choices survive a reload', async ({ page }) => {
-  await open(page, '#/cycle/discover');
+  await open(page, '#/');
   await press(page, 'Choose Correct the summary');
   await press(page, 'Continue to Define');
   await press(page, 'Choose Safety comes first');
