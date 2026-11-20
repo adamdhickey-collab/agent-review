@@ -2,7 +2,7 @@ import { Badge } from '../../components';
 import type { Change } from '../../data/types';
 import { href, titleTransitionName } from '../../app/router';
 import { relativeTime } from '../format';
-import { ReviewLanes, ReviewStatus } from '../ReviewRow/ReviewParts';
+import { NextCell, ReviewLanes, ReviewStatus } from '../ReviewRow/ReviewParts';
 import './ReviewCard.css';
 
 /* One change in the queue, as a list item, for a screen too narrow for the
@@ -34,11 +34,8 @@ export function ReviewCard({ change }: { change: Change }) {
         <ReviewLanes change={change} />
       </span>
       <span className="review-card__facts">
-        <span className="review-card__group">
-          {change.agent.name}
-          <span aria-hidden="true"> · </span>
-          {change.requester.name}
-        </span>
+        <NextCell change={change} />
+        <span className="review-card__group">{change.requester.name}</span>
         <span className="review-card__group">
           {relativeTime(change.openedAt)}
           <span aria-hidden="true"> · </span>

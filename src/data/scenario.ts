@@ -147,6 +147,7 @@ export const bulkActionsWithRules: Change = {
   agent: { name: 'Claude Code', run: 'run 1, with the rules' },
   requester: adam,
   openedAt: '2026-10-01T11:46:00-05:00',
+  next: { owner: 'system', does: 'Approve the shared Table change' },
   state: 'needs-review',
   componentsTouched: ['CustomerTable', 'Checkbox', 'Toolbar', 'Button', 'EmptyState', 'Table'],
   files: [
@@ -365,6 +366,7 @@ export const bulkActionsWithoutRules: Change = {
   agent: { name: 'Claude Code', run: 'run 2, without the rules' },
   requester: adam,
   openedAt: '2026-10-01T12:05:00-05:00',
+  next: { owner: 'designer', does: 'Decide the empty table' },
   state: 'needs-review',
   componentsTouched: ['CustomerTable', 'Checkbox', 'Toolbar', 'Button'],
   files: [
@@ -586,6 +588,7 @@ export const bulkActionsDrift: Change = {
   agent: { name: 'By hand', run: 'seeded, not an agent’s run' },
   requester: adam,
   openedAt: '2026-10-01T12:40:00-05:00',
+  next: { owner: 'agent', does: 'Fix what the checks found' },
   state: 'needs-review',
   componentsTouched: ['CustomerTable', 'Checkbox', 'Button'],
   files: [
@@ -673,6 +676,7 @@ export const queue: Change[] = [
     agent: { name: 'Claude Code', run: 'run_01K6LZ' },
     requester: tomas,
     openedAt: '2026-10-01T13:40:00-05:00',
+    next: { owner: 'none', does: 'Checks settled it. Accept' },
     state: 'ready',
     componentsTouched: ['InvoiceList', 'EmptyState'],
     files: [{ path: 'src/product/invoices/InvoiceList.tsx', status: 'modified', additions: 12, deletions: 2, shared: false }],
@@ -704,6 +708,7 @@ export const queue: Change[] = [
     agent: { name: 'Claude Code', run: 'run_01K6LQ' },
     requester: priya,
     openedAt: '2026-10-01T12:55:00-05:00',
+    next: { owner: 'agent', does: 'Checks still running' },
     state: 'validating',
     componentsTouched: ['ActivityFeed'],
     files: [{ path: 'src/product/activity/ActivityFeed.tsx', status: 'modified', additions: 6, deletions: 4, shared: false }],
@@ -735,6 +740,7 @@ export const queue: Change[] = [
     agent: { name: 'Claude Code', run: 'run_01K6KT' },
     requester: tomas,
     openedAt: '2026-09-30T16:20:00-05:00',
+    next: { owner: 'agent', does: 'Fixing what was returned' },
     state: 'returned',
     componentsTouched: ['Inbox', 'Kbd'],
     files: [
@@ -775,6 +781,7 @@ export const queue: Change[] = [
     agent: { name: 'Claude Code', run: 'run_01K6K2' },
     requester: priya,
     openedAt: '2026-09-30T11:02:00-05:00',
+    next: { owner: 'engineer', does: 'Build it for production' },
     state: 'accepted',
     componentsTouched: ['CustomerMenu'],
     files: [{ path: 'src/product/customers/CustomerMenu.tsx', status: 'modified', additions: 2, deletions: 2, shared: false }],
@@ -807,6 +814,7 @@ export const queue: Change[] = [
     agent: { name: 'Claude Code', run: 'run_01K6J8' },
     requester: tomas,
     openedAt: '2026-09-29T15:48:00-05:00',
+    next: { owner: 'none', does: 'Closed' },
     state: 'rejected',
     componentsTouched: ['Table', 'CustomerTable', 'InvoiceList'],
     files: [

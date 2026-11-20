@@ -1,9 +1,13 @@
 import { useCallback, useLayoutEffect, useRef, useState, type ReactNode, type Ref } from 'react';
-import { Badge, Button, Cell, Checkbox, EmptyState, HeaderCell, Icon, IconSetContext, Row, Table, Tabs, TestStatus, TextArea } from '../../components';
+import { Badge, Button, Cell, Checkbox, Disclosure, EmptyState, HeaderCell, Icon, IconSetContext, Row, Table, Tabs, TestStatus, TextArea } from '../../components';
 import { href } from '../../app/router';
 import { useStore } from '../../app/store';
 import {
   WORK,
+  GUIDE,
+  OWNER,
+  unsupportedOf,
+  type Owner,
   activeRule,
   ASKING,
   BOUNDARIES,
@@ -780,6 +784,64 @@ function requirementCount(s: CycleState): number {
   return (Object.keys(f) as FeatureId[]).filter((k) => f[k]).length;
 }
 
+/** Whose decision something is, as a small label: one of the four roles in data/cycle.ts. */
+function OwnerTag({ owner, prefix = 'Decides' }: { owner: Owner; prefix?: string }) {
+  return (
+    <span className="cycle__owner">
+      <Icon name={owner === 'agent' ? 'bot' : owner === 'engineer' ? 'code' : owner === 'system' ? 'layers' : 'user'} size={14} />
+      <span>
+        {prefix}: <strong>{OWNER[owner].name}</strong>
+      </span>
+    </span>
+  );
+}
+
+/* What guides the agent (2026-11-20): the components it builds from, one
+   rule followed to the check that holds it, what happens at a pattern the
+   system doesn't have, and the difference between a violation a check
+   settles and a decision it can't. Closed by default, because the build's
+   account above it is what most readers came for. */
+function Guide({ direction, question }: { direction: DirectionId; question: string }) {
+  const unsupported = unsupportedOf(direction);
+  return (
+    <Disclosure className="cycle__guide" summary="What guides the agent" meta={`${GUIDE.components.length} components, 12 rules`}>
+      <dl className="cycle__facts">
+        <div>
+          <dt>Builds from</dt>
+          <dd>
+            The design system’s {GUIDE.components.length} components, never its own: {GUIDE.components.slice(0, 6).join(', ')}, and the rest.
+          </dd>
+        </div>
+        <div>
+          <dt>Reads, before it starts</dt>
+          <dd>
+            <blockquote className="cycle__rule">
+              Rule {GUIDE.rule.n}. {GUIDE.rule.name}. {GUIDE.rule.says}
+            </blockquote>
+            <p className="cycle__guide-check">
+              <TestStatus state="passed" />
+              <span>
+                Held by <code>{GUIDE.rule.check}</code>. This build passes it.
+              </span>
+            </p>
+            <p className="cycle__from">Real: {GUIDE.rule.real}</p>
+          </dd>
+        </div>
+        <div>
+          <dt>Where the system runs out</dt>
+          <dd>{unsupported ? unsupported.says : 'This direction uses only what the system has, so nothing here needed a new pattern or component.'}</dd>
+        </div>
+        <div>
+          <dt>Violation or decision</dt>
+          <dd>
+            A check settles a violation: an off-token value fails, and it goes back to the agent. A decision passes every check and still has two right answers. “{question}” is a decision.
+          </dd>
+        </div>
+      </dl>
+    </Disclosure>
+  );
+}
+
 /* ---------- 5. DELEGATE ---------- */
 
 export function Delegate() {
@@ -799,6 +861,7 @@ export function Delegate() {
             <Badge tone="warning" icon={stop.kind === 'judgment' ? 'message-question' : 'lock'}>
               {stop.kind === 'judgment' ? 'Needs judgment' : 'Needs approval'}
             </Badge>
+            <OwnerTag owner={stop.owner} />
           </p>
           <p className="cycle__move-lead">{stop.why}</p>
           <ul className="cycle__choices" role="list">
@@ -910,6 +973,7 @@ export function Delegate() {
                 </li>
               ))}
             </ul>
+            <Guide direction={cycle.direction} question={stop.question} />
           </Section>
         ) : null}
 
@@ -935,15 +999,28 @@ export function Learn() {
   if (!outcome || !build || !cycle.direction || !cycle.answer) return <Needs stage="delegate" what="Nothing’s been built yet" />;
   const stop = stopOf(cycle.direction);
   const answer = stop.answers.find((a) => a.id === cycle.answer);
-  const brief = briefOf(cycle)!;
+  const intent = outcome.handoff.intent;
+  /* The checks that ran for real in this repository, against the screens the cycle renders, and the ones that are the simulated agent's report. */
+  const real = build.verified.filter((v) => v.how.startsWith('npm'));
+  const reported = build.verified.filter((v) => !real.includes(v));
 
   return (
     <div className="cycle__work">
       <Move stage="learn" title="Save this rule for the next agent?">
-        <p className="cycle__move-lead">The next agent reads this rule before building a bulk action, if you save it.</p>
+        <p className="cycle__move-lead">Your decision can guide the next agent, but only if you save it as a rule. The agent doesn’t learn from your answer on its own.</p>
         <blockquote className="cycle__rule">{outcome.guidance}</blockquote>
+        <dl className="cycle__rule-facts">
+          <div>
+            <dt>Applies to</dt>
+            <dd>Bulk actions that remove records, on customer screens</dd>
+          </div>
+          <div>
+            <dt>Carries</dt>
+            <dd>Your reason, and the risk it accepts</dd>
+          </div>
+        </dl>
         <Checkbox label="Save the rule for customer screens" checked={cycle.kept} onChange={(e) => cycleDo({ type: 'keep', on: e.currentTarget.checked })} />
-        {cycle.kept ? <Consequence>Saved, with your reason attached. Deleting the rule later won’t change what was built.</Consequence> : null}
+        {cycle.kept ? <Consequence>Saved. Anyone can read it, and clearing the box revokes it. Revoking won’t change what was built.</Consequence> : null}
         {/* The cycle's one way out (since 2026-10-26, when the bar stopped
             offering the product's other places on the cycle): the two runs,
             for whoever wants to see the agent stop again, and the case
@@ -963,25 +1040,52 @@ export function Learn() {
       </Move>
 
       <div className="cycle__main">
-        <Section title="What you decided">
+        <Section title="Next time, the rule does the asking">
+          <p className="cycle__lead">Today’s judgment becomes tomorrow’s orchestration, if you save it.</p>
+          <div className="cycle__later" data-kept={cycle.kept || undefined}>
+            <p className="cycle__later-when">
+              <Badge variant="outline">Later, simulated</Badge>
+              An agent adds Merge duplicates to the customers screen. Merging removes records.
+            </p>
+            {cycle.kept ? (
+              <p className="cycle__later-then">
+                <Badge tone="success" icon="check">
+                  Follows the rule
+                </Badge>
+                <span>
+                  It finds your saved rule, builds to it, and doesn’t ask you again. The change cites the rule, so a reviewer can see where the behavior came from.
+                </span>
+              </p>
+            ) : (
+              <p className="cycle__later-then">
+                <Badge icon="message-question">Asks again</Badge>
+                <span>Without a saved rule, it builds what the new brief says, and you answer the same question again.</span>
+              </p>
+            )}
+          </div>
+        </Section>
+
+        <Section title="The handoff to engineering">
+          <p className="cycle__lead">A working design to build from, not a shipped feature.</p>
+          <h3 className="cycle__h3">Design intent</h3>
           <dl className="cycle__facts cycle__facts--record">
             <div>
-              <dt>Discover</dt>
-              <dd>{cycle.reading === 'keep' ? 'Kept the summary: archiving deletes customer data.' : cycle.reading === 'correct' ? 'Corrected the summary: Relay keeps archived customers for 90 days.' : 'Not decided.'}</dd>
+              <dt>Problem</dt>
+              <dd>{intent.problem}</dd>
             </div>
             <div>
-              <dt>Define</dt>
-              <dd>{cycle.priority ? `${PRIORITY[cycle.priority].name}.` : 'No priority set.'}</dd>
+              <dt>Outcome</dt>
+              <dd>{intent.outcome}</dd>
             </div>
             <div>
-              <dt>Evaluate</dt>
+              <dt>Pattern</dt>
               <dd>
-                <strong>{buildNameOf(cycle.direction, featuresOf(cycle.direction, cycle.required))}.</strong> {cycle.reason ?? draftReason(cycle.direction, cycle.priority)}
+                <strong>{intent.pattern}.</strong> {intent.why}
               </dd>
             </div>
             <div>
-              <dt>Required</dt>
-              <dd>{brief.requirements.length ? brief.requirements.map((r) => r.says).join(' ') : 'Nothing beyond the direction.'}</dd>
+              <dt>Trade-off accepted</dt>
+              <dd>{intent.tradeoff}</dd>
             </div>
             <div>
               <dt>The agent asked</dt>
@@ -990,17 +1094,44 @@ export function Learn() {
               </dd>
             </div>
           </dl>
-        </Section>
 
-        <Section title="What’s verified">
+          <h3 className="cycle__h3">Verified in the prototype</h3>
           <ul className="cycle__checks" role="list">
-            {build.verified.map((v) => (
+            {real.map((v) => (
               <li key={v.says}>
                 <TestStatus state={v.state} />
-                <span>{v.says}</span>
+                <span>
+                  {v.says} <span className="cycle__from">{v.how}, runs on every push to this repository</span>
+                </span>
+              </li>
+            ))}
+            {reported.map((v) => (
+              <li key={v.says}>
+                <TestStatus state={v.state} />
+                <span>
+                  {v.says} <span className="cycle__from">{v.state === 'inconclusive' ? 'Open' : 'The simulated agent’s report'}</span>
+                </span>
               </li>
             ))}
           </ul>
+
+          <h3 className="cycle__h3">Still needs production work</h3>
+          <ul className="cycle__list" role="list">
+            {outcome.handoff.production.map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+          </ul>
+
+          <h3 className="cycle__h3">Who owns what</h3>
+          <dl className="cycle__facts cycle__owners">
+            {(Object.keys(OWNER) as Owner[]).map((o) => (
+              <div key={o}>
+                <dt>{OWNER[o].name}</dt>
+                <dd>{OWNER[o].owns}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="cycle__from">Illustrative, not job boundaries. The checks take avoidable review off people’s desks; they don’t take the accountability.</p>
         </Section>
 
         <Section title="What isn’t known">

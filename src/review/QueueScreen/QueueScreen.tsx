@@ -26,7 +26,7 @@ type Filter = 'open' | 'returned' | 'done' | 'all';
    row in the table or a card in the list, each by its title link. */
 const onListKey = listKeys('.review-row, .review-card', 'a[href]');
 
-/** The table's columns: the change, validation, agent, requested by, opened, components. */
+/** The table's columns: the change, validation, who decides next, requested by, opened, components. */
 const COLUMNS = 6;
 
 const FILTERS: { value: Filter; label: string; states: ReviewState[] }[] = [
@@ -83,7 +83,7 @@ export function QueueScreen({ changes: given, list }: { changes?: Change[]; /** 
             <tr>
               <HeaderCell>Change</HeaderCell>
               <HeaderCell>Validation</HeaderCell>
-              <HeaderCell>Agent</HeaderCell>
+              <HeaderCell>Next decision</HeaderCell>
               <HeaderCell>Requested by</HeaderCell>
               <HeaderCell>Opened</HeaderCell>
               <HeaderCell numeric>Components</HeaderCell>

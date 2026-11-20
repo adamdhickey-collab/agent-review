@@ -1,6 +1,7 @@
 import type { KeyboardEvent } from 'react';
 import { Badge, Cell, Row } from '../../components';
 import type { Change } from '../../data/types';
+import { NextCell } from './ReviewParts';
 import { href, titleTransitionName } from '../../app/router';
 import { relativeTime } from '../format';
 import { ReviewLanes } from './ReviewParts';
@@ -44,7 +45,9 @@ export function ReviewRow({ change }: { change: Change }) {
       <Cell>
         <ReviewLanes change={change} />
       </Cell>
-      <Cell muted>{change.agent.name}</Cell>
+      <Cell>
+        <NextCell change={change} />
+      </Cell>
       <Cell muted>{change.requester.name}</Cell>
       <Cell muted>{relativeTime(change.openedAt)}</Cell>
       <Cell numeric>{change.componentsTouched.length}</Cell>

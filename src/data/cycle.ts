@@ -511,8 +511,26 @@ export interface StopAnswer {
   recommended?: boolean;
 }
 
+/* WHO DECIDES (2026-11-20, after Babbel's account of designers working
+   in the repo). Four roles, illustrative rather than job boundaries: the
+   agent builds inside its boundaries and reports what it couldn't settle;
+   the product designer owns the experience and its trade-offs; the design
+   systems lead owns what every screen shares; the engineer owns production:
+   data, architecture, performance and integration. A stop names whose
+   decision it is, so the person reading it knows whether it's theirs. */
+export type Owner = 'agent' | 'designer' | 'system' | 'engineer';
+
+export const OWNER: Record<Owner, { name: string; owns: string }> = {
+  agent: { name: 'Agent', owns: 'Builds scoped changes from existing components, runs the checks, and says what it couldn’t settle.' },
+  designer: { name: 'Product designer', owns: 'Sets the intent, uses the result, decides the trade-offs, and owns how the interaction feels.' },
+  system: { name: 'Design systems lead', owns: 'Approves anything that changes what every screen shares: a component, a token, a pattern.' },
+  engineer: { name: 'Engineer', owns: 'Owns the production build: data, permissions, architecture, performance, and integration.' },
+};
+
 export interface Stop {
   kind: StopKind;
+  /** Whose decision the stop is. */
+  owner: Owner;
   question: string;
   /** Why the agent can't settle it from the brief and the checks. */
   why: string;
@@ -527,6 +545,7 @@ export function stopOf(direction: DirectionId): Stop {
     case 'undo':
       return {
         kind: 'approval',
+        owner: 'system',
         question: 'Keep the Undo bar on this screen, or propose it for the design system?',
         why: 'The Undo bar is a new pattern, and the agent can’t add one to the design system (rule 12). The design systems lead decides.',
         answers: [
@@ -537,6 +556,7 @@ export function stopOf(direction: DirectionId): Stop {
     case 'confirm':
       return {
         kind: 'judgment',
+        owner: 'designer',
         question: 'Who counts as an active customer for the warning?',
         why: 'The brief says “active.” The table has an Active status and a Last active date. Either reading passes every check.',
         answers: [
@@ -547,6 +567,7 @@ export function stopOf(direction: DirectionId): Stop {
     case 'review':
       return {
         kind: 'approval',
+        owner: 'system',
         question: 'Build the review panel from existing parts, or add a Panel component?',
         why: 'The review step needs a panel. A new shared component needs a written reason and the design systems lead’s approval (rule 10).',
         answers: [
@@ -563,6 +584,31 @@ export const BOUNDARIES = {
   judgment: ['Any question the brief doesn’t answer'],
   approval: ['A change to a shared component in src/components', 'A new interaction pattern (rule 12)'],
 } as const;
+
+/* WHAT GUIDES THE AGENT (2026-11-20). The agent doesn't invent the
+   screen: it builds from the components in src/components and reads the
+   twelve rules in skills/ui-quality/SKILL.md, each of which names its
+   check. One rule is shown, with the check that holds it, because one
+   followed end to end says more than twelve listed. The finding it quotes
+   is real: the experiment's hand-seeded branch, where the token lint
+   reported seventeen literals (data/scenario.ts, f3-tokens). */
+export const GUIDE = {
+  components: ['Button', 'IconButton', 'Badge', 'StatusIndicator', 'TestStatus', 'Checkbox', 'TextArea', 'SegmentedControl', 'Tabs', 'Disclosure', 'Table', 'Toolbar', 'EmptyState', 'LoadingState', 'ErrorState'],
+  rule: {
+    n: 2,
+    name: 'Never write a value where a token exists',
+    says: 'A stylesheet writes var(--space-3), not 12px.',
+    check: 'npm run lint:tokens',
+    real: 'On the experiment’s seeded branch, this check found 17 values off the token layer. Nobody had to decide anything: each one went back to the agent.',
+  },
+};
+
+/** Where the direction's build meets something the system doesn't have, by the rule that says so. */
+export function unsupportedOf(direction: DirectionId): { rule: number; says: string } | null {
+  if (direction === 'undo') return { rule: 12, says: 'The Undo bar isn’t in the design system. Rule 12 says a new pattern needs a person, so the agent builds it on this screen only and asks.' };
+  if (direction === 'review') return { rule: 10, says: 'The review step wants a Panel the system doesn’t have. Rule 10 says a new component needs a written reason and approval, so the agent asks.' };
+  return null;
+}
 
 export interface Brief {
   title: string;
@@ -646,7 +692,18 @@ export interface Measure {
   target: string;
 }
 
+/* THE HANDOFF (2026-11-20). A working build in the repo is a
+   specification an engineer can trust, not a shipped feature. Learn says
+   which is which: the design intent, what was verified in the prototype
+   (and whether that check really ran here or is the simulated agent's
+   report), and the production work nobody has done. */
+export interface Handoff {
+  intent: { problem: string; outcome: string; pattern: string; why: string; tradeoff: string };
+  production: string[];
+}
+
 export interface Outcome {
+  handoff: Handoff;
   unknowns: string[];
   measures: Measure[];
   research: string[];
@@ -704,7 +761,29 @@ export function outcomeOf(state: CycleState): Outcome | null {
         ? `A bulk action that removes records ${before}.`
         : 'A bulk action that removes records names what was removed, and offers Undo until the next action.';
 
-  return { unknowns, measures, research, nextTime, guidance };
+  const d = directionOf(state.direction);
+  const handoff: Handoff = {
+    intent: {
+      problem: problemOf(state.reading),
+      outcome: f.restore ? 'People archive in bulk without losing an active customer, and can restore one without a support ticket.' : 'People archive in bulk without losing an active customer.',
+      pattern: buildNameOf(state.direction, f),
+      /* The designer's reason, or the priority it follows: the agent's
+         draft carries its own trade-off, which the line under this one
+         says better for a conditional build. */
+      why: state.reason ?? (state.priority ? `Because ${PRIORITY[state.priority].name.toLowerCase()}.` : 'It fits the brief.'),
+      tradeoff: conditional ? 'A batch with no active customer archives in one press, with only Undo behind it. The rarer stop still has to be read when it comes.' : d.costs,
+    },
+    production: [
+      'Real archive and restore endpoints, and the job that clears customers after 90 days.',
+      ...(f.who ? ['Who archived and when, recorded on the server. The prototype reads it from sample data.'] : []),
+      'Permissions: who may archive and restore. Define left it out of scope.',
+      'Integration and performance testing on real accounts, at real table sizes.',
+      'Research with real operations leads and administrators.',
+      'Engineering review and acceptance before it ships.',
+    ],
+  };
+
+  return { handoff, unknowns, measures, research, nextTime, guidance };
 }
 
 /* ---------- THE STATE, AND THE ONE REDUCER THAT MOVES IT ---------- */
