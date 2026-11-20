@@ -17,10 +17,15 @@
   min-width: 0;
 }
 
-/* The title does not shrink while anything else on the line can: it is cut
-   with an ellipsis only when the line is narrower than the title alone. */
+/* The title does not shrink while anything else on the line can: the meta
+   only ever takes what is left over (below), so the title is cut with an
+   ellipsis only when the title and the badge alone are wider than the line.
+   It does shrink then, so a Sample badge stays inside the cell: at
+   flex: 0 0 auto the title held its width and pushed the badge into the
+   Validation column on Linux, once Next decision widened the table
+   (2026-11-20). */
 .review-row__title {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   max-width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -33,10 +38,15 @@
   text-decoration: none; /* the row's own ground says it is under the pointer */
 }
 
-/* The branch and the hash give way first, all the way to nothing. */
+/* The branch and the hash give way first, all the way to nothing. A basis of
+   0 puts nothing of theirs into the shortfall, so they grow into the space
+   the title and badge leave, up to their own width, and never take a pixel
+   from the title. A shrink factor cannot do that: shrinking is shared in
+   proportion, and even a 1000:1 share shaves enough off the title to cut it. */
 .review-row__meta {
-  flex: 0 1 auto;
+  flex: 1 1 0;
   min-width: 0;
+  max-width: max-content;
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--color-text-muted);
