@@ -1232,6 +1232,92 @@
   line-height: var(--leading-body);
 }
 
+/* Whose decision a stop is (2026-11-20): an icon and the role, beside the
+   kind of stop, in the muted ink so the badge stays the loud one. */
+.cycle__move-kind {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.cycle__owner {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-ui);
+}
+
+.cycle__owner strong {
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+}
+
+/* What guides the agent: closed under the checks it explains. */
+.cycle__guide {
+  margin-top: var(--space-4);
+}
+
+.cycle__guide .cycle__facts {
+  margin-top: var(--space-3);
+}
+
+.cycle__guide-check,
+.cycle__later-then {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  line-height: var(--leading-ui);
+}
+
+/* The saved rule's scope and what it carries, under the rule. */
+.cycle__rule-facts {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-ui);
+}
+
+.cycle__rule-facts > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+}
+
+.cycle__rule-facts dt {
+  color: var(--color-text-muted);
+}
+
+.cycle__rule-facts dd {
+  margin: 0;
+}
+
+/* The later run that reads the rule, or doesn't. */
+.cycle__later {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+}
+
+.cycle__later-when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  line-height: var(--leading-body);
+}
+
+.cycle__later-then {
+  margin-top: 0;
+}
+
 .cycle__links {
   display: flex;
   flex-direction: column;
@@ -1389,7 +1475,9 @@
     padding: var(--space-4);
   }
 
-  .cycle__checks li {
+  .cycle__checks li,
+  .cycle__guide-check,
+  .cycle__later-then {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-1);
   }

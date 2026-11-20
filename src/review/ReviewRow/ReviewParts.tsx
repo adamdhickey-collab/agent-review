@@ -1,5 +1,5 @@
 import { StatusIndicator, TestStatus, type StatusTone } from '../../components';
-import { REVIEW_STATE_LABEL, type Change, type ReviewState } from '../../data/types';
+import { NEXT_OWNER_LABEL, REVIEW_STATE_LABEL, type Change, type ReviewState } from '../../data/types';
 import './ReviewRow.css';
 
 /* The two things a queue entry says that are not text: the five validation
@@ -37,4 +37,16 @@ export function ReviewLanes({ change }: { change: Change }) {
     a live dot while validation is still running. */
 export function ReviewStatus({ change }: { change: Change }) {
   return <StatusIndicator tone={STATE_TONE[change.state]} label={REVIEW_STATE_LABEL[change.state]} live={change.state === 'validating'} />;
+}
+
+/** Who moves the change next, and what they do: the role first, since that is
+    what a reader scans the column for, and the act after it, muted. */
+export function NextCell({ change }: { change: Change }) {
+  if (!change.next) return null;
+  return (
+    <span className="review-row__next" data-owner={change.next.owner}>
+      <span className="review-row__next-who">{NEXT_OWNER_LABEL[change.next.owner]}</span>
+      <span className="review-row__next-does">{change.next.does}</span>
+    </span>
+  );
 }

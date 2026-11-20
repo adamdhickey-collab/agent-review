@@ -70,3 +70,29 @@
 .review-row[data-state='rejected'] .review-row__title {
   color: var(--color-text-secondary);
 }
+
+/* Who decides next (2026-11-20): the role, then the act, muted, on one
+   line; the act gives way first when the column is short. */
+.review-row__next {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.review-row__next-who {
+  font-weight: var(--weight-medium);
+}
+
+.review-row__next[data-owner='none'] .review-row__next-who {
+  color: var(--color-text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.review-row__next-does {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+}

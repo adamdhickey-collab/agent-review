@@ -235,6 +235,27 @@ export interface Decision {
   findingIds?: string[];
 }
 
+/* Who moves a change next (2026-11-20). The queue's job is the next
+   decision, not the history: work the checks settled needs nobody's
+   judgment, a shared component needs the design systems lead, a decision
+   the checks can't make needs the product designer, and accepted work
+   goes to an engineer to build for production. Illustrative roles. */
+export type NextOwner = 'none' | 'agent' | 'designer' | 'system' | 'engineer';
+
+export const NEXT_OWNER_LABEL: Record<NextOwner, string> = {
+  none: 'No judgment needed',
+  agent: 'Agent',
+  designer: 'Product designer',
+  system: 'Design systems lead',
+  engineer: 'Engineer',
+};
+
+export interface NextStep {
+  owner: NextOwner;
+  /** What they do, in a few words. */
+  does: string;
+}
+
 export interface Change {
   id: string;
   /** Invented, so the queue reads as a queue: its name, branch, figures and decision. Said wherever the change is shown. */
@@ -256,4 +277,5 @@ export interface Change {
   diff: DiffHunk[];
   rationale: Rationale;
   decision?: Decision;
+  next?: NextStep;
 }

@@ -61,3 +61,10 @@
 .review-card[data-state='rejected'] .review-card__title {
   color: var(--color-text-secondary);
 }
+
+/* Who decides next (2026-11-20) takes a line of its own, so the requester's
+   name after it never reads as part of what they do. */
+.review-card__facts .review-row__next {
+  flex-basis: 100%;
+  color: var(--color-text);
+}

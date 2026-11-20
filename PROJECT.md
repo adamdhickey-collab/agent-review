@@ -659,6 +659,40 @@ customers", and a selection cleared offers the batch again. Once tried,
 the move offers the next direction by number, and after all three,
 Continue.
 
+### From a working design to the team around it (2026-11-20)
+
+Read against Ralf Chille's account of Babbel's product designers working
+in their SwiftUI repository with Claude Code ("We moved design into the
+repo. The hard part wasn't the tooling.", November 2026). Most of what it
+describes was already here: components and tokens an agent builds from,
+rules that each name a check, a stop when the work reaches a shared
+component, and a decision saved as a rule. What it added was the team
+around the work, so four things changed and nothing was added to the six
+stages:
+
+- **What guides the agent.** Delegate's account of the build closes on a
+  disclosure: the fifteen components the agent builds from, rule 2 followed
+  to `npm run lint:tokens` and to the seventeen literals that check found on
+  the seeded branch, where the system runs out for this direction (rule 12
+  or rule 10), and the difference between a violation a check settles and
+  a decision it can't.
+- **Whose decision.** The agent's stop names its owner, the product
+  designer for a question of meaning, the design systems lead for anything
+  shared. The queue's Agent column (every row said Claude Code) is now
+  Next decision: who moves the change and what they do. The roles are
+  illustrative, and the queue says the simulated changes are not live
+  branches.
+- **A specification, not a shipped feature.** Learn opens with the
+  handoff to engineering: the design intent, what was verified in the
+  prototype, split between the checks that really run on every push here
+  and what only the simulated agent reports, the production work nobody has
+  done (endpoints, permissions, a server-side record, integration and
+  performance testing, research, engineering acceptance), and who owns what.
+- **Today's judgment, tomorrow's orchestration.** The saved rule shows its
+  scope and what it carries, and a later, simulated run on the same screen
+  either follows it without asking or asks again, depending only on whether
+  the box is ticked. The model learns nothing from the answer by itself.
+
 ## Exploration: three information architectures
 
 Pencil is not available here (no MCP server, no application), so the

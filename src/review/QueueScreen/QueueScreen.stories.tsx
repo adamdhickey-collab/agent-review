@@ -22,7 +22,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The review queue: every change an agent has opened, grouped by the state it is in, with the five validation lanes beside the title, then who and when. A row is one line, 40px, and the state is said once above its group, with how many, not once on every line. It is dense on purpose, because a reviewer scans it for the row that needs them rather than reading it. Below 48rem it is a list of cards instead of a table, because seven columns do not fit a phone and scrolling them sideways hides the two a reviewer decides on. The filter is a segmented control over the state, and it opens on Open, which is the question a reviewer arrives with. When a filter leaves nothing, the screen renders EmptyState rather than an empty table: on Open it says what will appear and when, and on any other filter it offers the way back. The screen owns the store and the filter; each row is a ReviewRow, or below 48rem each item is a ReviewCard.',
+          'The review queue: every change an agent has opened, grouped by the state it is in, with the five validation lanes beside the title, then who decides next and what they do, then who asked and when. A row is one line, 40px, and the state is said once above its group, with how many, not once on every line. It is dense on purpose, because a reviewer scans it for the row that needs them rather than reading it. Below 48rem it is a list of cards instead of a table, because seven columns do not fit a phone and scrolling them sideways hides the two a reviewer decides on. The filter is a segmented control over the state, and it opens on Open, which is the question a reviewer arrives with. When a filter leaves nothing, the screen renders EmptyState rather than an empty table: on Open it says what will appear and when, and on any other filter it offers the way back. The screen owns the store and the filter; each row is a ReviewRow, or below 48rem each item is a ReviewCard.',
       },
     },
   },
@@ -39,6 +39,19 @@ export const Default: Story = {
     const groups = Array.from(canvasElement.querySelectorAll('.queue__group'));
     await expect(groups.map((g) => g.textContent)).toEqual(['Needs review3', 'Ready to accept1', 'Validating1']);
     await expect(canvasElement.querySelectorAll('tbody .review-row').length).toBe(5);
+  },
+};
+
+export const NextDecision: Story = {
+  parameters: {
+    docs: { description: { story: 'Each change says who moves it next, and what they do: the design systems lead for a change to the shared Table, the product designer for a decision the checks can’t make, the agent for violations the checks found, and nobody’s judgment for a change the checks settled. Under Done, an accepted change goes to an engineer to build for production. Illustrative roles; the simulated changes are not live branches.' } },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const next = () => Array.from(canvasElement.querySelectorAll('.review-row__next-who')).map((n) => n.textContent);
+    await expect(next()).toEqual(['Design systems lead', 'Product designer', 'Agent', 'No judgment needed', 'Agent']);
+    await userEvent.click(canvas.getByRole('radio', { name: 'Done' }));
+    await expect(next()).toEqual(['Engineer', 'No judgment needed']);
   },
 };
 

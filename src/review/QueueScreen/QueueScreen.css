@@ -21,7 +21,7 @@
 }
 
 .queue__table {
-  min-width: 56rem;
+  min-width: 62rem; /* 56rem until the Next decision column (2026-11-20) */
 }
 
 /* A row is one line, 40px, and its line is the row's, not each cell's: the

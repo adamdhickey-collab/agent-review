@@ -185,6 +185,12 @@ export const DelegateReady: Story = {
     await expect(canvasElement.querySelector('.cycle__brief')).toHaveTextContent('Stop only for a batch with an active customer. A batch with none archives in one press, with Undo.');
     await userEvent.click(canvas.getByRole('button', { name: 'Send the brief' }));
     await expect(canvas.getByRole('heading', { level: 2, name: /Build the review panel from existing parts/ })).toBeVisible();
+    /* The stop says whose decision it is, and the guide says what the agent built from and where the system ran out. */
+    await expect(canvasElement.querySelector('.cycle__move-kind')).toHaveTextContent('Decides: Design systems lead');
+    await userEvent.click(canvas.getByText('What guides the agent'));
+    await expect(canvasElement.querySelector('.cycle__guide')).toHaveTextContent('npm run lint:tokens');
+    await expect(canvasElement.querySelector('.cycle__guide')).toHaveTextContent('Rule 10 says a new component needs a written reason');
+    await expect(canvasElement.querySelector('.cycle__guide')).toHaveTextContent('A check settles a violation');
   },
 };
 
@@ -228,7 +234,7 @@ export const AStageNotOpenYet: Story = {
 export const Learn: Story = {
   args: { stage: 'learn' },
   decorators: [inStore(built)],
-  parameters: { docs: { description: { story: 'What was decided, verified and still unknown, what to measure, and the guidance to keep. With no Archived view required, the unknowns say restoring is still a support ticket; with the review stopping only for an active customer, what to measure is how often it appears and whether people read it.' } } },
+  parameters: { docs: { description: { story: 'The handoff to engineering (the design intent, what was verified in the prototype and what only the simulated agent reports, the production work still to do, and who owns what), what is unknown, what to measure, and the rule to save, with a later run that follows it only once it is saved. With no Archived view required, the unknowns say restoring is still a support ticket; with the review stopping only for an active customer, what to measure is how often it appears and whether people read it.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvasElement.querySelector('.cycle__facts--record')).toHaveTextContent('Review only when someone’s active.');
@@ -237,7 +243,15 @@ export const Learn: Story = {
     await expect(canvas.getByRole('rowheader', { name: 'How often the review appears' })).toBeVisible();
     await expect(canvas.getByRole('rowheader', { name: 'Reviews pressed straight through' })).toBeVisible();
     await expect(canvasElement.querySelector('.cycle__rule')).toHaveTextContent('stops only when the batch holds a record at risk, and names those records');
+    /* The handoff: the real checks apart from the simulated agent's report, and the production work nobody has done. */
+    await expect(canvas.getAllByText(/runs on every push to this repository/)).toHaveLength(2);
+    await expect(canvas.getAllByText('The simulated agent’s report').length).toBeGreaterThan(0);
+    await expect(canvas.getByText('Engineering review and acceptance before it ships.')).toBeVisible();
+    await expect(canvas.getByText('Design systems lead')).toBeVisible();
+    /* The rule is followed later only once it is saved. */
+    await expect(canvasElement.querySelector('.cycle__later')).toHaveTextContent('Asks again');
     await userEvent.click(canvas.getByRole('checkbox', { name: /Save the rule/ }));
+    await expect(canvasElement.querySelector('.cycle__later')).toHaveTextContent('Follows the rule');
     await expect(canvas.getByRole('link', { name: /Learn.*decided/ })).toBeVisible();
   },
 };
