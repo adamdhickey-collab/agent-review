@@ -398,6 +398,20 @@
   line-height: var(--leading-body);
 }
 
+/* On a phone each label sits over its answer (since 2026-11-21). The
+   labels set their column at max-content, and since they say what they
+   mean ("What each direction would change") that column left the answers
+   too little room at 320: a word spilled 23px past the screen. */
+@media (max-width: 40rem) {
+  .ask__gathered .ask__brief {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ask__gathered .ask__brief > div + div dt {
+    margin-top: var(--space-2);
+  }
+}
+
 .ask__proposed {
   color: var(--color-text-muted);
   font-size: var(--text-sm);
