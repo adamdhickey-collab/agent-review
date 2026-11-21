@@ -22,7 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      # Whichever deploy-pages landed: the first try, or the second (below).
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -37,5 +38,28 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
+      # Twice, because the first look can come too early. deploy-pages asks
+      # the artifact store for this run's `github-pages` artifact under a
+      # second after the upload finalizes, and the store does not always list
+      # it yet ("Found 0 artifact(s)"). On 2026-11-21 that failed #118's
+      # deploy and #121's twice in a row; adamhickey.com's pages.yml measured
+      # the same race the same day and added this (adamhickey.com#1336).
+      #
+      # So the first try is allowed to fail, and a failure waits fifteen
+      # seconds and tries once more in the same run, on the one artifact
+      # already uploaded. Don't "Re-run failed jobs" on a red deploy: a
+      # re-run uploads a second artifact into the run and deploy-pages
+      # refuses to choose between two. Start a new run instead:
+      #
+      #   gh workflow run pages.yml --ref main
       - id: deployment
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+      - name: The artifact store may be behind, so wait and deploy again
+        if: steps.deployment.outcome == 'failure'
+        run: |
+          echo "::warning title=deploy-pages took two tries::The first try failed, most likely because the artifact store had not listed the upload yet. Waiting fifteen seconds, then trying again in this run."
+          sleep 15
+      - id: deployment_retry
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v5
