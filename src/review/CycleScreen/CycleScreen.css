@@ -1064,8 +1064,11 @@
   }
 }
 
-/* The three directions as the move's script: the one open now marked in
-   the accent, a tried one checked, with what it showed under its name. */
+/* The three directions as the move's script: a tried one checked, with
+   what it showed under its name. Every name is set the same (since
+   2026-11-21): the open direction took a heavier weight and darker ink,
+   and with all three tried that read as one result outranking the others.
+   The screen beside the list says which direction is open. */
 .cycle__tries {
   display: flex;
   flex-direction: column;
@@ -1081,24 +1084,13 @@
   border-left: 2px solid var(--color-border);
 }
 
-/* The direction on screen is said by its name's ink, not by an accent rule
-   beside it (since 2026-10-26, with the rail and a chosen answer). */
-.cycle__tries li[data-current] .cycle__try-name {
-  color: var(--color-text);
-}
-
 .cycle__try-name {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-text-secondary);
+  color: var(--color-text);
   font-weight: var(--weight-medium);
   line-height: var(--leading-ui);
-}
-
-.cycle__tries li[data-current] .cycle__try-name {
-  color: var(--color-text);
-  font-weight: var(--weight-semibold);
 }
 
 .cycle__tries li[data-done] .cycle__try-name .icon {
