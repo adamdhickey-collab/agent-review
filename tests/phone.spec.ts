@@ -1,11 +1,23 @@
 import { devices, expect, test, type Page } from '@playwright/test';
 import { EXPLORED, FRAMED, seedCycle } from './seed';
 
-/* What makes a page too wide, named, for a failure message: the elements
-   whose right edge lies past the screen and within the page's scroll
-   width, which leaves out a scroller's own content. */
+/* What makes a page too wide, named, for a failure message: each element
+   whose box, or whose content spilling out of it, reaches past the screen
+   and within the page's scroll width (a scroller's own content does not
+   widen the page, so it is left out). */
 async function wider(page: Page, width: number): Promise<string> {
-  const out = await page.evaluate((w) => [...document.querySelectorAll('body *')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 0.5 && r.right <= document.documentElement.scrollWidth + 0.5; }).map((e) => { const r = e.getBoundingClientRect(); return `${e.tagName.toLowerCase()}.${String((e as HTMLElement).className).split(' ').join('.')} right ${r.right.toFixed(1)}: ${(e.textContent ?? '').trim().slice(0, 50)}`; }), width);
+  const out = await page.evaluate((w) => {
+    const page = document.documentElement.scrollWidth;
+    const found: string[] = [];
+    for (const e of document.querySelectorAll<HTMLElement>('body *')) {
+      const r = e.getBoundingClientRect();
+      if (r.width === 0) continue;
+      const spill = getComputedStyle(e).overflowX === 'visible' ? e.scrollWidth - e.clientWidth : 0;
+      const reach = Math.max(r.right, r.left + e.clientWidth + spill);
+      if (reach > w + 0.5 && reach <= page + 0.5) found.push(`${e.tagName.toLowerCase()}.${String(e.className).split(' ').join('.')} reaches ${reach.toFixed(1)}${spill > 0 ? ` (its content spills ${spill}px)` : ''}: ${(e.textContent ?? '').trim().slice(0, 50)}`);
+    }
+    return found;
+  }, width);
   return out.length ? `past ${width}:\n${out.slice(-15).join('\n')}` : `nothing past ${width}`;
 }
 
