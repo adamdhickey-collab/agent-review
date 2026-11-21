@@ -12,6 +12,9 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  # For the failure notice at the bottom. A red run in a tab nobody has open
+  # is not a notification; an issue is.
+  issues: write
 
 concurrency:
   group: pages
@@ -63,3 +66,80 @@ jobs:
       - id: deployment_retry
         if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v5
+
+      # LOUDLY, because the quiet version of this failure is a stale
+      # prototype that reads as a quiet day, and adamhickey.com embeds it, so
+      # the case study shows the old one too. Three places, none of which is
+      # the run log: an annotation on the run, a job summary, and an issue,
+      # the issue being the only one that arrives anywhere on its own.
+      # Carried over from adamhickey.com's pages.yml.
+      #
+      # One issue per outage, not per attempt: a later failure comments on
+      # the open one. Closing it is the signal that the prototype is current
+      # again. A cancelled run is not a failure, so two merges landing
+      # seconds apart, which cancel the first deploy by design, open nothing.
+      - name: Say so somewhere that is not the run log
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+          SUBJECT: ${{ github.event.head_commit.message }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          short="${SHA:0:7}"
+          title="The prototype did not deploy"
+          # First line only, and pipes escaped: the subject goes in a table
+          # cell, and a commit message is allowed to contain both. A run
+          # started by hand has no head_commit, so read it from the checkout.
+          subject=${SUBJECT%%$'\n'*}
+          [ -n "$subject" ] || subject=$(git log -1 --format=%s "$SHA" 2>/dev/null || true)
+          subject=${subject//|/\\|}
+          echo "::error title=$title::$short is on main and is not on the prototype. The previous deploy is still being served."
+
+          cat > "$RUNNER_TEMP/notice.md" <<EOF
+          **\`$short\` is on \`main\` and is not on https://adamdhickey-collab.github.io/agent-review/.**
+          Pages is still serving the previous deploy, and so is the prototype
+          embedded in adamhickey.com's case study.
+
+          | | |
+          | --- | --- |
+          | Commit | \`$short\` — $subject |
+          | Run | $RUN |
+
+          Read the failing step in that run.
+
+          - **npm ci, the builds, or build-check**: the build is broken on
+            \`main\`. Its log names the file; build-check's names the stylesheet
+            that lost \`light-dark()\`.
+          - **deploy-pages**, finding no artifact named \`github-pages\` or more
+            than one: GitHub's artifact store was behind the upload, and stayed
+            behind through a second try fifteen seconds later, or this is a
+            re-run. Start a new run rather than re-running this one, because a
+            re-run adds a second artifact to this run and deploy-pages will not
+            choose between them:
+
+            \`\`\`bash
+            gh workflow run pages.yml --ref main
+            \`\`\`
+
+          - **Anything else**: the usual suspects are the artifact upload and
+            Pages itself.
+
+          Nothing is lost while this is open. The commit is on \`main\`, only
+          unpublished, and any later push to \`main\` deploys it along with
+          whatever fixed this.
+
+          Close this issue once the prototype is current again.
+          EOF
+
+          cat "$RUNNER_TEMP/notice.md" >> "$GITHUB_STEP_SUMMARY"
+
+          open=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+                   --search "\"$title\" in:title" \
+                   --json number --jq '.[0].number // empty')
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/notice.md"
+            echo "commented on the open notice, #$open"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title: $short" --body-file "$RUNNER_TEMP/notice.md"
+          fi
