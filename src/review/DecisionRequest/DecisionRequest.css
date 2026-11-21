@@ -117,6 +117,19 @@
   gap: var(--space-1) var(--space-2);
 }
 
+/* A check's badge wraps inside the column rather than running off it
+   (since 2026-11-21): "Visual baselines: 0 of 2 frames moved with both" is
+   339px on one line in Linux's Chromium, wider than a 320 screen, and a
+   badge is nowrap by default. */
+.ask__check-badge {
+  max-width: 100%;
+  height: auto;
+  min-height: var(--space-6);
+  padding-block: calc((var(--space-6) - 1em * var(--leading-tight)) / 2); /* one line stays 24 tall */
+  white-space: normal;
+  line-height: var(--leading-tight);
+}
+
 .ask__check-says {
   color: var(--color-text-secondary);
   font-size: var(--text-sm);

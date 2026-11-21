@@ -202,7 +202,8 @@ test.describe('the tour on a phone', () => {
       const out: string[] = [];
       for (const c of el.querySelectorAll<HTMLElement>('button, select')) {
         const r = c.getBoundingClientRect();
-        if (r.height > 0 && r.height < floor) out.push(`${c.getAttribute("aria-label") ?? c.textContent?.trim()} (${r.height})`);
+        /* Rounded first: Linux's Chromium measures a 44px button at 43.99997. */
+        if (r.height > 0 && Math.round(r.height) < floor) out.push(`${c.getAttribute("aria-label") ?? c.textContent?.trim()} (${r.height})`);
       }
       return out;
     }, FLOOR);
