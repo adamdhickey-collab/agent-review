@@ -1,10 +1,11 @@
 import { devices, expect, test, type Page } from '@playwright/test';
 import { EXPLORED, FRAMED, seedCycle } from './seed';
 
-/* What reaches past the screen's edge, named, for a failure message: the
-   elements whose right edge is past the width, innermost last. */
+/* What makes a page too wide, named, for a failure message: the elements
+   whose right edge lies past the screen and within the page's scroll
+   width, which leaves out a scroller's own content. */
 async function wider(page: Page, width: number): Promise<string> {
-  const out = await page.evaluate((w) => [...document.querySelectorAll('body *')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 0.5; }).map((e) => { const r = e.getBoundingClientRect(); return `${e.tagName.toLowerCase()}.${String((e as HTMLElement).className).split(' ').join('.')} right ${r.right.toFixed(1)}: ${(e.textContent ?? '').trim().slice(0, 50)}`; }), width);
+  const out = await page.evaluate((w) => [...document.querySelectorAll('body *')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 0.5 && r.right <= document.documentElement.scrollWidth + 0.5; }).map((e) => { const r = e.getBoundingClientRect(); return `${e.tagName.toLowerCase()}.${String((e as HTMLElement).className).split(' ').join('.')} right ${r.right.toFixed(1)}: ${(e.textContent ?? '').trim().slice(0, 50)}`; }), width);
   return out.length ? `past ${width}:\n${out.slice(-15).join('\n')}` : `nothing past ${width}`;
 }
 
