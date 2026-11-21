@@ -1,6 +1,13 @@
 import { devices, expect, test, type Page } from '@playwright/test';
 import { EXPLORED, FRAMED, seedCycle } from './seed';
 
+/* What reaches past the screen's edge, named, for a failure message: the
+   elements whose right edge is past the width, innermost last. */
+async function wider(page: Page, width: number): Promise<string> {
+  const out = await page.evaluate((w) => [...document.querySelectorAll('body *')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > w + 0.5; }).map((e) => { const r = e.getBoundingClientRect(); return `${e.tagName.toLowerCase()}.${String((e as HTMLElement).className).split(' ').join('.')} right ${r.right.toFixed(1)}: ${(e.textContent ?? '').trim().slice(0, 50)}`; }), width);
+  return out.length ? `past ${width}:\n${out.slice(-15).join('\n')}` : `nothing past ${width}`;
+}
+
 /* The review on a phone. Not a screenshot: three things that must stay true
    at the widths phones come in, each measured on the real screens with a
    touch device, because that is what turns the coarse-pointer styles on.
@@ -145,7 +152,7 @@ test.describe('the delegated work on a phone, the other direction', () => {
     await open(page, '#/runs/billing');
     await page.getByRole('button', { name: 'Request evidence' }).click();
     await expect(page.getByText('What the agent found when you asked')).toBeVisible();
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth), await wider(page, 320)).toBeLessThanOrEqual(320);
     await page.getByRole('button', { name: /^Select and preview\s+Make it a Button in its own change$/ }).click();
     await expect(page.getByRole('textbox', { name: 'Your reason' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
