@@ -23,12 +23,12 @@ function props(s: DelegationState, id: string, preview: RulePreview): DecisionRe
 
 const makeRule: RulePreview = {
   offer: 'make',
-  text: 'On the billing screens, an action that ends or reduces a subscription never gets a quiet variant: it stays as built, under an exception with an end date, until its own change makes it a Button.',
+  text: 'On the billing screens, an action that ends or reduces a subscription never gets a quiet variant. The action stays as built, under an exception with an end date, until a separate change makes the action a Button.',
   settles: waitingOn(start, 'cancel-action').filter((w) => w.question?.pattern === 'exit'),
 };
 
-const DRAFT_OWN = 'How easy it is to cancel is a product decision, so it gets its own change. A quiet variant would let any agent make any action this hard to find.';
-const DRAFT_QUIET = 'The job was to change nothing visible. A quiet variant keeps that promise, and rule 9 allows it.';
+const DRAFT_OWN = 'How easy it is to cancel is a product decision, and belongs in its own change. A quiet variant would let any agent make any action this hard to find.';
+const DRAFT_QUIET = 'The job was to change nothing visible, and rule 9 allows a quiet variant that keeps that promise.';
 
 const meta = {
   title: 'Review/DecisionRequest',
@@ -66,7 +66,7 @@ export const TradeOff: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('3 changes wait on this')).toBeInTheDocument();
-    await expect(canvas.getByRole('heading', { name: 'Keep “Cancel subscription” looking as it does, or make it a Button on purpose?' })).toBeInTheDocument();
+    await expect(canvas.getByRole('heading', { name: 'Keep “Cancel subscription” small and gray, or make it a Button?' })).toBeInTheDocument();
     const said = 'All 3 checks pass with either direction, and neither moves a pixel.';
     const tried = canvas.getByText(said).closest('details')!;
     await expect(tried).not.toHaveAttribute('open');
@@ -75,7 +75,7 @@ export const TradeOff: Story = {
     await expect(checks).toHaveTextContent('Visual baselines: 0 of 2 frames moved with both');
     /* The checks are not the decision. */
     await expect(canvas.getByText(/Passing doesn’t mean either trade-off works for the people who use this screen\./)).toBeInTheDocument();
-    const answers = canvas.getByRole('group', { name: 'Which trade-off is acceptable?' });
+    const answers = canvas.getByRole('group', { name: 'The two directions' });
     const cards = within(answers).getAllByRole('listitem').filter((li) => li.classList.contains('ask__choice'));
     await expect(cards).toHaveLength(2);
     await expect(cards[0]).toHaveTextContent(/^Add a quiet variant\s*Recommended/);
@@ -237,7 +237,7 @@ export const OutsideYourRule: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
+    await expect(canvas.getByText(/Close to your rule, but outside the rule/)).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', choose(QUIET)));
     await expect(canvas.getByText('Add this case to your rule')).toBeInTheDocument();
   },
@@ -249,7 +249,7 @@ export const AnsweredOnceElsewhere: Story = {
     docs: { description: { story: 'The first question decided once, without a rule. This change was waiting on it, and asks anyway, saying why: a one-time decision does not carry over.' } },
   },
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByText(/A one-time decision doesn’t carry over/)).toBeInTheDocument();
+    await expect(within(canvasElement).getByText(/for that change only\./)).toBeInTheDocument();
   },
 };
 
@@ -279,7 +279,7 @@ export const SharedComponent: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('Needs approval')).toBeInTheDocument();
-    await expect(canvas.getByText('So this isn’t a technical problem. It’s a permission decision.')).toBeInTheDocument();
+    await expect(canvas.getByText('So this is a permission decision, not a technical problem.')).toBeInTheDocument();
     await expect(canvas.getByText(/The shared Table is Priya Raman’s to change \(Design systems\)\./)).toBeInTheDocument();
     for (const name of ['Fix this screen only', 'Approve, this once', 'Show me the 40 screens']) await expect(canvas.getByRole('button', { name })).toBeInTheDocument();
     /* Gathering evidence decides nothing, so it asks no second question. */
@@ -303,7 +303,7 @@ export const SharedComponentApproveOnce: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('button', { name: 'Apply' })).toHaveFocus();
     await expect(canvas.queryByRole('checkbox')).toBeNull();
-    await expect(canvas.getByText(/only its owner, Priya Raman \(Design systems\), can give/)).toBeInTheDocument();
+    await expect(canvas.getByText(/Only the Table’s owner, Priya Raman \(Design systems\), can let an agent/)).toBeInTheDocument();
   },
 };
 
@@ -321,7 +321,7 @@ export const SharedComponentKeepLocal: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByText('Also use this answer for similar cases'));
     await expect(canvas.getByText(/On the customer screens, when a fix would change a shared component/)).toBeInTheDocument();
-    await expect(canvas.getByText(/You can revoke it under the boundaries/)).toBeInTheDocument();
+    await expect(canvas.getByText(/Revoke the rule under the boundaries/)).toBeInTheDocument();
   },
 };
 
@@ -347,7 +347,7 @@ export const Titled: Story = {
   decorators: [
     (Story) => (
       <div>
-        <h2 id="story-question">Keep “Cancel subscription” looking as it does, or make it a Button on purpose?</h2>
+        <h2 id="story-question">Keep “Cancel subscription” small and gray, or make it a Button?</h2>
         <Story />
       </div>
     ),
@@ -364,6 +364,6 @@ export const Titled: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getAllByRole('heading', { name: /Keep “Cancel subscription”/ })).toHaveLength(1);
     await expect(canvas.queryByText('Needs judgment')).toBeNull();
-    await expect(canvas.getByRole('article', { name: 'Keep “Cancel subscription” looking as it does, or make it a Button on purpose?' })).toBeInTheDocument();
+    await expect(canvas.getByRole('article', { name: 'Keep “Cancel subscription” small and gray, or make it a Button?' })).toBeInTheDocument();
   },
 };

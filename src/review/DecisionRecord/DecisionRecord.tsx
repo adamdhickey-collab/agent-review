@@ -37,7 +37,7 @@ export interface DecisionRecordProps {
   onSeeRule?: () => void;
 }
 
-const and = (parts: string[]) => (parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`);
+const and = (parts: string[]) => (parts.length <= 1 ? parts.join('') : parts.length === 2 ? parts.join(' and ') : `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`);
 
 export const DecisionRecord = forwardRef<HTMLElement, DecisionRecordProps>(function DecisionRecord({ decision: d, work, rule, all, onSeeRule }, ref) {
   const id = useId();
@@ -78,7 +78,7 @@ export const DecisionRecord = forwardRef<HTMLElement, DecisionRecordProps>(funct
             <li>
               <Icon name="status-passed" size={16} />
               <span>
-                Applied it to the {plural(used.length, 'change')} your rule covers, on the {and(Array.from(new Set(used.map((w) => w.screen.toLowerCase()))))}.
+                Applied the decision to the {plural(used.length, 'change')} your rule covers, on the {and(Array.from(new Set(used.map((w) => w.screen.toLowerCase()))))}.
               </span>
             </li>
           ) : null}
@@ -112,7 +112,7 @@ export const DecisionRecord = forwardRef<HTMLElement, DecisionRecordProps>(funct
           </dd>
         </div>
         <div>
-          <dt>Reusable guidance</dt>
+          <dt>Rule</dt>
           <dd>
             {rule ? (
               <>
@@ -122,8 +122,8 @@ export const DecisionRecord = forwardRef<HTMLElement, DecisionRecordProps>(funct
                 <p className="decided__used">
                   {rule.status === 'active'
                     ? used.length
-                      ? `Kept as your rule. ${plural(used.length, 'later change')} followed it, and each record names this decision.`
-                      : 'Kept as your rule. Nothing has matched it yet; the next case that does follows it.'
+                      ? `Kept as your rule. ${plural(used.length, 'later change')} followed the rule, and each record names this decision.`
+                      : 'Kept as your rule. No change has matched the rule yet.'
                     : 'Kept as your rule, since revoked. A matching case asks you again.'}
                 </p>
                 {onSeeRule ? (
@@ -133,7 +133,7 @@ export const DecisionRecord = forwardRef<HTMLElement, DecisionRecordProps>(funct
                 ) : null}
               </>
             ) : (
-              <p className="decided__used">Not kept for similar cases. This decision applies to this change only, so the next matching case asks you again.</p>
+              <p className="decided__used">Not kept as a rule, so the next matching case asks you again.</p>
             )}
           </dd>
         </div>

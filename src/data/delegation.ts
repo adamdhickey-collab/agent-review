@@ -568,19 +568,19 @@ export function whyAsking(s: DelegationState, w: Work): string {
   const q = w.question;
   if (!q) return '';
   const cite = q.paused.map((n) => `boundary ${n}`).join(' and ');
-  if (!w.waitsOn || !q.pattern) return `It stopped under ${cite}.`;
+  if (!w.waitsOn || !q.pattern) return `The agent stopped under ${cite}.`;
   const first = find(s, w.waitsOn);
   const rule = activeRule(s);
   if (rule && !rule.covers.includes(q.pattern)) {
-    return `Close to your rule, but outside it. Your rule covers ${rule.covers.map((p) => PATTERN_LABEL[p]).join(' and ')}; this is ${PATTERN_LABEL[q.pattern]}.`;
+    return `Close to your rule, but outside the rule. Your rule covers ${rule.covers.map((p) => PATTERN_LABEL[p]).join(' and ')}; this change is ${PATTERN_LABEL[q.pattern]}.`;
   }
   const revoked = s.rules.find((r) => r.status === 'revoked' && r.covers.includes(q.pattern!));
   if (!rule && revoked) {
     const at = revoked.history[revoked.history.length - 1]?.at;
-    return `Your rule for this was revoked at ${at}, so it asks again.`;
+    return `Your rule for this case was revoked at ${at}, so the agent asks again.`;
   }
   const answered = first?.history.find((e) => e.who === 'you');
-  return `You decided the same question for the ${first?.screen.toLowerCase()} at ${answered?.at ?? 'an earlier time'}, for that change only. A one-time decision doesn’t carry over to another change.`;
+  return `You decided the same question for the ${first?.screen.toLowerCase()} at ${answered?.at ?? 'an earlier time'}, for that change only.`;
 }
 
 /** The account the screen opens on. Every number is counted from the work, never carried. */
@@ -752,8 +752,8 @@ function settle(s: DelegationState, at: string): { state: DelegationState; settl
         option,
         { kind: 'rule', ruleId: rule.id },
         at,
-        from ? `Followed your rule, from your decision at ${from.at} (${from.direction.toLowerCase()}): this is the case it covers.` : 'Followed your rule.',
-        'Whether your rule fits this case. No check can tell; your rule decided it.',
+        from ? `Followed your rule, from your decision at ${from.at} (${from.direction.toLowerCase()}): the rule covers this case.` : 'Followed your rule.',
+        'Whether your rule fits this case. No check can tell; your rule decided.',
       );
       settled.push(done);
       return done;
@@ -762,7 +762,7 @@ function settle(s: DelegationState, at: string): { state: DelegationState; settl
       const asking: Work = {
         ...w,
         status: 'asking',
-        history: [...w.history, { at, who: 'agent', text: rule ? 'Asked: your rule doesn’t cover this case.' : 'Asked: the answer it was waiting on was given once, and doesn’t cover this change.' }],
+        history: [...w.history, { at, who: 'agent', text: rule ? 'Asked: your rule doesn’t cover this case.' : 'Asked: the answer this change waited on covered only that change.' }],
       };
       asked.push(asking);
       return asking;
@@ -817,7 +817,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
           ...s,
           ...tick,
           work: s.work.map((x) => (x.id === w.id ? again : x)),
-          notice: option.then?.notice ?? 'Nothing decided yet. It gathered the evidence you asked for, and is asking again.',
+          notice: option.then?.notice ?? 'Nothing decided yet. The agent gathered the evidence you asked for and is asking again.',
           noticeKind: 'open',
           noticeRule: undefined,
           noticeDecision: undefined,
@@ -857,7 +857,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
               status: 'active',
               from: w.id,
               applied: [],
-              history: [{ at, who: 'you', text: draft ? `Made it from your decision: ${direction.toLowerCase()}.` : `Made it from the ${w.screen.toLowerCase()}’s question.` }],
+              history: [{ at, who: 'you', text: draft ? `Made the rule from your decision: ${direction.toLowerCase()}.` : `Made the rule from the ${w.screen.toLowerCase()}’s question.` }],
               ...option.rule,
               /* A rule made from a decision gives the person's reason as its
                  why, so the reason travels with the guidance it became. */
@@ -883,7 +883,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
           { kind: 'allowed-once', at },
           at,
           'Made the change you allowed.',
-          'Whether the system should have this token. That was your call, for this change only; the agent still won’t add a token on its own.',
+          'Whether the design system should have this token. You decided for this change only, and the agent still won’t add a token on its own.',
         );
       } else {
         done = make(
@@ -904,7 +904,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
           { kind: 'answer', at },
           at,
           'Applied your answer.',
-          draft ? 'Whether this was the right trade-off. No check can tell; that was your decision.' : 'Whether that is the right meaning. No check can tell; that was your answer.',
+          draft ? 'Whether this was the right trade-off. No check can tell; you decided.' : 'Whether your answer was right. No check can tell.',
         );
       }
 
@@ -935,7 +935,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
         : option.grants
           ? 'Allowed once, made and merged.'
           : decision
-            ? `Decided: ${direction.toLowerCase()}${ruled}. The agent applied it and recorded your reason.`
+            ? `Decided: ${direction.toLowerCase()}${ruled}. The agent applied the decision and recorded your reason.`
             : `Answered${ruled}.`;
       const quiet = state.work.some((x) => x.status === 'asking') ? '' : 'Nothing else needs you.';
       const rule = ruleNote || settled.length ? activeRule(state)?.id : undefined;
@@ -951,7 +951,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
         ...tick,
         work: s.work.map((x) =>
           x.id === w.id
-            ? { ...x, status: 'reverted', history: [...x.history, { at, who: 'you', text: w.undo ? `Reverted it: ${commit} on main undoes it. The agent won’t redo it.` : `Reverted it: ${commit} on main puts the ${w.lines.length === 1 ? 'literal' : 'literals'} back. The agent won’t redo it.` }] }
+            ? { ...x, status: 'reverted', history: [...x.history, { at, who: 'you', text: w.undo ? `Reverted: ${commit} on main undoes the fix. The agent won’t try again.` : `Reverted: ${commit} on main undoes the change. The agent won’t try again.` }] }
             : x,
         ),
         notice: `Reverted: ${w.title}.`,
@@ -967,7 +967,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
       return {
         ...s,
         ...tick,
-        work: s.work.map((x) => (x.id === w.id ? { ...x, status: 'made', history: [...x.history, { at, who: 'you', text: `Restored it: ${w.commit} is applied again.` }] } : x)),
+        work: s.work.map((x) => (x.id === w.id ? { ...x, status: 'made', history: [...x.history, { at, who: 'you', text: `Restored: ${w.commit} is applied again.` }] } : x)),
         notice: `Restored: ${w.title}.`,
         noticeKind: 'done',
         noticeRule: undefined,
@@ -997,7 +997,7 @@ export function reduce(s: DelegationState, a: Action): DelegationState {
         ...s,
         ...tick,
         rules: s.rules.map((x) => (x.id === r.id ? { ...x, status: 'revoked', history: [...x.history, { at, who: 'you', text: 'Revoked it.' }] } : x)),
-        notice: `Rule revoked. The ${plural(r.applied.length, 'change')} it made ${r.applied.length === 1 ? 'stays' : 'stay'} merged; a matching case will ask you again.`,
+        notice: `Rule revoked. The ${plural(r.applied.length, 'change')} the rule made ${r.applied.length === 1 ? 'stays' : 'stay'} merged; a matching case will ask you again.`,
         noticeKind: 'back',
         noticeRule: undefined,
         noticeDecision: undefined,

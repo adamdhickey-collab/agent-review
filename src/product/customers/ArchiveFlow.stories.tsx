@@ -37,7 +37,7 @@ export const Undo: Story = {
     await expect(canvas.getByRole('button', { name: 'Archive' })).toHaveAttribute('data-next');
     await userEvent.click(canvas.getByRole('button', { name: 'Archive' }));
     await expect(args.onPhase).toHaveBeenCalledWith('done', null);
-    await expect(canvasElement.querySelector('.archive-flow__result')).toHaveTextContent('4 of 12 customers archived. Monarch Dental Group wasn’t: it has an open invoice.');
+    await expect(canvasElement.querySelector('.archive-flow__result')).toHaveTextContent('4 of 12 customers archived. Monarch Dental Group has an open invoice and stays.');
     await expect(canvas.getByRole('button', { name: 'Undo' })).toHaveFocus();
     /* The four stay in view while the bar shows, struck through and out of reach. */
     await expect(canvas.getAllByRole('row')).toHaveLength(13);
@@ -58,7 +58,7 @@ export const UndoNamingActive: Story = {
   play: async ({ canvasElement }) => {
     const notes = canvasElement.querySelector('.archive-flow__notes');
     await expect(notes).not.toHaveTextContent('in this selection');
-    await expect(notes).toHaveTextContent('Monarch Dental Group: it has an open invoice.');
+    await expect(notes).toHaveTextContent('Monarch Dental Group has an open invoice.');
     const shaded = [...canvasElement.querySelectorAll('.archive-flow__row--active th')].map((th) => th.textContent);
     await expect(shaded).toEqual(['Halvorsen Freight', 'Brightwater Clinics', 'Saltmarsh Studio']);
   },
@@ -71,7 +71,7 @@ export const Confirm: Story = {
     const canvas = within(canvasElement);
     const ask = canvas.getByRole('alertdialog');
     await expect(ask).toHaveAccessibleName('Archive 5 customers?');
-    await expect(ask).toHaveAccessibleDescription('3 are active: Halvorsen Freight, Brightwater Clinics and Saltmarsh Studio.');
+    await expect(ask).toHaveAccessibleDescription('3 are active: Halvorsen Freight, Brightwater Clinics, and Saltmarsh Studio.');
     /* The bar and the rows under the pop-up can't be reached while it asks. */
     await expect(canvasElement.querySelector('.archive-flow__selected')).toHaveTextContent('5 of 12 customers selected');
     await expect(canvasElement.querySelector('.archive-flow__rows-under')).toHaveAttribute('inert');
@@ -100,10 +100,10 @@ export const ReviewSkippedForACleanup: Story = {
   parameters: { docs: { description: { story: 'The same build with a cleanup of two trial and two churned customers, and Monarch Dental Group. Nobody is active, so there is no review: the note names Monarch before the press, and one press archives the four, and the bar offers Undo, as undo’s does: a press that asked nothing needs a way back (rule 6). The review is the protection when there is something to say.' } } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await expect(canvasElement.querySelector('.archive-flow__notes')).toHaveTextContent('Monarch Dental Group: it has an open invoice.');
+    await expect(canvasElement.querySelector('.archive-flow__notes')).toHaveTextContent('Monarch Dental Group has an open invoice.');
     await userEvent.click(canvas.getByRole('button', { name: 'Archive' }));
     await expect(canvasElement.querySelector('.archive-flow__review')).toBeNull();
-    await expect(canvasElement.querySelector('.archive-flow__result')).toHaveTextContent('4 of 12 customers archived. Monarch Dental Group wasn’t: it has an open invoice.');
+    await expect(canvasElement.querySelector('.archive-flow__result')).toHaveTextContent('4 of 12 customers archived. Monarch Dental Group has an open invoice and stays.');
     await expect(canvas.getByRole('button', { name: 'Undo' })).toHaveFocus();
     await expect(args.onEvent).toHaveBeenCalledWith('archived');
     await expect(args.onEvent).not.toHaveBeenCalledWith('active-archived');
