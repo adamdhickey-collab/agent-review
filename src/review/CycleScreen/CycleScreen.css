@@ -1429,8 +1429,67 @@
     position: static;
   }
 
+  /* Below the desktop the rail is one row (since 2026-11-21), a stepper:
+     six markers on a hairline with each name small under its marker, the
+     current one ringed. Three columns and then two had turned a progress
+     bar into a menu. Each marker keeps a fingertip's target. */
   .cycle__rail ol {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    padding: var(--space-2) 0;
+  }
+
+  .cycle__rail li {
+    position: relative;
+    display: flex;
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  /* The hairline is drawn in pieces, one from each marker back to the one
+     before it, through the marker's middle, so a piece after a decided
+     stage can take the success solid and the row reads as how far the
+     ticket has come. */
+  .cycle__rail li + li::before {
+    position: absolute;
+    top: calc(var(--space-2) + var(--space-6) / 2);
+    right: 50%;
+    left: -50%;
+    border-top: var(--border-width) solid var(--color-border);
+    content: '';
+  }
+
+  .cycle__rail li:has(> a[data-done]) + li::before {
+    border-top-color: var(--color-success-solid);
+  }
+
+  .cycle__rail a,
+  .cycle__rail-locked {
+    position: relative;
+    z-index: 1;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: var(--control-height-touch);
+    min-height: var(--control-height-touch);
+    padding: var(--space-2) 0 0;
+    font-size: var(--text-xs);
+  }
+
+  .cycle__rail a:hover,
+  .cycle__rail a[aria-current='step'] {
+    background: none;
+  }
+
+  .cycle__rail-num {
+    background: var(--color-surface);
+  }
+
+  .cycle__rail a[aria-current='step'] .cycle__rail-num {
+    box-shadow: 0 0 0 var(--space-1) var(--color-accent-subtle);
+  }
+
+  .cycle__rail-name {
+    overflow: visible;
   }
 }
 
@@ -1454,9 +1513,6 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .cycle__rail ol {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 
   .cycle__reading {
     grid-template-columns: minmax(0, 1fr);
@@ -1507,4 +1563,30 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+/* Under 360 the stage names are closer than 9px to each other ("Evaluate"
+   and "Delegate" touch at 320), so the rail keeps its markers and the names
+   go to a screen reader only; the line under the rail still says "Stage 3
+   of 6 · Explore". */
+@media (max-width: 22.4375rem) {
+  .cycle__rail-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .cycle__rail a,
+  .cycle__rail-locked {
+    padding-top: 0;
+    justify-content: center;
+  }
+
+  .cycle__rail li + li::before {
+    top: 50%;
+  }
 }
