@@ -336,7 +336,7 @@ const GATHERED: Gathered = {
       what: 'Actions built by hand, small and gray',
       places: '4 places on 2 screens: “Cancel subscription” and “Remove card” in billing settings, and “Downgrade plan” and “Remove seats” on the plan card.',
     },
-    { what: 'Actions drawn as the system’s Button', places: 'Every other action on both screens, from “Change plan” to “Add seats”.' },
+    { what: 'Actions drawn as a Button', places: 'Every other action on both screens, from “Change plan” to “Add seats”.' },
   ],
   changes: [
     { direction: 'Add a quiet variant', text: 'All 4 become quiet Buttons, and the Button gains a fifth variant every screen can use. 0 visual baselines move.' },

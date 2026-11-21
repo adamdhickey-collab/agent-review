@@ -1,6 +1,26 @@
 import { devices, expect, test, type Page } from '@playwright/test';
 import { EXPLORED, FRAMED, seedCycle } from './seed';
 
+/* What makes a page too wide, named, for a failure message: each element
+   whose box, or whose content spilling out of it, reaches past the screen
+   and within the page's scroll width (a scroller's own content does not
+   widen the page, so it is left out). */
+async function wider(page: Page, width: number): Promise<string> {
+  const out = await page.evaluate((w) => {
+    const page = document.documentElement.scrollWidth;
+    const found: string[] = [];
+    for (const e of document.querySelectorAll<HTMLElement>('body *')) {
+      const r = e.getBoundingClientRect();
+      if (r.width === 0) continue;
+      const spill = getComputedStyle(e).overflowX === 'visible' ? e.scrollWidth - e.clientWidth : 0;
+      const reach = Math.max(r.right, r.left + e.clientWidth + spill);
+      if (reach > w + 0.5 && reach <= page + 0.5) found.push(`${e.tagName.toLowerCase()}.${String(e.className).split(' ').join('.')} reaches ${reach.toFixed(1)}${spill > 0 ? ` (its content spills ${spill}px)` : ''}: ${(e.textContent ?? '').trim().slice(0, 50)}`);
+    }
+    return found;
+  }, width);
+  return out.length ? `past ${width}:\n${out.slice(-15).join('\n')}` : `nothing past ${width}`;
+}
+
 /* The review on a phone. Not a screenshot: three things that must stay true
    at the widths phones come in, each measured on the real screens with a
    touch device, because that is what turns the coarse-pointer styles on.
@@ -145,7 +165,7 @@ test.describe('the delegated work on a phone, the other direction', () => {
     await open(page, '#/runs/billing');
     await page.getByRole('button', { name: 'Request evidence' }).click();
     await expect(page.getByText('What the agent found when you asked')).toBeVisible();
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth), await wider(page, 320)).toBeLessThanOrEqual(320);
     await page.getByRole('button', { name: /^Select and preview\s+Make it a Button in its own change$/ }).click();
     await expect(page.getByRole('textbox', { name: 'Your reason' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
@@ -202,7 +222,8 @@ test.describe('the tour on a phone', () => {
       const out: string[] = [];
       for (const c of el.querySelectorAll<HTMLElement>('button, select')) {
         const r = c.getBoundingClientRect();
-        if (r.height > 0 && r.height < floor) out.push(`${c.getAttribute("aria-label") ?? c.textContent?.trim()} (${r.height})`);
+        /* Rounded first: Linux's Chromium measures a 44px button at 43.99997. */
+        if (r.height > 0 && Math.round(r.height) < floor) out.push(`${c.getAttribute("aria-label") ?? c.textContent?.trim()} (${r.height})`);
       }
       return out;
     }, FLOOR);

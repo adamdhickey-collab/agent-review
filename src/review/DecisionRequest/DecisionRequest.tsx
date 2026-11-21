@@ -252,6 +252,7 @@ function CheckBadge({ check }: { check: Check }) {
   const passed = check.state === 'passed';
   return (
     <Badge
+      className="ask__check-badge"
       size="large"
       tone={passed ? 'success' : 'neutral'}
       variant="tint"
