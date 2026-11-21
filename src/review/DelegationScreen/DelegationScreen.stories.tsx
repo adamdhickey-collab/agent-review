@@ -67,7 +67,7 @@ export const Initial: Story = {
     await expect(canvas.queryByText(/settled by you/)).toBeNull();
     await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveTextContent('2');
     await expect(canvas.getByRole('heading', { name: /Completed work/ })).toHaveTextContent('7');
-    await expect(canvas.getByText(/3 changes are held until you decide/)).toBeInTheDocument();
+    await expect(canvas.getByText(/The same decision may settle 3 held changes/)).toBeInTheDocument();
     await expect(canvas.getByText('Simulated')).toBeInTheDocument();
     await expect(canvas.getByText('4 routine swaps')).toBeInTheDocument();
     await expect(canvas.queryByText('On its own')).toBeNull();
@@ -87,13 +87,13 @@ export const AfterARule: Story = {
     await expect(canvas.getByRole('button', { name: 'See the decision record' })).toBeInTheDocument();
     const record = canvas.getByRole('article', { name: 'Add a quiet variant' });
     await expect(record).toHaveTextContent(/Your reason.*The agent’s draft, kept as written/);
-    await expect(record).toHaveTextContent('Accepted trade-offA job that changes nothing visible, over a system with no way to make an action hard to find.');
-    await expect(record).toHaveTextContent(/Follow-up.*Decide with whoever owns it how easy “Cancel subscription” should be to find\..*Open/);
-    await expect(record).toHaveTextContent(/Kept as your rule\. 2 later changes followed it/);
-    await expect(canvas.getByText(/Follow-up from your decision at 14:26: decide with whoever owns it/)).toBeInTheDocument();
+    await expect(record).toHaveTextContent('Accepted trade-offNothing visible changes, at the cost of a variant that can make any action hard to find.');
+    await expect(record).toHaveTextContent(/Follow-up.*Decide with product design how easy “Cancel subscription” should be to find\..*Open/);
+    await expect(record).toHaveTextContent(/Kept as your rule\. 2 later changes followed the rule/);
+    await expect(canvas.getByText(/Follow-up from your decision at 14:26: decide with product design/)).toBeInTheDocument();
     /* The case outside the rule is the second decision. */
     await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
-    await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
+    await expect(canvas.getByText(/Close to your rule, but outside the rule/)).toBeInTheDocument();
     await expect(canvas.getAllByText('Your rule')).toHaveLength(2);
     await expect(canvas.getByText('Active')).toBeInTheDocument();
   },
@@ -115,10 +115,10 @@ export const AnsweredOnce: Story = {
     for (let n = 2; n <= 4; n++) {
       await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
       await expect(canvas.getByText(`Decision ${n} of 4`)).toBeInTheDocument();
-      await expect(canvas.getByText(/A one-time decision doesn’t carry over to another change/)).toBeInTheDocument();
+      await expect(canvas.getByText(/at 14:\d\d, for that change only\./)).toBeInTheDocument();
     }
     await expect(canvas.getByRole('button', { name: 'Next decision' })).toBeDisabled();
-    await expect(canvas.getByRole('article', { name: 'Make it a Button in its own change' })).toHaveTextContent(/Not kept for similar cases\./);
+    await expect(canvas.getByRole('article', { name: 'Make it a Button in its own change' })).toHaveTextContent(/Not kept as a rule, so the next matching case asks you again\./);
     await expect(canvas.getByText('No rules yet')).toBeInTheDocument();
   },
 };
@@ -171,19 +171,19 @@ export const TheWholeLoop: Story = {
       await userEvent.click(canvas.getByText('Use this decision for similar cases'));
       await expect(canvas.getByText(/It settles now:/).closest('p')).toHaveTextContent('2 changes that match, on the plan card');
       await userEvent.click(apply);
-      await expect(canvas.getByText(/Decided: make it a button in its own change, and made a rule\. The agent applied it and recorded your reason\. Your rule settled 2 waiting changes\. 1 change is asking now\./)).toBeInTheDocument();
+      await expect(canvas.getByText(/Decided: make it a button in its own change, and made a rule\. The agent applied the decision and recorded your reason\. Your rule settled 2 waiting changes\. 1 change is asking now\./)).toBeInTheDocument();
       await expect(canvas.getByRole('heading', { name: 'That’s the loop' })).toHaveFocus();
       await expect(canvas.getByText('10 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
-      await userEvent.click(canvas.getByRole('button', { name: 'Keep going here' }));
+      await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
       await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveFocus();
     });
 
     await step('The case outside the rule pauses, and says why', async () => {
       await expect(canvas.getByText('Decision 1 of 2')).toBeInTheDocument();
       await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
-      await expect(canvas.getByText(/Close to your rule, but outside it/)).toBeInTheDocument();
-      await expect(canvas.getByRole('heading', { name: /Keep “Remove card” looking as it does/ })).toBeInTheDocument();
-      await expect(canvas.getByRole('list', { name: 'What each marked element is' })).toHaveTextContent(/Hand-built action · Billing settings\s*Small gray text, built by hand\./);
+      await expect(canvas.getByText(/Close to your rule, but outside the rule/)).toBeInTheDocument();
+      await expect(canvas.getByRole('heading', { name: /Keep “Remove card” small and gray/ })).toBeInTheDocument();
+      await expect(canvas.getByRole('list', { name: 'What each marked element is' })).toHaveTextContent(/Hand-built action · Billing settings\s*Small gray text, where the design system draws a Button\./);
     });
 
     await step('Widen the rule, and it settles that case', async () => {
@@ -201,7 +201,7 @@ export const TheWholeLoop: Story = {
       await userEvent.click(within(seats).getByRole('button', { name: 'Revert this change' }));
       await expect(seats.dataset.status).toBe('reverted');
       await expect(within(seats).getByRole('button', { name: 'Restore it' })).toHaveFocus();
-      await expect(within(seats).getByText(/puts the literals back/)).toBeInTheDocument();
+      await expect(within(seats).getByText(/undoes the change\. The agent won’t try again\./)).toBeInTheDocument();
       await expect(canvas.getByText(/1 change reverted by you\./)).toBeInTheDocument();
       await expect(canvas.getByText(/The lint reports its 2 literals again\./)).toBeInTheDocument();
       await expect(canvas.getByRole('list', { name: 'Where the literals are' })).toHaveTextContent('33 merged1 waiting on your decision2 reverted or left by you');
@@ -228,7 +228,7 @@ export const TheWholeLoop: Story = {
     });
 
     await step('Reset puts the run back at its start', async () => {
-      await userEvent.click(canvas.getByRole('button', { name: 'Reset the demo' }));
+      await userEvent.click(canvas.getByRole('button', { name: 'Reset the run' }));
       await expect(canvas.getByText('7 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
       await expect(canvas.getByRole('heading', { level: 1 })).toHaveFocus();
     });
@@ -256,10 +256,10 @@ export const ItsOwnChange: Story = {
     await expect(canvas.getByText('10 changes made and checked. 2 decisions need you.')).toBeInTheDocument();
     const record = canvas.getByRole('article', { name: 'Make it a Button in its own change' });
     await expect(record).toHaveTextContent(/Your reasonThe gray link is from a retention test last year.*In your words/);
-    await expect(record).toHaveTextContent('Accepted trade-offA system with no way to make an action hard to find, over finishing every control in this job.');
+    await expect(record).toHaveTextContent('Accepted trade-offOne control stays unfinished until Oct 15, so no variant can make an action hard to find.');
     await expect(record).toHaveTextContent(/Remaining risk“Cancel subscription” stays hard to find until its own change ships, on Oct 15\./);
     await expect(record).toHaveTextContent(/Wrote the exception down, ending Oct 15\./);
-    await expect(record).toHaveTextContent(/never gets a quiet variant: it stays as built/);
+    await expect(record).toHaveTextContent(/never gets a quiet variant\. The action stays as built/);
     await expect(canvas.getByText(/Follow-up from your decision at 14:26: make “Cancel subscription” a Button in its own change, by Oct 15/)).toBeInTheDocument();
     const rule = canvasElement.querySelector('.rule') as HTMLElement;
     await expect(rule).toHaveTextContent(/WhyThe gray link is from a retention test last year/);
@@ -396,7 +396,7 @@ export const StartHere: Story = {
     await expect(cue.querySelectorAll('[data-done]')).toHaveLength(3);
     await expect(cue).toHaveTextContent('Choose a direction (done)');
     await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
-    await userEvent.click(await canvas.findByRole('button', { name: 'Keep going here' }));
+    await userEvent.click(await canvas.findByRole('button', { name: 'Next decision' }));
     await waitFor(() => expect(canvas.getByRole('region', { name: 'Next' })).toBeInTheDocument());
     await expect(canvas.queryByRole('region', { name: 'Start here' })).toBeNull();
   },
@@ -418,7 +418,7 @@ export const StepsTakeYouThere: Story = {
     const canvas = within(canvasElement);
     const cue = within(canvas.getByRole('region', { name: 'Start here' }));
     const preview = canvas.getByRole('region', { name: 'Preview of Billing settings BillingSettings.tsx' });
-    const directions = canvas.getByRole('group', { name: 'Which trade-off is acceptable?' });
+    const directions = canvas.getByRole('group', { name: 'The two directions' });
     const ring = (el: Element) => getComputedStyle(el).outlineStyle;
 
     await userEvent.click(cue.getByRole('button', { name: /Compare the two actions/ }));
@@ -455,9 +455,9 @@ const firstMinute = async ({ canvasElement }: { canvasElement: HTMLElement }) =>
   const end = canvas.getByRole('region', { name: 'That’s the loop' });
   await expect(canvas.getByRole('heading', { name: 'That’s the loop' })).toHaveFocus();
   /* What happened, in the reducer's words, said once. */
-  await expect(end).toHaveTextContent('What happened. Decided: add a quiet variant. The agent applied it and recorded your reason. 3 changes are asking now.');
+  await expect(end).toHaveTextContent('What happened. Decided: add a quiet variant. The agent applied the decision and recorded your reason. 3 changes are asking now.');
   await expect(canvasElement.querySelector('.delegation__notice')).toBeEmptyDOMElement();
-  await expect(end).toHaveTextContent('Why 3 more are asking. You decided for this change only.');
+  await expect(end).toHaveTextContent('Why 3 more are asking. You decided for this change only, so each similar change still asks.');
   /* In place of the workspace, not as well as it. */
   await expect(canvas.queryByRole('heading', { name: /Needs you/ })).toBeNull();
   await expect(canvas.getByText('8 changes made and checked. 4 decisions need you.')).toBeInTheDocument();
@@ -479,7 +479,7 @@ export const FirstMinuteEnds: Story = {
   play: async (context) => {
     await firstMinute(context);
     const canvas = within(context.canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Keep going here' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Next decision' }));
     await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveFocus();
     await expect(canvas.getByText('Decision 1 of 4')).toBeInTheDocument();
     await expect(canvas.queryByRole('region', { name: 'That’s the loop' })).toBeNull();
@@ -511,7 +511,7 @@ export const FirstMinuteEndsWithARule: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
     const end = canvas.getByRole('region', { name: 'That’s the loop' });
     await expect(end).toHaveTextContent(/Your rule settled 2 waiting changes\. 1 change is asking now\./);
-    await expect(end).toHaveTextContent(/Why 1 more is asking\. Close to your rule, but outside it\./);
+    await expect(end).toHaveTextContent(/Why 1 more is asking\. Close to your rule, but outside the rule\./);
   },
 };
 
@@ -565,7 +565,7 @@ export const SharedTableThreeAnswers: Story = {
       await userEvent.click(canvas.getByRole('button', { name: 'Show me the 40 screens' }));
       await expect(canvas.getByText(/Nothing decided yet\./)).toBeInTheDocument();
       await expect(canvas.getByRole('heading', { name: /Needs you/ })).toHaveFocus();
-      await expect(canvas.getByRole('list', { name: 'What is known' })).toHaveTextContent(/On 5, a panel of fixed height now cuts off the last row/);
+      await expect(canvas.getByRole('list', { name: 'What is known' })).toHaveTextContent(/On 5 screens, a panel of fixed height now cuts off the last row/);
       await expect(canvas.queryByRole('button', { name: 'Show me the 40 screens' })).toBeNull();
       await expect(canvas.getByText('2 changes made and checked. 1 decision needs you.')).toBeInTheDocument();
     });
@@ -573,14 +573,14 @@ export const SharedTableThreeAnswers: Story = {
     await step('Approving offers no rule, and says whose permission a standing one needs', async () => {
       await userEvent.click(canvas.getByRole('button', { name: 'Approve, this once' }));
       await expect(canvas.queryByText('Also use this answer for similar cases')).toBeNull();
-      await expect(canvas.getByText(/only its owner, Priya Raman/)).toBeInTheDocument();
+      await expect(canvas.getByText(/Only the Table’s owner, Priya Raman/)).toBeInTheDocument();
       await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }));
     });
 
     await step('Keep it to the screen, as a rule for the customer screens', async () => {
       await userEvent.click(canvas.getByRole('button', { name: 'Fix this screen only' }));
       await userEvent.click(canvas.getByText('Also use this answer for similar cases'));
-      await expect(canvas.getByText(/You can revoke it under the boundaries/)).toBeInTheDocument();
+      await expect(canvas.getByText(/Revoke the rule under the boundaries/)).toBeInTheDocument();
       await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
       await waitFor(() => expect(canvas.getByText('Nothing needs your attention.')).toBeInTheDocument());
       await expect(canvas.getByText(/Answered, and made a rule\./)).toBeInTheDocument();
@@ -598,7 +598,7 @@ export const SharedTableThreeAnswers: Story = {
     });
 
     await step('Reset puts this run back at its start', async () => {
-      await userEvent.click(canvas.getByRole('button', { name: 'Reset the demo' }));
+      await userEvent.click(canvas.getByRole('button', { name: 'Reset the run' }));
       await expect(canvas.getByText('2 changes made and checked. 1 decision needs you.')).toBeInTheDocument();
       await expect(canvas.getByRole('button', { name: 'Show me the 40 screens' })).toBeInTheDocument();
     });
@@ -642,7 +642,7 @@ export const SharedTableApproveSelected: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Approve, this once' }));
     await expect(canvas.getByText(/Proposed:/, { selector: '.studio-preview__proposed' })).toHaveTextContent('Proposed: All 40 screens');
     await expect(canvas.getByText('Proposed: all 40 screens get the change. 28 of them have no visual baseline.')).toBeInTheDocument();
-    await expect(canvas.getByText(/only its owner, Priya Raman \(Design systems\), can give/)).toBeInTheDocument();
+    await expect(canvas.getByText(/Only the Table’s owner, Priya Raman \(Design systems\), can let an agent/)).toBeInTheDocument();
     await expect(canvas.queryByRole('checkbox', { name: /similar cases/ })).toBeNull();
     await expect(canvas.getByText('2 changes made and checked. 1 decision needs you.')).toBeInTheDocument();
   },
@@ -698,14 +698,14 @@ export const Desk: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('heading', { level: 3, name: 'Keep “Cancel subscription” looking as it does, or make it a Button on purpose?' })).toBeInTheDocument();
+    await expect(canvas.getByRole('heading', { level: 3, name: 'Keep “Cancel subscription” small and gray, or make it a Button?' })).toBeInTheDocument();
     const queue = within(canvas.getByRole('navigation', { name: 'The run’s work' }));
     await expect(queue.getAllByRole('listitem')).toHaveLength(9);
     await expect(queue.getByRole('button', { current: true })).toHaveTextContent('Keep “Cancel subscription”');
     const steps = canvas.getByRole('list', { name: 'Steps' });
     await expect(steps.querySelector('[aria-current="step"]')).toHaveTextContent('Compare');
     await expect(canvas.getByRole('region', { name: 'What the agent read' })).toBeInTheDocument();
-    await expect(canvas.queryByRole('group', { name: 'Which trade-off is acceptable?' })).toBeNull();
+    await expect(canvas.queryByRole('group', { name: 'The two directions' })).toBeNull();
     await expect(canvas.getByRole('button', { name: 'Next: choose' })).toBeEnabled();
     /* Each column scrolls on its own, so each is reachable by keyboard: the
        interface's column takes a tab stop of its own. */
@@ -730,7 +730,7 @@ export const DeskSteps: Story = {
     const here = () => steps.querySelector('[aria-current="step"]');
     await userEvent.click(canvas.getByRole('button', { name: 'Next: choose' }));
     await expect(here()).toHaveTextContent('Choose');
-    await expect(canvas.getByRole('group', { name: 'Which trade-off is acceptable?' })).toBeVisible();
+    await expect(canvas.getByRole('group', { name: 'The two directions' })).toBeVisible();
     await expect(canvas.queryByRole('region', { name: 'What the agent read' })).toBeNull();
     await expect(canvas.getByRole('button', { name: 'Next: preview' })).toBeDisabled();
     await expect(canvas.getByText('Select a direction to preview it.')).toBeInTheDocument();
@@ -795,6 +795,6 @@ export const DeskDark: Story = {
     const canvas = within(canvasElement);
     await expect(getComputedStyle(canvasElement.ownerDocument.documentElement).colorScheme).toBe('dark');
     await userEvent.click(canvas.getByRole('button', { name: 'Next: choose' }));
-    await expect(canvas.getByRole('group', { name: 'Which trade-off is acceptable?' })).toBeVisible();
+    await expect(canvas.getByRole('group', { name: 'The two directions' })).toBeVisible();
   },
 };

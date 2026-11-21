@@ -54,7 +54,7 @@ export const AGroupOpen: Story = {
     await expect(asks).toHaveTextContent('Asks for your judgment2 boundaries');
     await userEvent.click(canvas.getByText('Asks for your judgment'));
     await expect(asks.open).toBe(true);
-    await expect(canvas.getByText('When no token or component draws it as it is.')).toBeVisible();
+    await expect(canvas.getByText('When no token or component draws an element as built.')).toBeVisible();
   },
 };
 

@@ -187,16 +187,9 @@
   gap: var(--space-2);
 }
 
-/* "Which trade-off is acceptable?": the decision, so it is a heading
-   for the answers rather than a label over them, with the one sentence
-   under it that sets up what each answer shows. A step of air above it
-   parts it from the verdict, which is the end of the argument before it. */
-.ask__if {
-  margin-top: var(--space-2);
-  color: var(--color-text);
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-body);
-}
+/* The directions' group was headed "Which trade-off is acceptable?" until
+   2026-11-01, a second question under the one the head already asks; its
+   name is for a screen reader alone now (DecisionRequest.tsx). */
 
 .ask__later {
   max-width: 44rem;

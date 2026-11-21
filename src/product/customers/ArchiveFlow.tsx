@@ -111,8 +111,8 @@ const STATUS_TONE: Record<CustomerStatus, BadgeTone> = {
   churned: 'neutral',
 };
 
-/** Why a customer can't be archived, when it can't. */
-const BLOCKED: Record<string, string> = { c_01HZKF: 'it has an open invoice' };
+/** Why a customer can't be archived, when it can't, as a predicate: "Monarch Dental Group has an open invoice". */
+const BLOCKED: Record<string, string> = { c_01HZKF: 'has an open invoice' };
 
 function plural(n: number): string {
   return n === 1 ? '1 customer' : `${n} customers`;
@@ -133,8 +133,8 @@ function restOf(rest: Customer[]): string {
 }
 
 function list(names: string[]): string {
-  if (names.length <= 1) return names.join('');
-  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+  if (names.length <= 2) return names.join(' and ');
+  return `${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}`;
 }
 
 export function isActive(c: Customer, rule: 'status' | 'recent'): boolean {
@@ -275,7 +275,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
     const back = new Set(result.archived.map((c) => c.id));
     setArchived((a) => a.filter((id) => !back.has(id)));
     setResult(null);
-    setStatus(`${plural(back.size)} back in the table.`);
+    setStatus(`Undone: ${plural(back.size)} in the table again.`);
     pendingFocus.current = 'select-all';
     onEvent?.('undone');
   }
@@ -297,7 +297,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
   const asking = view === 'current' && step && direction === 'confirm';
   const askNote = [
     f.namesActive && active.length ? `${active.length} ${active.length === 1 ? 'is' : 'are'} active: ${list(active.map((c) => c.company))}.` : '',
-    f.blockedFirst && blocked.length ? `${list(blocked.map((c) => c.company))} can’t be archived: ${BLOCKED[blocked[0].id]}.` : '',
+    f.blockedFirst && blocked.length ? `${list(blocked.map((c) => c.company))} ${BLOCKED[blocked[0].id]} and can’t be archived.` : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -362,7 +362,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
       {view === 'current' && count > 0 && !step && immediate && f.blockedFirst && blocked.length ? (
         <div className="archive-flow__notes">
           <p className="archive-flow__note">
-            <Badge tone="warning">Can’t archive</Badge> {list(blocked.map((c) => c.company))}: {BLOCKED[blocked[0].id]}.
+            <Badge tone="warning">Can’t archive</Badge> {list(blocked.map((c) => c.company))} {BLOCKED[blocked[0].id]}.
           </p>
         </div>
       ) : null}
@@ -389,7 +389,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
               <ul className="archive-flow__rows">
                 {blocked.map((c) => (
                   <li key={c.id}>
-                    <strong>{c.company}</strong>: {BLOCKED[c.id]}. It stays in the table.
+                    <strong>{c.company}</strong> {BLOCKED[c.id]} and stays in the table.
                   </li>
                 ))}
               </ul>
@@ -398,7 +398,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
           {active.length ? (
             <div className="archive-flow__group">
               <p className="archive-flow__group-name">
-                <Badge tone="success">Active</Badge> {active.length === 1 ? 'Check this one. Clear the box to keep the customer.' : 'Check these. Clear a box to keep the customer.'}
+                <Badge tone="success">Active</Badge> To keep a customer, clear its box.
               </p>
               <ul className="archive-flow__rows">
                 {active.map((c) => (
@@ -509,7 +509,7 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
               ))}
             </tbody>
           </Table>
-          {shown.length === 0 ? <EmptyState title="All customers archived" description={f.restore ? 'They’re in Archived, and can be restored for 90 days.' : 'Archived customers aren’t shown here. Support can restore one for 90 days.'} /> : null}
+          {shown.length === 0 ? <EmptyState title="All customers archived" description={f.restore ? 'Restore any customer from Archived for 90 days.' : 'Support can restore an archived customer for 90 days.'} /> : null}
           </div>
         </div>
       ) : (
@@ -554,6 +554,6 @@ export const ArchiveFlow = forwardRef<ArchiveFlowHandle, ArchiveFlowProps>(funct
 
 function sentence(out: Customer[], of: number, stopped: Customer[]): string {
   const a = out.length ? `${out.length} of ${plural(of)} archived.` : 'Nothing archived.';
-  const b = stopped.length ? ` ${list(stopped.map((c) => c.company))} wasn’t: ${BLOCKED[stopped[0].id]}.` : '';
+  const b = stopped.length ? ` ${list(stopped.map((c) => c.company))} ${BLOCKED[stopped[0].id]} and stays.` : '';
   return a + b;
 }

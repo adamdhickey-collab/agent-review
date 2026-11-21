@@ -139,10 +139,11 @@ import { useDeskWide } from './deskWide';
      asking now, and two ways on: the other run, or the next decision here
      (FirstMinute). The next decision comes after it, not instead of it. */
 
-/* The runs, as the switch names them: what each is about, in two words. */
+/* The runs, as the switch names them: what each is about, in two words,
+   the words of its decision's badge (KIND_STATUS). */
 const RUNS: { id: RunId; label: string; kind: string }[] = [
-  { id: 'billing', label: 'Quiet cancel', kind: 'missing intent' },
-  { id: 'shared-table', label: 'Shared table', kind: 'a permission boundary' },
+  { id: 'billing', label: 'Quiet cancel', kind: 'needs judgment' },
+  { id: 'shared-table', label: 'Shared table', kind: 'needs approval' },
 ];
 
 /* The shorter of the workspace's two columns follows the page while the
@@ -360,7 +361,7 @@ function FirstMinute({
         <Icon name="status-passed" size={20} />
         That’s the loop
       </h2>
-      <p className="studio-end__lead">The agent stopped at a question only a person could answer. You answered it, and it acted on your answer.</p>
+      <p className="studio-end__lead">The agent stopped at a question only a person could answer. You answered, and the agent acted on your answer.</p>
       <ul className="studio-end__facts">
         <li>
           <p>
@@ -370,7 +371,7 @@ function FirstMinute({
         {onRecord ? (
           <li>
             <p>
-              <strong>On record.</strong> Your reason, the trade-off you accepted and the risk that remains are in the decision record.
+              <strong>On record.</strong> Your reason, the trade-off you accepted, and the remaining risk are in the decision record.
             </p>
             <Button size="compact" variant="secondary" onClick={onRecord}>
               See the decision record
@@ -383,17 +384,17 @@ function FirstMinute({
               <strong>
                 Why {held.length} more {held.length === 1 ? 'is' : 'are'} asking.
               </strong>{' '}
-              {ruled ? whyAsking(state, held[0]) : 'You decided for this change only. A decision kept for similar cases settles the ones it covers without asking you.'}
+              {ruled ? whyAsking(state, held[0]) : 'You decided for this change only, so each similar change still asks.'}
             </p>
           </li>
         ) : null}
       </ul>
       <div className="studio-end__next">
         <Button variant="primary" onClick={onNext}>
-          {asking.length ? 'Keep going here' : 'See the finished run'}
+          {asking.length ? 'Next decision' : 'See the finished run'}
         </Button>
         <a className="studio-end__other" href={href({ name: 'delegation', run: other.id })} onClick={onLeave}>
-          Try the other run: {other.label}, {other.kind}
+          Try the other run: {other.label} ({other.kind})
         </a>
       </div>
     </section>
@@ -594,7 +595,7 @@ export function DelegationScreen({ run = 'billing', layout }: { run?: RunId; /**
             <Badge variant="quiet" icon="play" className="delegation__sim-label">
               Simulated
             </Badge>
-            <p>A sample run, played back the same way every time. No model runs, and no real repository is touched.</p>
+            <p>A sample run, played back the same way every time. No model is called, and no real repository changes.</p>
           </div>
           <Button
             size="compact"
@@ -610,7 +611,7 @@ export function DelegationScreen({ run = 'billing', layout }: { run?: RunId; /**
               top.current?.focus();
             }}
           >
-            Reset the demo
+            Reset the run
           </Button>
         </div>
       </div>
@@ -867,7 +868,7 @@ export function DelegationScreen({ run = 'billing', layout }: { run?: RunId; /**
                 <h2 id="decided-title" className="delegation__h2">
                   Your decisions <span className="delegation__count">{s.decisions.length}</span>
                 </h2>
-                <p className="delegation__hint">What you decided, why, and what it left to do. A later change follows one only through a rule you made from it.</p>
+                <p className="delegation__hint">What you decided, why, and what is left to do. A later change follows a decision only through a rule.</p>
                 <ul className="delegation__decisions">
                   {[...s.decisions].reverse().map((d) => (
                     <li key={d.id}>
@@ -896,7 +897,7 @@ export function DelegationScreen({ run = 'billing', layout }: { run?: RunId; /**
               <h2 id="done-title" className="delegation__h2">
                 Completed work <span className="delegation__count">{done.length}</span>
               </h2>
-              <p className="delegation__hint">Done on its own unless marked. Open one for what changed, why, and what the checks established.</p>
+              <p className="delegation__hint">Made by the agent alone, unless marked. Open a change for its reason and checks.</p>
               <ul className="delegation__records">
                 {notable.map((w) => (
                   <li key={w.id} id={`work-${w.id}`}>

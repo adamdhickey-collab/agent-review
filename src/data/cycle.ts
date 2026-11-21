@@ -482,7 +482,7 @@ export const FINDINGS: readonly Finding[] = [
   { id: 'f-bulk', source: 'session', says: 'The operations lead’s quarterly cleanup took twice as long with the review step, and not one of those batches had an active customer.', becomes: 'only-active', about: ['review'] },
   { id: 'f-back', source: 'evidence', figure: { on: 6, of: 9 }, says: '6 of 9 archiving tickets ask to restore a customer.', becomes: 'restore' },
   { id: 'f-audit', source: 'evidence', says: 'An auditor asked who archived a customer. Nobody could say.', becomes: 'who' },
-  { id: 'f-blocked', source: 'trying', says: 'Monarch Dental Group can’t be archived: it has an open invoice. Two directions only say so after the press.', becomes: 'blocked-first', about: ['undo', 'confirm'] },
+  { id: 'f-blocked', source: 'trying', says: 'Monarch Dental Group has an open invoice and can’t be archived. Two directions only say so after the press.', becomes: 'blocked-first', about: ['undo', 'confirm'] },
   { id: 'f-axe', source: 'check', says: 'All three pass the accessibility checks and work with a keyboard. No check can say whether people notice what changed.' },
 ];
 

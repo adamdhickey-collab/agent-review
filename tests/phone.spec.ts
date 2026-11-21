@@ -159,7 +159,7 @@ test.describe('the delegated work on a phone, the other direction', () => {
     /* The first answer's end, in the workspace's place: it fits, and its
        ways on are a fingertip. */
     await expect(page.getByRole('heading', { name: 'That’s the loop' })).toBeFocused();
-    for (const control of [page.getByRole('button', { name: 'See the decision record' }), page.getByRole('button', { name: 'Keep going here' }), page.getByRole('link', { name: /Try the other run/ })]) {
+    for (const control of [page.getByRole('button', { name: 'See the decision record' }), page.getByRole('button', { name: 'Next decision' }), page.getByRole('link', { name: /Try the other run/ })]) {
       const box = await control.boundingBox();
       expect(box!.height, (await control.textContent()) ?? '').toBeGreaterThanOrEqual(FLOOR);
     }
