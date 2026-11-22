@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
 
 import type { RunId } from '../data/delegation';
-import { isStage, type StageId } from '../data/cycle';
+import { DIRECTIONS, isStage, type DirectionId, type StageId } from '../data/cycle';
 import { isScene, type SceneId } from '../review/SceneScreen/scenes';
 
 /* A hash router in fifty lines. Five routes, one hook. The hash is the
@@ -27,9 +27,26 @@ import { isScene, type SceneId } from '../review/SceneScreen/scenes';
    For a day, 2026-11-18, the front door was a short path at "/decide", one
    question in three beats. Adam took it out: the full prototype is the
    front door again, with the guided tour featured on Discover. "/decide"
-   still opens Discover, because the case study linked to it. */
+   still opens Discover, because the case study linked to it.
+
+   Since 2026-11-22 the front door is a start screen again, at Adam's ask:
+   a hiring manager should meet the mistake, the three fixes and the
+   decision before the method. "/" is the scenario in a screen; "/compare"
+   is the three working fixes, one open at a time ("/compare/confirm" names
+   which); "/decision" is the behavior Adam chose, on a batch with an active
+   customer or without one ("/decision/routine"); and "/about" is the
+   experiment, which until today led Discover. None of the four reads or
+   writes the design cycle's state: what they show is in the address, so a
+   refresh or a direct link finds it, and a visitor's progress through the
+   six stages is as they left it. The cycle is still at "/cycle". */
+
+export type QuickBatch = 'active' | 'routine';
 
 export type Route =
+  | { name: 'start' }
+  | { name: 'compare'; fix?: DirectionId }
+  | { name: 'decision'; batch?: QuickBatch }
+  | { name: 'about' }
   | { name: 'delegation'; run?: RunId }
   | { name: 'queue' }
   | { name: 'cycle'; stage: StageId }
@@ -39,7 +56,14 @@ export type Route =
 
 export function parse(hash: string): Route {
   const path = hash.replace(/^#/, '') || '/';
-  if (path === '/' || path === '/decide' || path === '/decide/') return { name: 'cycle', stage: 'discover' };
+  if (path === '/') return { name: 'start' };
+  if (path === '/decide' || path === '/decide/') return { name: 'cycle', stage: 'discover' };
+  if (path === '/compare' || path === '/compare/') return { name: 'compare' };
+  const fx = path.match(/^\/compare\/([a-z]+)\/?$/);
+  if (fx && DIRECTIONS.some((d) => d.id === fx[1])) return { name: 'compare', fix: fx[1] as DirectionId };
+  if (path === '/decision' || path === '/decision/' || path === '/decision/active') return { name: 'decision' };
+  if (path === '/decision/routine') return { name: 'decision', batch: 'routine' };
+  if (path === '/about' || path === '/about/') return { name: 'about' };
   if (path === '/runs/billing' || path === '/runs/billing/') return { name: 'delegation' };
   if (path === '/runs/shared-table' || path === '/runs/shared-table/') return { name: 'delegation', run: 'shared-table' };
   if (path === '/queue' || path === '/queue/') return { name: 'queue' };
@@ -55,6 +79,14 @@ export function parse(hash: string): Route {
 
 export function href(route: Route): string {
   switch (route.name) {
+    case 'start':
+      return '#/';
+    case 'compare':
+      return route.fix && route.fix !== 'undo' ? `#/compare/${route.fix}` : '#/compare';
+    case 'decision':
+      return route.batch === 'routine' ? '#/decision/routine' : '#/decision';
+    case 'about':
+      return '#/about';
     case 'delegation':
       return `#/runs/${route.run ?? 'billing'}`;
     case 'queue':

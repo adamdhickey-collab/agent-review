@@ -146,6 +146,12 @@
   text-decoration: none;
 }
 
+/* The quick path's About link says where you are the way a place does, by ink. */
+.shell__links a[aria-current='page'] {
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+}
+
 .shell__context {
   display: flex;
   align-items: center;

@@ -67,7 +67,11 @@ for (const width of WIDTHS) {
 
     /* The cycle's later stages open from the choices before them (seed.ts). */
     const SCREENS: [string, string, object?][] = [
-      ['the design cycle, discover, the front door', '#/'],
+      ['the start screen, the front door', '#/'],
+      ['the three fixes', '#/compare'],
+      ['the decision', '#/decision'],
+      ['about the experiment', '#/about'],
+      ['the design cycle, discover', '#/cycle/discover'],
       ['the design cycle, explore', '#/cycle/explore', FRAMED],
       ['the design cycle, evaluate', '#/cycle/evaluate', EXPLORED],
       ['the delegated work', '#/runs/billing'],
@@ -93,7 +97,7 @@ for (const width of WIDTHS) {
               /* Inside a closed disclosure is not on the screen: Chrome hides it with
                  content-visibility rather than display: none, so it still has a box,
                  but it cannot be reached or pressed until the disclosure opens. */
-              if (el.closest('.preview__frame, .studio-preview__frame, .cycle__product-frame, .visually-hidden, .diff__finding, details:not([open]) > :not(summary)') || el.matches(allowed)) continue;
+              if (el.closest('.preview__frame, .studio-preview__frame, .cycle__product-frame, .quick__selection-frame, .visually-hidden, .diff__finding, details:not([open]) > :not(summary)') || el.matches(allowed)) continue;
               /* a checkbox input is a transparent box over its label, and the label is the target */
               const target = el.matches('input[type="checkbox"]') ? (el.closest('label') ?? el) : el;
               const r = target.getBoundingClientRect();
@@ -213,7 +217,7 @@ test.describe('the tour on a phone', () => {
   test.use({ ...phone, viewport: { width: 360, height: 760 }, deviceScaleFactor: 1 });
 
   test('the bar fits, and its controls are a fingertip', async ({ page }) => {
-    await open(page, '#/');
+    await open(page, '#/cycle/discover');
     await page.getByRole('button', { name: 'Watch the tour' }).first().click();
     const bar = page.getByRole('region', { name: 'Guided tour' });
     await expect(bar).toContainText('Step 1 of 18');

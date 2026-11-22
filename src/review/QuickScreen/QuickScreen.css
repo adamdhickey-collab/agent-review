@@ -1,0 +1,276 @@
+/* THE QUICK PATH (QuickScreen.tsx). The cycle's container and type, in one
+   narrower column: these screens are read top to bottom, with no move
+   beside the work, so the measure is a reading one. */
+.quick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
+}
+
+.quick--start {
+  max-width: 44rem;
+  gap: var(--space-4);
+}
+
+.quick__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* What the screen is, small, over its heading: muted ink, no tint, so the
+   heading is the first thing with weight. */
+.quick__label {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+}
+
+.quick .cycle__title {
+  font-size: var(--text-4xl);
+}
+
+/* ---------- the selection that went wrong ---------- */
+
+.quick__selection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+}
+
+.quick__selection-frame {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-canvas);
+  color-scheme: light;
+  overflow: hidden;
+}
+
+.quick__selected {
+  font-weight: var(--weight-medium);
+}
+
+/* The active customer's row, on the success tint its badge is in: the one
+   row of the three that should not be here. */
+.quick__selection-frame .table__tr.quick__row--active {
+  background: var(--color-success-subtle);
+}
+
+.quick__caption {
+  color: var(--color-text-secondary);
+  font-size: var(--text-md);
+  line-height: var(--leading-ui);
+}
+
+/* ---------- the way on ---------- */
+
+.quick__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.quick__quiet {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+  color: var(--color-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.quick__quiet:hover {
+  color: var(--color-text);
+}
+
+.quick__more {
+  margin-left: calc(var(--control-padding-x-compact) * -1);
+}
+
+/* ---------- a fix, and what it asks ---------- */
+
+.quick__fix {
+  padding-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.quick__fix-says {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 44rem;
+}
+
+.quick__fix-does {
+  font-size: var(--text-lg);
+  line-height: var(--leading-ui);
+}
+
+.quick__fix-tradeoff {
+  color: var(--color-text-secondary);
+  line-height: var(--leading-ui);
+}
+
+.quick__again {
+  margin-left: calc(var(--control-padding-x-compact) * -1);
+}
+
+.quick__framing {
+  max-width: 44rem;
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+.quick__framing strong {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+/* ---------- the two conditions ---------- */
+
+/* Side by side, each a full ring; the one on screen takes the accent's
+   ring and tint. */
+.quick__conditions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.quick__conditions > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.quick__conditions > div[data-on] {
+  border-color: var(--color-accent-border);
+  background: var(--color-accent-subtle);
+}
+
+.quick__conditions dt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.quick__conditions dd {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+.quick__conditions--plain dt {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.quick__try-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.quick__limits-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 48rem;
+}
+
+.quick__limits-list li {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+}
+
+.quick__limits-list .badge {
+  justify-self: start;
+}
+
+.quick__limits-list a,
+.quick .cycle__links a,
+.quick__conditions a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-accent);
+  font-weight: var(--weight-medium);
+}
+
+/* ---------- about ---------- */
+
+.quick__findings {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.quick__evidence {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+
+@media (max-width: 48rem) {
+  .quick {
+    gap: var(--space-4);
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .quick .cycle__title {
+    font-size: var(--text-3xl);
+  }
+
+  .quick__conditions,
+  .quick__evidence {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .quick__limits-list li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+}
+
+/* A finger gets the 44px line on the quiet links, as the cycle's do. */
+@media (pointer: coarse) {
+  .quick .checkbox {
+    min-height: var(--control-height-touch);
+    align-items: center;
+  }
+
+  .quick__quiet,
+  .quick .cycle__links a,
+  .quick__limits-list a {
+    min-height: var(--control-height-touch);
+  }
+
+  /* A link at the end of a sentence takes a line of its own. */
+  .quick__conditions a,
+  .quick__limits-list a {
+    display: flex;
+    width: fit-content;
+    min-height: var(--control-height-touch);
+  }
+}

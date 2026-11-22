@@ -60,7 +60,7 @@ async function open(page: Page, hash: string) {
 
 test('pressed through under reduced motion, the tour ends in the case study’s choices', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await open(page, '#/');
+  await open(page, '#/cycle/discover');
   await page.getByRole('button', { name: 'Watch the tour' }).click();
   await expect(bar(page)).toContainText('Step 1 of 18 · Paused');
   await expect(bar(page)).toContainText('Simulated demo');
@@ -135,7 +135,7 @@ test('it starts from anywhere, pauses, goes to a stage, and hands the page over'
 });
 
 test('the arrows step, Escape leaves, and a press on the page pauses', async ({ page }) => {
-  await open(page, '#/');
+  await open(page, '#/cycle/discover');
   await page.getByRole('button', { name: 'Watch the tour' }).click();
   await expect(bar(page)).toContainText('Step 1 of 18');
   await page.keyboard.press('ArrowRight');
@@ -156,7 +156,7 @@ test('the arrows step, Escape leaves, and a press on the page pauses', async ({ 
 });
 
 test('the close in the corner leaves the tour from its first step', async ({ page }) => {
-  await open(page, '#/');
+  await open(page, '#/cycle/discover');
   await page.getByRole('region', { name: /Watch a designer orchestrate an agent/ }).getByRole('button', { name: 'Watch the tour' }).click();
   await expect(bar(page)).toContainText('Step 1 of 18');
   await bar(page).getByRole('button', { name: 'Close the tour' }).click();
@@ -167,7 +167,7 @@ test('the close in the corner leaves the tour from its first step', async ({ pag
 
 test('the narration is off until turned on, then reads each caption as it plays, stops on a pause, and goes off again', async ({ page }) => {
   test.setTimeout(90_000);
-  await open(page, '#/');
+  await open(page, '#/cycle/discover');
   await page.getByRole('region', { name: /Watch a designer orchestrate an agent/ }).getByRole('button', { name: 'Watch the tour' }).click();
   const voice = bar(page).getByRole('button', { name: 'Narration' });
   /* Off by default: nothing is said, and nothing is kept. Turned on, it reads the line on screen and is remembered. */
@@ -211,7 +211,7 @@ test('one menu holds the speed and the voice: a speed is spoken at and remembere
     let held: SpeechSynthesisVoice | null = null;
     Object.defineProperty(SpeechSynthesisUtterance.prototype, 'voice', { get: () => held, set: (v: SpeechSynthesisVoice | null) => (held = v) });
   });
-  await open(page, '#/');
+  await open(page, '#/cycle/discover');
   await page.getByRole('region', { name: /Watch a designer orchestrate an agent/ }).getByRole('button', { name: 'Watch the tour' }).click();
   const settings = bar(page).getByRole('button', { name: /^Voice and speed: / });
   await expect(settings).toHaveText('Voice and speed: Ava · , 1×');

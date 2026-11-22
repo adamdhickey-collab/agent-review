@@ -4,9 +4,10 @@ import { EXPLORED, seedCycle } from './seed';
 /* The design cycle (data/cycle.ts, CycleScreen), and since 2026-10-26 the
    front door. What must stay true:
 
-   1. "/" is the cycle's first stage, with no screen in front of it, and the
-      bar there offers no other place in the product. A run's own address
-      is that run. The product's name goes to the first stage from anywhere.
+   1. "/cycle" is the cycle's first stage, and the bar there offers no other
+      place in the product. A run's own address is that run. The product's
+      name goes to the start screen from anywhere (since 2026-11-22, when
+      the start screen became the front door; tests/quick.spec.ts).
    2. The cycle is a script: the way on, Continue in the move, waits for
       the stage's move (the foot offers only Back since 2026-10-28), the
       rail links only the stages that are open, and an address further on
@@ -42,8 +43,8 @@ async function press(page: Page, name: string | RegExp, role: 'button' | 'link' 
   throw new Error(`never reached ${name} by Tab`);
 }
 
-test('the front door is the first stage, and a run’s own address is the run', async ({ page }) => {
-  await open(page, '#/');
+test('the cycle opens on its first stage, and a run’s own address is the run', async ({ page }) => {
+  await open(page, '#/cycle');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Something is wrong with archiving. What, exactly?');
   await expect(page).toHaveTitle('Design cycle: Discover · Agent Review');
   await expect(page.locator('.cycle__setup')).toContainText('Orchestration is setting an agent up');
@@ -65,11 +66,11 @@ test('the front door is the first stage, and a run’s own address is the run', 
   }
 });
 
-test('the product’s name goes to the first stage', async ({ page }) => {
+test('the product’s name goes to the start screen', async ({ page }) => {
   await open(page, '#/queue');
-  await page.getByRole('link', { name: 'Agent Review, start of the design cycle' }).click();
-  await expect(page).toHaveURL(/#\/cycle\/discover$/);
-  await arrived(page, 'Something is wrong with archiving. What, exactly?');
+  await page.getByRole('link', { name: 'Agent Review, start' }).click();
+  await expect(page).toHaveURL(/#\/$/);
+  await arrived(page, 'A paying customer was archived by mistake.');
 });
 
 test('Continue waits for the move, and a stage further on sends the reader back to the open one', async ({ page }) => {
@@ -113,7 +114,7 @@ test('an open stage is an address, and back and forward step between them', asyn
 });
 
 test('the cycle can be done from the keyboard, and its choices survive a reload', async ({ page }) => {
-  await open(page, '#/');
+  await open(page, '#/cycle/discover');
   await press(page, 'Choose Correct the summary');
   await press(page, 'Continue to Define');
   await press(page, 'Choose Safety comes first');
