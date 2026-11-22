@@ -133,6 +133,66 @@ it returns.
 judgment"; whether they read the owner line; whether they approve all forty
 without opening the evidence.
 
+## A second study: the archive itself
+
+The five tasks above test the person who reviews an agent's work. They do
+not test the decision the case study ends on: Relay stops an archive only
+when the batch holds an active customer, and names that customer before
+anything is archived. The claim behind it, that an interruption with a reason
+gets noticed, is about the person doing the cleanup. It needs its own
+sessions with its own people.
+
+**Status: planned, not run**, like everything else here.
+
+**Who.** Four or five people who manage customer accounts in a CRM or an
+admin tool and clear out old records as part of the job: account managers,
+customer success, support operations. Nobody who has seen Agent Review or
+its case study.
+
+**How.** 30 minutes, remote, moderated, thinking aloud, on the Relay
+customer list with the archive rule applied. Say that Relay and its customers
+are made up. Do not say that any batch is different from another.
+
+### A. Routine cleanup
+
+**Prompt.** "These trial and churned accounts are finished. Clear them out."
+Two or three batches in a row, none with an active customer.
+
+**Success.** Archives each batch in one press; can say where the customers
+went and how to bring them back.
+
+**Note.** Whether the missing question worries them; whether Undo is seen.
+
+### B. The batch with Northside in it
+
+**Prompt.** The same words as task A. This batch includes Northside
+Trucking, active, $5,040 a month. The moderator does not point it out.
+
+**Success.** Reads the review, clears Northside's box, and archives the
+rest. Says afterward why Relay stopped.
+
+**Note.** Time on the review; whether the name and the amount are read or
+the primary button is pressed on reflex; whether "To keep a customer, clear
+its box" is understood on first reading.
+
+### C. Getting one back
+
+**Prompt.** Straight after an archive: "One of those shouldn't have gone.
+Get it back." Then, once Undo has left the screen: "Same again, for a
+customer you archived earlier."
+
+**Success.** The first is Undo. The second has no path in Relay today: there
+is no Archived view, and the customer is restored by support. What counts is
+where the person looks and what they expect to find there.
+
+**Note.** Whether they understand that archived is not deleted.
+
+**What this cannot show.** The worry behind the rule is habit: a question
+asked on every batch stops being read over a quarter. Thirty minutes shows
+whether a first-time interruption is noticed, not whether the hundredth is.
+That needs the product in use and a count of active customers archived and
+restored, which a prototype does not have.
+
 ## What to record per session
 
 One file per session in `docs/validation/sessions/`, named by number and
@@ -162,3 +222,12 @@ can't move the goalposts:
   described is reworded.
 - Anyone approving all forty screens without looking at the reach: the
   approval answer gains a step that shows the reach first.
+
+For the second study:
+
+- Two or more archiving Northside past the review: the review is redrawn
+  before the rule is defended anywhere.
+- Two or more unsettled by a routine batch archiving without a question: the
+  one-press path gains a clearer account of what happened and where Undo is.
+- Anyone unable to say where an archived customer went: an Archived view
+  moves from deferred to next.
