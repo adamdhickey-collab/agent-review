@@ -410,7 +410,9 @@ What would tell whether this works, none of it tested yet:
 The sessions that would answer these are planned, not run, in
 `docs/validation/README.md`: four or five people who supervise coding-agent
 work, five tasks, and what result would change the design, decided before
-any session.
+any session. A second study in the same file puts the archive rule in
+front of the people who would do the cleanup: account managers, three tasks,
+one batch with an active customer in it.
 
 THE FIRST MINUTE, 2026-10-12 (a hiring-manager review of the portfolio and
 this prototype). Three changes to the workspace, and one fix:
