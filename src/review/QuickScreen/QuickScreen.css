@@ -253,6 +253,27 @@
   }
 }
 
+/* On a narrow phone the selection switch is the row's full width, and its
+   two labels may wrap inside their halves: at 320 on Linux, whose glyphs
+   run wider, one line each made the page 332px wide. A layout of this
+   screen's, not a change to the SegmentedControl. */
+@media (max-width: 30rem) {
+  .quick__try-head .segmented {
+    width: 100%;
+    height: auto;
+    min-height: var(--control-height);
+  }
+
+  .quick__try-head .segmented__option {
+    flex: 1 1 0;
+    justify-content: center;
+    padding-block: var(--space-1);
+    text-align: center;
+    white-space: normal;
+    line-height: var(--leading-tight);
+  }
+}
+
 /* A finger gets the 44px line on the quiet links, as the cycle's do. */
 @media (pointer: coarse) {
   .quick .checkbox {
