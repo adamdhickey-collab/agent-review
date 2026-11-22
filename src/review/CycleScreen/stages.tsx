@@ -145,7 +145,7 @@ export function Needs({ stage, what, description }: { stage: StageId; what: stri
 /** Relay, inside the review: the product's surface and icons, always light.
     A stage that marks something in the screen draws the mark in the frame,
     over the screen, as the preview does (mark.ts). */
-function Product({ label, frameRef, mark, children }: { label: string; frameRef?: Ref<HTMLDivElement>; mark?: ReactNode; children: ReactNode }) {
+export function Product({ label, frameRef, mark, children }: { label: string; frameRef?: Ref<HTMLDivElement>; mark?: ReactNode; children: ReactNode }) {
   return (
     <figure className="cycle__product">
       <figcaption className="cycle__product-label">
@@ -992,6 +992,34 @@ export function Delegate() {
 
 /* ---------- 6. LEARN ---------- */
 
+/** The later run that reads the saved rule, or doesn't: Learn's, and the
+    quick path's, where the rule is Adam's rather than the visitor's. */
+export function LaterRun({ kept, mine = false }: { kept: boolean; mine?: boolean }) {
+  return (
+    <div className="cycle__later" data-kept={kept || undefined}>
+      <p className="cycle__later-when">
+        <Badge variant="outline">Later, simulated</Badge>
+        An agent adds Merge duplicates to the customers screen. Merging removes records.
+      </p>
+      {kept ? (
+        <p className="cycle__later-then">
+          <Badge tone="success" icon="check">
+            Follows the rule
+          </Badge>
+          <span>
+            It finds {mine ? 'the' : 'your'} saved rule, builds to it, and doesn’t ask {mine ? 'the designer' : 'you'} again. The change cites the rule, so a reviewer can see where the behavior came from.
+          </span>
+        </p>
+      ) : (
+        <p className="cycle__later-then">
+          <Badge icon="message-question">Asks again</Badge>
+          <span>Without a saved rule, it builds what the new brief says, and {mine ? 'the designer answers' : 'you answer'} the same question again.</span>
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function Learn() {
   const { cycle, cycleDo } = useStore();
   const outcome = outcomeOf(cycle);
@@ -1042,27 +1070,7 @@ export function Learn() {
       <div className="cycle__main">
         <Section title="Next time, the rule does the asking">
           <p className="cycle__lead">Today’s judgment becomes tomorrow’s orchestration, if you save it.</p>
-          <div className="cycle__later" data-kept={cycle.kept || undefined}>
-            <p className="cycle__later-when">
-              <Badge variant="outline">Later, simulated</Badge>
-              An agent adds Merge duplicates to the customers screen. Merging removes records.
-            </p>
-            {cycle.kept ? (
-              <p className="cycle__later-then">
-                <Badge tone="success" icon="check">
-                  Follows the rule
-                </Badge>
-                <span>
-                  It finds your saved rule, builds to it, and doesn’t ask you again. The change cites the rule, so a reviewer can see where the behavior came from.
-                </span>
-              </p>
-            ) : (
-              <p className="cycle__later-then">
-                <Badge icon="message-question">Asks again</Badge>
-                <span>Without a saved rule, it builds what the new brief says, and you answer the same question again.</span>
-              </p>
-            )}
-          </div>
+          <LaterRun kept={cycle.kept} />
         </Section>
 
         <Section title="The handoff to engineering">

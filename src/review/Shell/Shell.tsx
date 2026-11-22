@@ -47,6 +47,16 @@ import './Shell.css';
    "Demo role" label over it says what the name is: the part a visitor
    plays, not a session.
 
+   THE QUICK PATH'S BAR, since 2026-11-22. On the start screen, the three
+   fixes, the decision and About ("/", "/compare", "/decision", "/about")
+   the bar is the project's name and two links: About the experiment, which
+   is where the Storybook, the source and the experiment's record now sit
+   for this path, and the case study. Nobody is playing a role there, so
+   there is no disc and no "Demo role": the screens say whose prototype and
+   whose decision it is in their own words. The role returns on the cycle,
+   where a visitor does decide as Adam. The product's name goes to the
+   start screen from everywhere.
+
    The appearance control is three choices, Light, Dark and System, as the
    system's segmented control: one tab stop, arrow keys between them, each
    an icon with its name as the tooltip and the accessible name. It was a
@@ -89,6 +99,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
   const singleKeys = useSingleKeys();
   const [sheet, setSheet] = useState(false);
   const guided = route.name === 'cycle';
+  const quick = route.name === 'start' || route.name === 'compare' || route.name === 'decision' || route.name === 'about';
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -101,7 +112,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
   }, []);
 
   return (
-    <div className="shell" data-surface="review" data-guided={guided || undefined}>
+    <div className="shell" data-surface="review" data-guided={guided || undefined} data-quick={quick || undefined}>
       <a
         className="shell__skip"
         href="#main"
@@ -113,12 +124,12 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
         Skip to content
       </a>
       <header className="shell__bar">
-        <a className="shell__brand" href={href({ name: 'cycle', stage: 'discover' })} aria-label="Agent Review, start of the design cycle">
+        <a className="shell__brand" href={href({ name: 'start' })} aria-label="Agent Review, start">
           <AppMark />
           <span>Agent Review</span>
         </a>
         <div className="shell__where">
-          {guided ? null : (
+          {guided || quick ? null : (
           <nav className="shell__nav" aria-label="Primary">
             <a href={href({ name: 'cycle', stage: 'discover' })}>
               <span className="shell__long">Design cycle</span>
@@ -137,20 +148,32 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
             </a>
           </nav>
           )}
-          <nav className="shell__links" aria-label="Project links">
-            <a href="https://adamhickey.com/lab/agent-review.html">
-              Case study
-              <Icon name="arrow-up-right" size={12} />
-            </a>
-            <a href="storybook/" target="_blank" rel="noopener">
-              Storybook
-              <Icon name="arrow-up-right" size={12} />
-            </a>
-            <a href="https://github.com/adamdhickey-collab/agent-review" target="_blank" rel="noopener">
-              Source
-              <Icon name="arrow-up-right" size={12} />
-            </a>
-          </nav>
+          {quick ? (
+            <nav className="shell__links" aria-label="Project links">
+              <a href={href({ name: 'about' })} aria-current={route.name === 'about' ? 'page' : undefined}>
+                About the experiment
+              </a>
+              <a href="https://adamhickey.com/lab/agent-review.html">
+                Case study
+                <Icon name="arrow-up-right" size={12} />
+              </a>
+            </nav>
+          ) : (
+            <nav className="shell__links" aria-label="Project links">
+              <a href="https://adamhickey.com/lab/agent-review.html">
+                Case study
+                <Icon name="arrow-up-right" size={12} />
+              </a>
+              <a href="storybook/" target="_blank" rel="noopener">
+                Storybook
+                <Icon name="arrow-up-right" size={12} />
+              </a>
+              <a href="https://github.com/adamdhickey-collab/agent-review" target="_blank" rel="noopener">
+                Source
+                <Icon name="arrow-up-right" size={12} />
+              </a>
+            </nav>
+          )}
         </div>
         <div className="shell__context">
           <IconButton
@@ -163,21 +186,23 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
             onClick={() => setSheet(true)}
           />
           <SegmentedControl className="shell__appearance" label="Appearance" options={APPEARANCES} value={appearance} onChange={setAppearance} size="compact" />
-          {guided ? null : (
+          {guided || quick ? null : (
             <span className="shell__repo">
               <Icon name="git-branch" size={14} />
               <code>relay/web</code>
             </span>
           )}
-          <span className="shell__user">
-            <span className="shell__avatar" aria-hidden="true">
-              AH
+          {quick ? null : (
+            <span className="shell__user">
+              <span className="shell__avatar" aria-hidden="true">
+                AH
+              </span>
+              <span className="shell__user-name">
+                <span className="shell__user-role">Demo role</span>
+                Adam Hickey
+              </span>
             </span>
-            <span className="shell__user-name">
-              <span className="shell__user-role">Demo role</span>
-              Adam Hickey
-            </span>
-          </span>
+          )}
         </div>
       </header>
       <main id="main" className="shell__main" tabIndex={-1}>
