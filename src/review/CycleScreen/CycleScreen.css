@@ -762,6 +762,7 @@
   font-size: var(--text-4xl);
   font-weight: var(--weight-regular); /* Crimson is regular only */
   line-height: 1;
+  letter-spacing: var(--tracking-title);
 }
 
 .cycle__dots {
