@@ -71,6 +71,9 @@
      read as the same rank, and a scene's figure two. */
   --text-3xl: 1.875rem; /* 30 */
   --text-4xl: 2.75rem;  /* 44 */
+  /* The serif at its display size (--text-4xl): a headline of two lines reads
+     as one thought at 1.1; at --leading-tight the lines drift apart. */
+  --leading-display: 1.1;
   --leading-tight: 1.25;
   --leading-ui: 1.45;
   --leading-body: 1.55;
