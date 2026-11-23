@@ -42,9 +42,10 @@ import './CycleScreen.css';
    than on every card.
 
    WHAT THE EXPERIMENT SHOWED led Discover from 2026-11-21 to 2026-11-22.
-   It is on About the experiment now (QuickScreen, "/about"): the front
-   door is the start screen, and the experiment is one link from it rather
-   than the first thing on the first stage. */
+   It is on About the experiment now (QuickScreen, "/about"). The start
+   screen that took the front door that day came out on 2026-11-23, and
+   Discover is the front door again, with one line of shortcuts under the
+   tour to the three fixes and the decision. */
 
 export function CycleScreen({ stage }: { stage: StageId }) {
   const { cycle, cycleDo } = useStore();
@@ -158,6 +159,14 @@ export function CycleScreen({ stage }: { stage: StageId }) {
             this screen alone, or while one is playing. */}
         {stage === 'discover' && tour.available && !tour.active ? (
           <TourFeature onStart={tour.start} />
+        ) : null}
+        {/* The short way (since 2026-11-23, when the start screen came out
+            of the front door): the three working fixes and Adam's decision,
+            each one screen, for a reader who won't play six stages. */}
+        {stage === 'discover' ? (
+          <p className="cycle__shortcuts">
+            Short on time? <a href={href({ name: 'compare' })}>Compare the three fixes</a> or <a href={href({ name: 'decision' })}>see the decision Adam made</a>.
+          </p>
         ) : null}
         <dl className="cycle__roles">
           <div className="cycle__role">

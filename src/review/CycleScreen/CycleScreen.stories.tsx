@@ -59,12 +59,14 @@ type Story = StoryObj<typeof meta>;
 export const Discover: Story = {
   args: { stage: 'discover' },
   decorators: [inStore(initialCycle())],
-  parameters: { docs: { description: { story: 'The first stage (the front door until 2026-11-22, when the start screen took its place and the experiment’s findings moved to About the experiment). The scenario in one line under the question, the evidence and the agent’s summary, each line marked observation, interpretation or assumption. Continue, in the move, waits for the move, and the rail links only the stages that are open; the foot offers only Back. Correcting the assumption changes the brief’s problem.' } } },
+  parameters: { docs: { description: { story: 'The first stage and the front door (but for 2026-11-22, when a start screen stood in front of it; the experiment’s findings moved to About the experiment that day and stayed). One line under the tour offers the three fixes and the decision to a reader short on time. The scenario in one line under the question, the evidence and the agent’s summary, each line marked observation, interpretation or assumption. Continue, in the move, waits for the move, and the rail links only the stages that are open; the foot offers only Back. Correcting the assumption changes the brief’s problem.' } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('Something is wrong with archiving');
     await expect(canvasElement.querySelector('.cycle__setup')).toHaveTextContent('Orchestration is setting an agent up');
     await expect(canvas.queryByRole('region', { name: 'What the experiment showed' })).toBeNull();
+    await expect(canvas.getByRole('link', { name: 'Compare the three fixes' })).toHaveAttribute('href', '#/compare');
+    await expect(canvas.getByRole('link', { name: 'see the decision Adam made' })).toHaveAttribute('href', '#/decision');
     await expect(canvas.queryByRole('button', { name: /Continue to/ })).toBeNull();
     await expect(canvas.queryByRole('link', { name: /Next/ })).toBeNull();
     await expect(canvasElement.querySelector('.cycle__pager')).toBeNull();

@@ -27,8 +27,6 @@ export const RISKY_BATCH = STORY_BATCH;
 /** A routine cleanup: nobody active in it. */
 export const ROUTINE_BATCH = ['c_01HZKV', 'c_01HZL3', 'c_01HZLB'];
 
-export const RISKY_CUSTOMERS: Customer[] = RISKY_BATCH.map((id) => customers.find((c) => c.id === id)).filter((c): c is Customer => !!c);
-
 export interface Fix {
   id: DirectionId;
   name: string;

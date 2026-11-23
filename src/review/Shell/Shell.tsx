@@ -47,15 +47,16 @@ import './Shell.css';
    "Demo role" label over it says what the name is: the part a visitor
    plays, not a session.
 
-   THE QUICK PATH'S BAR, since 2026-11-22. On the start screen, the three
-   fixes, the decision and About ("/", "/compare", "/decision", "/about")
+   THE QUICK PATH'S BAR, since 2026-11-22. On the three fixes, the decision
+   and About ("/compare", "/decision", "/about")
    the bar is the project's name and two links: About the experiment, which
    is where the Storybook, the source and the experiment's record now sit
    for this path, and the case study. Nobody is playing a role there, so
    there is no disc and no "Demo role": the screens say whose prototype and
    whose decision it is in their own words. The role returns on the cycle,
    where a visitor does decide as Adam. The product's name goes to the
-   start screen from everywhere.
+   cycle's first stage from everywhere (the start screen that stood at "/"
+   for a day was taken out on 2026-11-23).
 
    The appearance control is three choices, Light, Dark and System, as the
    system's segmented control: one tab stop, arrow keys between them, each
@@ -99,7 +100,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
   const singleKeys = useSingleKeys();
   const [sheet, setSheet] = useState(false);
   const guided = route.name === 'cycle';
-  const quick = route.name === 'start' || route.name === 'compare' || route.name === 'decision' || route.name === 'about';
+  const quick = route.name === 'compare' || route.name === 'decision' || route.name === 'about';
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -124,7 +125,7 @@ export function Shell({ route, children }: { route: Route; children: ReactNode }
         Skip to content
       </a>
       <header className="shell__bar">
-        <a className="shell__brand" href={href({ name: 'start' })} aria-label="Agent Review, start">
+        <a className="shell__brand" href={href({ name: 'cycle', stage: 'discover' })} aria-label="Agent Review, start of the design cycle">
           <AppMark />
           <span>Agent Review</span>
         </a>
