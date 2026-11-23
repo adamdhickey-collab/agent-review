@@ -641,6 +641,7 @@
 .cycle .cycle__title {
   font-size: var(--text-4xl);
   line-height: var(--leading-display);
+  letter-spacing: var(--tracking-title);
 }
 
 .cycle .cycle__roles {

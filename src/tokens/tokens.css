@@ -77,6 +77,9 @@
   --leading-tight: 1.25;
   --leading-ui: 1.45;
   --leading-body: 1.55;
+  /* The serif at its display size is set a little tight, as the site's titles
+     of 34 to 48px are (its --tracking-title). */
+  --tracking-title: -0.015em;
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
