@@ -1,12 +1,14 @@
 import { expect, test, type Page } from '@playwright/test';
 import { FRAMED, seedCycle } from './seed';
 
-/* The quick path (review/QuickScreen, since 2026-11-22): the start screen,
-   the three working fixes, the decision, and About. What must stay true:
+/* The quick path (review/QuickScreen, since 2026-11-22): the three working
+   fixes, the decision, and About. Its start screen was the front door for
+   a day; since 2026-11-23 the front door is Discover, which offers the
+   path in one line. What must stay true:
 
-   1. A fresh session opens on the start screen, with no stage rail, no
-      findings and no demo role, and Compare the fixes goes straight to a
-      working screen.
+   1. A fresh session opens on the cycle's first stage, with the tour and
+      the shortcuts, and Compare the three fixes goes straight to a working
+      screen with no stage rail and no demo role.
    2. Each of the three fixes is an address, works when opened directly and
       after a reload, and can be operated: Undo puts the batch back, Cancel
       keeps the selection, the review keeps a customer out.
@@ -37,22 +39,18 @@ const last = (page: Page) => page.getByRole('toolbar', { name: 'Last action' });
 const selected = (page: Page) => page.getByRole('toolbar', { name: 'Selected customers' });
 const cycleKept = (page: Page) => page.evaluate(() => JSON.parse(sessionStorage.getItem('agent-review:cycle') ?? 'null'));
 
-test('a fresh session opens on the start screen, and Compare the fixes opens a working fix', async ({ page }) => {
+test('a fresh session opens on the first stage, and its shortcut opens a working fix', async ({ page }) => {
   await open(page, './');
-  await expect(h1(page)).toHaveText('A paying customer was archived by mistake.');
-  await expect(page).toHaveTitle('A paying customer was archived by mistake · Agent Review');
-  await expect(page.getByText('Working prototype · Simulated scenario')).toBeVisible();
-  await expect(page.getByText('Archiving this selection also removes a paying customer from the list.')).toBeVisible();
-  await expect(page.locator('.cycle__rail')).toHaveCount(0);
-  await expect(page.getByText('What the experiment showed')).toHaveCount(0);
-  await expect(page.getByText('Demo role')).toHaveCount(0);
-  /* About sixty words of introduction, at most, before the action. */
-  const words = await page.evaluate(() => ['.quick__label', 'h1', '.cycle__setup', '.quick__caption'].map((s) => document.querySelector(s)?.textContent ?? '').join(' ').trim().split(/\s+/).length);
-  expect(words).toBeLessThanOrEqual(60);
+  await expect(h1(page)).toHaveText('Something is wrong with archiving. What, exactly?');
+  await expect(page.locator('.cycle__rail')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Watch the tour' }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'see the decision Adam made' })).toHaveAttribute('href', '#/decision');
 
-  await page.getByRole('button', { name: 'Compare the fixes' }).click();
+  await page.getByRole('link', { name: 'Compare the three fixes' }).click();
   await expect(page).toHaveURL(/#\/compare$/);
   await arrived(page, 'Three fixes, each a working screen.');
+  await expect(page.locator('.cycle__rail')).toHaveCount(0);
+  await expect(page.getByText('Demo role')).toHaveCount(0);
   await expect(page.getByRole('tab', { name: 'Undo afterward' })).toHaveAttribute('aria-selected', 'true');
   await expect(selected(page)).toContainText('3 of 8 customers selected');
   await expect(product(page).getByRole('button', { name: 'Archive', exact: true })).toBeVisible();
@@ -156,9 +154,7 @@ test('progress in the cycle survives a visit to the quick path, and the stages s
   await seedCycle(page, FRAMED);
   await open(page, '#/cycle/explore');
   await expect(h1(page)).toHaveText('Three ways to archive. Try each one.');
-  await page.getByRole('link', { name: 'Agent Review, start' }).click();
-  await arrived(page, 'A paying customer was archived by mistake.');
-  await page.getByRole('button', { name: 'Compare the fixes' }).click();
+  await open(page, '#/compare');
   await product(page).getByRole('button', { name: 'Archive', exact: true }).click();
   await page.getByRole('button', { name: 'See my design decision' }).click();
   await page.getByRole('button', { name: 'Explore the full design process' }).click();
@@ -180,11 +176,12 @@ test('progress in the cycle survives a visit to the quick path, and the stages s
 
 test('the quick path works from the keyboard', async ({ page }) => {
   await open(page, '#/');
-  for (let i = 0; i < 12; i++) {
+  const short = page.getByRole('link', { name: 'Compare the three fixes' });
+  for (let i = 0; i < 20; i++) {
     await page.keyboard.press('Tab');
-    if (await page.getByRole('button', { name: 'Compare the fixes' }).evaluate((el) => el === document.activeElement)) break;
+    if (await short.evaluate((el) => el === document.activeElement)) break;
   }
-  await expect(page.getByRole('button', { name: 'Compare the fixes' })).toBeFocused();
+  await expect(short).toBeFocused();
   await page.keyboard.press('Enter');
   await arrived(page, 'Three fixes, each a working screen.');
 
@@ -206,7 +203,7 @@ test('the quick path works from the keyboard', async ({ page }) => {
 });
 
 test('the experiment, the catalog, the source and the walkthrough are still reachable', async ({ page }) => {
-  await open(page, '#/');
+  await open(page, '#/compare');
   await page.getByRole('link', { name: 'About the experiment' }).click();
   await arrived(page, 'About the experiment');
   await expect(page.getByRole('link', { name: 'About the experiment' })).toHaveAttribute('aria-current', 'page');
@@ -219,7 +216,7 @@ test('the experiment, the catalog, the source and the walkthrough are still reac
   await expect(page.getByRole('link', { name: 'All three versions in the review queue' })).toHaveAttribute('href', '#/queue');
 
   await open(page, '#/');
-  await page.getByRole('button', { name: 'Watch the walkthrough' }).click();
+  await page.getByRole('button', { name: 'Watch the tour' }).first().click();
   await expect(page.getByRole('region', { name: 'Guided tour' })).toContainText('Step 1 of 18');
   await expect(page).toHaveURL(/#\/cycle\/discover$/);
 });

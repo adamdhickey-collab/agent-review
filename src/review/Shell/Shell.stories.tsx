@@ -55,7 +55,7 @@ export const OnTheCycle: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.queryByRole('navigation', { name: 'Primary' })).toBeNull();
     await expect(canvas.queryByText('relay/web')).toBeNull();
-    await expect(canvas.getByRole('link', { name: 'Agent Review, start' })).toHaveAttribute('href', '#/');
+    await expect(canvas.getByRole('link', { name: 'Agent Review, start of the design cycle' })).toHaveAttribute('href', '#/cycle/discover');
     await expect(canvas.getByText('Demo role')).toBeInTheDocument();
   },
 };
@@ -64,12 +64,12 @@ export const OnTheCycle: Story = {
    the experiment and the case study: no places, no Storybook or source (they
    are on About), and no demo role, because nobody is playing one there. */
 export const OnTheQuickPath: Story = {
-  args: { route: { name: 'start' } },
+  args: { route: { name: 'compare' } },
   parameters: {
     docs: {
       description: {
         story:
-          'The bar on the start screen, the three fixes, the decision and About: the project’s name, About the experiment and the case study, with the appearance and shortcut controls. No disc and no “Demo role”: a visitor there is reading Adam’s work, not playing him.',
+          'The bar on the three fixes, the decision and About: the project’s name, About the experiment and the case study, with the appearance and shortcut controls. No disc and no “Demo role”: a visitor there is reading Adam’s work, not playing him.',
       },
     },
   },

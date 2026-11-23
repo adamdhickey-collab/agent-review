@@ -8,7 +8,7 @@ import { ChangeScreen } from '../review/ChangeScreen/ChangeScreen';
 import { CycleScreen } from '../review/CycleScreen/CycleScreen';
 import { SceneScreen } from '../review/SceneScreen/SceneScreen';
 import { TourProvider, useTour } from '../review/Tour/Tour';
-import { About, Compare, Decision, Start } from '../review/QuickScreen/QuickScreen';
+import { About, Compare, Decision } from '../review/QuickScreen/QuickScreen';
 import { EmptyState } from '../components';
 
 /* The store has to be above anything that reads it, and the route effects
@@ -21,7 +21,6 @@ function Screens() {
   if (route.name === 'scene') return <SceneScreen id={route.id} />;
   return (
     <Shell route={route}>
-      {route.name === 'start' ? <Start /> : null}
       {route.name === 'compare' ? <Compare fix={route.fix ?? 'undo'} /> : null}
       {route.name === 'decision' ? <Decision batch={route.batch ?? 'active'} /> : null}
       {route.name === 'about' ? <About /> : null}

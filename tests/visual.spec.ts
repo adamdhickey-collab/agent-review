@@ -32,13 +32,7 @@ for (const width of WIDTHS) {
        the batch archived in its first direction, so the baseline holds a
        working interface mid-use, not only a page. Since 2026-10-26 Discover
        is the front door, and a direction opens with the batch selected. */
-    /* The quick path (since 2026-11-22): the front door, and the three fixes with the first one's Archive pressed. */
-    test('the start screen', async ({ page }) => {
-      await page.goto('#/');
-      await settle(page);
-      await expect(page).toHaveScreenshot(`start-${width}.png`, { fullPage: true });
-    });
-
+    /* The quick path (since 2026-11-22): the three fixes with the second one's Archive pressed. Its start screen left the front door on 2026-11-23. */
     test('the three fixes', async ({ page }) => {
       await page.goto('#/compare/confirm');
       await settle(page);

@@ -58,7 +58,7 @@ const atTheTop = { y: 0, bar: 0 };
 const arrived = (page: Page, heading: string | RegExp) => expect(page.getByRole('heading', { level: 1, name: heading })).toBeFocused();
 
 test('a screen opened from its address starts at the top', async ({ page }) => {
-  for (const hash of ['#/', '#/compare', '#/cycle/discover', '#/runs/billing', '#/runs/shared-table', '#/queue', '#/changes/rv-2041']) {
+  for (const hash of ['#/', '#/compare', '#/runs/billing', '#/runs/shared-table', '#/queue', '#/changes/rv-2041']) {
     await open(page, hash);
     expect(await where(page), hash).toMatchObject(atTheTop);
   }

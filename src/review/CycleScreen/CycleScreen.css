@@ -278,6 +278,28 @@
   line-height: var(--leading-body);
 }
 
+/* The short way, one quiet line under the tour (since 2026-11-23). */
+.cycle__shortcuts {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+}
+
+.cycle__shortcuts a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+@media (pointer: coarse) {
+  .cycle__shortcuts a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-height-touch);
+  }
+}
+
 /* ---------- the work and the move ---------- */
 
 .cycle__work {

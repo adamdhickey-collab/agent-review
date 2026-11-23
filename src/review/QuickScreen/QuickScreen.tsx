@@ -1,19 +1,21 @@
 import { useState, type ReactNode } from 'react';
-import { Badge, Button, Cell, Checkbox, HeaderCell, Icon, Row, SegmentedControl, Table, Tabs, Toolbar } from '../../components';
+import { Badge, Button, Checkbox, Icon, SegmentedControl, Tabs } from '../../components';
 import { href, navigate, type QuickBatch } from '../../app/router';
 import type { DirectionId } from '../../data/cycle';
-import { DECISION, DECISION_RULE, FIXES, QUICK_CUSTOMERS, RISKY_BATCH, RISKY_CUSTOMERS, ROUTINE_BATCH } from '../../data/quick';
+import { DECISION, DECISION_RULE, FIXES, QUICK_CUSTOMERS, RISKY_BATCH, ROUTINE_BATCH } from '../../data/quick';
 import { ArchiveFlow } from '../../product/customers/ArchiveFlow';
-import { formatMrr, STATUS_LABEL } from '../../product/customers/customers';
 import { LaterRun, Product } from '../CycleScreen/stages';
-import { useTour } from '../Tour/Tour';
 import '../CycleScreen/CycleScreen.css';
 import './QuickScreen.css';
 
-/* THE QUICK PATH (2026-11-22): four screens in front of the design cycle,
-   for a hiring manager who should understand the project before investing
-   in the six stages. The problem ("/"), the alternatives ("/compare"), the
-   decision ("/decision"), and the experiment as depth ("/about").
+/* THE QUICK PATH (2026-11-22): three screens beside the design cycle, for
+   a reader short on time. The alternatives ("/compare"), the decision
+   ("/decision"), and the experiment as depth ("/about").
+
+   NOT THE FRONT DOOR, since 2026-11-23. For a day a fourth screen, the
+   problem, stood at "/" in front of the cycle. Adam took it out: he wants
+   the full experience first. "/" is Discover again, and Discover offers
+   these screens in one line under the tour (CycleScreen's shortcuts).
 
    WHY IT IS BACK. On 2026-11-18 a three-beat short path was the front door
    for a day and Adam took it out: it summarized the prototype and put
@@ -59,79 +61,6 @@ function Out({ to, children }: { to: string; children: ReactNode }) {
       <Icon name="arrow-up-right" size={12} />
       <span className="visually-hidden"> (opens in a new tab)</span>
     </a>
-  );
-}
-
-/* ---------- 1. THE PROBLEM ---------- */
-
-/** The selection that went wrong, as Relay draws it and out of reach: a
-    picture of the mistake, with its words for a screen reader beside it. */
-function RiskySelection() {
-  return (
-    <figure className="quick__selection">
-      <p className="visually-hidden">
-        Three customers are selected to archive: {RISKY_CUSTOMERS.map((c) => `${c.company}, ${STATUS_LABEL[c.status]}`).join('; ')}.
-      </p>
-      <div className="quick__selection-frame" data-surface="product" inert aria-hidden="true">
-        <Toolbar label="Selected customers" tone="accent" start={<span className="quick__selected">3 customers selected to archive</span>} />
-        <Table caption="The selected customers" density="compact">
-          <thead>
-            <tr>
-              <HeaderCell control>
-                <span className="visually-hidden">Selected</span>
-              </HeaderCell>
-              <HeaderCell>Company</HeaderCell>
-              <HeaderCell>Status</HeaderCell>
-              <HeaderCell numeric>MRR</HeaderCell>
-            </tr>
-          </thead>
-          <tbody>
-            {RISKY_CUSTOMERS.map((c) => (
-              <Row key={c.id} selected className={c.status === 'active' ? 'quick__row--active' : undefined}>
-                <Cell control>
-                  <Checkbox label={`${c.company}, selected`} hideLabel checked readOnly tabIndex={-1} />
-                </Cell>
-                <Cell rowHeader>{c.company}</Cell>
-                <Cell>
-                  <Badge tone={c.status === 'active' ? 'success' : c.status === 'trial' ? 'accent' : 'neutral'}>{STATUS_LABEL[c.status]}</Badge>
-                </Cell>
-                <Cell numeric>{formatMrr(c.mrr)}</Cell>
-              </Row>
-            ))}
-          </tbody>
-        </Table>
-      </div>
-      <figcaption className="quick__caption">Archiving this selection also removes a paying customer from the list.</figcaption>
-    </figure>
-  );
-}
-
-export function Start() {
-  const tour = useTour();
-  return (
-    <div className="quick quick--start">
-      <p className="quick__label">Working prototype · Simulated scenario</p>
-      <h1 className="cycle__title" tabIndex={-1}>
-        A paying customer was archived by mistake.
-      </h1>
-      <p className="cycle__setup">I set the design rules. A coding agent built three fixes. Compare the tradeoffs.</p>
-      <RiskySelection />
-      <div className="quick__actions">
-        <Button variant="primary" trailingIcon="arrow-right" onClick={go(href({ name: 'compare' }))}>
-          Compare the fixes
-        </Button>
-        <a className="quick__quiet" href={href({ name: 'cycle', stage: 'discover' })}>
-          Explore the full design process
-        </a>
-      </div>
-      {tour.available && !tour.active ? (
-        <p className="quick__more">
-          <Button size="compact" variant="ghost" leadingIcon="play" onClick={tour.start}>
-            Watch the walkthrough
-          </Button>
-        </p>
-      ) : null}
-    </div>
   );
 }
 
@@ -190,8 +119,8 @@ export function Compare({ fix }: { fix: DirectionId }) {
         <Button variant="primary" trailingIcon="arrow-right" onClick={go(href({ name: 'decision' }))}>
           See my design decision
         </Button>
-        <a className="quick__quiet" href={href({ name: 'start' })}>
-          Back to the problem
+        <a className="quick__quiet" href={href({ name: 'cycle', stage: 'discover' })}>
+          Explore the full design process
         </a>
       </div>
     </div>

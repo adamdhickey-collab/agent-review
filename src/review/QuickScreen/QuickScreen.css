@@ -11,11 +11,6 @@
   padding: var(--space-8) var(--space-6);
 }
 
-.quick--start {
-  max-width: 44rem;
-  gap: var(--space-4);
-}
-
 .quick__head {
   display: flex;
   flex-direction: column;
@@ -33,39 +28,6 @@
 
 .quick .cycle__title {
   font-size: var(--text-4xl);
-}
-
-/* ---------- the selection that went wrong ---------- */
-
-.quick__selection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin: var(--space-2) 0;
-}
-
-.quick__selection-frame {
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-canvas);
-  color-scheme: light;
-  overflow: hidden;
-}
-
-.quick__selected {
-  font-weight: var(--weight-medium);
-}
-
-/* The active customer's row, on the success tint its badge is in: the one
-   row of the three that should not be here. */
-.quick__selection-frame .table__tr.quick__row--active {
-  background: var(--color-success-subtle);
-}
-
-.quick__caption {
-  color: var(--color-text-secondary);
-  font-size: var(--text-md);
-  line-height: var(--leading-ui);
 }
 
 /* ---------- the way on ---------- */
@@ -88,10 +50,6 @@
 
 .quick__quiet:hover {
   color: var(--color-text);
-}
-
-.quick__more {
-  margin-left: calc(var(--control-padding-x-compact) * -1);
 }
 
 /* ---------- a fix, and what it asks ---------- */

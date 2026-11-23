@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
-import { About, Compare, Decision, Start } from './QuickScreen';
+import { About, Compare, Decision } from './QuickScreen';
 
 const meta = {
   title: 'Review/QuickScreen',
@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The quick path in front of the design cycle: the problem, the three working fixes, the decision, and the experiment as depth. Built from the cycle’s own parts (the Product frame, ArchiveFlow, the later-run panel) and the system’s components; it reads no cycle state and writes none.',
+          'The quick path beside the design cycle, one line from Discover: the three working fixes, the decision, and the experiment as depth. Built from the cycle’s own parts (the Product frame, ArchiveFlow, the later-run panel) and the system’s components; it reads no cycle state and writes none.',
       },
     },
   },
@@ -17,21 +17,6 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-
-export const TheProblem: Story = {
-  render: () => <Start />,
-  parameters: { docs: { description: { story: 'The front door: the mistake in a heading, the selection that caused it as Relay draws it (a picture, out of reach, with its words for a screen reader), and one primary action.' } } },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('A paying customer was archived by mistake.');
-    await expect(canvas.getByText(/Three customers are selected to archive: Alder & Finch, Trial; Northside Trucking, Active; Juniper Foods, Churned\./)).toBeInTheDocument();
-    await expect(canvas.getByText('Archiving this selection also removes a paying customer from the list.')).toBeVisible();
-    await expect(canvas.getByRole('button', { name: 'Compare the fixes' })).toBeVisible();
-    await expect(canvas.getByRole('link', { name: 'Explore the full design process' })).toHaveAttribute('href', '#/cycle/discover');
-    /* The picture takes no press and no focus. */
-    await expect(canvas.queryAllByRole('checkbox')).toHaveLength(0);
-  },
-};
 
 export const UndoAfterward: Story = {
   render: () => <Compare fix="undo" />,

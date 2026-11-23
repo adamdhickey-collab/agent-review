@@ -55,9 +55,7 @@ function place(y: number, settle = false) {
 export function useRouteEffects(route: Route, arrival: Arrival) {
   const store = useStore();
   const screen =
-    route.name === 'start'
-      ? 'A paying customer was archived by mistake'
-      : route.name === 'compare'
+    route.name === 'compare'
         ? 'Compare the fixes'
         : route.name === 'decision'
           ? 'My design decision'

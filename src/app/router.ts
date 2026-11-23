@@ -38,12 +38,17 @@ import { isScene, type SceneId } from '../review/SceneScreen/scenes';
    experiment, which until today led Discover. None of the four reads or
    writes the design cycle's state: what they show is in the address, so a
    refresh or a direct link finds it, and a visitor's progress through the
-   six stages is as they left it. The cycle is still at "/cycle". */
+   six stages is as they left it. The cycle is still at "/cycle".
+
+   On 2026-11-23 Adam took the start screen out: opening on a summary read
+   as confusing, and he wants the full experience in front. "/" is Discover
+   again. The three fixes, the decision and About keep their addresses (the
+   case study links to "/compare"), and Discover offers them in one line
+   for a reader short on time. */
 
 export type QuickBatch = 'active' | 'routine';
 
 export type Route =
-  | { name: 'start' }
   | { name: 'compare'; fix?: DirectionId }
   | { name: 'decision'; batch?: QuickBatch }
   | { name: 'about' }
@@ -56,8 +61,7 @@ export type Route =
 
 export function parse(hash: string): Route {
   const path = hash.replace(/^#/, '') || '/';
-  if (path === '/') return { name: 'start' };
-  if (path === '/decide' || path === '/decide/') return { name: 'cycle', stage: 'discover' };
+  if (path === '/' || path === '/decide' || path === '/decide/') return { name: 'cycle', stage: 'discover' };
   if (path === '/compare' || path === '/compare/') return { name: 'compare' };
   const fx = path.match(/^\/compare\/([a-z]+)\/?$/);
   if (fx && DIRECTIONS.some((d) => d.id === fx[1])) return { name: 'compare', fix: fx[1] as DirectionId };
@@ -79,8 +83,6 @@ export function parse(hash: string): Route {
 
 export function href(route: Route): string {
   switch (route.name) {
-    case 'start':
-      return '#/';
     case 'compare':
       return route.fix && route.fix !== 'undo' ? `#/compare/${route.fix}` : '#/compare';
     case 'decision':
